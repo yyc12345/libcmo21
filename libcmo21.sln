@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31702.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PyCmo", "PyCmo\PyCmo.pyproj", "{ADC519E8-5F1B-427D-8E5C-1FABCB6147FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ADC519E8-5F1B-427D-8E5C-1FABCB6147FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADC519E8-5F1B-427D-8E5C-1FABCB6147FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7C36D9F6-B130-4675-A20E-CE3523231D08}
+	EndGlobalSection
+EndGlobal
