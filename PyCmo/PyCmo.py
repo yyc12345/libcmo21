@@ -1,6 +1,6 @@
-import VirtoolsReader
-import VirtoolsStruct
+import VTReader
+import VTStruct
 
 with open("D:\\libcmo21\\PyCmo\\Gameplay.nmo", 'rb') as fs:
-    composition = VirtoolsReader.ReadCKComposition(fs)
-    print(str(composition.Header))
+    composition = VTReader.ReadCKComposition(fs)
+    print(composition.Header)

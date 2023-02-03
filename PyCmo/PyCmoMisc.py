@@ -1,3 +1,4 @@
+import functools, inspect
 
 def OutputSizeHumanReadable(storage_size: int):
     probe = storage_size
@@ -30,3 +31,16 @@ def BcdCodeToDecCode(bcd_num: int):
         pow *= 10
 
     return result
+
+def ClsMethodRegister(cls):
+    def decorator(func):
+        @functools.wraps(func) 
+        def wrapper(self, *args, **kwargs): 
+            return func(self, *args, **kwargs)
+        if inspect.getattr_static(cls, func.__name__, None):
+            msg = 'Error. method name REPEAT, {} has exist'.format(func.__name__)
+            raise NameError(msg)
+        else:
+            setattr(cls, func.__name__, wrapper)
+        return func 
+    return decorator

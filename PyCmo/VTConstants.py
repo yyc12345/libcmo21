@@ -1,27 +1,31 @@
 import enum
 
-class PyEnum(object):
-    @staticmethod
-    def Contain(val: int, probe: int):
-        return bool(val & probe)
+class CKEnum(object):
+    def __init__(self, val: int):
+        self.m_Value: int = val
 
-    @staticmethod
-    def Add(val: int, data: int):
-        return val | data
-    
-    @staticmethod
-    def PrintEnum(val: int, _enum: enum.IntEnum):
-        for i in _enum:
+
+    def __repr__(self):
+        for i in self:
             if i.value == val:
                 return i.name
 
-        return ""
-    
-    @staticmethod
-    def PrintEnumFlag(val: int, _enum: enum.IntEnum):
+        return "[None]"
+
+    def __str__(self):
+        return self.__repr__()
+
+class CKFlagEnum(CKEnum):
+    def Contain(self: CKFlagEnum, probe: int):
+        return bool(self.m_Value & probe)
+
+    def Add(self: CKFlagEnum, data: int):
+        self.m_Value = self.m_Value | data
+
+    def __repr__(self):
         pending = []
 
-        for i in _enum:
+        for i in self:
             # if it have exactly same entry, return directly
             if i.value == val:
                 return i.name
@@ -30,16 +34,17 @@ class PyEnum(object):
             if bool(val & i.value):
                 pending.append(i.name)
 
-        return ', '.join(pending)
+        result = ', '.join(pending)
+        return result if len(result) != 9 else "[None]"
 
-class CK_FILE_WRITEMODE(enum.IntEnum):
+class CK_FILE_WRITEMODE(CKFlagEnum, enum.IntEnum):
     CKFILE_UNCOMPRESSED	       =0	# Save data uncompressed
     CKFILE_CHUNKCOMPRESSED_OLD =1	# Obsolete
     CKFILE_EXTERNALTEXTURES_OLD=2	# Obsolete : use CKContext::SetGlobalImagesSaveOptions instead.
     CKFILE_FORVIEWER           =4	# Don't save Interface Data within the file, the level won't be editable anymore in the interface
     CKFILE_WHOLECOMPRESSED     =8	# Compress the whole file
 
-class CK_LOAD_FLAGS(enum.IntEnum):
+class CK_LOAD_FLAGS(CKFlagEnum, enum.IntEnum):
     CK_LOAD_ANIMATION					=1<<0	# Load animations
     CK_LOAD_GEOMETRY					=1<<1	# Load geometry.
     CK_LOAD_DEFAULT						=CK_LOAD_GEOMETRY|CK_LOAD_ANIMATION	# Load animations & geometry

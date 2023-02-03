@@ -25,16 +25,16 @@
     <Compile Include="PyCmoMisc.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="VirtoolsConstants.py">
+    <Compile Include="VTConstants.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="VirtoolsReader.py">
+    <Compile Include="VTReader.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="VirtoolsStruct.py">
+    <Compile Include="VTStruct.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="VirtoolsUtils.py">
+    <Compile Include="VTUtils.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
