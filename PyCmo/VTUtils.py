@@ -6,7 +6,7 @@ class RawFileReader():
     def __init__(self, filename: str):
         self.__size: int = os.path.getsize(filename)
         self.__fs = open(filename, 'rb')
-        self.__mm: mmap.mmap = mmap.mmap(self.__fs.fileno, 0, access = mmap.ACCESS_READ)
+        self.__mm: mmap.mmap = mmap.mmap(self.__fs.fileno(), 0, access = mmap.ACCESS_READ)
     
     def __del__(self):
         self.__mm.close()
@@ -49,7 +49,10 @@ class LargeZlibFileReader():
         return self.__mm
 
 class SmallZlibFileReader():
-    def __init__(self):
+    def __init__(self, raw_reader: RawFileReader, comp_size: int, uncomp_size: int):
+        # set size
+        self.__size: int = uncomp_size
+
         # create io
         self.__ss: io.BytesIO = io.BytesIO()
 
@@ -61,13 +64,16 @@ class SmallZlibFileReader():
         while buf:
             self.__ss.write(parser.decompress(buf))
             buf = reader.read(io.DEFAULT_BUFFER_SIZE)
-        self._ss.write(parser.flush())
+        self.__ss.write(parser.flush())
+
+        # reset cursor
+        self.__ss.seek(0, io.SEEK_SET)
 
     def __del__(self):
         del self.__ss
 
     def GetSize(self) -> int:
-        return len(self.__ss.getvalue())
+        return self.__size
 
     def GetReader(self) -> io.BytesIO:
         return self.__ss

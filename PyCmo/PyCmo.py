@@ -1,6 +1,7 @@
-import VTReader
-import VTStruct
+import VTReader, VTStruct, VTConstants
 
-with open("D:\\libcmo21\\PyCmo\\Gameplay.nmo", 'rb') as fs:
-    composition = VTReader.ReadCKComposition(fs)
-    print(composition.Header)
+ckFile = VTStruct.CKFile()
+VTReader.CKFileReader.Load(ckFile, "D:\\libcmo21\\PyCmo\\Language.nmo", VTConstants.CK_LOAD_FLAGS(VTConstants.CK_LOAD_FLAGS.CK_LOAD_DEFAULT))
+print(ckFile)
+print(str(ckFile.m_FileObjects))
+
