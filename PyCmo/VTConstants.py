@@ -25,7 +25,7 @@ class CKEnum(object):
             if i.value == self.m_Value:
                 return '<' + i.name + '>'
 
-        return "<[None] {:d}>".format(self.m_Value)
+        return "<[None]: {:d}>".format(self.m_Value)
 
     def __str__(self):
         return self.__repr__()
@@ -48,14 +48,14 @@ class CKFlagEnum(CKEnum):
         for i in self:
             # if it have exactly same entry, return directly
             if i.value == self.m_Value:
-                return i.name
+                return '<' + i.name + '>'
 
             # check exist
             if bool(self.m_Value & i.value):
                 pending.append(i.name)
 
         result = ', '.join(pending)
-        return ('<' + result + '>') if len(result) != 9 else "<[None] {:d}>".format(self.m_Value)
+        return ('<' + result + '>') if len(result) != 0 else "<[None]: {:d}>".format(self.m_Value)
 
 class CK_FILE_WRITEMODE(CKFlagEnum):
     CKFILE_UNCOMPRESSED	       =0	# Save data uncompressed

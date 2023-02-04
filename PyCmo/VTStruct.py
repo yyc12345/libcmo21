@@ -19,7 +19,7 @@ class CKFileInfo:
         self.ProductVersion: int = 0
         self.ProductBuild: int = 0
 
-        self.FileWriteMode: VTConstants.CK_FILE_WRITEMODE = VTConstants.CK_FILE_WRITEMODE(0)
+        self.FileWriteMode: VTConstants.CK_FILE_WRITEMODE = VTConstants.CK_FILE_WRITEMODE(VTConstants.CK_FILE_WRITEMODE.CKFILE_WHOLECOMPRESSED)
         
         self.FileVersion: int = 0
         self.CKVersion: int = 0
