@@ -1,0 +1,70 @@
+#define  CKCID_OBJECT					1		
+	#define  CKCID_PARAMETERIN				2	
+	#define  CKCID_PARAMETEROPERATION		4	
+	#define  CKCID_STATE					5	
+	#define  CKCID_BEHAVIORLINK				6	
+	#define  CKCID_BEHAVIOR					8	
+	#define  CKCID_BEHAVIORIO				9	
+	#define  CKCID_RENDERCONTEXT			12	
+	#define  CKCID_KINEMATICCHAIN			13	
+	#define  CKCID_SCENEOBJECT				11		
+		#define  CKCID_OBJECTANIMATION			15	
+		#define  CKCID_ANIMATION				16	
+			#define  CKCID_KEYEDANIMATION		18	
+		#define  CKCID_BEOBJECT					19	
+			#define	 CKCID_DATAARRAY			52	
+			#define  CKCID_SCENE				10	
+			#define  CKCID_LEVEL				21	
+			#define  CKCID_PLACE				22	
+			#define  CKCID_GROUP				23	
+			#define  CKCID_SOUND				24	
+				#define  CKCID_WAVESOUND		25	
+				#define  CKCID_MIDISOUND		26	
+			#define  CKCID_MATERIAL				30	
+			#define  CKCID_TEXTURE				31	
+			#define  CKCID_MESH					32	
+				#define CKCID_PATCHMESH			53	
+			#define  CKCID_RENDEROBJECT			47	
+				#define  CKCID_2DENTITY			27	
+					#define  CKCID_SPRITE		28	
+					#define  CKCID_SPRITETEXT	29	
+			#define  CKCID_3DENTITY				33	
+				#define CKCID_GRID				50	
+				#define  CKCID_CURVEPOINT		36	
+				#define  CKCID_SPRITE3D			37	
+				#define  CKCID_CURVE			43	
+				#define  CKCID_CAMERA			34	
+					#define  CKCID_TARGETCAMERA	35	
+				#define  CKCID_LIGHT			38	
+					#define  CKCID_TARGETLIGHT	39	
+				#define  CKCID_CHARACTER		40	
+				#define  CKCID_3DOBJECT			41	
+					#define  CKCID_BODYPART		42	
+	#define  CKCID_PARAMETER				46		
+		#define  CKCID_PARAMETERLOCAL		45	
+			#define  CKCID_PARAMETERVARIABLE	55	
+		#define  CKCID_PARAMETEROUT			3	
+	#define CKCID_INTERFACEOBJECTMANAGER	48	
+	#define CKCID_CRITICALSECTION			49	
+	#define CKCID_LAYER						51	
+	#define CKCID_PROGRESSIVEMESH			54		
+	#define CKCID_SYNCHRO					20	
+
+#define  CKCID_OBJECTARRAY				80	
+#define  CKCID_SCENEOBJECTDESC			81	
+#define  CKCID_ATTRIBUTEMANAGER			82	
+#define  CKCID_MESSAGEMANAGER			83	
+#define  CKCID_COLLISIONMANAGER			84	
+#define  CKCID_OBJECTMANAGER			85	
+#define  CKCID_FLOORMANAGER				86	
+#define  CKCID_RENDERMANAGER			87	
+#define  CKCID_BEHAVIORMANAGER			88	
+#define  CKCID_INPUTMANAGER				89	
+#define  CKCID_PARAMETERMANAGER			90	
+#define  CKCID_GRIDMANAGER				91	
+#define  CKCID_SOUNDMANAGER				92	
+#define  CKCID_TIMEMANAGER				93	
+#define  CKCID_CUIKBEHDATA				-1	
+
+#define CKCID_MAXCLASSID				56	
+#define  CKCID_MAXMAXCLASSID			128

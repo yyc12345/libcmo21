@@ -15,21 +15,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="VTReader.c">
+    <ClCompile Include="VTReader.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="VTReader.h">
+    <ClInclude Include="VTReader.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="VTStruct.h">
+    <ClInclude Include="VTStruct.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="VTConstants.h">
+    <ClInclude Include="VTConstants.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="VTUtils.h">
+    <ClInclude Include="VTUtils.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

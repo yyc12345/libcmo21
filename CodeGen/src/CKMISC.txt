@@ -1,0 +1,27 @@
+enum !CK_FILE_WRITEMODE
+	CKFILE_UNCOMPRESSED	       =0,	// Save data uncompressed
+	CKFILE_CHUNKCOMPRESSED_OLD =1,	// Obsolete
+	CKFILE_EXTERNALTEXTURES_OLD=2,	// Obsolete : use CKContext::SetGlobalImagesSaveOptions instead.
+	CKFILE_FORVIEWER           =4,	// Don't save Interface Data within the file, the level won't be editable anymore in the interface
+	CKFILE_WHOLECOMPRESSED     =8,	// Compress the whole file
+
+enum !CK_LOAD_FLAGS
+			CK_LOAD_ANIMATION					=1<<0,	// Load animations
+			CK_LOAD_GEOMETRY					=1<<1,	// Load geometry.
+			CK_LOAD_DEFAULT						=CK_LOAD_GEOMETRY|CK_LOAD_ANIMATION,	// Load animations & geometry
+			CK_LOAD_ASCHARACTER					=1<<2, // Load all the objects and create a character that contains them all .
+			CK_LOAD_DODIALOG					=1<<3, // Check object name unicity and warns the user with a dialog box when duplicate names are found. 
+			CK_LOAD_AS_DYNAMIC_OBJECT			=1<<4, // Objects loaded from this file may be deleted at run-time or are temporary
+			CK_LOAD_AUTOMATICMODE				=1<<5, // Check object name unicity and automatically rename or replace according to the options specified in CKContext::SetAutomaticLoadMode
+			CK_LOAD_CHECKDUPLICATES				=1<<6, // Check object name unicity (The list of duplicates is stored in the CKFile class after a OpenFile call
+			CK_LOAD_CHECKDEPENDENCIES			=1<<7, // Check if every plugins needed are availables
+			CK_LOAD_ONLYBEHAVIORS				=1<<8, // 
+
+enum CK_FO_OPTIONS
+		CK_FO_DEFAULT = 0,		 // Default behavior : a new object will be created with the name stored in CKFileObject
+		CK_FO_RENAMEOBJECT,		 // Renaming : a new object will be created with the name stored in CKFileObject + a integer value XXX to ensure its uniqueness
+		CK_FO_REPLACEOBJECT,	 // Do not create a new object, instead use an existing one which CK_ID is given by CreatedObject   	
+								 // to load the chunk on 
+		CK_FO_DONTLOADOBJECT,	 // Object chunk will not be read either because it is a reference
+								// or because the loaded object already exist in the current level 
+								// and the user choose to keep the existing one.

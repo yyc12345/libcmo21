@@ -15,8 +15,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="unvirt.c">
+    <ClCompile Include="Unvirt.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="AccessibleValue.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="StringHelper.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AccessibleValue.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="StringHelper.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

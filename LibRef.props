@@ -2,10 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <GLIB_INCLUDE_PATH>D:\CppLib\GLib\Win32\include\glib-2.0</GLIB_INCLUDE_PATH>
-    <GLIB_EXTRA_INCLUDE_PATH>D:\CppLib\GLib\Win32\lib\glib-2.0\include</GLIB_EXTRA_INCLUDE_PATH>
-    <GLIB_WIN32_LIB_PATH>D:\CppLib\GLib\Win32\lib</GLIB_WIN32_LIB_PATH>
-    <GLIB_WIN64_LIB_PATH>D:\CppLib\GLib\x64\lib</GLIB_WIN64_LIB_PATH>
+    <BOOST_MMAP_INCLUDE_PATH>D:\CppLib\interprocess-boost-1.81.0\include</BOOST_MMAP_INCLUDE_PATH>
     
     <SQLITE_HEADER_PATH>D:\CppLib\SQLite\sqlite-amalgamation-3400100</SQLITE_HEADER_PATH>
     <SQLITE_WIN32_LIB_PATH>D:\CppLib\SQLite\sqlite-dll-win32-x86-3400100</SQLITE_WIN32_LIB_PATH>
@@ -16,17 +13,8 @@
   <PropertyGroup />
   <ItemDefinitionGroup />
   <ItemGroup>
-    <BuildMacro Include="GLIB_INCLUDE_PATH">
-      <Value>$(GLIB_INCLUDE_PATH)</Value>
-    </BuildMacro>
-    <BuildMacro Include="GLIB_EXTRA_INCLUDE_PATH">
-      <Value>$(GLIB_EXTRA_INCLUDE_PATH)</Value>
-    </BuildMacro>
-    <BuildMacro Include="GLIB_WIN32_LIB_PATH">
-      <Value>$(GLIB_WIN32_LIB_PATH)</Value>
-    </BuildMacro>
-    <BuildMacro Include="GLIB_WIN64_LIB_PATH">
-      <Value>$(GLIB_WIN64_LIB_PATH)</Value>
+    <BuildMacro Include="BOOST_MMAP_INCLUDE_PATH">
+      <Value>$(BOOST_MMAP_INCLUDE_PATH)</Value>
     </BuildMacro>
     
     <BuildMacro Include="SQLITE_HEADER_PATH">

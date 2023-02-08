@@ -100,14 +100,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <CompileAs>CompileAsC</CompileAs>
-      <AdditionalIncludeDirectories>../LibCmo;$(SQLITE_HEADER_PATH);$(GLIB_EXTRA_INCLUDE_PATH);$(GLIB_INCLUDE_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../LibCmo;$(SQLITE_HEADER_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glib-2.0.lib;sqlite3.lib;LibCmo.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)out\$(Platform)\$(Configuration)\LibCmo;$(SQLITE_WIN32_LIB_PATH);$(GLIB_WIN32_LIB_PATH)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sqlite3.lib;LibCmo.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)out\$(Platform)\$(Configuration)\LibCmo;$(SQLITE_WIN32_LIB_PATH)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -118,16 +118,16 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <CompileAs>CompileAsC</CompileAs>
-      <AdditionalIncludeDirectories>../LibCmo;$(SQLITE_HEADER_PATH);$(GLIB_EXTRA_INCLUDE_PATH);$(GLIB_INCLUDE_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../LibCmo;$(SQLITE_HEADER_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glib-2.0.lib;sqlite3.lib;LibCmo.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)out\$(Platform)\$(Configuration)\LibCmo;$(SQLITE_WIN32_LIB_PATH);$(GLIB_WIN32_LIB_PATH)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sqlite3.lib;LibCmo.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)out\$(Platform)\$(Configuration)\LibCmo;$(SQLITE_WIN32_LIB_PATH)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -136,14 +136,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <CompileAs>CompileAsC</CompileAs>
-      <AdditionalIncludeDirectories>../LibCmo;$(SQLITE_HEADER_PATH);$(GLIB_EXTRA_INCLUDE_PATH);$(GLIB_INCLUDE_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../LibCmo;$(SQLITE_HEADER_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glib-2.0.lib;sqlite3.lib;LibCmo.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)out\$(Platform)\$(Configuration)\LibCmo;$(SQLITE_WIN64_LIB_PATH);$(GLIB_WIN64_LIB_PATH)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sqlite3.lib;LibCmo.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)out\$(Platform)\$(Configuration)\LibCmo;$(SQLITE_WIN64_LIB_PATH)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,20 +154,26 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <CompileAs>CompileAsC</CompileAs>
-      <AdditionalIncludeDirectories>../LibCmo;$(SQLITE_HEADER_PATH);$(GLIB_EXTRA_INCLUDE_PATH);$(GLIB_INCLUDE_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../LibCmo;$(SQLITE_HEADER_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glib-2.0.lib;sqlite3.lib;LibCmo.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)out\$(Platform)\$(Configuration)\LibCmo;$(SQLITE_WIN64_LIB_PATH);$(GLIB_WIN64_LIB_PATH)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sqlite3.lib;LibCmo.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)out\$(Platform)\$(Configuration)\LibCmo;$(SQLITE_WIN64_LIB_PATH)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="unvirt.c" />
+    <ClCompile Include="AccessibleValue.cpp" />
+    <ClCompile Include="StringHelper.cpp" />
+    <ClCompile Include="Unvirt.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AccessibleValue.hpp" />
+    <ClInclude Include="StringHelper.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
