@@ -134,5 +134,31 @@ namespace LibCmo {
         CKERR_INVALIDANIMATION = -123
     };
 
+    enum class CK_FILE_WRITEMODE : int32_t {
+        CKFILE_UNCOMPRESSED = 0,
+        CKFILE_CHUNKCOMPRESSED_OLD = 1,
+        CKFILE_EXTERNALTEXTURES_OLD = 2,
+        CKFILE_FORVIEWER = 4,
+        CKFILE_WHOLECOMPRESSED = 8
+    };
+    enum class CK_LOAD_FLAGS : int32_t {
+        CK_LOAD_ANIMATION = 1 << 0,
+        CK_LOAD_GEOMETRY = 1 << 1,
+        CK_LOAD_DEFAULT = CK_LOAD_GEOMETRY | CK_LOAD_ANIMATION,
+        CK_LOAD_ASCHARACTER = 1 << 2,
+        CK_LOAD_DODIALOG = 1 << 3,
+        CK_LOAD_AS_DYNAMIC_OBJECT = 1 << 4,
+        CK_LOAD_AUTOMATICMODE = 1 << 5,
+        CK_LOAD_CHECKDUPLICATES = 1 << 6,
+        CK_LOAD_CHECKDEPENDENCIES = 1 << 7,
+        CK_LOAD_ONLYBEHAVIORS = 1 << 8
+    };
+    enum class CK_FO_OPTIONS : int32_t {
+        CK_FO_DEFAULT = 0,
+        CK_FO_RENAMEOBJECT,
+        CK_FO_REPLACEOBJECT,
+        CK_FO_DONTLOADOBJECT
+    };
+
 }
 

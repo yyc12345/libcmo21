@@ -6,9 +6,9 @@ def RemoveAnnotation(strl: str) -> str:
 
 def Underline2Camel(orig: str) -> str:
     return ''.join(map(
-        lambda mixed: mixed[-1].upper() if mixed[0] == '_' else mixed[-1].lower(),
-        ((('_' if idx == 0 else orig[idx - 1]), c) for idx, c in enumerate(orig))
-    )).replace('_', '')
+        lambda strl: strl[0].upper() + strl[1:].lower(),
+        orig.split('_')
+    ))
 
 class EnumEntry():
     def __init__(self, name: str, val: str):
@@ -21,6 +21,7 @@ class EnumEntry():
 class EnumBody():
     def __init__(self, name: str, is_flag: bool):
         self.name: str = name
+        self.camel_name: str = Underline2Camel(name)
         self.is_flag: bool = is_flag
         self.entries: list[EnumEntry] = []
     def __repr__(self) -> str:
@@ -72,15 +73,30 @@ with open('dest/CKMISC.txt', 'w', encoding='utf-8') as fw:
 
     fw.write('\n')
 
-    # write vector
+    # write decl
+    fw.write('namespace EnumDesc {\n')
     for item in full_enum:
-        fw.write('static const std::array<std::pair<LibCmo::{}, const char*>, {}> _{} {{\n'.format(
-            item.name, len(item.entries), Underline2Camel(item.name)
+        fw.write('extern const EnumDescPairArray<LibCmo::{}> {};\n'.format(
+            item.name, item.name
+        ))
+    fw.write('}')
+
+    fw.write('\n')
+
+    # write vector
+    fw.write('namespace EnumDesc {\n')
+    for item in full_enum:
+        fw.write('const EnumDescPairArray<LibCmo::{}> {} {{\n'.format(
+            item.name, item.name
         ))
         fw.write(',\n'.join(map(
-            lambda x: '{{ LibCmo::{}, "{}" }}'.format(x.name, x.name),
+            lambda x: '{{ LibCmo::{}::{}, "{}" }}'.format(item.name, x.name, x.name),
             item.entries
         )))
         fw.write('\n};\n')
+    fw.write('}')
+
+    fw.write('\n')
+
 
     fw.close()

@@ -6,6 +6,52 @@
 namespace Unvirt {
 	namespace AccessibleValue {
 
+#pragma region universal enum name
+
+		namespace EnumDesc {
+			const EnumDescPairArray<LibCmo::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE{
+			{ LibCmo::CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED, "CKFILE_UNCOMPRESSED" },
+			{ LibCmo::CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD, "CKFILE_CHUNKCOMPRESSED_OLD" },
+			{ LibCmo::CK_FILE_WRITEMODE::CKFILE_EXTERNALTEXTURES_OLD, "CKFILE_EXTERNALTEXTURES_OLD" },
+			{ LibCmo::CK_FILE_WRITEMODE::CKFILE_FORVIEWER, "CKFILE_FORVIEWER" },
+			{ LibCmo::CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED, "CKFILE_WHOLECOMPRESSED" }
+			};
+			const EnumDescPairArray<LibCmo::CK_LOAD_FLAGS> CK_LOAD_FLAGS{
+			{ LibCmo::CK_LOAD_FLAGS::CK_LOAD_ANIMATION, "CK_LOAD_ANIMATION" },
+			{ LibCmo::CK_LOAD_FLAGS::CK_LOAD_GEOMETRY, "CK_LOAD_GEOMETRY" },
+			{ LibCmo::CK_LOAD_FLAGS::CK_LOAD_DEFAULT, "CK_LOAD_DEFAULT" },
+			{ LibCmo::CK_LOAD_FLAGS::CK_LOAD_ASCHARACTER, "CK_LOAD_ASCHARACTER" },
+			{ LibCmo::CK_LOAD_FLAGS::CK_LOAD_DODIALOG, "CK_LOAD_DODIALOG" },
+			{ LibCmo::CK_LOAD_FLAGS::CK_LOAD_AS_DYNAMIC_OBJECT, "CK_LOAD_AS_DYNAMIC_OBJECT" },
+			{ LibCmo::CK_LOAD_FLAGS::CK_LOAD_AUTOMATICMODE, "CK_LOAD_AUTOMATICMODE" },
+			{ LibCmo::CK_LOAD_FLAGS::CK_LOAD_CHECKDUPLICATES, "CK_LOAD_CHECKDUPLICATES" },
+			{ LibCmo::CK_LOAD_FLAGS::CK_LOAD_CHECKDEPENDENCIES, "CK_LOAD_CHECKDEPENDENCIES" },
+			{ LibCmo::CK_LOAD_FLAGS::CK_LOAD_ONLYBEHAVIORS, "CK_LOAD_ONLYBEHAVIORS" }
+			};
+			const EnumDescPairArray<LibCmo::CK_FO_OPTIONS> CK_FO_OPTIONS{
+			{ LibCmo::CK_FO_OPTIONS::CK_FO_DEFAULT, "CK_FO_DEFAULT" },
+			{ LibCmo::CK_FO_OPTIONS::CK_FO_RENAMEOBJECT, "CK_FO_RENAMEOBJECT" },
+			{ LibCmo::CK_FO_OPTIONS::CK_FO_REPLACEOBJECT, "CK_FO_REPLACEOBJECT" },
+			{ LibCmo::CK_FO_OPTIONS::CK_FO_DONTLOADOBJECT, "CK_FO_DONTLOADOBJECT" }
+			};
+		}
+
+		template<typename TEnum>
+		void GetEnumName(const EnumDescPairArray<TEnum> desc, std::string& strl, TEnum val) {
+
+
+		}
+
+		template<typename TEnum>
+		void GetFlagEnumName(const EnumDescPairArray<TEnum> desc, std::string& strl, TEnum val) {
+
+
+		}
+
+#pragma endregion
+
+#pragma region class id and ck error
+
 		template<typename TKey, typename TValue>
 		static inline const TValue* GetEnumData(const std::vector<std::pair<TKey, TValue>>& vec, const TKey key) {
 			size_t len = vec.size();
@@ -186,6 +232,8 @@ namespace Unvirt {
 				}
 			}
 		}
+
+#pragma endregion
 
 		void GetAccessibleFileSize(std::string& strl, uint64_t size) {
 			static double denominator = (double)0b1111111111;
