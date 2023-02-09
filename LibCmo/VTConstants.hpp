@@ -2,8 +2,27 @@
 
 #include <cinttypes>
 #include <cstdint>
+#include <cstdarg>
+#include <type_traits>
 
 namespace LibCmo {
+
+    namespace EnumHelper {
+        template<typename TEnum>
+        inline TEnum FlagEnumAdd(TEnum e, ...) {
+            TEnum result = e;
+            va_list argptr;
+            va_start(argptr, e);
+            result = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(result) | static_cast<std::underlying_type_t<TEnum>>(va_arg(argptr, TEnum)));
+            va_end(argptr);
+            return result;
+        }
+
+        template<typename TEnum>
+        inline bool FlagEnumHas(TEnum e, TEnum probe) {
+            return static_cast<bool>(static_cast<std::underlying_type_t<TEnum>>(e) & static_cast<std::underlying_type_t<TEnum>>(probe));
+        }
+    }
 
     using CK_ID = uint32_t;
 

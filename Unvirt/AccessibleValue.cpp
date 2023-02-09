@@ -8,6 +8,8 @@ namespace Unvirt {
 
 #pragma region universal enum name
 
+		const char c_InvalidEnumName[] = "[undefined]";
+
 		namespace EnumDesc {
 			const EnumDescPairArray<LibCmo::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE{
 			{ LibCmo::CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED, "CKFILE_UNCOMPRESSED" },
@@ -34,18 +36,6 @@ namespace Unvirt {
 			{ LibCmo::CK_FO_OPTIONS::CK_FO_REPLACEOBJECT, "CK_FO_REPLACEOBJECT" },
 			{ LibCmo::CK_FO_OPTIONS::CK_FO_DONTLOADOBJECT, "CK_FO_DONTLOADOBJECT" }
 			};
-		}
-
-		template<typename TEnum>
-		void GetEnumName(const EnumDescPairArray<TEnum> desc, std::string& strl, TEnum val) {
-
-
-		}
-
-		template<typename TEnum>
-		void GetFlagEnumName(const EnumDescPairArray<TEnum> desc, std::string& strl, TEnum val) {
-
-
 		}
 
 #pragma endregion
@@ -116,24 +106,26 @@ namespace Unvirt {
 		};
 
 		void GetCkErrorName(std::string& strl, LibCmo::CKERROR err) {
-			strl.clear();
 			const std::array<const char*, 2>* pErrDesc = GetEnumData<LibCmo::CKERROR, std::array<const char*, 2>>(
 				_CkErrorData, err
 				);
 
 			if (pErrDesc != nullptr) {
 				strl = pErrDesc->front();
+			} else {
+				strl = c_InvalidEnumName;
 			}
 		}
 
 		void GetCkErrorDescription(std::string& strl, LibCmo::CKERROR err) {
-			strl.clear();
 			const std::array<const char*, 2>* pErrDesc = GetEnumData<LibCmo::CKERROR, std::array<const char*, 2>>(
 				_CkErrorData, err
 				);
 
 			if (pErrDesc != nullptr) {
 				strl = pErrDesc->back();
+			} else {
+				strl = c_InvalidEnumName;
 			}
 		}
 
@@ -209,27 +201,30 @@ namespace Unvirt {
 		};
 
 		void GetClassIdName(std::string& strl, LibCmo::CK_CLASSID cls) {
-			strl.clear();
 			const std::vector<const char*>* pHierarchy = GetEnumData<LibCmo::CK_CLASSID, std::vector<const char*>>(
 				_CkClassHierarchy, cls
 				);
 
 			if (pHierarchy != nullptr) {
 				strl = pHierarchy->back();
+			} else {
+				strl = c_InvalidEnumName;
 			}
 		}
 
 		void GetClassIdHierarchy(std::string& strl, LibCmo::CK_CLASSID cls) {
-			strl.clear();
 			const std::vector<const char*>* pHierarchy = GetEnumData<LibCmo::CK_CLASSID, std::vector<const char*>>(
 				_CkClassHierarchy, cls
 				);
 
 			if (pHierarchy != nullptr) {
+				strl.clear();
 				for (auto it = pHierarchy->begin(); it != pHierarchy->end(); ++it) {
 					if (it != pHierarchy->begin()) strl += " -> ";
 					strl += (*it);
 				}
+			} else {
+				strl = c_InvalidEnumName;
 			}
 		}
 
