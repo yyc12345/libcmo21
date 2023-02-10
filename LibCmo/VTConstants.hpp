@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <cstdarg>
 #include <type_traits>
+#include <string>
+#include <vector>
 
 namespace LibCmo {
 
@@ -25,6 +27,16 @@ namespace LibCmo {
     }
 
     using CK_ID = uint32_t;
+    using CKDWORD = uint32_t;
+    using CKBOOL = int32_t;
+
+    using XString = std::string;
+    using XBitArray = std::vector<bool>;
+    template<typename T>
+    using XArray = std::vector<T>;
+    using XIntArray = std::vector<int32_t>;
+    template<typename T>
+    using XClassArray = std::vector<T*>;
 
     enum class CK_CLASSID : uint32_t {
         CKCID_OBJECT = 1,

@@ -18,6 +18,9 @@
     <ClCompile Include="VTReader.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="VTStruct.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VTReader.hpp">
@@ -30,6 +33,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="VTUtils.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="VTEncoding.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
