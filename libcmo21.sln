@@ -8,6 +8,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibCmo", "LibCmo\LibCmo.vcxproj", "{70F64F8D-099C-4C21-B29C-0A8F1E22FB2E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Unvirt", "Unvirt\Unvirt.vcxproj", "{77E7ADB6-0D0C-4BA4-8DE7-A284C7F83941}"
+	ProjectSection(ProjectDependencies) = postProject
+		{70F64F8D-099C-4C21-B29C-0A8F1E22FB2E} = {70F64F8D-099C-4C21-B29C-0A8F1E22FB2E}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

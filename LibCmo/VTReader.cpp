@@ -88,7 +88,7 @@ namespace LibCmo {
 		this->m_FileInfo.Hdr1UnPackSize = fhdr2[7];
 		this->m_FileInfo.DataPackSize = fhdr2[0];
 		this->m_FileInfo.DataUnPackSize = fhdr2[1];
-		this->m_FileInfo.Crc = fhdr1[3];
+		this->m_FileInfo.Crc = fhdr1[2];
 
 		// ========== crc and body unpacker ==========
 		if (this->m_FileInfo.FileVersion >= 8) {
