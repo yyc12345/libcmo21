@@ -24,12 +24,18 @@
     <ClCompile Include="StringHelper.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="ColorfulTerminal.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AccessibleValue.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="StringHelper.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorfulTerminal.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
