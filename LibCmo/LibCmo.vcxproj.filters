@@ -21,11 +21,11 @@
     <ClCompile Include="VTStruct.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="VTEncoding.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="VTReader.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
     <ClInclude Include="VTStruct.hpp">
       <Filter>Headers</Filter>
     </ClInclude>

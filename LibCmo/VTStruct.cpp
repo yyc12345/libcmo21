@@ -1,6 +1,31 @@
+#include "VTUtils.hpp"
+#if defined(LIBCMO_OS_WIN32)
+#define ZLIB_WINAPI
+#include "zconf.h"
+#endif
+
 #include "VTStruct.hpp"
+#include <cstdlib>
+#include <zlib.h>
 
 namespace LibCmo {
+
+	void* CKUnPackData(CKINT DestSize, const void* SrcBuffer, CKINT SrcSize) {
+		char* DestBuffer = (char*)malloc(DestSize);
+		if (DestBuffer == nullptr) return nullptr;
+
+		uLongf cache = DestSize;
+		if (uncompress(
+			reinterpret_cast<Bytef*>(DestBuffer), &cache,
+			reinterpret_cast<const Bytef*>(SrcBuffer), SrcSize) != Z_OK) {
+			free(DestBuffer);
+			return nullptr;
+		}
+
+		return DestBuffer;
+	}
+
+#pragma region VxMemoryMappedFile
 
 	VxMemoryMappedFile::VxMemoryMappedFile(const char* u8_filepath) :
 		m_szFilePath(),
@@ -24,7 +49,7 @@ namespace LibCmo {
 
 		// open region
 		this->m_hFileMapping = new boost::interprocess::mapped_region(
-			this->m_hFile, boost::interprocess::read_only,
+			*(this->m_hFile), boost::interprocess::read_only,
 			0, 0, nullptr,
 			region_option
 		);
@@ -42,15 +67,54 @@ namespace LibCmo {
 		delete this->m_hFile;
 	}
 
-	void* VxMemoryMappedFile::GetBase(void) { return this->m_hFileMapping->get_address(); }
-	size_t VxMemoryMappedFile::GetFileSize(void) { return this->m_hFileMapping->get_size(); }
-	bool VxMemoryMappedFile::IsValid(void) { return this->m_bIsValid; }
+#pragma endregion
 
+#pragma region CKBufferParser
 
-	CKFile::CKFile() {
+	CKBufferParser::CKBufferParser(void* ptr, size_t rsize, bool need_manual_free) :
+		m_ReaderBegin(static_cast<char*>(ptr)),
+		m_ReaderPos(0u), m_ReaderSize(rsize),
+		m_NeedManualFree(need_manual_free) {
+		;
+	}
+	CKBufferParser::~CKBufferParser() {
+		if (this->m_NeedManualFree) free(this->m_ReaderBegin);
+	}
+
+#pragma endregion
+
+#pragma region CKFile Misc
+
+	CKFile::CKFile(const Utils::VirtoolsContext& cfg) :
+		m_Parser(nullptr), m_MappedFile(nullptr),
+		m_UserCfg(cfg) {
+		;
 	}
 
 	CKFile::~CKFile() {
 	}
+
+
+	void CKFile::ClearData(void) {
+		m_SaveIDMax = 0;
+		m_FileObject.clear();
+		m_PluginDep.clear();
+
+		memset(&m_FileInfo, 0, sizeof(CKFileInfo));
+
+		m_Flags = CK_LOAD_FLAGS::CK_LOAD_DEFAULT;
+		m_FileName.clear();
+		if (m_Parser != nullptr) {
+			delete m_Parser;
+			m_Parser = nullptr;
+		}
+		if (m_MappedFile != nullptr) {
+			delete m_MappedFile;
+			m_MappedFile = nullptr;
+		}
+	}
+
+#pragma endregion
+
 
 }

@@ -1,16 +1,16 @@
 #pragma once
 
+#include "VTUtils.hpp"
 #include "VTConstants.hpp"
 #include "VTEncoding.hpp"
 #include <vector>
 
-// only expose boost in libcom self. do not let it be seen by any program using libcmo.
-#if defined(LIBCMO_EXPORTING)
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/interprocess/mapped_region.hpp>
-#endif
 
 namespace LibCmo {
+
+	void* CKUnPackData(CKINT DestSize, const void* SrcBuffer, CKINT SrcSize);
 
 	struct CKGUID {
 		union {
@@ -22,25 +22,7 @@ namespace LibCmo {
 		CKGUID(CKDWORD gd1 = 0, CKDWORD gd2 = 0) { d[0] = gd1; d[1] = gd2; }
 	};
 
-	// define some mapped file to make boost is invisible for 
-	// any program using this library
-#if defined(LIBCMO_EXPORTING)
-	using P_FILE_MAPPING = boost::interprocess::file_mapping*;
-	using P_MAPPED_REGION = boost::interprocess::mapped_region*;
-#else
-	using P_FILE_MAPPING = void*;
-	using P_MAPPED_REGION = void*;
-#endif
-
 	class VxMemoryMappedFile {
-	public:
-		VxMemoryMappedFile(const char* u8_filepath);
-		~VxMemoryMappedFile(void);
-
-		void* GetBase(void);
-		size_t GetFileSize(void);
-		bool IsValid(void);
-
 	private:
 
 #if defined(LIBCMO_OS_WIN32)
@@ -49,9 +31,18 @@ namespace LibCmo {
 		std::string m_szFilePath;
 #endif
 
-		P_FILE_MAPPING m_hFile;
-		P_MAPPED_REGION m_hFileMapping;
+		boost::interprocess::file_mapping* m_hFile;
+		boost::interprocess::mapped_region* m_hFileMapping;
 		bool m_bIsValid;
+	public:
+		VxMemoryMappedFile(const char* u8_filepath);
+		VxMemoryMappedFile(const VxMemoryMappedFile&) = delete;
+		VxMemoryMappedFile& operator=(const VxMemoryMappedFile&) = delete;
+		~VxMemoryMappedFile(void);
+
+		inline void* GetBase(void) { return this->m_hFileMapping->get_address(); }
+		inline size_t GetFileSize(void) { return this->m_hFileMapping->get_size(); }
+		inline bool IsValid(void) { return this->m_bIsValid; }
 	};
 
 	class CKBufferParser {
@@ -62,17 +53,12 @@ namespace LibCmo {
 		size_t m_ReaderSize;
 
 	public:
-		CKBufferParser(void* ptr, size_t rsize, bool need_manual_free) :
-			m_ReaderBegin(static_cast<char*>(ptr)),
-			m_ReaderPos(0u), m_ReaderSize(rsize),
-			m_NeedManualFree(need_manual_free) {
-			;
-		}
-		~CKBufferParser() {
-			if (this->m_NeedManualFree) free(this->m_ReaderBegin);
-		}
+		CKBufferParser(void* ptr, size_t rsize, bool need_manual_free);
+		CKBufferParser(const CKBufferParser&) = delete;
+		CKBufferParser& operator=(const CKBufferParser&) = delete;
+		~CKBufferParser();
 
-		inline void* GetPtr(void) { return (this->m_ReaderBegin + m_ReaderPos); }
+		inline const void* GetPtr(void) { return (this->m_ReaderBegin + m_ReaderPos); }
 		inline size_t GetSize(void) { return this->m_ReaderSize; }
 		inline void MoveCursor(size_t off) { this->m_ReaderPos += off; }
 		inline void SetCursor(size_t off) { this->m_ReaderPos = off; }
@@ -84,7 +70,7 @@ namespace LibCmo {
 		CK_FILE_WRITEMODE FileWriteMode;		// Options used to save this file. (CK_FILE_WRITEMODE)
 		CKDWORD FileVersion;		// Version of file format when file was saved.
 		CKDWORD CKVersion;			// Version of CK when file was saved.
-		CKDWORD FileSize;			// Size of file in bytes.
+		size_t FileSize;			// Size of file in bytes.
 		CKDWORD ObjectCount;		// Number of objects stored in the file. 	
 		CKDWORD ManagerCount;		// Number of managers which saved data in the file.
 		CKDWORD MaxIDSaved;			// Maximum Object identifier saved
@@ -117,16 +103,25 @@ namespace LibCmo {
 
 	class CKFile {
 	public:
-		CKFile();
+		CKFile(const Utils::VirtoolsContext& cfg);
+		CKFile(const CKFile&) = delete;
+		CKFile& operator=(const CKFile&) = delete;
 		~CKFile();
 
+		void ClearData(void);
+		CKERROR Load(CKSTRING u8_filename, /*CKObjectArray list, */ CK_LOAD_FLAGS flags);
+		CKERROR OpenFile(CKSTRING u8_filename, CK_LOAD_FLAGS flags);
+		CKERROR OpenMemory(void* MemoryBuffer, size_t BufferSize, CK_LOAD_FLAGS Flags);
+		CKERROR ReadFileHeaders(CKBufferParser** ParserPtr);
+		CKERROR ReadFileData(CKBufferParser** ParserPtr);
+		CKERROR LoadFileData(void/*CKObjectArray list*/);
 
 		int32_t m_SaveIDMax;
 		XArray<CKFileObject> m_FileObject;
 		//XArray<CKFileManagerData> m_ManagersData;
 		XClassArray<CKFilePluginDependencies> m_PluginDep;
-		//XClassArray<XIntArray> m_IndexByClassId;
-		//XClassArray<XString> m_IncludedFiles;
+		XClassArray<XIntArray> m_IndexByClassId;
+		XClassArray<XString> m_IncludedFiles;
 
 		CKFileInfo m_FileInfo;
 
@@ -137,6 +132,8 @@ namespace LibCmo {
 
 		bool m_ReadFileDataDone;
 
+	private:
+		Utils::VirtoolsContext m_UserCfg;
 	};
 
 }

@@ -26,9 +26,12 @@ namespace LibCmo {
         }
     }
 
+    using CKINT = int32_t;
     using CK_ID = uint32_t;
     using CKDWORD = uint32_t;
     using CKBOOL = int32_t;
+    using CKMUTSTRING = char*;
+    using CKSTRING = const char*;
 
     using XString = std::string;
     using XBitArray = std::vector<bool>;
@@ -36,7 +39,8 @@ namespace LibCmo {
     using XArray = std::vector<T>;
     using XIntArray = std::vector<int32_t>;
     template<typename T>
-    using XClassArray = std::vector<T*>;
+    using XClassArray = std::vector<T>;
+    //using CKObjectArray = std::vector<CKObject*>;
 
     enum class CK_CLASSID : uint32_t {
         CKCID_OBJECT = 1,
@@ -83,7 +87,6 @@ namespace LibCmo {
         CKCID_BODYPART = 42,
         CKCID_PARAMETER = 46,
         CKCID_PARAMETERLOCAL = 45,
-        CKCID_PARAMETERVARIABLE = 55,
         CKCID_PARAMETEROUT = 3,
         CKCID_INTERFACEOBJECTMANAGER = 48,
         CKCID_CRITICALSECTION = 49,
@@ -105,9 +108,9 @@ namespace LibCmo {
         CKCID_GRIDMANAGER = 91,
         CKCID_SOUNDMANAGER = 92,
         CKCID_TIMEMANAGER = 93,
-        CKCID_CUIKBEHDATA = (uint32_t)-1,
+        CKCID_CUIKBEHDATA = static_cast<uint32_t>(-1),
 
-        CKCID_MAXCLASSID = 56,
+        CKCID_MAXCLASSID = 55,
         CKCID_MAXMAXCLASSID = 128
 	};
 

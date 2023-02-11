@@ -1,9 +1,12 @@
 #pragma once
 
+#include <string>
+
+/*
 // https://stackoverflow.com/questions/2164827/explicitly-exporting-shared-library-functions-in-linux
 // generate import export macro
 #if defined(_MSC_VER)
-//  Microsoft 
+//  Microsoft
 #define LIBCMO_RAW_EXPORT __declspec(dllexport)
 #define LIBCMO_RAW_IMPORT __declspec(dllimport)
 #elif defined(__GNUC__)
@@ -34,3 +37,20 @@
 #else
 #define LIBCMO_EXPORT LIBCMO_NAKED_EXPORT
 #endif
+*/
+
+#if defined(_WIN32)
+#define LIBCMO_OS_WIN32
+#endif
+
+namespace LibCmo {
+	namespace Utils {
+
+		struct VirtoolsContext {
+			std::string NameEncoding;
+
+		};
+
+	}
+
+}
