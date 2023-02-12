@@ -5,8 +5,11 @@
 #include "VTEncoding.hpp"
 #include <vector>
 
-#include <boost/interprocess/file_mapping.hpp>
-#include <boost/interprocess/mapped_region.hpp>
+#if defined(LIBCMO_OS_WIN32)
+#include <Windows.h>
+#else
+#include <sys/mman.h>
+#endif
 
 namespace LibCmo {
 
@@ -27,12 +30,17 @@ namespace LibCmo {
 
 #if defined(LIBCMO_OS_WIN32)
 		std::wstring m_szFilePath;
+		HANDLE m_hFile;
+		DWORD m_dwFileSizeLow, m_dwFileSizeHigh;
+		HANDLE m_hFileMapping;
+		LPVOID m_hFileMapView;
 #else
 		std::string m_szFilePath;
+#error NO IMPLEMENTATION FOR LINUX MMAP!
 #endif
 
-		boost::interprocess::file_mapping* m_hFile;
-		boost::interprocess::mapped_region* m_hFileMapping;
+		void* m_pMemoryMappedFileBase;
+		size_t m_cbFile;
 		bool m_bIsValid;
 	public:
 		VxMemoryMappedFile(const char* u8_filepath);
@@ -40,8 +48,8 @@ namespace LibCmo {
 		VxMemoryMappedFile& operator=(const VxMemoryMappedFile&) = delete;
 		~VxMemoryMappedFile(void);
 
-		inline void* GetBase(void) { return this->m_hFileMapping->get_address(); }
-		inline size_t GetFileSize(void) { return this->m_hFileMapping->get_size(); }
+		inline void* GetBase(void) { return this->m_pMemoryMappedFileBase; }
+		inline size_t GetFileSize(void) { return this->m_cbFile; }
 		inline bool IsValid(void) { return this->m_bIsValid; }
 	};
 

@@ -5,6 +5,7 @@
 
 #if defined(LIBCMO_OS_WIN32)
 #include <Windows.h>
+#include <fileapi.h>
 #else
 #include <iconv.h>
 #endif

@@ -2,8 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <BOOST_INCLUDE_PATH>D:\CppLib\boost_1_81_0</BOOST_INCLUDE_PATH>
-    
     <SQLITE_HEADER_PATH>D:\CppLib\SQLite\sqlite-amalgamation-3400100</SQLITE_HEADER_PATH>
     <SQLITE_WIN32_LIB_PATH>D:\CppLib\SQLite\sqlite-dll-win32-x86-3400100</SQLITE_WIN32_LIB_PATH>
     <SQLITE_WIN64_LIB_PATH>D:\CppLib\SQLite\sqlite-dll-win64-x64-3400100</SQLITE_WIN64_LIB_PATH>
@@ -13,10 +11,6 @@
   <PropertyGroup />
   <ItemDefinitionGroup />
   <ItemGroup>
-    <BuildMacro Include="BOOST_INCLUDE_PATH">
-      <Value>$(BOOST_INCLUDE_PATH)</Value>
-    </BuildMacro>
-    
     <BuildMacro Include="SQLITE_HEADER_PATH">
         <Value>$(SQLITE_HEADER_PATH)</Value>
     </BuildMacro>
