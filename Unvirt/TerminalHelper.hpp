@@ -1,7 +1,7 @@
 #pragma once
 
 namespace Unvirt{
-	namespace ColorfulTerminal {
+	namespace TerminalHelper {
 
 #define UNVIRT_REMOVE_PARENS_IMPL(...) __VA_ARGS__
 #define UNVIRT_REMOVE_PARENS(T) UNVIRT_REMOVE_PARENS_IMPL T

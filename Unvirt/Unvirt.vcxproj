@@ -172,13 +172,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AccessibleValue.cpp" />
-    <ClCompile Include="ColorfulTerminal.cpp" />
+    <ClCompile Include="InteractiveCmd.cpp" />
+    <ClCompile Include="TerminalHelper.cpp" />
     <ClCompile Include="StringHelper.cpp" />
     <ClCompile Include="Unvirt.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AccessibleValue.hpp" />
-    <ClInclude Include="ColorfulTerminal.hpp" />
+    <ClInclude Include="InteractiveCmd.hpp" />
+    <ClInclude Include="TerminalHelper.hpp" />
     <ClInclude Include="StringHelper.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

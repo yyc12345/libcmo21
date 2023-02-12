@@ -24,7 +24,10 @@
     <ClCompile Include="StringHelper.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="ColorfulTerminal.cpp">
+    <ClCompile Include="TerminalHelper.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InteractiveCmd.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,7 +38,10 @@
     <ClInclude Include="StringHelper.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="ColorfulTerminal.hpp">
+    <ClInclude Include="TerminalHelper.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="InteractiveCmd.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

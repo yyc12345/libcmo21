@@ -1,14 +1,16 @@
-#include "ColorfulTerminal.hpp"
+#include "TerminalHelper.hpp"
 #include <VTUtils.hpp>
+#include <cstdarg>
 
 #if defined(LIBCMO_OS_WIN32)
 #include <Windows.h>
 #include <cstdio>
 #include <io.h>
+#include <fcntl.h>
 #endif
 
 namespace Unvirt {
-	namespace ColorfulTerminal {
+	namespace TerminalHelper {
 
 		// all of these functions only works on Windows platform
 		// due to shitty Windows implementations.
@@ -34,6 +36,9 @@ namespace Unvirt {
 #if defined(LIBCMO_OS_WIN32)
 			if (!SetConsoleCP(CP_UTF8)) return false;
 			if (!SetConsoleOutputCP(CP_UTF8)) return false;
+			
+			/*_setmode(_fileno(stdout), _O_U8TEXT);*/
+			_setmode(_fileno(stdin), _O_U16TEXT);
 #endif
 			return true;
 		}

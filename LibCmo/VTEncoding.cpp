@@ -94,6 +94,11 @@ namespace LibCmo {
 			return;
 		}
 
+		void GetWcharStdin(std::string& u8_input, std::wstring& wc_input) {
+			// just redirect to prev func
+			CharToWchar(u8_input, wc_input, CP_UTF8);
+		}
+
 #else
 				//todo: linux implementation
 
