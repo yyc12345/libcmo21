@@ -1,4 +1,6 @@
 #include "CmdHelper.hpp"
+#include "TerminalHelper.hpp"
+#include <stdexcept>
 
 namespace Unvirt {
 	namespace CmdHelper {
@@ -14,7 +16,7 @@ namespace Unvirt {
 			;
 		}
 
-		std::vector<std::string> CmdSplitter::Convert(std::string& u8cmd) {
+		std::vector<std::string> CmdSplitter::Convert(const std::string& u8cmd) {
 			// set up variables
 			std::vector<std::string> result;
 			std::string buffer;
@@ -69,11 +71,77 @@ namespace Unvirt {
 
 #pragma region interactive cmd helper classes
 
-		SubCmd::SubCmd() {
+
+		OptionsDescription::OptionsDescription() :
+			mLongNameDict(), mShortNameMapping(), mPositionalArgMapping() {
+			;
+		}
+		OptionsDescription::~OptionsDescription() { ; }
+
+		void OptionsDescription::AddOption(
+			const char* fullname, char shortname, CmdArgType type, const char* description) {
+			// pre-check
+			if (fullname == nullptr ||
+				fullname[0] == '\0' ||
+				fullname[0] == '-')
+				throw std::invalid_argument("Invalid Option Long Name.");
+
+			// construct data
+			std::string sfullname(fullname);
+			OptionDescription data{
+				fullname, shortname, type, (description != nullptr ? description : "")
+			};
+
+			// check requirement
+			if (mLongNameDict.contains(sfullname)) throw std::invalid_argument("Duplicated Option Long Name.");
+			if (shortname != '\0')
+				if (mShortNameMapping.contains(shortname)) throw std::invalid_argument("Duplicated Option Short Name.");
+
+			// add them
+			mShortNameMapping.emplace(shortname, sfullname);
+			mLongNameDict.emplace(sfullname, std::move(data));
 		}
 
-		SubCmd::~SubCmd() {
+		void OptionsDescription::AddPositionalOption(const char* corresponding_longname) {
+			// pre-check
+			if (corresponding_longname == nullptr) throw std::invalid_argument("Invalid Option Long Name.");
+
+			// construct data
+			std::string fullname(corresponding_longname);
+
+			// check requirement
+			if (!mLongNameDict.contains(fullname)) throw std::invalid_argument("No Matched Option.");
+			if (!mPositionalArgMapping.empty()) {
+				for (const auto& i : mPositionalArgMapping) {
+					if (i == fullname)throw std::invalid_argument("Duplicated Option.");
+				}
+			}
+
+			// set value
+			mPositionalArgMapping.push_back(std::move(fullname));
 		}
+
+		void OptionsDescription::PrintHelp(FILE* f) {
+			fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("Allowed Options: \n")), f);
+			for (const auto& [key, value] : mLongNameDict) {
+				fprintf(f, "--%s\t%s\n", value.mLongName.c_str(), value.mDescription.c_str());
+			}
+
+			if (!mPositionalArgMapping.empty()) {
+				fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("\nPositional Options: \n")), f);
+				for (const auto& i : mPositionalArgMapping) {
+					fprintf(f, "[%s] ", i.c_str());
+				}
+			}
+		}
+
+
+		VariablesMap::VariablesMap() {
+		}
+
+		VariablesMap::~VariablesMap() {
+		}
+
 
 #pragma endregion
 

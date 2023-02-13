@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include <vector>
+#include <unordered_map>
 
 namespace Unvirt {
 	namespace CmdHelper {
@@ -15,7 +16,7 @@ namespace Unvirt {
 			CmdSplitter& operator=(const CmdSplitter&) = delete;
 			~CmdSplitter();
 
-			std::vector<std::string> Convert(std::string& u8cmd);
+			std::vector<std::string> Convert(const std::string& u8cmd);
 		private:
 			char mCmdChar;
 			std::string* mBuffer;
@@ -120,13 +121,68 @@ namespace Unvirt {
 			}
 		};
 
-		class SubCmd {
+		enum class CmdArgType {
+			NONE,
+			STRING,
+			INT
+		};
+
+		struct OptionDescription {
+			std::string mLongName;
+			char mShortName;
+			CmdArgType mType;
+			std::string mDescription;
+		};
+
+		class OptionsDescription {
 		public:
-			SubCmd();
-			~SubCmd();
+			OptionsDescription();
+			OptionsDescription(const OptionsDescription&) = delete;
+			OptionsDescription& operator=(const OptionsDescription&) = delete;
+			~OptionsDescription();
 
+			/// <summary>
+			/// Add an option
+			/// </summary>
+			/// <param name="fullname">The long name of this option. Should NOT be blank or NULL.</param>
+			/// <param name="shortname">A single char for the short name of this option. Leave ZERO to omit this.</param>
+			/// <param name="type">The value type of this option. Set to CmdArgType::NONE to indicate this is a switch (no value).</param>
+			/// <param name="sescription">The description of this option. This can be NULL.</param>
+			void AddOption(const char* fullname, char shortname, CmdArgType type, const char* sescription);
+			void AddPositionalOption(const char* corresponding_longname);
+
+			void PrintHelp(FILE* f);
 		private:
+			std::unordered_map<std::string, OptionDescription> mLongNameDict;
+			std::unordered_map<char, std::string> mShortNameMapping;
+			std::vector<std::string> mPositionalArgMapping;
+		};
 
+		struct AnyVariable {
+			CmdArgType mType;
+			void* mData;
+		};
+
+		class VariablesMap {
+		private:
+			std::unordered_map<std::string, AnyVariable> mDataPair;
+
+		public:
+			VariablesMap();
+			~VariablesMap();
+
+			void Clear(void);
+			bool AddPair(std::string& name, CmdArgType t, std::string& val);
+			bool Contain(const char* probe);
+			template<typename T>
+			T* GetData(const char* opt) {
+				;
+			}
+		};
+
+		struct CmdRegisteryEntry {
+			OptionsDescription mOptDesc;
+			std::function<void(OptionsDescription&, VariablesMap&)> mBindProc;
 		};
 
 		class InteractiveCmd {
@@ -137,7 +193,9 @@ namespace Unvirt {
 			void Run(void);
 
 		private:
-			//std::unordered_map<std::string, CmdRegisteryEntry> mCmdDispatcher;
+			bool AnalyzeCmd(std::vector<std::string>& args);
+			void PrintHelp(FILE* f);
+			std::unordered_map<std::string, CmdRegisteryEntry> mCmdDispatcher;
 
 
 		};
