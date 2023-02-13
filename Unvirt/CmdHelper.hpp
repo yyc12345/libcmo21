@@ -5,6 +5,7 @@
 #include <functional>
 #include <vector>
 #include <unordered_map>
+#include <stdexcept>
 
 namespace Unvirt {
 	namespace CmdHelper {
@@ -151,6 +152,10 @@ namespace Unvirt {
 			void AddOption(const char* fullname, char shortname, CmdArgType type, const char* sescription);
 			void AddPositionalOption(const char* corresponding_longname);
 
+			OptionDescription* GetDescByLongName(const std::string& longname);
+			OptionDescription* GetDescByShortName(char shortname);
+			OptionDescription* GetDescByPosition(int pos);
+
 			void PrintHelp(FILE* f);
 		private:
 			std::unordered_map<std::string, OptionDescription> mLongNameDict;
@@ -159,7 +164,7 @@ namespace Unvirt {
 		};
 
 		struct AnyVariable {
-			CmdArgType mType;
+			size_t mDataBasicSize;
 			void* mData;
 		};
 
@@ -169,35 +174,72 @@ namespace Unvirt {
 
 		public:
 			VariablesMap();
+			VariablesMap(const VariablesMap&) = delete;
+			VariablesMap& operator=(const VariablesMap&) = delete;
 			~VariablesMap();
 
 			void Clear(void);
+			/// <summary>
+			/// Add option key value pair.
+			/// </summary>
+			/// <param name="name"></param>
+			/// <param name="t"></param>
+			/// <param name="val"></param>
+			/// <returns>return false when this opt is existed.</returns>
 			bool AddPair(std::string& name, CmdArgType t, std::string& val);
-			bool Contain(const char* probe);
+			bool Contain(const char* opt) {
+				if (opt == nullptr) throw std::invalid_argument("Invalid Option Name.");
+				return mDataPair.contains(opt);
+			}
 			template<typename T>
 			T* GetData(const char* opt) {
-				;
+				if (opt == nullptr) throw std::invalid_argument("Invalid Option Name.");
+				const auto search = mDataPair.find(opt);
+				if (search == mDataPair.end()) return nullptr;
+
+				if (sizeof(T) > search->second.mDataBasicSize) throw std::invalid_argument("Memory Violation.");
+				return reinterpret_cast<T*>(search->second.mData);
 			}
 		};
 
 		struct CmdRegisteryEntry {
+			std::string mSubCmdDesc;
 			OptionsDescription mOptDesc;
 			std::function<void(OptionsDescription&, VariablesMap&)> mBindProc;
+		};
+
+		class ExecEnvironment {
+		public:
+			ExecEnvironment();
+			ExecEnvironment(const ExecEnvironment&) = delete;
+			ExecEnvironment& operator=(const ExecEnvironment&) = delete;
+			~ExecEnvironment();
+
+			void ProcLoad(OptionsDescription&, VariablesMap&);
+			void ProcInfo(OptionsDescription&, VariablesMap&);
+			void ProcClear(OptionsDescription&, VariablesMap&);
+			void ProcExportSql(OptionsDescription&, VariablesMap&);
+		private:
+
 		};
 
 		class InteractiveCmd {
 		public:
 			InteractiveCmd();
+			InteractiveCmd(const InteractiveCmd&) = delete;
+			InteractiveCmd& operator=(const InteractiveCmd&) = delete;
 			~InteractiveCmd();
 
 			void Run(void);
 
 		private:
-			bool AnalyzeCmd(std::vector<std::string>& args);
+			void CmdParser(const std::vector<std::string>& args);
 			void PrintHelp(FILE* f);
+
 			std::unordered_map<std::string, CmdRegisteryEntry> mCmdDispatcher;
-
-
+			ExecEnvironment mExecEnv;
+			VariablesMap mVm;
+			std::string mBlank;
 		};
 
 	}
