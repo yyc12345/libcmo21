@@ -27,7 +27,7 @@
     <ClCompile Include="TerminalHelper.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="InteractiveCmd.cpp">
+    <ClCompile Include="CmdHelper.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,7 +41,7 @@
     <ClInclude Include="TerminalHelper.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="InteractiveCmd.hpp">
+    <ClInclude Include="CmdHelper.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
