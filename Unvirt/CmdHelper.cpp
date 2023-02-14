@@ -1,5 +1,10 @@
 #include "CmdHelper.hpp"
 #include "TerminalHelper.hpp"
+#include "VTUtils.hpp"
+#include "VTEncoding.hpp"
+#include <iostream>
+
+/*
 
 namespace Unvirt {
 	namespace CmdHelper {
@@ -15,7 +20,7 @@ namespace Unvirt {
 			;
 		}
 
-		std::vector<std::string> CmdSplitter::Convert(const std::string& u8cmd) {
+		const std::vector<std::string> CmdSplitter::Convert(const std::string& u8cmd) {
 			// set up variables
 			std::vector<std::string> result;
 			std::string buffer;
@@ -129,7 +134,7 @@ namespace Unvirt {
 			if (search == mShortNameMapping.end()) return nullptr;
 			return GetDescByLongName((*search).second);
 		}
-		OptionDescription* OptionsDescription::GetDescByPosition(int pos) {
+		OptionDescription* OptionsDescription::GetDescByPosition(size_t pos) {
 			if (pos >= mPositionalArgMapping.size()) return nullptr;
 			return GetDescByLongName(mPositionalArgMapping[pos]);
 		}
@@ -167,7 +172,7 @@ namespace Unvirt {
 			mDataPair.clear();
 		}
 
-		bool VariablesMap::AddPair(std::string& name, CmdArgType t, std::string& val) {
+		bool VariablesMap::AddPair(const std::string& name, CmdArgType t, const std::string& val) {
 			if (mDataPair.contains(name)) return false;
 
 			AnyVariable var;
@@ -206,41 +211,75 @@ namespace Unvirt {
 			}
 
 			mDataPair.emplace(name, std::move(var));
+			return true;
 		}
 
 #pragma endregion
 
 #pragma region ExecEnvironment
 
-		ExecEnvironment::ExecEnvironment() {
+		ExecEnvironment::ExecEnvironment() :
+			mVtFile(nullptr), mVtFileEnv(nullptr) {
+			;
 		}
 
 		ExecEnvironment::~ExecEnvironment() {
+			if (mVtFile != nullptr) delete mVtFile;
+			if (mVtFileEnv != nullptr) delete mVtFileEnv;
 		}
 
 		void ExecEnvironment::ProcLoad(OptionsDescription& od, VariablesMap& vm) {
+			if (mVtFile != nullptr || mVtFileEnv != nullptr) {
+				printf(UNVIRT_TERMCOL_LIGHT_RED(("Please close current opened Vrtools file first.\n")));
+				return;
+			}
+
+			const char* filename = vm.GetData<char>("file");
+			if (filename == nullptr) {
+				printf(UNVIRT_TERMCOL_LIGHT_RED(("You should specify a file first.\n")));
+				od.PrintHelp(stdout);
+				return;
+			}
+
+			mVtFileEnv = new LibCmo::Utils::VirtoolsContext();
+			const char* enc = vm.GetData<char>("encoding");
+			mVtFileEnv->NameEncoding = enc == nullptr ? "" : enc;
+
+			mVtFile = new LibCmo::CKFile(*mVtFileEnv);
+			mVtFile->Load(filename, LibCmo::CK_LOAD_FLAGS::CK_LOAD_DEFAULT);
 		}
 
 		void ExecEnvironment::ProcInfo(OptionsDescription& od, VariablesMap& vm) {
+			printf(UNVIRT_TERMCOL_LIGHT_RED(("Sorry. This feature is not supported now.\n")));
 		}
 
 		void ExecEnvironment::ProcClear(OptionsDescription& od, VariablesMap& vm) {
+			if (mVtFile == nullptr && mVtFileEnv == nullptr) {
+				printf(UNVIRT_TERMCOL_LIGHT_RED(("Virtools file already is empty.\n")));
+				return;
+			}
+
+			if (mVtFile != nullptr) delete mVtFile;
+			if (mVtFileEnv != nullptr) delete mVtFileEnv;
+
+			mVtFile = nullptr;
+			mVtFileEnv = nullptr;
 		}
 
 		void ExecEnvironment::ProcExportSql(OptionsDescription& od, VariablesMap& vm) {
+			printf(UNVIRT_TERMCOL_LIGHT_RED(("Sorry. This feature is not supported now.\n")));
 		}
 
 
 #pragma endregion
 
-
 #pragma region InteractiveCmd
 
 		InteractiveCmd::InteractiveCmd() :
-			mCmdDispatcher(), mExecEnv(), mVm(), mBlank()
-		{
+			mCmdDispatcher(), mExecEnv(), mVm(), mBlank(), mExitRunFlag(false), mCmdSplitter() {
 			// add load subcommand
 			CmdRegisteryEntry entryLoad;
+			const std::string entryLoadName = "load";
 			entryLoad.mSubCmdDesc = "Load Virtools file.";
 			entryLoad.mOptDesc.AddOption("file", 'f', CmdArgType::STRING, "The loaded Virtools file.");
 			entryLoad.mOptDesc.AddPositionalOption("file");
@@ -249,33 +288,57 @@ namespace Unvirt {
 			entryLoad.mOptDesc.AddOption("temp", 't', CmdArgType::STRING, "The temp folder used by engine.");
 			entryLoad.mOptDesc.AddPositionalOption("temp");
 			entryLoad.mBindProc = std::bind(&ExecEnvironment::ProcLoad, &this->mExecEnv, std::placeholders::_1, std::placeholders::_2);
-			mCmdDispatcher.emplace("load", std::move(entryLoad));
+			//mCmdDispatcher.emplace("load", std::move(entryLoad));
 
 			CmdRegisteryEntry entryInfo;
 			entryInfo.mSubCmdDesc = "Show loaded Virtools file header info.";
 			entryInfo.mBindProc = std::bind(&ExecEnvironment::ProcInfo, &this->mExecEnv, std::placeholders::_1, std::placeholders::_2);
-			mCmdDispatcher.emplace("info", std::move(entryInfo));
+			//mCmdDispatcher.emplace("info", std::move(entryInfo));
 
 			CmdRegisteryEntry entryClear;
 			entryClear.mSubCmdDesc = "Clear current loaded Virtools file.";
 			entryClear.mBindProc = std::bind(&ExecEnvironment::ProcClear, &this->mExecEnv, std::placeholders::_1, std::placeholders::_2);
-			mCmdDispatcher.emplace("clear", std::move(entryClear));
+			//mCmdDispatcher.emplace("clear", std::move(entryClear));
 
 			CmdRegisteryEntry entryExportSql;
 			entryExportSql.mSubCmdDesc = "Export loaded Virtools file as a SQList database file.";
 			entryExportSql.mOptDesc.AddOption("file", 'f', CmdArgType::STRING, "The exported SQL file.");
 			entryExportSql.mOptDesc.AddPositionalOption("file");
 			entryExportSql.mBindProc = std::bind(&ExecEnvironment::ProcExportSql, &this->mExecEnv, std::placeholders::_1, std::placeholders::_2);
-			mCmdDispatcher.emplace("sql", std::move(entryExportSql));
+			//mCmdDispatcher.emplace("sql", std::move(entryExportSql));
+
+			CmdRegisteryEntry entryExit;
+			entryExit.mSubCmdDesc = "Exit this interactive commander.";
+			entryExit.mBindProc = std::bind(&InteractiveCmd::ProcExit, this, std::placeholders::_1, std::placeholders::_2);
+			//mCmdDispatcher.emplace("exit", std::move(entryExit));
 
 		}
 
 		InteractiveCmd::~InteractiveCmd() {
-
+			;
 		}
 
 		void InteractiveCmd::Run(void) {
+			std::string u8cmd;
 
+			mExitRunFlag = false;
+			while (!mExitRunFlag) {
+				// get command
+				GetCmdLine(u8cmd);
+
+				// split cmd and parse it
+				CmdParser(mCmdSplitter.Convert(u8cmd));
+			}
+		}
+
+		void InteractiveCmd::GetCmdLine(std::string& u8cmd) {
+#if defined(LIBCMO_OS_WIN32)
+			std::wstring wcmd;
+			std::getline(std::wcin, wcmd);
+			LibCmo::Encoding::WcharToChar(wcmd, u8cmd, CP_UTF8);
+#else
+			std::getline(std::cin, u8cmd);
+#endif
 		}
 
 		void InteractiveCmd::CmdParser(const std::vector<std::string>& args) {
@@ -316,7 +379,7 @@ namespace Unvirt {
 						optsDesc.PrintHelp(f);
 						return;
 					}
-					optsDesc.GetDescByShortName(opt[1]);
+					optDesc = optsDesc.GetDescByShortName(opt[1]);
 				} else {
 					// position
 					optDesc = optsDesc.GetDescByPosition(position_counter++);
@@ -330,11 +393,17 @@ namespace Unvirt {
 				}
 
 				// get value
+				bool add_success = true;
 				switch (optDesc->mType) {
 					case CmdArgType::NONE:
 						// just a switch
-						mVm.AddPair(optDesc->mLongName, optDesc->mType, this->mBlank);
+						add_success = mVm.AddPair(optDesc->mLongName, optDesc->mType, this->mBlank);
 						++arg;
+						if (!add_success) {
+							fprintf(f, UNVIRT_TERMCOL_LIGHT_RED(("Error!  Duplicated option \"%s\"! \n")), opt.c_str());
+							optsDesc.PrintHelp(f);
+							return;
+						}
 						break;
 					case CmdArgType::INT:
 					case CmdArgType::STRING:
@@ -345,8 +414,13 @@ namespace Unvirt {
 							optsDesc.PrintHelp(f);
 							return;
 						}
-						mVm.AddPair(optDesc->mLongName, optDesc->mType, *arg);
+						add_success = mVm.AddPair(optDesc->mLongName, optDesc->mType, *arg);
 						++arg;
+						if (!add_success) {
+							fprintf(f, UNVIRT_TERMCOL_LIGHT_RED(("Error!  Duplicated option \"%s\"! \n")), opt.c_str());
+							optsDesc.PrintHelp(f);
+							return;
+						}
 						break;
 					default:
 						throw std::invalid_argument("Invalid Option Type.");
@@ -364,8 +438,13 @@ namespace Unvirt {
 			}
 		}
 
+		void InteractiveCmd::ProcExit(OptionsDescription&, VariablesMap&) {
+			mExitRunFlag = true;
+		}
+
 #pragma endregion
 
-
+		}
 	}
-}
+
+*/

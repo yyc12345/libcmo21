@@ -231,30 +231,31 @@ namespace Unvirt {
 
 		void GetAccessibleFileSize(std::string& strl, uint64_t size) {
 			static double denominator = (double)0b1111111111;
+			uint64_t probe = size;
 
 			// check bytes
-			if ((size >> 10) == UINT64_C(0)) {
-				StringHelper::StdstringPrintf(strl, "%" PRIu64 "Bytes", size);
+			if ((probe >> 10) == UINT64_C(0)) {
+				StringHelper::StdstringPrintf(strl, "%" PRIu64 "Bytes", probe);
 				return;
 			}
-			size >>= 10;
+			probe >>= 10;
 
 			// check kb
-			if ((size >> 10) == UINT64_C(0)) {
-				StringHelper::StdstringPrintf(strl, "%.2lfKiB", size / denominator);
+			if ((probe >> 10) == UINT64_C(0)) {
+				StringHelper::StdstringPrintf(strl, "%.2lfKiB", size / static_cast<double>(UINT64_C(1) << 10));
 				return;
 			}
-			size >>= 10;
+			probe >>= 10;
 
 			// check mb
-			if ((size >> 10) == UINT64_C(0)) {
-				StringHelper::StdstringPrintf(strl, "%.2lfMiB", size / denominator);
+			if ((probe >> 10) == UINT64_C(0)) {
+				StringHelper::StdstringPrintf(strl, "%.2lfMiB", size / static_cast<double>(UINT64_C(1) << 20));
 				return;
 			}
-			size >>= 10;
+			probe >>= 10;
 
 			// otherwise gb
-			StringHelper::StdstringPrintf(strl, "%.2lfGiB", size / denominator);
+			StringHelper::StdstringPrintf(strl, "%.2lfGiB", size / static_cast<double>(UINT64_C(1) << 30));
 			return;
 
 		}

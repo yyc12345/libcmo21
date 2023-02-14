@@ -17,7 +17,7 @@ namespace Unvirt {
 			strl.resize(count);
 			int write_result = _vsnprintf(strl.data(), count, format, argptr);
 
-			if (write_result < 0 || write_result >= count) throw new std::length_error("Invalid write_result in _vsnprintf.");
+			if (write_result < 0 || write_result > count) throw new std::length_error("Invalid write_result in _vsnprintf.");
 		}
 
 	}

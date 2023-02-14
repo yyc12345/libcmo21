@@ -173,6 +173,7 @@
   <ItemGroup>
     <ClCompile Include="AccessibleValue.cpp" />
     <ClCompile Include="CmdHelper.cpp" />
+    <ClCompile Include="StructFormatter.cpp" />
     <ClCompile Include="TerminalHelper.cpp" />
     <ClCompile Include="StringHelper.cpp" />
     <ClCompile Include="Unvirt.cpp" />
@@ -180,6 +181,7 @@
   <ItemGroup>
     <ClInclude Include="AccessibleValue.hpp" />
     <ClInclude Include="CmdHelper.hpp" />
+    <ClInclude Include="StructFormatter.hpp" />
     <ClInclude Include="TerminalHelper.hpp" />
     <ClInclude Include="StringHelper.hpp" />
   </ItemGroup>

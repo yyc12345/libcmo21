@@ -6,6 +6,10 @@
 #include <vector>
 #include <unordered_map>
 #include <stdexcept>
+#include "VTUtils.hpp"
+#include "VTStruct.hpp"
+
+/*
 
 namespace Unvirt {
 	namespace CmdHelper {
@@ -17,7 +21,7 @@ namespace Unvirt {
 			CmdSplitter& operator=(const CmdSplitter&) = delete;
 			~CmdSplitter();
 
-			std::vector<std::string> Convert(const std::string& u8cmd);
+			const std::vector<std::string> Convert(const std::string& u8cmd);
 		private:
 			char mCmdChar;
 			std::string* mBuffer;
@@ -154,7 +158,7 @@ namespace Unvirt {
 
 			OptionDescription* GetDescByLongName(const std::string& longname);
 			OptionDescription* GetDescByShortName(char shortname);
-			OptionDescription* GetDescByPosition(int pos);
+			OptionDescription* GetDescByPosition(size_t pos);
 
 			void PrintHelp(FILE* f);
 		private:
@@ -186,7 +190,7 @@ namespace Unvirt {
 			/// <param name="t"></param>
 			/// <param name="val"></param>
 			/// <returns>return false when this opt is existed.</returns>
-			bool AddPair(std::string& name, CmdArgType t, std::string& val);
+			bool AddPair(const std::string& name, CmdArgType t, const std::string& val);
 			bool Contain(const char* opt) {
 				if (opt == nullptr) throw std::invalid_argument("Invalid Option Name.");
 				return mDataPair.contains(opt);
@@ -220,7 +224,8 @@ namespace Unvirt {
 			void ProcClear(OptionsDescription&, VariablesMap&);
 			void ProcExportSql(OptionsDescription&, VariablesMap&);
 		private:
-
+			LibCmo::CKFile* mVtFile;
+			LibCmo::Utils::VirtoolsContext* mVtFileEnv;
 		};
 
 		class InteractiveCmd {
@@ -233,14 +238,20 @@ namespace Unvirt {
 			void Run(void);
 
 		private:
+			void GetCmdLine(std::string& u8cmd);
 			void CmdParser(const std::vector<std::string>& args);
 			void PrintHelp(FILE* f);
 
+			void ProcExit(OptionsDescription&, VariablesMap&);
+
 			std::unordered_map<std::string, CmdRegisteryEntry> mCmdDispatcher;
+			CmdSplitter mCmdSplitter;
 			ExecEnvironment mExecEnv;
 			VariablesMap mVm;
 			std::string mBlank;
+			bool mExitRunFlag;
 		};
 
 	}
 }
+*/
