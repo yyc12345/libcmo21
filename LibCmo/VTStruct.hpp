@@ -67,6 +67,10 @@ namespace LibCmo {
 		~CKBufferParser();
 
 		inline const void* GetPtr(void) { return (this->m_ReaderBegin + m_ReaderPos); }
+		inline void ReadAndMove(void* data, size_t data_size) {
+			memcpy(data, (this->m_ReaderBegin + m_ReaderPos), data_size);
+			this->m_ReaderPos += data_size;
+		}
 		inline size_t GetSize(void) { return this->m_ReaderSize; }
 		inline void MoveCursor(size_t off) { this->m_ReaderPos += off; }
 		inline void SetCursor(size_t off) { this->m_ReaderPos = off; }
@@ -104,14 +108,14 @@ namespace LibCmo {
 	};
 
 	struct CKFilePluginDependencies {
-		CKDWORD m_PluginCategory;
+		CK_PLUGIN_TYPE m_PluginCategory;
 		XArray<CKGUID> m_Guids;
 		XBitArray ValidGuids;
 	};
 
 	class CKFile {
 	public:
-		CKFile(const Utils::VirtoolsContext& cfg);
+		CKFile(const Utils::VirtoolsEnvironment& cfg);
 		CKFile(const CKFile&) = delete;
 		CKFile& operator=(const CKFile&) = delete;
 		~CKFile();
@@ -141,7 +145,7 @@ namespace LibCmo {
 		bool m_ReadFileDataDone;
 
 	private:
-		Utils::VirtoolsContext m_UserCfg;
+		Utils::VirtoolsEnvironment m_UserCfg;
 	};
 
 }

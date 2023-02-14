@@ -18,6 +18,7 @@ namespace Unvirt {
 			extern const EnumDescPairArray<LibCmo::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE;
 			extern const EnumDescPairArray<LibCmo::CK_LOAD_FLAGS> CK_LOAD_FLAGS;
 			extern const EnumDescPairArray<LibCmo::CK_FO_OPTIONS> CK_FO_OPTIONS;
+			extern const EnumDescPairArray<LibCmo::CK_PLUGIN_TYPE> CK_PLUGIN_TYPE;
 		}
 
 		template<typename TEnum>

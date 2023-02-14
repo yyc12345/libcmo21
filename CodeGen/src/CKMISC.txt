@@ -25,3 +25,14 @@ enum CK_FO_OPTIONS
 		CK_FO_DONTLOADOBJECT,	 // Object chunk will not be read either because it is a reference
 								// or because the loaded object already exist in the current level 
 								// and the user choose to keep the existing one.
+
+enum CK_PLUGIN_TYPE
+	CKPLUGIN_BITMAP_READER		= 0,	// The plugin is bitmap (textures,sprites) loader
+	CKPLUGIN_SOUND_READER		= 1,	// Sound Reader Plugin
+	CKPLUGIN_MODEL_READER		= 2,	// 3D Model Reader 
+	CKPLUGIN_MANAGER_DLL		= 3,	// The plugin implements a Manager
+	CKPLUGIN_BEHAVIOR_DLL		= 4,	// The plugin implements one or more behaviors
+	CKPLUGIN_RENDERENGINE_DLL	= 5,	// Render Engine plugin
+	CKPLUGIN_MOVIE_READER		= 6,	// Movie (AVI,Mpeg) reader		
+	CKPLUGIN_EXTENSION_DLL		= 7,	// Generic extension (definition of new parameter types or operations for ex.)	
+

@@ -46,9 +46,9 @@
 namespace LibCmo {
 	namespace Utils {
 
-		struct VirtoolsContext {
+		struct VirtoolsEnvironment {
 			std::string NameEncoding;
-
+			std::string TempFolder;
 		};
 
 	}

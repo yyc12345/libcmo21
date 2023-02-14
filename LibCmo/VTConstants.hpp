@@ -193,6 +193,16 @@ namespace LibCmo {
         CK_FO_REPLACEOBJECT,
         CK_FO_DONTLOADOBJECT
     };
+    enum class CK_PLUGIN_TYPE : int32_t {
+        CKPLUGIN_BITMAP_READER = 0,
+        CKPLUGIN_SOUND_READER = 1,
+        CKPLUGIN_MODEL_READER = 2,
+        CKPLUGIN_MANAGER_DLL = 3,
+        CKPLUGIN_BEHAVIOR_DLL = 4,
+        CKPLUGIN_RENDERENGINE_DLL = 5,
+        CKPLUGIN_MOVIE_READER = 6,
+        CKPLUGIN_EXTENSION_DLL = 7
+    };
 
 }
 

@@ -96,7 +96,7 @@ namespace LibCmo {
 
 		// write member data
 		m_pMemoryMappedFileBase = m_hFileMapView;
-		m_cbFile = static_cast<size_t>(m_dwFileSizeLow) | (static_cast<size_t>(m_dwFileSizeHigh) << 32);
+		m_cbFile = static_cast<size_t>(static_cast<uint64_t>(m_dwFileSizeLow) | (static_cast<uint64_t>(m_dwFileSizeHigh) << 32));
 
 #else
 #error NO IMPLEMENTATION FOR LINUX MMAP!
@@ -142,7 +142,7 @@ namespace LibCmo {
 
 #pragma region CKFile Misc
 
-	CKFile::CKFile(const Utils::VirtoolsContext& cfg) :
+	CKFile::CKFile(const Utils::VirtoolsEnvironment& cfg) :
 		m_Parser(nullptr), m_MappedFile(nullptr),
 		m_UserCfg(cfg) {
 		;

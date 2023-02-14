@@ -4,6 +4,7 @@
 *.nms
 *.vmo
 CodeGen/dest/*.txt
+PyCmoOld/
 
 .vscode/
 

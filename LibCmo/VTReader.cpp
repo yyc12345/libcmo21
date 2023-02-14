@@ -23,9 +23,11 @@ namespace LibCmo {
 		if (u8_filename == nullptr) return CKERROR::CKERR_INVALIDPARAMETER;
 
 		this->m_FileName = u8_filename;
-		this->m_MappedFile = new VxMemoryMappedFile(this->m_FileName.c_str());
+		this->m_MappedFile = new(std::nothrow) VxMemoryMappedFile(this->m_FileName.c_str());
+		if (this->m_MappedFile == nullptr) return CKERROR::CKERR_OUTOFMEMORY;
 		if (!this->m_MappedFile->IsValid()) return CKERROR::CKERR_INVALIDFILE;
 
+		// MARK: CKContext::SetLastCmoLoaded
 		return this->OpenMemory(this->m_MappedFile->GetBase(), this->m_MappedFile->GetFileSize(), flags);
 	}
 
@@ -34,8 +36,11 @@ namespace LibCmo {
 		// compare magic words
 		if (BufferSize < 0x20 || memcmp(MemoryBuffer, "Nemo", 4u)) return CKERROR::CKERR_INVALIDFILE;
 
-		this->m_Parser = new CKBufferParser(MemoryBuffer, BufferSize, false);
+		this->m_Parser = new(std::nothrow) CKBufferParser(MemoryBuffer, BufferSize, false);
+		if (this->m_Parser == nullptr) return CKERROR::CKERR_OUTOFMEMORY;
+		// MARK: eliminate check of m_Parser->m_ReaderBegin
 
+		// MARK: dword_2405F6C0 = 0;
 		this->m_Flags = Flags;
 		this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));
 		return this->ReadFileHeaders(&(this->m_Parser));
@@ -49,8 +54,7 @@ namespace LibCmo {
 		CKDWORD fhdr1[8];
 		CKDWORD fhdr2[8];
 		if (parser->GetSize() < sizeof(fhdr1)) return CKERROR::CKERR_INVALIDFILE;
-		memcpy(fhdr1, parser->GetPtr(), sizeof(fhdr1));
-		parser->MoveCursor(sizeof(fhdr1));
+		parser->ReadAndMove(fhdr1, sizeof(fhdr1));
 
 		if (fhdr1[5]) {	// it seems that there is a ZERO checker?
 			memset(fhdr1, 0, sizeof(fhdr1));
@@ -64,8 +68,7 @@ namespace LibCmo {
 			memset(fhdr2, 0, sizeof(fhdr2));
 		} else {
 			if (parser->GetSize() < sizeof(fhdr1) + sizeof(fhdr2)) return CKERROR::CKERR_INVALIDFILE;
-			memcpy(fhdr2, parser->GetPtr(), sizeof(fhdr2));
-			parser->MoveCursor(sizeof(fhdr2));
+			parser->ReadAndMove(fhdr2, sizeof(fhdr2));
 		}
 
 		// forcely reset too big product ver
@@ -111,7 +114,11 @@ namespace LibCmo {
 			// compare size to decide wheher use compress feature
 			void* decomp_buffer = CKUnPackData(this->m_FileInfo.Hdr1UnPackSize, parser->GetPtr(), this->m_FileInfo.Hdr1PackSize);
 			if (decomp_buffer != nullptr) {
-				parser = new CKBufferParser(decomp_buffer, this->m_FileInfo.Hdr1UnPackSize, true);
+				parser = new(std::nothrow) CKBufferParser(decomp_buffer, this->m_FileInfo.Hdr1UnPackSize, true);
+				if (parser == nullptr) {
+					free(decomp_buffer);
+					return CKERROR::CKERR_OUTOFMEMORY;
+				}
 			}
 		}
 
@@ -124,30 +131,99 @@ namespace LibCmo {
 			this->m_FileObject.resize(this->m_FileInfo.ObjectCount);
 
 			// read data
-			for (auto it = this->m_FileObject.begin(); it != this->m_FileObject.end(); ++it) {
-				CKFileObject* fileobj = &(*it);
+			for (auto& fileobj : this->m_FileObject) {
 				// setup useless fields
-				fileobj->ObjPtr = nullptr;
-				fileobj->Data = nullptr;
+				fileobj.ObjPtr = nullptr;
+				fileobj.Data = nullptr;
 
 				// read basic fields
-				memcpy(&(fileobj->Object), parser->GetPtr(), sizeof(CK_ID));
-				parser->MoveCursor(sizeof(CK_ID));
-				memcpy(&(fileobj->ObjectCid), parser->GetPtr(), sizeof(CK_CLASSID));
-				parser->MoveCursor(sizeof(CK_CLASSID));
-				memcpy(&(fileobj->FileIndex), parser->GetPtr(), sizeof(CKDWORD));
-				parser->MoveCursor(sizeof(CKDWORD));
+				parser->ReadAndMove(&(fileobj.Object), sizeof(CK_ID));
+				parser->ReadAndMove(&(fileobj.ObjectCid), sizeof(CK_CLASSID));
+				parser->ReadAndMove(&(fileobj.FileIndex), sizeof(CKDWORD));
 
 				CKDWORD namelen;
-				memcpy(&namelen, parser->GetPtr(), sizeof(CKDWORD));
-				parser->MoveCursor(sizeof(CKDWORD));
+				parser->ReadAndMove(&namelen, sizeof(CKDWORD));
 				if (namelen != 0) {
-					fileobj->Name.resize(namelen);
-					memcpy(fileobj->Name.data(), parser->GetPtr(), namelen);
-					parser->MoveCursor(namelen);
+					fileobj.Name.resize(namelen);
+					parser->ReadAndMove(fileobj.Name.data(), namelen);
 				}
 			}
 		}
+
+		// ========== dep list read ==========
+		// file ver >= 8 have this feature
+		bool noDepLost = true;
+		if (this->m_FileInfo.FileVersion >= 8) {
+			// get size and resize
+			CKDWORD depSize;
+			parser->ReadAndMove(&depSize, sizeof(CKDWORD));
+			this->m_PluginDep.resize(depSize);
+
+			CKDWORD guid_size;
+			for (auto& dep : this->m_PluginDep) {
+				// read category
+				parser->ReadAndMove(&(dep.m_PluginCategory), sizeof(CK_PLUGIN_TYPE));
+				// get size and resize
+				parser->ReadAndMove(&guid_size, sizeof(CKDWORD));
+				dep.m_Guids.resize(guid_size);
+				dep.ValidGuids.resize(guid_size);
+				// read data
+				if (guid_size != 0) {
+					parser->ReadAndMove(dep.m_Guids.data(), sizeof(CKGUID)* guid_size);
+				}
+
+				// extra load flag
+				if (EnumHelper::FlagEnumHas(this->m_Flags, CK_LOAD_FLAGS::CK_LOAD_CHECKDEPENDENCIES)) {
+					for (size_t i = 0u; i < dep.m_Guids.size(); ++i) {
+						// MARK: CKPluginManager::FindComponent
+						bool plgEntryIsNull = true;
+						if (plgEntryIsNull) {
+							noDepLost = false;
+							dep.ValidGuids[i] = false;
+						} else {
+							dep.ValidGuids[i] = true;
+						}
+					}
+				}
+
+			}
+		}
+
+		// ========== included file list read ==========
+		// file ver >= 8 have this feature
+		if (this->m_FileInfo.FileVersion >= 8) {
+			// MARK: i don't knwo what is this!
+			int32_t unknowIncludedFileFlag;
+			parser->ReadAndMove(&unknowIncludedFileFlag, sizeof(int32_t));
+
+			if (unknowIncludedFileFlag > 0) {
+				// read included file size and resize
+				CKDWORD includedFileCount;
+				parser->ReadAndMove(&includedFileCount, sizeof(CKDWORD));
+				this->m_IncludedFiles.resize(includedFileCount);
+
+				unknowIncludedFileFlag -= 4;
+			}
+
+			// backward pos
+			parser->SetCursor(unknowIncludedFileFlag);
+		}
+
+		// ========== read data ==========
+		// restore old parser if needed
+		if (parser != *ParserPtr) {
+			delete parser;
+			parser = *ParserPtr;
+			parser->MoveCursor(this->m_FileInfo.Hdr1PackSize);
+		}
+
+		// MARK: dword_2405F6BC, dword_2405F6B8 set
+
+		if (!(EnumHelper::FlagEnumHas(this->m_Flags, CK_LOAD_FLAGS::CK_LOAD_CHECKDEPENDENCIES) &&
+			this->m_FileInfo.FileVersion < 8)) {
+			// we have read all header. return result
+			return noDepLost ? CKERROR::CKERR_OK : CKERROR::CKERR_PLUGINSMISSING;
+		} // however, if we need check dep, and, we have not read dep list. continue read them.
 
 		return CKERROR::CKERR_OK;
 	}
