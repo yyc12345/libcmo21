@@ -14,6 +14,7 @@
 namespace LibCmo {
 
 	void* CKUnPackData(CKINT DestSize, const void* SrcBuffer, CKINT SrcSize);
+	CKDWORD CKComputeDataCRC(const void* data, size_t size, CKDWORD PreviousCRC = 0);
 
 	struct CKGUID {
 		union {
@@ -55,10 +56,10 @@ namespace LibCmo {
 
 	class CKBufferParser {
 	private:
-		char* m_ReaderBegin;
-		size_t m_ReaderPos;
+		char* m_MemBegin;
+		size_t m_MemPos;
 		bool m_NeedManualFree;
-		size_t m_ReaderSize;
+		size_t m_MemSize;
 
 	public:
 		CKBufferParser(void* ptr, size_t rsize, bool need_manual_free);
@@ -66,14 +67,19 @@ namespace LibCmo {
 		CKBufferParser& operator=(const CKBufferParser&) = delete;
 		~CKBufferParser();
 
-		inline const void* GetPtr(void) { return (this->m_ReaderBegin + m_ReaderPos); }
-		inline void ReadAndMove(void* data, size_t data_size) {
-			memcpy(data, (this->m_ReaderBegin + m_ReaderPos), data_size);
-			this->m_ReaderPos += data_size;
+		inline const void* GetPtr(void) { return (this->m_MemBegin + m_MemPos); }
+		inline void Read(void* data, size_t data_size) {
+			memcpy(data, (this->m_MemBegin + m_MemPos), data_size);
+			this->m_MemPos += data_size;
 		}
-		inline size_t GetSize(void) { return this->m_ReaderSize; }
-		inline void MoveCursor(size_t off) { this->m_ReaderPos += off; }
-		inline void SetCursor(size_t off) { this->m_ReaderPos = off; }
+		inline void Write(const void* data, size_t data_size) {
+			memcpy((this->m_MemBegin + m_MemPos), data, data_size);
+			this->m_MemPos += data_size;
+		}
+		inline size_t GetSize(void) { return this->m_MemSize; }
+		inline size_t GetCursor(void) { return this->m_MemPos; }
+		inline void MoveCursor(size_t off) { this->m_MemPos += off; }
+		inline void SetCursor(size_t off) { this->m_MemPos = off; }
 	};
 
 	struct CKFileInfo {
@@ -127,6 +133,7 @@ namespace LibCmo {
 		CKERROR ReadFileHeaders(CKBufferParser** ParserPtr);
 		CKERROR ReadFileData(CKBufferParser** ParserPtr);
 		CKERROR LoadFileData(void/*CKObjectArray list*/);
+		CKERROR FinishLoading(/*CKObjectArray list, */CK_LOAD_FLAGS flags);
 
 		int32_t m_SaveIDMax;
 		XArray<CKFileObject> m_FileObject;

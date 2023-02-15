@@ -10,20 +10,32 @@
 
 namespace LibCmo {
 
+#pragma region CKZLib Func
+
 	void* CKUnPackData(CKINT DestSize, const void* SrcBuffer, CKINT SrcSize) {
-		char* DestBuffer = (char*)malloc(DestSize);
+		char* DestBuffer = new(std::nothrow) char[DestSize];
 		if (DestBuffer == nullptr) return nullptr;
 
 		uLongf cache = DestSize;
 		if (uncompress(
 			reinterpret_cast<Bytef*>(DestBuffer), &cache,
 			reinterpret_cast<const Bytef*>(SrcBuffer), SrcSize) != Z_OK) {
-			free(DestBuffer);
+			delete[] DestBuffer;
 			return nullptr;
 		}
 
 		return DestBuffer;
 	}
+
+	CKDWORD LibCmo::CKComputeDataCRC(const void* data, size_t size, CKDWORD PreviousCRC) {
+		return static_cast<CKDWORD>(adler32(
+			static_cast<uLong>(PreviousCRC),
+			reinterpret_cast<const Bytef*>(data),
+			static_cast<uInt>(size)
+			));
+	}
+
+#pragma endregion
 
 #pragma region VxMemoryMappedFile
 
@@ -47,7 +59,7 @@ namespace LibCmo {
 
 		// real mapping work
 #if defined(LIBCMO_OS_WIN32)
-		
+
 		// open file
 		this->m_hFile = CreateFileW(
 			this->m_szFilePath.c_str(),
@@ -129,13 +141,13 @@ namespace LibCmo {
 #pragma region CKBufferParser
 
 	CKBufferParser::CKBufferParser(void* ptr, size_t rsize, bool need_manual_free) :
-		m_ReaderBegin(static_cast<char*>(ptr)),
-		m_ReaderPos(0u), m_ReaderSize(rsize),
+		m_MemBegin(static_cast<char*>(ptr)),
+		m_MemPos(0u), m_MemSize(rsize),
 		m_NeedManualFree(need_manual_free) {
 		;
 	}
 	CKBufferParser::~CKBufferParser() {
-		if (this->m_NeedManualFree) free(this->m_ReaderBegin);
+		if (this->m_NeedManualFree) delete[](this->m_MemBegin);
 	}
 
 #pragma endregion

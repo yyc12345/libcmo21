@@ -16,6 +16,7 @@ in VT25 +32, 128
 VxMemoryMappedFile and CKFileInfo seems no change
 CKFileObject still no change
 CKFilePluginDependencies still no change
+CKFileManagerData no change (12)
 
 CKStateChunk is 0x28u black box
 CKBufferParser also is 0x10u black box
@@ -55,6 +56,25 @@ struct XBitArray {
     DWORD m_Size;
 };
 
+// <T, K> = <int, CK_ID>
+typedef struct XFileObjectsTable::Entry {
+    CK_ID key;
+    int data;
+    struct Entry* next;
+} *XFileObjectsTable::pEntry;
+struct XFileObjectsTable {
+    struct XFileObjectsTable::XSArray_pEntry_ {
+        XFileObjectsTable::pEntry* m_Begin;
+        XFileObjectsTable::pEntry* m_End;
+    }m_Table;
+    struct XFileObjectsTable::XClassArray_pEntry_ {
+        XFileObjectsTable::pEntry*			m_Begin;
+        XFileObjectsTable::pEntry*			m_End;
+        XFileObjectsTable::pEntry*			m_AllocatedEnd;
+    }m_Pool;
+};
+
+
 struct CKFileInfo 
 {
 	DWORD				ProductVersion;		// Virtools Version (Dev/Creation). (CK_VIRTOOLS_VERSION)
@@ -86,6 +106,11 @@ struct CKFileObject {
 	int				FileIndex;		// Position of the object data inside uncompressed file buffer
 	CKDWORD			SaveFlags;		// Flags used when this object was saved.	
 };
+
+struct CKFileManagerData {
+	CKStateChunk *data;
+	CKGUID Manager;
+}
 
 struct CKFilePluginDependencies{
 	int				m_PluginCategory;
@@ -130,7 +155,7 @@ struct CKFile {
 	VxMemoryMappedFile*			m_MappedFile;
 // 33 + 5 = 38
     // guess
-    float   m_Chrono[5];
+    XFileObjectsTable			m_ObjectsHashTable;
 // 38 + 5 = 43
     //[guess]
 	CKBOOL					m_SceneSaved;
