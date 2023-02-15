@@ -1,0 +1,420 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Headers\Virtools">
+      <UniqueIdentifier>{13a4e7ed-2c5b-49a5-a201-e5fb5cfd701c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Virtools">
+      <UniqueIdentifier>{970d5dc3-c8f4-4cb0-aea4-2caa12194d95}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CK2dCurve.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CK2dCurvePoint.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CK2dEntity.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CK3dEntity.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKAttributeManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKBaseManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKBehavior.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKBehaviorIO.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKBehaviorManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKBehaviorPrototype.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKBeObject.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKBitmapData.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKCamera.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKCollisionManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKContext.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKDataArray.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKGlobals.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKGroup.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKInputManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKLevel.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKLight.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKMaterial.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKMesh.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKMessage.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKMessageManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKObject.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKObjectArray.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKObjectDeclaration.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKParameter.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKParameterIn.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKParameterManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKParameterOperation.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKPathManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKPluginManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKRenderContext.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKRenderManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKRenderObject.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKScene.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKSceneObject.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKSound.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKSoundManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKSprite.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKSprite3D.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKSpriteText.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKStateObject.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKTexture.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\CKTimeManager.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\VxMath.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\VxMatrix.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\VxQuaternion.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BallanceModLoader\virtools\XString.cpp">
+      <Filter>Sources\Virtools</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CK2dCurve.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CK2dCurvePoint.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CK2dEntity.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CK3dEntity.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKAll.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKAttributeManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKBaseManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKBehavior.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKBehaviorIO.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKBehaviorManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKBehaviorPrototype.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKBeObject.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKBitmapData.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKCamera.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKCollisionManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKContext.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKDataArray.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKDef.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKdefines2.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKDependencies.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKEnums.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKError.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKGlobals.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKGroup.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKInputManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKLevel.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKLight.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKMaterial.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKMesh.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKMessage.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKMessageManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKObject.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKObjectArray.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKObjectDeclaration.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKParameter.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKParameterIn.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKParameterManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKParameterOperation.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKPathManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKPluginManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKRenderContext.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKRenderManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKRenderObject.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKScene.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKSceneObject.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKSound.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKSoundManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKSprite.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKSprite3D.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKSpriteText.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKStateObject.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKTexture.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKTimeManager.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\CKTypes.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\Vx2dVector.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxAllocator.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxColor.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxFrustum.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxMath.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxMathDefines.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxMatrix.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxMutex.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxPlane.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxQuaternion.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxRay.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxRect.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxSphere.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\VxVector.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\XArray.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\XBitArray.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\XClassArray.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\XHashFun.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\XHashTable.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\XObjectArray.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\XSArray.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\XSHashTable.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\XSmartPtr.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\XString.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BallanceModLoader\virtools\XUtil.h">
+      <Filter>Headers\Virtools</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

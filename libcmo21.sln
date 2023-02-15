@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Unvirt", "Unvirt\Unvirt.vcx
 		{70F64F8D-099C-4C21-B29C-0A8F1E22FB2E} = {70F64F8D-099C-4C21-B29C-0A8F1E22FB2E}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VirtoolsProbe", "VirtoolsProbe\VirtoolsProbe.vcxproj", "{C8D9CFFF-442C-4CCB-80D7-02B6B2E7412F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -34,6 +36,12 @@ Global
 		{77E7ADB6-0D0C-4BA4-8DE7-A284C7F83941}.Release|x64.Build.0 = Release|x64
 		{77E7ADB6-0D0C-4BA4-8DE7-A284C7F83941}.Release|x86.ActiveCfg = Release|Win32
 		{77E7ADB6-0D0C-4BA4-8DE7-A284C7F83941}.Release|x86.Build.0 = Release|Win32
+		{C8D9CFFF-442C-4CCB-80D7-02B6B2E7412F}.Debug|x64.ActiveCfg = Debug|Win32
+		{C8D9CFFF-442C-4CCB-80D7-02B6B2E7412F}.Debug|x86.ActiveCfg = Debug|Win32
+		{C8D9CFFF-442C-4CCB-80D7-02B6B2E7412F}.Debug|x86.Build.0 = Debug|Win32
+		{C8D9CFFF-442C-4CCB-80D7-02B6B2E7412F}.Release|x64.ActiveCfg = Release|Win32
+		{C8D9CFFF-442C-4CCB-80D7-02B6B2E7412F}.Release|x86.ActiveCfg = Release|Win32
+		{C8D9CFFF-442C-4CCB-80D7-02B6B2E7412F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
