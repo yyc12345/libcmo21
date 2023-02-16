@@ -41,12 +41,17 @@ struct XArray {
 	DWORD*			m_End;
 	// reserved end {secret}
 	DWORD*			m_AllocatedEnd;
-}
+};
+struct XIntArray {
+	int*			m_Begin;
+	int*			m_End;
+	int*			m_AllocatedEnd;
+};
 struct XClassArray {
 	DWORD*			m_Begin;
 	DWORD*			m_End;
 	DWORD*			m_AllocatedEnd;
-}
+};
 struct XSArray {
 	DWORD*			m_Begin;
 	DWORD*			m_End;
@@ -126,21 +131,79 @@ struct VxMemoryMappedFile {
     DWORD m_errCode;  
 };
 
+struct CKStateChunkParser {
+    DWORD m_CurrentPos;
+    DWORD m_DataSize;
+    DWORD m_PrevIdentifierPos;
+};
+struct IntListStruct {
+    DWORD m_Count;
+    DWORD m_Allocated;
+    DWORD* m_pData;
+};
+struct CKStateChunkProp {
+    WORD m_DataVersion;
+    WORD m_ChunkVersion;
+};
+struct CKStateChunk {
+    CK_CLASSID m_ClassId;
+
+    DWORD m_DataDwordSize;
+    DWORD* m_pData;
+
+    CKStateChunkProp m_ChunkProps;
+
+    CKStateChunkParser* m_Parser;
+
+    IntListStruct* m_ObjectIdList;
+    IntListStruct* m_SubChunkList;
+    IntListStruct* m_ManagerIntList;
+
+    CKFile* m_BindFile;
+    DWORD m_unknow;
+};
+
 struct CKBufferParser {
-    char* m_ReaderBegin;
-    DWORD m_ReaderPos;
+    char* m_MemBegin;
+    DWORD m_MemPos;
     CKBOOL m_NeedManualFree;
-    DWORD m_ReaderSize;
+    DWORD m_MemSize;
+};
+
+struct XArray_CKFileObject_ {
+	CKFileObject*			m_Begin;
+	CKFileObject*			m_End;
+	CKFileObject*			m_AllocatedEnd;
+};
+struct XArray_CKFileManagerData_ {
+	CKFileManagerData*			m_Begin;
+	CKFileManagerData*			m_End;
+	CKFileManagerData*			m_AllocatedEnd;
+};
+struct XClassArray_CKFilePluginDependencies_ {
+	CKFilePluginDependencies*			m_Begin;
+	CKFilePluginDependencies*			m_End;
+	CKFilePluginDependencies*			m_AllocatedEnd;
+};
+struct XClassArray_XIntArray_ {
+	XIntArray*			m_Begin;
+	XIntArray*			m_End;
+	XIntArray*			m_AllocatedEnd;
+};
+struct XClassArray_XString_ {
+	XString*			m_Begin;
+	XString*			m_End;
+	XString*			m_AllocatedEnd;
 };
 
 struct CKFile {
 // 0
 	int							m_SaveIDMax;			// Maximum CK_ID found when saving or loading objects  {secret}
-	XArray/*<CKFileObject>*/		m_FileObjects;			// List of objects being saved / loaded   {secret}
-	XArray/*<CKFileManagerData>*/	m_ManagersData;			// Manager Data loaded  {secret}
-	XClassArray/*<CKFilePluginDependencies>*/ m_PluginsDep;	// Plugins dependencies for this file  {secret}
-	XClassArray/*<XIntArray>*/		m_IndexByClassId;		// List of index in the m_FileObjects table sorted by ClassID  {secret}
-	XClassArray/*<XString>*/		m_IncludedFiles;		// List of files that should be inserted in the CMO file.  {secret}
+	XArray_CKFileObject_		m_FileObjects;			// List of objects being saved / loaded   {secret}
+	XArray_CKFileManagerData_	m_ManagersData;			// Manager Data loaded  {secret}
+	XClassArray_CKFilePluginDependencies_ m_PluginsDep;	// Plugins dependencies for this file  {secret}
+	XClassArray_XIntArray_		m_IndexByClassId;		// List of index in the m_FileObjects table sorted by ClassID  {secret}
+	XClassArray_XString_		m_IncludedFiles;		// List of files that should be inserted in the CMO file.  {secret}
 // 16
     CKFileInfo					m_FileInfo;				// Headers summary  {secret}
 // 16 + 14 = 30
@@ -148,7 +211,7 @@ struct CKFile {
     DWORD unknow_fields;
 	XBitArray					m_AlreadySavedMask;			// BitArray of IDs already saved  {secret}
 // 30 + 3 = 33
-	CKDWORD						m_Flags;				// Flags used to save file {secret}
+	CKDWORD						m_Flags;				// Flags used to save file {secret} CK_LOAD_FLAGS
 	CKSTRING					m_FileName;				// Current file name  {secret}
 	CKContext*					m_Context;				// CKContext on which file is loaded/Saved  {secret}
 	CKBufferParser*				m_Parser;
