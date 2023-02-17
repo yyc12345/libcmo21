@@ -82,6 +82,39 @@ namespace LibCmo {
 		inline void SetCursor(size_t off) { this->m_MemPos = off; }
 	};
 
+	class CKStateChunk {
+	public:
+		CKStateChunk();
+		CKStateChunk(const CKStateChunk&) = delete;
+		CKStateChunk& operator=(const CKStateChunk&) = delete;
+		~CKStateChunk();
+
+		bool ConvertFromBuffer(const void* buf);
+		CKDWORD ConvertToBuffer(void* buf);
+
+	private:
+		CK_CLASSID m_ClassId;
+		CKDWORD m_DataDwSize;
+		CKDWORD* m_pData;
+
+		CK_STATECHUNK_DATAVERSION m_DataVersion;
+		CK_STATECHUNK_CHUNKVERSION m_ChunkVersion;
+
+		struct {
+			CKDWORD m_CurrentPos;
+			CKDWORD m_DataSize;
+			CKDWORD m_PrevIdentifierPos;
+		}m_Parser;
+
+		std::vector<CKDWORD> m_ObjectList;
+		std::vector<CKDWORD> m_ChunkList;
+		std::vector<CKDWORD> m_ManagerList;
+
+	private:
+		void _EnsureEnoughSpace(CKDWORD size);
+
+	};
+
 	struct CKFileInfo {
 		CKDWORD ProductVersion;		// Virtools Version (Dev/Creation). (CK_VIRTOOLS_VERSION)
 		CKDWORD ProductBuild;		// Virtools Build Number.

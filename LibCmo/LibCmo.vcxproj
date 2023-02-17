@@ -173,6 +173,7 @@
   <ItemGroup>
     <ClCompile Include="VTEncoding.cpp" />
     <ClCompile Include="VTReader.cpp" />
+    <ClCompile Include="VTStateChunk.cpp" />
     <ClCompile Include="VTStruct.cpp" />
   </ItemGroup>
   <ItemGroup>

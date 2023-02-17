@@ -29,6 +29,7 @@ namespace LibCmo {
     using CKINT = int32_t;
     using CK_ID = uint32_t;
     using CKDWORD = uint32_t;
+    using CKWORD = uint16_t;
     using CKBOOL = int32_t;
     using CKMUTSTRING = char*;
     using CKSTRING = const char*;
@@ -202,6 +203,37 @@ namespace LibCmo {
         CKPLUGIN_RENDERENGINE_DLL = 5,
         CKPLUGIN_MOVIE_READER = 6,
         CKPLUGIN_EXTENSION_DLL = 7
+    };
+    enum class CK_STATECHUNK_DATAVERSION : int32_t {
+        CHUNKDATA_OLDVERSION = 0,
+        CHUNKDATA_BASEVERSION = 1,
+        CHUNK_WAVESOUND_VERSION2 = 2,
+        CHUNK_WAVESOUND_VERSION3 = 3,
+        CHUNK_MATERIAL_VERSION_ZTEST = 4,
+        CHUNK_MAJORCHANGE_VERSION = 5,
+        CHUNK_MACCHANGE_VERSION = 6,
+        CHUNK_WAVESOUND_VERSION4 = 7,
+        CHUNK_SCENECHANGE_VERSION = 8,
+        CHUNK_MESHCHANGE_VERSION = 9,
+        CHUNK_DEV_2_1 = 10,
+        CHUNKDATA_CURRENTVERSION = CHUNK_DEV_2_1
+    };
+    enum class CK_STATECHUNK_CHUNKVERSION : int32_t {
+        CHUNK_VERSIONBASE = 0,
+        CHUNK_VERSION1 = 4,
+        CHUNK_VERSION2 = 5,
+        CHUNK_VERSION3 = 6,
+        CHUNK_VERSION4 = 7
+    };
+    enum class CK_STATECHUNK_CHUNKOPTIONS : int32_t {
+        CHNK_OPTION_IDS = 0x01,
+        CHNK_OPTION_MAN = 0x02,
+        CHNK_OPTION_CHN = 0x04,
+        CHNK_OPTION_FILE = 0x08,
+        CHNK_OPTION_ALLOWDYN = 0x10,
+        CHNK_OPTION_LISTBIG = 0x20,
+        CHNK_DONTDELETE_PTR = 0x40,
+        CHNK_DONTDELETE_PARSER = 0x80
     };
 
 }

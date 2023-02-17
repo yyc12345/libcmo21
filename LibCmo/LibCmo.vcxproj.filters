@@ -24,6 +24,9 @@
     <ClCompile Include="VTEncoding.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="VTStateChunk.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VTStruct.hpp">
