@@ -85,12 +85,21 @@ namespace LibCmo {
 	class CKStateChunk {
 	public:
 		CKStateChunk();
+		CKStateChunk(CK_CLASSID clsid);
 		CKStateChunk(const CKStateChunk&) = delete;
 		CKStateChunk& operator=(const CKStateChunk&) = delete;
 		~CKStateChunk();
 
+		bool ConvertFromOldBuffer(const void* buf, CKDWORD buf_size, CKDWORD blk_size, CK_FILE_WRITEMODE mode);
 		bool ConvertFromBuffer(const void* buf);
 		CKDWORD ConvertToBuffer(void* buf);
+
+		bool UnPack(CKDWORD DestSize);
+		CKDWORD GetDataSize(void);
+
+		bool SeekIdentifier(CKDWORD identifier);
+
+		void ReadString(std::string& strl);
 
 	private:
 		CK_CLASSID m_ClassId;
@@ -138,12 +147,17 @@ namespace LibCmo {
 		CK_CLASSID ObjectCid;
 		void* ObjPtr;
 		std::string Name;
-		void* Data;
+		CKStateChunk* Data;
 		CKDWORD PostPackSize;
 		CKDWORD PrePackSize;
 		CK_FO_OPTIONS Options;
 		CKDWORD FileIndex;
 		CK_FILE_WRITEMODE SaveFlags;
+	};
+
+	struct CKFileManagerData {
+		CKStateChunk* Data;
+		CKGUID Manager;
 	};
 
 	struct CKFilePluginDependencies {
@@ -170,7 +184,7 @@ namespace LibCmo {
 
 		int32_t m_SaveIDMax;
 		XArray<CKFileObject> m_FileObject;
-		//XArray<CKFileManagerData> m_ManagersData;
+		XArray<CKFileManagerData> m_ManagersData;
 		XClassArray<CKFilePluginDependencies> m_PluginDep;
 		XClassArray<XIntArray> m_IndexByClassId;
 		XClassArray<XString> m_IncludedFiles;

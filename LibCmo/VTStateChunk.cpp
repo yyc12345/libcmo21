@@ -1,3 +1,10 @@
+#include "VTUtils.hpp"
+#if defined(LIBCMO_OS_WIN32)
+#define ZLIB_WINAPI
+#include <zconf.h>
+#endif
+
+#include <zlib.h>;
 #include "VTStruct.hpp"
 
 namespace LibCmo {
@@ -10,10 +17,44 @@ namespace LibCmo {
 	{
 		;
 	}
-
+	LibCmo::CKStateChunk::CKStateChunk(CK_CLASSID clsid) :
+		m_ClassId(clsid), m_DataDwSize(0u), m_pData(nullptr),
+		m_DataVersion(CK_STATECHUNK_DATAVERSION::CHUNKDATA_CURRENTVERSION), m_ChunkVersion(CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4),
+		m_Parser{ 0u, 0u, 0u },
+		m_ObjectList(), m_ChunkList(), m_ManagerList()
+	{
+		;
+	}
 	CKStateChunk::~CKStateChunk() {
 		if (this->m_pData != nullptr)
 			delete[] this->m_pData;
+	}
+
+	bool CKStateChunk::ConvertFromOldBuffer(const void* buf, CKDWORD buf_size, CKDWORD blk_size, CK_FILE_WRITEMODE mode) {
+		// if not use compress or 2 size is equal, it mean that this buffer is raw.
+		// assign it directly
+		if (!EnumHelper::FlagEnumHas(mode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
+			buf_size == blk_size) {
+
+			this->m_DataDwSize = buf_size / sizeof(CKDWORD);
+			this->m_pData = new(std::nothrow) CKDWORD[this->m_DataDwSize];
+			if (this->m_pData != nullptr) {
+				memcpy(this->m_pData, buf, this->m_DataDwSize * sizeof(CKDWORD));
+			}
+
+			return true;
+
+		} else {
+			// otherwise, we need UnPack
+			// prepare UnPack requirement
+			this->m_DataDwSize = buf_size;	// NOTE: store as BYTE length!!!
+			this->m_pData = reinterpret_cast<CKDWORD*>(new(std::nothrow) char[buf_size]);
+			if (this->m_pData == nullptr) return false;
+			memcpy(this->m_pData, buf, buf_size);
+
+			// call UnPack
+			return UnPack(blk_size);
+		}
 	}
 
 	bool CKStateChunk::ConvertFromBuffer(const void* buf) {
@@ -101,7 +142,7 @@ namespace LibCmo {
 			CK_STATECHUNK_CHUNKOPTIONS options = static_cast<CK_STATECHUNK_CHUNKOPTIONS>(
 				reinterpret_cast<const char*>(buf)[3]
 				);
-			
+
 			// read normal data
 			this->m_DataDwSize = dwbuf[1];
 			bufpos = 2;
@@ -147,6 +188,39 @@ namespace LibCmo {
 
 	CKDWORD CKStateChunk::ConvertToBuffer(void* buf) {
 		return 0u;
+	}
+
+	bool CKStateChunk::SeekIdentifier(CKDWORD identifier) {
+		return false;
+	}
+
+	bool CKStateChunk::UnPack(CKDWORD DestSize) {
+		// NOTE: in UnPack. pData store the compressed buffer, and 
+		// dwSize store the length of compressed buffer as CHAR size, not DWORD size!
+
+		// create a enough buffer
+		char* buffer = new(std::nothrow) char[DestSize];
+		if (buffer == nullptr) return false;
+		uLongf destSize = DestSize;
+		// uncompress it
+		auto err = uncompress(
+			reinterpret_cast<Bytef*>(buffer), &destSize,
+			reinterpret_cast<const Bytef*>(this->m_pData), static_cast<uLong>(this->m_DataDwSize)
+		);
+		// if no error, assign data
+		if (err == Z_OK) {
+			// get dw size and copy it to remove useless blank data
+			this->m_DataDwSize = static_cast<CKDWORD>(destSize) / sizeof(CKDWORD);
+
+			delete[] this->m_pData;
+			this->m_pData = nullptr;
+			this->m_pData = new(std::nothrow) CKDWORD[this->m_DataDwSize];
+			if (this->m_pData != nullptr) {
+				memcpy(this->m_pData, buffer, this->m_DataDwSize * sizeof(CKDWORD));
+			}
+		}
+		delete[] buffer;
+		return true;
 	}
 
 	void LibCmo::CKStateChunk::_EnsureEnoughSpace(CKDWORD size) {

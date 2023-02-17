@@ -1,7 +1,7 @@
 #include "VTUtils.hpp"
 #if defined(LIBCMO_OS_WIN32)
 #define ZLIB_WINAPI
-#include "zconf.h"
+#include <zconf.h>
 #endif
 
 #include "VTStruct.hpp"

@@ -169,7 +169,7 @@ namespace LibCmo {
 				dep.ValidGuids.resize(guid_size);
 				// read data
 				if (guid_size != 0) {
-					parser->Read(dep.m_Guids.data(), sizeof(CKGUID)* guid_size);
+					parser->Read(dep.m_Guids.data(), sizeof(CKGUID) * guid_size);
 				}
 
 				// extra load flag
@@ -277,7 +277,140 @@ namespace LibCmo {
 		}
 
 		// ========== manager read ==========
+		// only file ver >= 6 have this
+		if (this->m_FileInfo.FileVersion >= 6 && this->m_FileInfo.ManagerCount != 0) {
+			this->m_ManagersData.resize(this->m_FileInfo.ManagerCount);
+			CKDWORD stateChunkLen = 0u;
+			bool stateChkParseSuccess = false;
 
+			for (auto& mgr : this->m_ManagersData) {
+				// read guid
+				parser->Read(&(mgr.Manager), sizeof(CKGUID));
+
+				// read statechunk len
+				parser->Read(&stateChunkLen, sizeof(CKDWORD));
+				// check len
+				if (stateChunkLen == 0) {
+					mgr.Data = nullptr;
+					continue;
+				}
+				// read statechunk
+				mgr.Data = new(std::nothrow) CKStateChunk();
+				if (mgr.Data != nullptr) {
+					stateChkParseSuccess = mgr.Data->ConvertFromBuffer(parser->GetPtr());
+					if (!stateChkParseSuccess) {
+						delete mgr.Data;
+						mgr.Data = nullptr;
+					}
+				}
+				parser->MoveCursor(stateChunkLen);
+			}
+		}
+
+		// ========== object read ==========
+		if (this->m_FileInfo.ObjectCount != 0) {
+			if (this->m_FileInfo.FileVersion >= 4) {
+				// new file reader section
+				CKDWORD stateChunkLen = 0u;
+				bool stateChkParseSuccess = false;
+				for (auto& obj : this->m_FileObject) {
+					if (this->m_FileInfo.FileVersion < 7) {
+						// it seems that file ver < 7, ck id was stored first.
+						parser->Read(&(obj.Object), sizeof(CK_ID));
+					}
+					// get statechunk len
+					parser->Read(&stateChunkLen, sizeof(CKDWORD));
+
+					// if only load behavior and current loaded obj is not behavior, give up.
+					// >= 7 is corresponding with obj header version requirement
+					// so don't worry about this
+					if (EnumHelper::FlagEnumHas(this->m_Flags, CK_LOAD_FLAGS::CK_LOAD_ONLYBEHAVIORS) &&
+						this->m_FileInfo.FileVersion >= 7 &&
+						obj.ObjectCid != CK_CLASSID::CKCID_BEHAVIOR) {
+						// move cursor for next one.
+						parser->MoveCursor(stateChunkLen);
+						continue;
+					}
+
+					// check state chunk len
+					if (stateChunkLen == 0) {
+						obj.Data = nullptr;
+						continue;
+					}
+					// read state chunk
+					obj.Data = new(std::nothrow) CKStateChunk();
+					if (obj.Data != nullptr) {
+						stateChkParseSuccess = obj.Data->ConvertFromBuffer(parser->GetPtr());
+						if (!stateChkParseSuccess) {
+							delete obj.Data;
+							obj.Data = nullptr;
+						} else {
+							// get data size and fill some fields
+							obj.PostPackSize = obj.Data->GetDataSize();
+							obj.PrePackSize = obj.PostPackSize;
+						}
+					}
+					parser->MoveCursor(stateChunkLen);
+
+				}
+			} else {
+				// old file read section
+				for (auto& obj : this->m_FileObject) {
+					// read CK_ID
+					parser->Read(&(obj.Object), sizeof(CK_ID));
+					// get data len
+					CKDWORD dataLen = 0u;
+					parser->Read(&dataLen, sizeof(CKDWORD));
+
+					// check state chunk len
+					if (dataLen == 0) {
+						obj.Data = nullptr;
+						continue;
+					}
+
+					// MARK: set dword_2405F6C0
+					
+					// read class id
+					CK_CLASSID clsid = CK_CLASSID::CKCID_OBJECT;
+					parser->Read(&clsid, sizeof(CK_CLASSID));
+					if (static_cast<uint32_t>(clsid) == UINT32_C(0)) {
+						// invalid cid;
+						return CKERROR::CKERR_INVALIDFILE;
+					}
+
+					// read save flags
+					parser->Read(&obj.SaveFlags, sizeof(CK_FILE_WRITEMODE));
+
+					// read statechunk len
+					CKDWORD oldBufLen = 0u;
+					parser->Read(&oldBufLen, sizeof(CKDWORD));
+
+					// setup state chunk and order parse it
+					obj.Data = new(std::nothrow) CKStateChunk(clsid);
+					if (obj.Data != nullptr) {
+						if (!obj.Data->ConvertFromOldBuffer(parser->GetPtr(), oldBufLen, dataLen, obj.SaveFlags)) {
+							delete obj.Data;
+							obj.Data = nullptr;
+						}
+					}
+					// move to next
+					parser->MoveCursor(oldBufLen);
+				}
+			}
+		}
+
+		// ========== object name get ==========
+		// only file ver < 7 need get it from statechunk
+		if (this->m_FileInfo.FileVersion < 7) {
+			for (auto& obj : this->m_FileObject) {
+				if (obj.Data != nullptr) {
+					// TODO: CK_STATESAVE_NAME
+					if (obj.Data->SeekIdentifier(1u)) {
+						obj.Data->ReadString(obj.Name);
+					}
+				}
+			}
+		}
 
 		return CKERROR::CKERR_OK;
 	}
