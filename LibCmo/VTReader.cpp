@@ -239,7 +239,7 @@ namespace LibCmo {
 			parser->MoveCursor(this->m_FileInfo.DataPackSize);
 
 			if (decomp_buffer != nullptr) {
-				parser = new(std::nothrow) CKBufferParser(decomp_buffer, this->m_FileInfo.Hdr1UnPackSize, true);
+				parser = new(std::nothrow) CKBufferParser(decomp_buffer, this->m_FileInfo.DataUnPackSize, true);
 				if (parser == nullptr) {
 					delete[] decomp_buffer;
 					return CKERROR::CKERR_OUTOFMEMORY;
