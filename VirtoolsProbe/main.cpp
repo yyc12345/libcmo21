@@ -41,14 +41,18 @@ int main() {
 	CKContext* ctx = NULL;
 	Assert(!CKCreateContext(&ctx, NULL, 0), "Fail to execute CKCreateContext()");
 
-	// call saver
+	// call reader
 	CKObjectArray* array = CreateCKObjectArray();
-	CKObject* objs = ctx->CreateObject(CKCID_OBJECT, "fuck dassault", CK_OBJECTCREATION_NONAMECHECK, NULL);
-	array->AddIfNotHere(objs);
+	Assert(!ctx->Load("Language.old.nmo", array, CK_LOAD_DEFAULT, NULL), "Fail to load CMO file");
 
-	CKDependencies* dep = CKGetDefaultClassDependencies(CK_DEPENDENCIES_SAVE);
-	dep->m_Flags = CK_DEPENDENCIES_FULL;
-	Assert(!ctx->Save("result.cmo", array, 0xFFFFFFFF, dep, NULL), "Fail to save CMO file");
+	// call saver
+	//CKObjectArray* array = CreateCKObjectArray();
+	//CKObject* objs = ctx->CreateObject(CKCID_OBJECT, "fuck dassault", CK_OBJECTCREATION_NONAMECHECK, NULL);
+	//array->AddIfNotHere(objs);
+
+	//CKDependencies* dep = CKGetDefaultClassDependencies(CK_DEPENDENCIES_SAVE);
+	//dep->m_Flags = CK_DEPENDENCIES_FULL;
+	//Assert(!ctx->Save("result.cmo", array, 0xFFFFFFFF, dep, NULL), "Fail to save CMO file");
 
 	DeleteCKObjectArray(array);
 	CKCloseContext(ctx);

@@ -230,6 +230,7 @@ namespace LibCmo {
 
 	CKERROR CKFile::ReadFileData(CKBufferParser** ParserPtr) {
 		CKBufferParser* parser = *ParserPtr;
+		CKBufferParser* parserSrc = *ParserPtr;
 
 		// ========== compress feature process ==========
 		if (EnumHelper::FlagEnumHas(this->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
@@ -243,6 +244,9 @@ namespace LibCmo {
 					delete[] decomp_buffer;
 					return CKERROR::CKERR_OUTOFMEMORY;
 				}
+
+				// sync to args
+				*ParserPtr = parser;
 			}
 		}
 
@@ -396,6 +400,8 @@ namespace LibCmo {
 					// move to next
 					parser->MoveCursor(oldBufLen);
 				}
+
+				// MARK: remove a weird assign: parserSrc = v46; it seems useless.
 			}
 		}
 
@@ -410,6 +416,39 @@ namespace LibCmo {
 					}
 				}
 			}
+		}
+
+		// ========== included file get ==========
+		// WARN: we use "parserSrc" to read, not "parser"!!!
+		for (size_t i = 0; i < this->m_IncludedFiles.size(); ++i) {
+			// get file name length and resize it
+			CKDWORD filenamelen = 0u;
+			parserSrc->Read(&filenamelen, sizeof(CKDWORD));
+			std::string filename;
+			filename.resize(filenamelen);
+
+			// read filename
+			if (filenamelen != 0) {
+				parserSrc->Read(filename.data(), filenamelen);
+			}
+
+			// todo: construct temp folder path
+			// and regulate file name
+
+			// read file body length
+			CKDWORD filebodylen = 0u;
+			parserSrc->Read(&filebodylen, sizeof(CKDWORD));
+
+			// todo: read file body
+			parserSrc->MoveCursor(filebodylen);
+		}
+
+		// ========== free parser ==========
+		if (parserSrc != parser && parserSrc != nullptr) {
+			// WARN: we should free parserSrc! not free parser
+			// because "parser" has synced with ParserPtr and will be freed from outside.
+			delete parserSrc;
+
 		}
 
 		return CKERROR::CKERR_OK;
@@ -431,9 +470,9 @@ namespace LibCmo {
 
 		// MARK: i assume FinishLoading do not calling mapped file anymore
 		// free file data
-		if (this->m_Parser != nullptr) {
-			delete this->m_Parser;
-			this->m_Parser = nullptr;
+		if (*ParserPtr != nullptr) {
+			delete *ParserPtr;
+			*ParserPtr = nullptr;
 		}
 		if (this->m_MappedFile != nullptr) {
 			delete this->m_MappedFile;

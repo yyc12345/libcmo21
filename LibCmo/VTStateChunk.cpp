@@ -4,7 +4,7 @@
 #include <zconf.h>
 #endif
 
-#include <zlib.h>;
+#include <zlib.h>
 #include "VTStruct.hpp"
 
 namespace LibCmo {
@@ -190,10 +190,6 @@ namespace LibCmo {
 		return 0u;
 	}
 
-	bool CKStateChunk::SeekIdentifier(CKDWORD identifier) {
-		return false;
-	}
-
 	bool CKStateChunk::UnPack(CKDWORD DestSize) {
 		// NOTE: in UnPack. pData store the compressed buffer, and 
 		// dwSize store the length of compressed buffer as CHAR size, not DWORD size!
@@ -221,6 +217,18 @@ namespace LibCmo {
 		}
 		delete[] buffer;
 		return true;
+	}
+
+	CKDWORD CKStateChunk::GetDataSize(void) {
+		return sizeof(CKDWORD) * this->m_DataDwSize;
+	}
+
+	bool CKStateChunk::SeekIdentifier(CKDWORD identifier) {
+		return false;
+	}
+
+	void CKStateChunk::ReadString(std::string& strl) {
+		;
 	}
 
 	void LibCmo::CKStateChunk::_EnsureEnoughSpace(CKDWORD size) {
