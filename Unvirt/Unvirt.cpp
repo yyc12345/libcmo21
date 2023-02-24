@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
 
 	LibCmo::Utils::VirtoolsEnvironment vtctx;
 	LibCmo::CKFile vtfile(vtctx);
-	LibCmo::CKERROR err = vtfile.Load("VeryOldFile.nmo", LibCmo::CK_LOAD_FLAGS::CK_LOAD_DEFAULT);
+	LibCmo::CKERROR err = vtfile.Load("vt2obj.nms", LibCmo::CK_LOAD_FLAGS::CK_LOAD_DEFAULT);
 
 	Unvirt::StructFormatter::PrintCKFileInfo(vtfile.m_FileInfo);
 

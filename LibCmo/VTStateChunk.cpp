@@ -145,7 +145,7 @@ namespace LibCmo {
 
 			// read normal data
 			this->m_DataDwSize = dwbuf[1];
-			bufpos = 2;
+			bufpos = 2u;
 
 			if (this->m_DataDwSize != 0) {
 				this->m_pData = new(std::nothrow) CKDWORD[this->m_DataDwSize];
