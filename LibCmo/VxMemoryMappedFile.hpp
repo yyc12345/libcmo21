@@ -8,23 +8,25 @@
 #endif
 
 #include <string>
+#include <filesystem>
 
 namespace LibCmo {
 
 	class VxMemoryMappedFile {
 	private:
 
+
 #if defined(LIBCMO_OS_WIN32)
-		std::wstring m_szFilePath;
 		HANDLE m_hFile;
 		DWORD m_dwFileSizeLow, m_dwFileSizeHigh;
 		HANDLE m_hFileMapping;
 		LPVOID m_hFileMapView;
 #else
-		std::string m_szFilePath;
+		
 #error NO IMPLEMENTATION FOR LINUX MMAP!
 #endif
 
+		std::filesystem::path m_szFilePath;
 		void* m_pMemoryMappedFileBase;
 		size_t m_cbFile;
 		bool m_bIsValid;

@@ -42,6 +42,12 @@
     <ClCompile Include="CKFile.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="CKMinContext.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="VTUtils.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VTUtils.hpp">
@@ -69,6 +75,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="VxMemoryMappedFile.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CKMinContext.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

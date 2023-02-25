@@ -11,47 +11,45 @@ namespace LibCmo {
 	* No need to support them.
 	*/
 
-	CKERROR CKFile::PrepareLoad(CKSTRING u8_filename) {
-		// assign file name
-		this->m_FileName = u8_filename;
-		// create mapped file
-		this->m_MappedFile = new(std::nothrow) VxMemoryMappedFile(this->m_FileName.c_str());
-		if (this->m_MappedFile == nullptr) {
+	CKERROR CKFile::ShallowLoad(CKSTRING u8_filename, CKFileData::ShallowDocument** out_doc) {
+		// preset value
+		*out_doc = nullptr;
+
+		// check file and open memory
+		if (u8_filename == nullptr) return CKERROR::CKERR_INVALIDPARAMETER;
+		std::unique_ptr<VxMemoryMappedFile> mappedFile(new(std::nothrow) VxMemoryMappedFile(u8_filename));
+		if (mappedFile == nullptr) {
 			this->m_MinCtx->Printf("Out of memory when creating Memory File.");
 			return CKERROR::CKERR_OUTOFMEMORY;
 		}
-		if (!this->m_MappedFile->IsValid()) {
+		if (!mappedFile->IsValid()) {
 			this->m_MinCtx->Printf("Fail to create Memory File for \"%s\".", this->m_FileName.c_str());
 			return CKERROR::CKERR_INVALIDFILE;
 		}
 
-		return CKERROR::CKERR_OK;
-	}
-
-	CKERROR CKFile::ShallowLoad(CKSTRING u8_filename, CKFileData::ShallowDocument** out_doc) {
-		// check file and open memory
-		if (u8_filename == nullptr) return CKERROR::CKERR_INVALIDPARAMETER;
-		CKERROR err = PrepareLoad(u8_filename);
-		if (err != CKERROR::CKERR_OK) return err;
-
 		// create document
-		this->m_ShallowDoc = new(std::nothrow) CKFileData::ShallowDocument();
-		if (this->m_ShallowDoc == nullptr) return CKERROR::CKERR_OUTOFMEMORY;
+		std::unique_ptr<CKFileData::ShallowDocument> doc(new(std::nothrow) CKFileData::ShallowDocument());
+		if (doc == nullptr) return CKERROR::CKERR_OUTOFMEMORY;
 
 		// create buffer and start loading
-		CKBufferParser parser(this->m_MappedFile->GetBase(), this->m_MappedFile->GetFileSize(), false);
-		err = this->ReadFileHeader(&parser);
+		std::unique_ptr<CKBufferParser> parser(new(std::nothrow) CKBufferParser(mappedFile->GetBase(), mappedFile->GetFileSize(), false));
+		CKERROR err = this->ReadFileHeader(parser.get(), doc.get());
 		if (err != CKERROR::CKERR_OK) return err;
-		err = this->ReadFileData(&parser);
+		err = this->ReadFileData(parser.get(), doc.get());
 		if (err != CKERROR::CKERR_OK) return err;
 
-		// free all data
-		this->ClearData();
+		// unbind document and assign it
+		*out_doc = doc.release();
+		// other data will be free automatically
 		return CKERROR::CKERR_OK;
 	}
 
-	CKERROR CKFile::ReadFileHeader(CKBufferParser* ParserPtr) {
+	CKERROR CKFile::ReadFileHeader(CKBufferParser* ParserPtr, CKFileData::ShallowDocument* doc) {
 		std::unique_ptr<CKBufferParser> parser(new(std::nothrow) CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
+		if (parser == nullptr) return CKERROR::CKERR_OUTOFMEMORY;
+		parser->SetCursor(ParserPtr->GetCursor());
+
+		std::string name_conv;
 
 		// ========== read header ==========
 		// check header size
@@ -73,23 +71,23 @@ namespace LibCmo {
 		}
 
 		// ========== assign value ==========
-		this->m_ShallowDoc->m_FileInfo.ProductVersion = rawHeader.ProductVersion;
-		this->m_ShallowDoc->m_FileInfo.ProductBuild = rawHeader.ProductBuild;
-		this->m_ShallowDoc->m_FileInfo.FileWriteMode = static_cast<CK_FILE_WRITEMODE>(rawHeader.FileWriteMode);
-		this->m_ShallowDoc->m_FileInfo.CKVersion = rawHeader.CKVersion;
-		this->m_ShallowDoc->m_FileInfo.FileVersion = rawHeader.FileVersion;
-		this->m_ShallowDoc->m_FileInfo.FileSize = parser->GetSize();
-		this->m_ShallowDoc->m_FileInfo.ManagerCount = rawHeader.ManagerCount;
-		this->m_ShallowDoc->m_FileInfo.ObjectCount = rawHeader.ObjectCount;
-		this->m_ShallowDoc->m_FileInfo.MaxIDSaved = rawHeader.MaxIDSaved;
-		this->m_ShallowDoc->m_FileInfo.Hdr1PackSize = rawHeader.FileVersion >= 8 ? rawHeader.Hdr1PackSize : 0u;
-		this->m_ShallowDoc->m_FileInfo.Hdr1UnPackSize = rawHeader.FileVersion >= 8 ? rawHeader.Hdr1UnPackSize : 0u;
-		this->m_ShallowDoc->m_FileInfo.DataPackSize = rawHeader.DataPackSize;
-		this->m_ShallowDoc->m_FileInfo.DataUnPackSize = rawHeader.DataUnPackSize;
-		this->m_ShallowDoc->m_FileInfo.Crc = rawHeader.Crc;
+		doc->m_FileInfo.ProductVersion = rawHeader.ProductVersion;
+		doc->m_FileInfo.ProductBuild = rawHeader.ProductBuild;
+		doc->m_FileInfo.FileWriteMode = static_cast<CK_FILE_WRITEMODE>(rawHeader.FileWriteMode);
+		doc->m_FileInfo.CKVersion = rawHeader.CKVersion;
+		doc->m_FileInfo.FileVersion = rawHeader.FileVersion;
+		doc->m_FileInfo.FileSize = parser->GetSize();
+		doc->m_FileInfo.ManagerCount = rawHeader.ManagerCount;
+		doc->m_FileInfo.ObjectCount = rawHeader.ObjectCount;
+		doc->m_FileInfo.MaxIDSaved = rawHeader.MaxIDSaved;
+		doc->m_FileInfo.Hdr1PackSize = rawHeader.FileVersion >= 8 ? rawHeader.Hdr1PackSize : 0u;
+		doc->m_FileInfo.Hdr1UnPackSize = rawHeader.FileVersion >= 8 ? rawHeader.Hdr1UnPackSize : 0u;
+		doc->m_FileInfo.DataPackSize = rawHeader.DataPackSize;
+		doc->m_FileInfo.DataUnPackSize = rawHeader.DataUnPackSize;
+		doc->m_FileInfo.Crc = rawHeader.Crc;
 
 		// ========== crc and body unpacker ==========
-		if (this->m_ShallowDoc->m_FileInfo.FileVersion >= 8) {
+		if (doc->m_FileInfo.FileVersion >= 8) {
 			// crc checker for file ver >= 8 
 			// reset crc field of header
 			rawHeader.Crc = 0u;
@@ -97,19 +95,22 @@ namespace LibCmo {
 			// compute crc
 			CKDWORD gotten_crc = CKComputeDataCRC(&rawHeader, sizeof(CKRawFileInfo), 0u);
 			parser->SetCursor(sizeof(CKRawFileInfo));
-			gotten_crc = CKComputeDataCRC(parser->GetPtr(), this->m_ShallowDoc->m_FileInfo.Hdr1PackSize, gotten_crc);
-			parser->MoveCursor(this->m_ShallowDoc->m_FileInfo.Hdr1PackSize);
-			gotten_crc = CKComputeDataCRC(parser->GetPtr(), this->m_ShallowDoc->m_FileInfo.DataPackSize, gotten_crc);
+			gotten_crc = CKComputeDataCRC(parser->GetPtr(), doc->m_FileInfo.Hdr1PackSize, gotten_crc);
+			parser->MoveCursor(doc->m_FileInfo.Hdr1PackSize);
+			gotten_crc = CKComputeDataCRC(parser->GetPtr(), doc->m_FileInfo.DataPackSize, gotten_crc);
 
-			if (gotten_crc != this->m_ShallowDoc->m_FileInfo.Crc) return CKERROR::CKERR_FILECRCERROR;
+			if (gotten_crc != doc->m_FileInfo.Crc) {
+				this->m_MinCtx->Printf("Virtools file CRC error.");
+				return CKERROR::CKERR_FILECRCERROR;
+			}
 
 			// reset cursor
 			parser->SetCursor(sizeof(CKRawFileInfo));
 
 			// compare size to decide wheher use compress feature
-			void* decomp_buffer = CKUnPackData(this->m_ShallowDoc->m_FileInfo.Hdr1UnPackSize, parser->GetPtr(), this->m_ShallowDoc->m_FileInfo.Hdr1PackSize);
+			void* decomp_buffer = CKUnPackData(doc->m_FileInfo.Hdr1UnPackSize, parser->GetPtr(), doc->m_FileInfo.Hdr1PackSize);
 			if (decomp_buffer != nullptr) {
-				parser = std::unique_ptr<CKBufferParser>(new(std::nothrow) CKBufferParser(decomp_buffer, this->m_ShallowDoc->m_FileInfo.Hdr1UnPackSize, true));
+				parser = std::unique_ptr<CKBufferParser>(new(std::nothrow) CKBufferParser(decomp_buffer, doc->m_FileInfo.Hdr1UnPackSize, true));
 				if (parser == nullptr) {
 					delete[] decomp_buffer;
 					return CKERROR::CKERR_OUTOFMEMORY;
@@ -119,14 +120,14 @@ namespace LibCmo {
 
 		// ========== object list read ==========
 		// file ver >= 7 have this features
-		if (this->m_ShallowDoc->m_FileInfo.FileVersion >= 7) {
+		{
 			// apply max id saved
-			this->m_ShallowDoc->m_SaveIDMax = this->m_ShallowDoc->m_FileInfo.MaxIDSaved;
+			doc->m_SaveIDMax = doc->m_FileInfo.MaxIDSaved;
 			// resize
-			this->m_ShallowDoc->m_FileObjects.resize(this->m_ShallowDoc->m_FileInfo.ObjectCount);
+			doc->m_FileObjects.resize(doc->m_FileInfo.ObjectCount);
 
 			// read data
-			for (auto& fileobj : this->m_ShallowDoc->m_FileObjects) {
+			for (auto& fileobj : doc->m_FileObjects) {
 				// read basic fields
 				parser->Read(&(fileobj.ObjectId), sizeof(CK_ID));
 				parser->Read(&(fileobj.ObjectCid), sizeof(CK_CLASSID));
@@ -135,8 +136,9 @@ namespace LibCmo {
 				CKDWORD namelen;
 				parser->Read(&namelen, sizeof(CKDWORD));
 				if (namelen != 0) {
-					fileobj.Name.resize(namelen);
-					parser->Read(fileobj.Name.data(), namelen);
+					name_conv.resize(namelen);
+					parser->Read(name_conv.data(), namelen);
+					m_MinCtx->GetUtf8ObjectName(name_conv, fileobj.Name);
 				}
 			}
 		}
@@ -144,14 +146,14 @@ namespace LibCmo {
 		// ========== dep list read ==========
 		// file ver >= 8 have this feature
 		bool noDepLost = true;
-		if (this->m_ShallowDoc->m_FileInfo.FileVersion >= 8) {
+		if (doc->m_FileInfo.FileVersion >= 8) {
 			// get size and resize
 			CKDWORD depSize;
 			parser->Read(&depSize, sizeof(CKDWORD));
-			this->m_ShallowDoc->m_PluginDep.resize(depSize);
+			doc->m_PluginDep.resize(depSize);
 
 			CKDWORD guid_size;
-			for (auto& dep : this->m_ShallowDoc->m_PluginDep) {
+			for (auto& dep : doc->m_PluginDep) {
 				// read category
 				parser->Read(&(dep.m_PluginCategory), sizeof(CK_PLUGIN_TYPE));
 				// get size and resize
@@ -167,7 +169,7 @@ namespace LibCmo {
 
 		// ========== included file list read ==========
 		// file ver >= 8 have this feature
-		if (this->m_ShallowDoc->m_FileInfo.FileVersion >= 8) {
+		if (doc->m_FileInfo.FileVersion >= 8) {
 			// MARK: i don't knwo what is this!
 			int32_t hasIncludedFile;
 			parser->Read(&hasIncludedFile, sizeof(int32_t));
@@ -176,20 +178,173 @@ namespace LibCmo {
 				// read included file size and resize
 				CKDWORD includedFileCount;
 				parser->Read(&includedFileCount, sizeof(CKDWORD));
-				this->m_ShallowDoc->m_IncludedFiles.resize(includedFileCount);
+				doc->m_IncludedFiles.resize(includedFileCount);
 
 				hasIncludedFile -= 4;
 			}
 
-			// backward pos
-			parser->SetCursor(hasIncludedFile);
+			// MARK: backward pos
+			// backward with 0?
+			parser->MoveCursor(hasIncludedFile);
+		}
+
+		// ========== sync main parser ==========
+		if (doc->m_FileInfo.FileVersion >= 8) {
+			// file ver >= 8, use header offset
+			// because it have compress feature
+			ParserPtr->SetCursor(doc->m_FileInfo.Hdr1PackSize + sizeof(CKRawFileInfo));
+		} else {
+			// otherwise, sync with current parser.
+			ParserPtr->SetCursor(parser->GetCursor());
 		}
 
 		return CKERROR::CKERR_OK;
 	}
 
-	CKERROR CKFile::ReadFileData(CKBufferParser* ParserPtr) {
-		return CKERROR();
+	CKERROR CKFile::ReadFileData(CKBufferParser* ParserPtr, CKFileData::ShallowDocument* doc) {
+		std::unique_ptr<CKBufferParser> parser(new(std::nothrow) CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
+		if (parser == nullptr) return CKERROR::CKERR_OUTOFMEMORY;
+		parser->SetCursor(ParserPtr->GetCursor());
+
+		std::string name_conv;
+
+		// ========== compress feature process ==========
+		if (EnumsHelper::FlagEnumHas(doc->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
+			EnumsHelper::FlagEnumHas(doc->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
+
+			void* decomp_buffer = CKUnPackData(doc->m_FileInfo.DataUnPackSize, parser->GetPtr(), doc->m_FileInfo.DataPackSize);
+			if (decomp_buffer != nullptr) {
+				parser = std::unique_ptr<CKBufferParser>(new(std::nothrow) CKBufferParser(decomp_buffer, doc->m_FileInfo.DataUnPackSize, true));
+
+				if (parser == nullptr) {
+					delete[] decomp_buffer;
+					return CKERROR::CKERR_OUTOFMEMORY;
+				}
+			}
+		}
+
+		// ========== old file crc and obj list read ==========
+		// only file ver < 8 run this
+		if (doc->m_FileInfo.FileVersion < 8) {
+			// check crc
+			CKDWORD gotten_crc = CKComputeDataCRC(
+				parser->GetPtr(),
+				parser->GetSize() - parser->GetCursor(),
+				0u
+			);
+			if (gotten_crc != doc->m_FileInfo.Crc) {
+				this->m_MinCtx->Printf("Virtools file CRC error.");
+				return CKERROR::CKERR_FILECRCERROR;
+			}
+
+			// MARK: why read again? especially for file ver == 7.
+			// get save id max
+			parser->Read(&doc->m_SaveIDMax, sizeof(int32_t));
+			// get object count and resize
+			parser->Read(&doc->m_FileInfo.ObjectCount, sizeof(CKDWORD));
+			if (doc->m_FileObjects.empty()) {
+				doc->m_FileObjects.resize(doc->m_FileInfo.ObjectCount);
+			}
+		}
+
+		// ========== manager read ==========
+		// only file ver >= 6 have this
+		if (doc->m_FileInfo.ManagerCount != 0) {
+			doc->m_FileManagersData.resize(doc->m_FileInfo.ManagerCount);
+			CKDWORD stateChunkLen = 0u;
+			bool stateChkParseSuccess = false;
+
+			for (auto& mgr : doc->m_FileManagersData) {
+				// read guid
+				parser->Read(&(mgr.Manager), sizeof(CKGUID));
+
+				// read statechunk len
+				parser->Read(&stateChunkLen, sizeof(CKDWORD));
+				// check len
+				if (stateChunkLen == 0) {
+					mgr.Data = nullptr;
+					continue;
+				}
+
+				// read statechunk
+				mgr.Data = new(std::nothrow) CKStateChunk();
+				if (mgr.Data != nullptr) {
+					stateChkParseSuccess = mgr.Data->ConvertFromBuffer(parser->GetPtr());
+					if (!stateChkParseSuccess) {
+						delete mgr.Data;
+						mgr.Data = nullptr;
+					}
+				}
+				parser->MoveCursor(stateChunkLen);
+			}
+		}
+
+		// ========== object read ==========
+		// only works file version >= 4. < 4 section has been removed.
+		if (doc->m_FileInfo.ObjectCount != 0) {
+			// new file reader section
+			CKDWORD stateChunkLen = 0u;
+			bool stateChkParseSuccess = false;
+			for (auto& obj : doc->m_FileObjects) {
+				// get statechunk len
+				parser->Read(&stateChunkLen, sizeof(CKDWORD));
+				// check state chunk len
+				if (stateChunkLen == 0) {
+					obj.Data = nullptr;
+					continue;
+				}
+
+				// read state chunk
+				obj.Data = new(std::nothrow) CKStateChunk();
+				if (obj.Data != nullptr) {
+					stateChkParseSuccess = obj.Data->ConvertFromBuffer(parser->GetPtr());
+					if (!stateChkParseSuccess) {
+						delete obj.Data;
+						obj.Data = nullptr;
+					}
+				}
+				parser->MoveCursor(stateChunkLen);
+
+			}
+		}
+
+		// ========== included file get ==========
+		// before reading, we need switch back to original parser.
+		// and skip data chunk size
+		parser = std::unique_ptr<CKBufferParser>(new(std::nothrow) CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
+		parser->MoveCursor(doc->m_FileInfo.DataPackSize);
+
+		// then we can read it.
+		if (doc->m_IncludedFiles.size() != 0) {
+			for (auto& file : doc->m_IncludedFiles) {
+				// get file name length and resize it
+				CKDWORD filenamelen = 0u;
+				parser->Read(&filenamelen, sizeof(CKDWORD));
+				name_conv.resize(filenamelen);
+
+				// read filename
+				if (filenamelen != 0) {
+					parser->Read(name_conv.data(), filenamelen);
+					m_MinCtx->GetUtf8ObjectName(name_conv, file);
+				}
+
+				// read file body length
+				CKDWORD filebodylen = 0u;
+				parser->Read(&filebodylen, sizeof(CKDWORD));
+
+				// read file body
+				FILE* fp = m_MinCtx->OpenTempFile(file.c_str(), false);
+				if (fp != nullptr) {
+					Utils::CopyStream(parser->GetPtr(), fp, filebodylen);
+					fclose(fp);
+				}
+
+				// move to next
+				parser->MoveCursor(filebodylen);
+			}
+		}
+
+		return CKERROR::CKERR_OK;
 	}
 
 	//CKERROR CKFile::Load(CKSTRING u8_filename, /*CKObjectArray list, */ CK_LOAD_FLAGS flags) {

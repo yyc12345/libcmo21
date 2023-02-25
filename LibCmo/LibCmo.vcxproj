@@ -174,10 +174,12 @@
     <ClCompile Include="CKFile.cpp" />
     <ClCompile Include="CKFileWriter.cpp" />
     <ClCompile Include="CKGlobals.cpp" />
+    <ClCompile Include="CKMinContext.cpp" />
     <ClCompile Include="ObjsImpl\CKObject.cpp" />
     <ClCompile Include="VTEncoding.cpp" />
     <ClCompile Include="CKFileReader.cpp" />
     <ClCompile Include="CKStateChunk.cpp" />
+    <ClCompile Include="VTUtils.cpp" />
     <ClCompile Include="VxMemoryMappedFile.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -185,6 +187,7 @@
     <ClInclude Include="CKEnums.hpp" />
     <ClInclude Include="CKFile.hpp" />
     <ClInclude Include="CKGlobals.hpp" />
+    <ClInclude Include="CKMinContext.hpp" />
     <ClInclude Include="CKStateChunk.hpp" />
     <ClInclude Include="VTEncoding.hpp" />
     <ClInclude Include="VTObjects.hpp" />

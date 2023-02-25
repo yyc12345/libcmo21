@@ -60,6 +60,16 @@ namespace LibCmo {
 			return CharToWchar(src.c_str(), dest, codepage);
 		}
 
+		bool CharToChar(const char* src, std::string& dest, UINT src_codepage, UINT dest_codepage) {
+			std::wstring intermediary;
+			if (!CharToWchar(src, intermediary, src_codepage)) return false;
+			if (!WcharToChar(intermediary, dest, dest_codepage)) return false;
+			return true;
+		}
+		bool CharToChar(std::string& src, std::string& dest, UINT src_codepage, UINT dest_codepage) {
+			return CharToChar(src.c_str(), dest, src_codepage, dest_codepage);
+		}
+
 #else
 
 		//todo: linux implementation
@@ -72,35 +82,66 @@ namespace LibCmo {
 
 #if defined(LIBCMO_OS_WIN32)
 
-		void GetUtf8VirtoolsName(std::string& native_name, std::string& u8_name, const char* u8_encoding_spec) {
-			// switch encoding spec
-			UINT codepage = CP_ACP;
-			if (!GetWindowsCodePage(u8_encoding_spec, &codepage)) {
-				u8_name = native_name.c_str();
-				return;
-			}
+		const ENCODING_TOKEN ENCODING_TOKEN_DEFAULT = nullptr;
 
-			// do convert
-			std::wstring intermediary;
-			if (!CharToWchar(native_name, intermediary, codepage)) {
-				u8_name = native_name.c_str();
-				return;
-			}
-			if (!WcharToChar(intermediary, u8_name, CP_UTF8)) {
-				u8_name = native_name.c_str();
-				return;
-			}
+		ENCODING_TOKEN CreateEncodingToken(std::string& token_string) {
+			ENCODING_TOKEN token = new(std::nothrow) UINT();
+			if (token == nullptr) return ENCODING_TOKEN_DEFAULT;
 
-			return;
+			if (!GetWindowsCodePage(token_string.c_str(), token)) {
+				*token = CP_ACP;
+			}
+			return token;
+		}
+		void DestroyEncodingToken(ENCODING_TOKEN token) {
+			if (token != ENCODING_TOKEN_DEFAULT) {
+				delete token;
+			}
 		}
 
-		void GetWcharStdin(std::string& u8_input, std::wstring& wc_input) {
-			// just redirect to prev func
-			CharToWchar(u8_input, wc_input, CP_UTF8);
+		void GetUtf8VirtoolsName(std::string& native_name, std::string& u8_name, ENCODING_TOKEN token) {
+			if (token == ENCODING_TOKEN_DEFAULT) {
+				u8_name = native_name.c_str();
+				return;
+			}
+
+			// convert with fallback
+			if (!CharToChar(native_name, u8_name, *token, CP_UTF8)) {
+				u8_name = native_name.c_str();
+			}
+		}
+
+		void GetNativeVirtoolsName(std::string& u8_name, std::string& native_name, ENCODING_TOKEN token) {
+			if (token == ENCODING_TOKEN_DEFAULT) {
+				native_name = u8_name.c_str();
+				return;
+			}
+
+			// convert with fallback
+			if (!CharToChar(u8_name, native_name, CP_UTF8, *token)) {
+				native_name = u8_name.c_str();
+			}
+		}
+
+		void SetStdPathFromU8Path(std::filesystem::path& stdpath, const char* u8_path) {
+			std::wstring intermediary;
+			if (CharToWchar(u8_path, intermediary, CP_UTF8)) {
+				stdpath = intermediary.c_str();
+			} else {
+				// fallback
+				stdpath = u8_path;
+			}
+		}
+
+		FILE* OpenStdPathFile(std::filesystem::path& u8_filepath, bool is_read) {
+			return _wfopen(u8_filepath.wstring().c_str(), is_read ? L"rb" : L"wb");
 		}
 
 #else
-				//todo: linux implementation
+
+		const ENCODING_TOKEN ENCODING_TOKEN_DEFAULT = nullptr;
+
+		//todo: linux implementation
 
 #endif
 

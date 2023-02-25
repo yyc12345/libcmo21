@@ -16,7 +16,7 @@ namespace LibCmo {
 
 		// save file path
 #if defined(LIBCMO_OS_WIN32)
-		Encoding::CharToWchar(u8_filepath, this->m_szFilePath, CP_UTF8);
+		Encoding::SetStdPathFromU8Path(m_szFilePath, u8_filepath);
 #else
 		this->m_szFilePath = u8_filepath;
 #endif
@@ -26,7 +26,7 @@ namespace LibCmo {
 
 		// open file
 		this->m_hFile = CreateFileW(
-			this->m_szFilePath.c_str(),
+			this->m_szFilePath.wstring().c_str(),
 			GENERIC_READ,
 			0,	// do not share
 			NULL,	// no security

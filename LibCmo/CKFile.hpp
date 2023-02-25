@@ -5,24 +5,9 @@
 
 #include "VxMemoryMappedFile.hpp"
 #include "CKStateChunk.hpp"
-#include "VTObjects.hpp"
+#include "CKMinContext.hpp"
 
 namespace LibCmo {
-
-	class CKMinContext {
-	public:
-		CKMinContext();
-		CKMinContext(const CKMinContext&) = delete;
-		CKMinContext& operator=(const CKMinContext&) = delete;
-		~CKMinContext();
-
-		void Printf(CKSTRING fmt, ...);
-
-	private:
-
-		std::string NameEncoding;
-		std::string TempFolder;
-	};
 
 	class CKBufferParser {
 	private:
@@ -103,16 +88,14 @@ namespace LibCmo {
 	class CKFileObject {
 	public:
 		CKFileObject();
-		CKFileObject(const CKFileObject&) = delete;
-		CKFileObject& operator=(const CKFileObject&) = delete;
+		//CKFileObject(const CKFileObject&) = delete;
+		//CKFileObject& operator=(const CKFileObject&) = delete;
 		~CKFileObject();
 
 		CK_ID ObjectId;
 		CK_CLASSID ObjectCid;
 		std::string Name;
 		CKStateChunk* Data;
-		CKDWORD PostPackSize;
-		CKDWORD PrePackSize;
 		CKDWORD FileIndex;
 	private:
 
@@ -121,8 +104,8 @@ namespace LibCmo {
 	class CKFileManagerData {
 	public:
 		CKFileManagerData();
-		CKFileManagerData(const CKFileManagerData&) = delete;
-		CKFileManagerData& operator=(const CKFileManagerData&) = delete;
+		//CKFileManagerData(const CKFileManagerData&) = delete;
+		//CKFileManagerData& operator=(const CKFileManagerData&) = delete;
 		~CKFileManagerData();
 
 		CKStateChunk* Data;
@@ -134,8 +117,8 @@ namespace LibCmo {
 	class CKFilePluginDependencies {
 	public:
 		CKFilePluginDependencies();
-		CKFilePluginDependencies(const CKFilePluginDependencies&) = delete;
-		CKFilePluginDependencies& operator=(const CKFilePluginDependencies&) = delete;
+		//CKFilePluginDependencies(const CKFilePluginDependencies&) = delete;
+		//CKFilePluginDependencies& operator=(const CKFilePluginDependencies&) = delete;
 		~CKFilePluginDependencies();
 
 		CK_PLUGIN_TYPE m_PluginCategory;
@@ -239,19 +222,13 @@ namespace LibCmo {
 
 	private:
 		// reader function and variables
-		CKERROR PrepareLoad(CKSTRING u8_filename);
-		CKERROR ReadFileHeader(CKBufferParser* ParserPtr);
-		CKERROR ReadFileData(CKBufferParser* ParserPtr);
-
-		CKFileData::ShallowDocument* m_ShallowDoc;
-		CKFileData::DeepDocument* m_DeepDoc;
+		CKERROR ReadFileHeader(CKBufferParser* ParserPtr, CKFileData::ShallowDocument* doc);
+		CKERROR ReadFileData(CKBufferParser* ParserPtr, CKFileData::ShallowDocument* doc);
 
 		// writer function and varibales
 
 		// shared function and variables
 		std::string m_FileName;
-		VxMemoryMappedFile* m_MappedFile;
-
 		CKMinContext* m_MinCtx;
 	};
 

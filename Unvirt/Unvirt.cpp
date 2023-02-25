@@ -10,11 +10,15 @@ int main(int argc, char* argv[]) {
 	Unvirt::TerminalHelper::EnsureTerminalEncoding();
 
 	LibCmo::CKMinContext vtctx;
+	vtctx.SetTempPath("Temp");
+	vtctx.SetEncoding("850");
+
 	LibCmo::CKFile vtfile(&vtctx);
 	LibCmo::CKFileData::ShallowDocument* doc;
-	LibCmo::CKERROR err = vtfile.ShallowLoad("Language.old.nmo", &doc);
+	LibCmo::CKERROR err = vtfile.ShallowLoad("combining behaviors.cmo", &doc);
 
-	Unvirt::StructFormatter::PrintCKFileInfo(doc->m_FileInfo);
+	if (doc)
+		Unvirt::StructFormatter::PrintCKFileInfo(doc->m_FileInfo);
 
 	return 0;
 }

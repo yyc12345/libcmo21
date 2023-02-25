@@ -41,10 +41,13 @@
 #define LIBCMO_OS_WIN32
 #endif
 
+#include <cstdio>
+
 namespace LibCmo {
 	namespace Utils {
 
-
+		void CopyStream(const void* src, FILE* dest, size_t len);
+		void CopyStream(FILE* src, void* dest, size_t len);
 
 	}
 }

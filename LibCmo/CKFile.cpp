@@ -3,25 +3,6 @@
 
 namespace LibCmo {
 
-
-#pragma region CKMinContext
-
-	CKMinContext::CKMinContext() {
-
-	}
-	CKMinContext::~CKMinContext() {
-
-	}
-
-	void CKMinContext::Printf(CKSTRING fmt, ...) {
-		va_list argptr;
-		va_start(argptr, fmt);
-		vfprintf(stdout, fmt, argptr);
-		va_end(argptr);
-	}
-
-#pragma endregion
-
 #pragma region CKBufferParser
 
 	CKBufferParser::CKBufferParser(void* ptr, size_t rsize, bool need_manual_free) :
@@ -32,6 +13,16 @@ namespace LibCmo {
 	}
 	CKBufferParser::~CKBufferParser() {
 		if (this->m_NeedManualFree) delete[](this->m_MemBegin);
+	}
+
+#pragma endregion
+
+#pragma region CKFileInfo
+
+	CKFileInfo::CKFileInfo() {
+	}
+
+	CKFileInfo::~CKFileInfo() {
 	}
 
 #pragma endregion
@@ -49,6 +40,25 @@ namespace LibCmo {
 
 #pragma endregion
 
+#pragma region CKFileManagerData
+
+	CKFileManagerData::CKFileManagerData() {
+	}
+
+	CKFileManagerData::~CKFileManagerData() {
+	}
+
+#pragma endregion
+
+#pragma region CKFilePluginDependencies
+
+	CKFilePluginDependencies::CKFilePluginDependencies() {
+	}
+
+	CKFilePluginDependencies::~CKFilePluginDependencies() {
+	}
+
+#pragma endregion
 
 #pragma region ShallowDocument
 
@@ -74,18 +84,15 @@ namespace LibCmo {
 
 #pragma endregion
 
-
 #pragma region CKFile Misc
 
 	CKFile::CKFile(CKMinContext* ctx) :
-		m_MappedFile(nullptr), m_FileName(),
-		m_MinCtx(ctx) {
+		m_FileName(), m_MinCtx(ctx) {
 		;
 	}
 
 	CKFile::~CKFile() {
 	}
-
 
 
 #pragma endregion
