@@ -171,16 +171,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CKFile.cpp" />
+    <ClCompile Include="CKFileWriter.cpp" />
+    <ClCompile Include="CKGlobals.cpp" />
+    <ClCompile Include="ObjsImpl\CKObject.cpp" />
     <ClCompile Include="VTEncoding.cpp" />
-    <ClCompile Include="VTReader.cpp" />
-    <ClCompile Include="VTStateChunk.cpp" />
-    <ClCompile Include="VTStruct.cpp" />
+    <ClCompile Include="CKFileReader.cpp" />
+    <ClCompile Include="CKStateChunk.cpp" />
+    <ClCompile Include="VxMemoryMappedFile.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="VTConstants.hpp" />
+    <ClInclude Include="CKDefines.hpp" />
+    <ClInclude Include="CKEnums.hpp" />
+    <ClInclude Include="CKFile.hpp" />
+    <ClInclude Include="CKGlobals.hpp" />
+    <ClInclude Include="CKStateChunk.hpp" />
     <ClInclude Include="VTEncoding.hpp" />
-    <ClInclude Include="VTStruct.hpp" />
+    <ClInclude Include="VTObjects.hpp" />
     <ClInclude Include="VTUtils.hpp" />
+    <ClInclude Include="VxMemoryMappedFile.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

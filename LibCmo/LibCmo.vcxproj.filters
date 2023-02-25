@@ -13,32 +13,62 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Sources\ObjsImpl">
+      <UniqueIdentifier>{a8cd2188-b552-478c-9801-a6286b3d48a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="VTReader.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="VTStruct.cpp">
+    <ClCompile Include="CKFileReader.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="VTEncoding.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="VTStateChunk.cpp">
+    <ClCompile Include="CKStateChunk.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="VxMemoryMappedFile.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="CKFileWriter.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjsImpl\CKObject.cpp">
+      <Filter>Sources\ObjsImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="CKGlobals.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="CKFile.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="VTStruct.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="VTConstants.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
     <ClInclude Include="VTUtils.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="VTEncoding.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="VTObjects.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CKDefines.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CKEnums.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CKStateChunk.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CKGlobals.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CKFile.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="VxMemoryMappedFile.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

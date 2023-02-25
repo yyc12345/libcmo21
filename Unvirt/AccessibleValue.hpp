@@ -1,6 +1,6 @@
 #pragma once
 
-#include <VTConstants.hpp>
+#include <CKEnums.hpp>
 #include <vector>
 #include <string>
 
@@ -42,7 +42,7 @@ namespace Unvirt {
 				}
 
 				// check flag match
-				if (LibCmo::EnumHelper::FlagEnumHas(val, (*it).first)) {
+				if (LibCmo::EnumsHelper::FlagEnumHas(val, (*it).first)) {
 					// matched, add it
 					if (strl.size() != 0u) strl += ", ";
 					strl += (*it).second;

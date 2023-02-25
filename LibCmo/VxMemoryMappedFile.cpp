@@ -1,43 +1,7 @@
-#include "VTUtils.hpp"
-#if defined(LIBCMO_OS_WIN32)
-#define ZLIB_WINAPI
-#include <zconf.h>
-#endif
-
-#include "VTStruct.hpp"
-#include <cstdlib>
-#include <zlib.h>
+#include "VxMemoryMappedFile.hpp"
+#include "VTEncoding.hpp"
 
 namespace LibCmo {
-
-#pragma region CKZLib Func
-
-	void* CKUnPackData(CKINT DestSize, const void* SrcBuffer, CKINT SrcSize) {
-		char* DestBuffer = new(std::nothrow) char[DestSize];
-		if (DestBuffer == nullptr) return nullptr;
-
-		uLongf cache = DestSize;
-		if (uncompress(
-			reinterpret_cast<Bytef*>(DestBuffer), &cache,
-			reinterpret_cast<const Bytef*>(SrcBuffer), SrcSize) != Z_OK) {
-			delete[] DestBuffer;
-			return nullptr;
-		}
-
-		return DestBuffer;
-	}
-
-	CKDWORD LibCmo::CKComputeDataCRC(const void* data, size_t size, CKDWORD PreviousCRC) {
-		return static_cast<CKDWORD>(adler32(
-			static_cast<uLong>(PreviousCRC),
-			reinterpret_cast<const Bytef*>(data),
-			static_cast<uInt>(size)
-			));
-	}
-
-#pragma endregion
-
-#pragma region VxMemoryMappedFile
 
 	VxMemoryMappedFile::VxMemoryMappedFile(const char* u8_filepath) :
 		// init members
@@ -135,55 +99,6 @@ namespace LibCmo {
 #endif
 		}
 	}
-
-#pragma endregion
-
-#pragma region CKBufferParser
-
-	CKBufferParser::CKBufferParser(void* ptr, size_t rsize, bool need_manual_free) :
-		m_MemBegin(static_cast<char*>(ptr)),
-		m_MemPos(0u), m_MemSize(rsize),
-		m_NeedManualFree(need_manual_free) {
-		;
-	}
-	CKBufferParser::~CKBufferParser() {
-		if (this->m_NeedManualFree) delete[](this->m_MemBegin);
-	}
-
-#pragma endregion
-
-#pragma region CKFile Misc
-
-	CKFile::CKFile(const Utils::VirtoolsEnvironment& cfg) :
-		m_Parser(nullptr), m_MappedFile(nullptr),
-		m_UserCfg(cfg) {
-		;
-	}
-
-	CKFile::~CKFile() {
-	}
-
-
-	void CKFile::ClearData(void) {
-		m_SaveIDMax = 0;
-		m_FileObject.clear();
-		m_PluginDep.clear();
-
-		memset(&m_FileInfo, 0, sizeof(CKFileInfo));
-
-		m_Flags = CK_LOAD_FLAGS::CK_LOAD_DEFAULT;
-		m_FileName.clear();
-		if (m_Parser != nullptr) {
-			delete m_Parser;
-			m_Parser = nullptr;
-		}
-		if (m_MappedFile != nullptr) {
-			delete m_MappedFile;
-			m_MappedFile = nullptr;
-		}
-	}
-
-#pragma endregion
 
 
 }

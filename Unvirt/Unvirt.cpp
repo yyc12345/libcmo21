@@ -1,7 +1,7 @@
 #include "AccessibleValue.hpp"
 #include "TerminalHelper.hpp"
 #include "StructFormatter.hpp"
-#include "VTStruct.hpp"
+#include "CKFile.hpp"
 #include <cstdio>
 #include <iostream>
 
@@ -9,11 +9,12 @@ int main(int argc, char* argv[]) {
 	Unvirt::TerminalHelper::EnsureTerminalColor();
 	Unvirt::TerminalHelper::EnsureTerminalEncoding();
 
-	LibCmo::Utils::VirtoolsEnvironment vtctx;
-	LibCmo::CKFile vtfile(vtctx);
-	LibCmo::CKERROR err = vtfile.Load("vt2obj.nms", LibCmo::CK_LOAD_FLAGS::CK_LOAD_DEFAULT);
+	LibCmo::CKMinContext vtctx;
+	LibCmo::CKFile vtfile(&vtctx);
+	LibCmo::CKFileData::ShallowDocument* doc;
+	LibCmo::CKERROR err = vtfile.ShallowLoad("Language.old.nmo", &doc);
 
-	Unvirt::StructFormatter::PrintCKFileInfo(vtfile.m_FileInfo);
+	Unvirt::StructFormatter::PrintCKFileInfo(doc->m_FileInfo);
 
 	return 0;
 }

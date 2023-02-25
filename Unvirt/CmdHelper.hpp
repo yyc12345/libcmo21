@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <stdexcept>
 #include "VTUtils.hpp"
-#include "VTStruct.hpp"
 
 /*
 

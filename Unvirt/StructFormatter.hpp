@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VTStruct.hpp"
+#include <CKFile.hpp>
 
 namespace Unvirt {
 	namespace StructFormatter {

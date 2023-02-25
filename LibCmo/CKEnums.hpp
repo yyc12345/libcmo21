@@ -1,15 +1,13 @@
 #pragma once
 
+#include <type_traits>
 #include <cinttypes>
 #include <cstdint>
 #include <cstdarg>
-#include <type_traits>
-#include <string>
-#include <vector>
 
 namespace LibCmo {
 
-    namespace EnumHelper {
+    namespace EnumsHelper {
         template<typename TEnum>
         inline TEnum FlagEnumAdd(TEnum e, ...) {
             TEnum result = e;
@@ -25,23 +23,6 @@ namespace LibCmo {
             return static_cast<bool>(static_cast<std::underlying_type_t<TEnum>>(e) & static_cast<std::underlying_type_t<TEnum>>(probe));
         }
     }
-
-    using CKINT = int32_t;
-    using CK_ID = uint32_t;
-    using CKDWORD = uint32_t;
-    using CKWORD = uint16_t;
-    using CKBOOL = int32_t;
-    using CKMUTSTRING = char*;
-    using CKSTRING = const char*;
-
-    using XString = std::string;
-    using XBitArray = std::vector<bool>;
-    template<typename T>
-    using XArray = std::vector<T>;
-    using XIntArray = std::vector<int32_t>;
-    template<typename T>
-    using XClassArray = std::vector<T>;
-    //using CKObjectArray = std::vector<CKObject*>;
 
     enum class CK_CLASSID : uint32_t {
         CKCID_OBJECT = 1,
@@ -113,7 +94,7 @@ namespace LibCmo {
 
         CKCID_MAXCLASSID = 55,
         CKCID_MAXMAXCLASSID = 128
-	};
+    };
 
     enum class CKERROR : int32_t {
         CKERR_OK = 0,
@@ -237,4 +218,3 @@ namespace LibCmo {
     };
 
 }
-

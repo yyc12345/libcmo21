@@ -1,6 +1,24 @@
 CKFile in VT21: 0xC8, 200, count50; in VT25: 0xE0, 224, count 56
 lost 24 byte, 6 fields or 2 lists
 
+
+
+Important CK Class size
+CKObject no change. 0x14(20)
+CKSceneObject no change 0x1C(28), share Load/Save with CKObject
+CKBeObject 0x50(80) count 20
+
+CKGroup 0x68(104) count 26
+CKMaterial 0xF0(240) count 90
+CKTexture 0x94(148) count 52
+CKMesh 0x104(260) count 65
+
+CKRenderObject 0x58(88) count 22, share Load/Save with CKBeObject
+CK3dEntity 0x1A8(424) count 106
+CK3dObject 0x1A8(424) count 106 same as CK3dEntity
+
+
+
 m_FileName
 in VT21 +34, 136
 in VT25 +31, 124

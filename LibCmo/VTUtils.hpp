@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 /*
 // https://stackoverflow.com/questions/2164827/explicitly-exporting-shared-library-functions-in-linux
 // generate import export macro
@@ -46,11 +44,7 @@
 namespace LibCmo {
 	namespace Utils {
 
-		struct VirtoolsEnvironment {
-			std::string NameEncoding;
-			std::string TempFolder;
-		};
+
 
 	}
-
 }
