@@ -9,26 +9,95 @@
 
 namespace LibCmo {
 
+#pragma region Ctor Dtor
+
 	CKStateChunk::CKStateChunk() :
 		m_ClassId(CK_CLASSID::CKCID_OBJECT), m_DataDwSize(0u), m_pData(nullptr),
 		m_DataVersion(CK_STATECHUNK_DATAVERSION::CHUNKDATA_CURRENTVERSION), m_ChunkVersion(CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4),
-		m_Parser{ 0u, 0u, 0u },
+		m_Parser{ CKStateChunkStatus::IDLE, 0u, 0u, 0u },
 		m_ObjectList(), m_ChunkList(), m_ManagerList()
 	{
 		;
 	}
-	LibCmo::CKStateChunk::CKStateChunk(CK_CLASSID clsid) :
-		m_ClassId(clsid), m_DataDwSize(0u), m_pData(nullptr),
-		m_DataVersion(CK_STATECHUNK_DATAVERSION::CHUNKDATA_CURRENTVERSION), m_ChunkVersion(CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4),
-		m_Parser{ 0u, 0u, 0u },
-		m_ObjectList(), m_ChunkList(), m_ManagerList()
+	CKStateChunk::CKStateChunk(const CKStateChunk& rhs) :
+		m_ClassId(rhs.m_ClassId), m_DataVersion(rhs.m_DataVersion), m_ChunkVersion(rhs.m_ChunkVersion),
+		m_Parser(rhs.m_Parser),
+		m_ObjectList(rhs.m_ObjectList), m_ManagerList(rhs.m_ManagerList), m_ChunkList(rhs.m_ChunkList),
+		m_pData(nullptr), m_DataDwSize(rhs.m_DataDwSize)
 	{
-		;
+		// copy buffer
+		if (rhs.m_pData != nullptr) {
+			this->m_pData = new(std::nothrow) CKDWORD[rhs.m_DataDwSize];
+			if (this->m_pData != nullptr) {
+				memcpy(this->m_pData, rhs.m_pData, sizeof(CKDWORD) * rhs.m_DataDwSize);
+			}
+		}
+	}
+	CKStateChunk& CKStateChunk::operator=(const CKStateChunk& rhs) {
+		this->Clear();
+
+		this->m_DataVersion = rhs.m_DataVersion;
+		this->m_ChunkVersion = rhs.m_ChunkVersion;
+		this->m_ClassId = rhs.m_ClassId;
+
+		this->m_Parser = rhs.m_Parser;
+
+		this->m_ObjectList = rhs.m_ObjectList;
+		this->m_ManagerList = rhs.m_ManagerList;
+		this->m_ChunkList = rhs.m_ChunkList;
+
+		// copy buffer
+		if (rhs.m_pData != nullptr) {
+			this->m_pData = new(std::nothrow) CKDWORD[rhs.m_DataDwSize];
+			if (this->m_pData != nullptr) {
+				memcpy(this->m_pData, rhs.m_pData, sizeof(CKDWORD) * rhs.m_DataDwSize);
+			}
+		}
+		this->m_DataDwSize = rhs.m_DataDwSize;
+
+		return *this;
 	}
 	CKStateChunk::~CKStateChunk() {
 		if (this->m_pData != nullptr)
 			delete[] this->m_pData;
 	}
+
+#pragma endregion
+
+#pragma region Misc Funcs
+
+	void CKStateChunk::Clear(void) {
+		this->m_ClassId = CK_CLASSID::CKCID_OBJECT;
+		//this->m_DataVersion = CK_STATECHUNK_DATAVERSION::CHUNK_DEV_2_1;
+		//this->m_ChunkVersion = CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4;
+
+		this->m_Parser.m_CurrentPos = 0;
+		this->m_Parser.m_DataSize = 0;
+		this->m_Parser.m_PrevIdentifierPos = 0;
+
+		this->m_DataDwSize = 0;
+		if (this->m_pData != nullptr) {
+			delete[] this->m_pData;
+			this->m_pData = nullptr;
+		}
+
+		this->m_ObjectList.clear();
+		this->m_ManagerList.clear();
+		this->m_ChunkList.clear();
+	}
+
+	CKDWORD CKStateChunk::GetDataSize(void) {
+		return sizeof(CKDWORD) * this->m_DataDwSize;
+	}
+
+	void LibCmo::CKStateChunk::_EnsureWriteSpace(CKDWORD size) {
+		;
+	}
+
+
+#pragma endregion
+
+#pragma region Buffer Related
 
 	bool CKStateChunk::ConvertFromBuffer(const void* buf) {
 		if (buf == nullptr) return false;
@@ -163,6 +232,9 @@ namespace LibCmo {
 		return 0u;
 	}
 
+#pragma endregion
+
+
 	//bool CKStateChunk::UnPack(CKDWORD DestSize) {
 	//	// NOTE: in UnPack. pData store the compressed buffer, and 
 	//	// dwSize store the length of compressed buffer as CHAR size, not DWORD size!
@@ -192,19 +264,20 @@ namespace LibCmo {
 	//	return true;
 	//}
 
-	CKDWORD CKStateChunk::GetDataSize(void) {
-		return sizeof(CKDWORD) * this->m_DataDwSize;
-	}
-
 	bool CKStateChunk::SeekIdentifier(CKDWORD identifier) {
 		return false;
 	}
 
-	void CKStateChunk::ReadString(std::string& strl) {
-		;
+	void CKStateChunk::StartRead(void) {
+		if (this->m_Parser.m_Status != CKStateChunkStatus::IDLE) return;
+
+		this->m_Parser.m_CurrentPos = 0u;
+		this->m_Parser.m_DataSize = this->m_DataDwSize;
+		this->m_Parser.m_PrevIdentifierPos = 0u;
+		this->m_Parser.m_Status = CKStateChunkStatus::READ;
 	}
 
-	void LibCmo::CKStateChunk::_EnsureEnoughSpace(CKDWORD size) {
+	void CKStateChunk::ReadString(std::string& strl) {
 		;
 	}
 

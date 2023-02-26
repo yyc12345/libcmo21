@@ -3,12 +3,10 @@
 #include "CKDefines.hpp"
 #include "CKEnums.hpp"
 #include "VTEncoding.hpp"
+#include "VTObjects.hpp"
 #include <filesystem>
 
 namespace LibCmo {
-
-	// forward decl to rm recursive reference
-	namespace ObjsImpl { class CKObject; }
 
 	class CKMinContext {
 	public:
@@ -19,7 +17,7 @@ namespace LibCmo {
 
 		void Printf(CKSTRING fmt, ...);
 
-		ObjsImpl::CKObject* CreateObject(CK_ID id, CKSTRING name);
+		ObjsImpl::CKObject* CreateObject(CK_ID id, CK_CLASSID cls, CKSTRING name);
 		void DestroyObject(ObjsImpl::CKObject* obj);
 
 		void GetUtf8ObjectName(std::string& native_name, std::string& u8_name);

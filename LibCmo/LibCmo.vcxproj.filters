@@ -80,5 +80,8 @@
     <ClInclude Include="CKMinContext.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="VTManagers.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

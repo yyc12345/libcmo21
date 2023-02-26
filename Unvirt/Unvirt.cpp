@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 
 	LibCmo::CKFile vtfile(&vtctx);
 	LibCmo::CKFileData::ShallowDocument* doc;
-	LibCmo::CKERROR err = vtfile.ShallowLoad("combining behaviors.cmo", &doc);
+	LibCmo::CKERROR err = vtfile.ShallowLoad("Language.old.nmo", &doc);
 
 	if (doc)
 		Unvirt::StructFormatter::PrintCKFileInfo(doc->m_FileInfo);

@@ -23,7 +23,6 @@ namespace LibCmo {
     using XClassArray = std::vector<T>;
     //using CKObjectArray = std::vector<CKObject*>;
 
-
     struct CKGUID {
         union {
             struct {

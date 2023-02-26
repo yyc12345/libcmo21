@@ -190,6 +190,7 @@
     <ClInclude Include="CKMinContext.hpp" />
     <ClInclude Include="CKStateChunk.hpp" />
     <ClInclude Include="VTEncoding.hpp" />
+    <ClInclude Include="VTManagers.hpp" />
     <ClInclude Include="VTObjects.hpp" />
     <ClInclude Include="VTUtils.hpp" />
     <ClInclude Include="VxMemoryMappedFile.hpp" />

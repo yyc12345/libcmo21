@@ -2,9 +2,13 @@
 
 #include "CKDefines.hpp"
 #include "CKEnums.hpp"
-#include "CKStateChunk.hpp"
 
 namespace LibCmo {
+
+	// forward decl to rm recursive reference
+	class CKMinContext;
+	class CKStateChunk;
+
 	namespace ObjsImpl {
 
 		class CKObject {

@@ -6,6 +6,8 @@ lost 24 byte, 6 fields or 2 lists
 Important CK Class size
 CKObject no change. 0x14(20)
 CKSceneObject no change 0x1C(28), share Load/Save with CKObject
+
+CKBehavior no change 0x6C(108)
 CKBeObject 0x50(80) count 20
 
 CKGroup 0x68(104) count 26
@@ -38,6 +40,14 @@ CKFileManagerData no change (12)
 
 CKStateChunk is 0x28u black box
 CKBufferParser also is 0x10u black box
+
+typedef char* CKSTRING;			
+typedef char CKCHAR;			
+typedef int CKBOOL;				
+typedef unsigned char CKBYTE;	
+typedef unsigned int CKDWORD; 	
+typedef unsigned short CKWORD;		
+typedef int CKERROR;			
 
 struct CKGUID {
 DWORD d1,d2;
@@ -97,6 +107,38 @@ struct XFileObjectsTable {
     }m_Pool;
 };
 
+
+struct CKObject {
+  DWORD* vtable;
+    CK_ID		m_ID;										
+    CKSTRING	m_Name;										
+    CKDWORD		m_ObjectFlags;								
+    CKContext	*m_Context;		
+};
+
+struct CKSceneObject : CKObject {
+    XBitArray	m_Scenes;
+};
+
+struct BehaviorBlockData{};		
+struct BehaviorGraphData{};	
+struct CKBehavior : CKSceneObject {
+	CK_ID					m_Owner; 
+	CK_ID					m_BehParent; 
+	XSObjectPointerArray	m_InputArray;		
+	XSObjectPointerArray	m_OutputArray;	
+	XSObjectPointerArray	m_InParameter;		
+	XSObjectPointerArray	m_OutParameter;		
+	XSObjectPointerArray	m_LocalParameter;	
+	CK_CLASSID				m_CompatibleClassID;
+	int						m_Priority;
+	CKDWORD					m_Flags;
+	CKStateChunk *			m_InterfaceChunk;
+	BehaviorGraphData*		m_GraphData;
+	BehaviorBlockData*		m_BlockData;
+	float					m_LastExecutionTime;
+	CK_ID					m_InputTargetParam;
+};
 
 struct CKFileInfo 
 {
@@ -180,6 +222,28 @@ struct CKStateChunk {
     CKFile* m_BindFile;
     DWORD m_unknow;
 };
+struct CKStateChunkRemap {  // 0x40 count 16
+DWORD m_ChunkVersion;
+DWORD* m_pData;
+DWORD m_DataDwordSize;
+DWORD unknow_3;
+DWORD* m_ObjList_pData;
+DWORD m_ObjList_Count;
+DWORD* m_ChkList_pData;
+DWORD m_ChkList_Count;
+
+DWORD unknow_8;
+DWORD unknow_9;
+DWORD unknow_10;
+DWORD unknow_11;
+DWORD unknow_12;
+DWORD unknow_13;
+
+CKDependenciesContext* m_DepCtx;
+CKContext* m_Ctx;
+};
+
+
 
 struct CKBufferParser {
     char* m_MemBegin;

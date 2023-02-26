@@ -347,6 +347,11 @@ namespace LibCmo {
 		return CKERROR::CKERR_OK;
 	}
 
+	CKERROR CKFile::DeepLoad(CKSTRING u8_filename, CKFileData::DeepDocument** out_doc) {
+		return CKERROR::CKERR_OK;
+	}
+
+
 	//CKERROR CKFile::Load(CKSTRING u8_filename, /*CKObjectArray list, */ CK_LOAD_FLAGS flags) {
 	//	CKERROR result = this->OpenFile(u8_filename, flags);
 	//	if (result == CKERROR::CKERR_OK || result == CKERROR::CKERR_PLUGINSMISSING) {
