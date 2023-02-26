@@ -3,7 +3,7 @@
 #include "CKDefines.hpp"
 #include "CKEnums.hpp"
 
-namespace LibCmo {
+namespace LibCmo::CK2 {
 
 	class CKStateChunk {
 	public:

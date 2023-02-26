@@ -13,8 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Sources\ObjsImpl">
+    <Filter Include="Sources\CKObjectImplements">
       <UniqueIdentifier>{a8cd2188-b552-478c-9801-a6286b3d48a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\CKManagerImplements">
+      <UniqueIdentifier>{784282d9-4adb-40ca-bbac-902c74e9a2e5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -33,8 +36,8 @@
     <ClCompile Include="CKFileWriter.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="ObjsImpl\CKObject.cpp">
-      <Filter>Sources\ObjsImpl</Filter>
+    <ClCompile Include="CKObjectImplements\CKObject.cpp">
+      <Filter>Sources\CKObjectImplements</Filter>
     </ClCompile>
     <ClCompile Include="CKGlobals.cpp">
       <Filter>Sources</Filter>
@@ -56,7 +59,7 @@
     <ClInclude Include="VTEncoding.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="VTObjects.hpp">
+    <ClInclude Include="CKObjects.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="CKDefines.hpp">
@@ -80,7 +83,7 @@
     <ClInclude Include="CKMinContext.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="VTManagers.hpp">
+    <ClInclude Include="CKManagers.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

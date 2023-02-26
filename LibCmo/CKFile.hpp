@@ -3,11 +3,7 @@
 #include "CKDefines.hpp"
 #include "CKEnums.hpp"
 
-#include "VxMemoryMappedFile.hpp"
-#include "CKStateChunk.hpp"
-#include "CKMinContext.hpp"
-
-namespace LibCmo {
+namespace LibCmo::CK2 {
 
 	class CKBufferParser {
 	private:
@@ -24,11 +20,11 @@ namespace LibCmo {
 
 		inline const void* GetPtr(void) { return (this->m_MemBegin + m_MemPos); }
 		inline void Read(void* data, size_t data_size) {
-			memcpy(data, (this->m_MemBegin + m_MemPos), data_size);
+			std::memcpy(data, (this->m_MemBegin + m_MemPos), data_size);
 			this->m_MemPos += data_size;
 		}
 		inline void Write(const void* data, size_t data_size) {
-			memcpy((this->m_MemBegin + m_MemPos), data, data_size);
+			std::memcpy((this->m_MemBegin + m_MemPos), data, data_size);
 			this->m_MemPos += data_size;
 		}
 		inline void* GetBase(void) { return this->m_MemBegin; }
@@ -158,7 +154,7 @@ namespace LibCmo {
 			int32_t m_SaveIDMax;
 			CKFileInfo m_FileInfo;
 
-			XArray<ObjsImpl::CKObject*> m_Objects;
+			XArray<CKObjectImplements::CKObject*> m_Objects;
 			XClassArray<XIntArray> m_IndexByClassId;
 			XClassArray<XString> m_IncludedFiles;
 		private:

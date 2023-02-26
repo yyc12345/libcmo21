@@ -1,8 +1,7 @@
 #include "VTUtils.hpp"
 
 namespace LibCmo {
-	namespace Utils {
-
+	namespace StreamHelper {
 
 		static constexpr const size_t CHUNK_SIZE = 10240;
 		void CopyStream(const void* src, FILE* dest, size_t len) {

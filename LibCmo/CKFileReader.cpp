@@ -1,8 +1,11 @@
 #include "CKFile.hpp"
 #include "CKGlobals.hpp"
+#include "CKStateChunk.hpp"
+#include "VxMemoryMappedFile.hpp"
+#include "CKMinContext.hpp"
 #include <memory>
 
-namespace LibCmo {
+namespace LibCmo::CK2 {
 
 	/*
 	* NOTE:
@@ -17,7 +20,7 @@ namespace LibCmo {
 
 		// check file and open memory
 		if (u8_filename == nullptr) return CKERROR::CKERR_INVALIDPARAMETER;
-		std::unique_ptr<VxMemoryMappedFile> mappedFile(new(std::nothrow) VxMemoryMappedFile(u8_filename));
+		std::unique_ptr<VxMath::VxMemoryMappedFile> mappedFile(new(std::nothrow) VxMath::VxMemoryMappedFile(u8_filename));
 		if (mappedFile == nullptr) {
 			this->m_MinCtx->Printf("Out of memory when creating Memory File.");
 			return CKERROR::CKERR_OUTOFMEMORY;
@@ -54,7 +57,7 @@ namespace LibCmo {
 		// ========== read header ==========
 		// check header size
 		if (parser->GetSize() < sizeof(CKRawFileInfo)) return CKERROR::CKERR_INVALIDFILE;
-		if (memcmp(parser->GetPtr(), "Nemo Fi", sizeof(CKRawFileInfo::NeMo))) return CKERROR::CKERR_INVALIDFILE;
+		if (std::memcmp(parser->GetPtr(), "Nemo Fi", sizeof(CKRawFileInfo::NeMo))) return CKERROR::CKERR_INVALIDFILE;
 		// read header
 		CKRawFileInfo rawHeader;
 		parser->Read(&rawHeader, sizeof(CKRawFileInfo));
@@ -138,7 +141,7 @@ namespace LibCmo {
 				if (namelen != 0) {
 					name_conv.resize(namelen);
 					parser->Read(name_conv.data(), namelen);
-					m_MinCtx->GetUtf8ObjectName(name_conv, fileobj.Name);
+					m_MinCtx->GetUtf8String(name_conv, fileobj.Name);
 				}
 			}
 		}
@@ -325,7 +328,7 @@ namespace LibCmo {
 				// read filename
 				if (filenamelen != 0) {
 					parser->Read(name_conv.data(), filenamelen);
-					m_MinCtx->GetUtf8ObjectName(name_conv, file);
+					m_MinCtx->GetUtf8String(name_conv, file);
 				}
 
 				// read file body length
@@ -335,7 +338,7 @@ namespace LibCmo {
 				// read file body
 				FILE* fp = m_MinCtx->OpenTempFile(file.c_str(), false);
 				if (fp != nullptr) {
-					Utils::CopyStream(parser->GetPtr(), fp, filebodylen);
+					StreamHelper::CopyStream(parser->GetPtr(), fp, filebodylen);
 					fclose(fp);
 				}
 

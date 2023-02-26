@@ -7,7 +7,7 @@ namespace Unvirt {
 
 		static FILE* fout = stdout;
 
-		void PrintCKFileInfo(const LibCmo::CKFileInfo& fileinfo) {
+		void PrintCKFileInfo(const LibCmo::CK2::CKFileInfo& fileinfo) {
 			std::string container;
 
 			fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKFileInfo\n")), fout);
@@ -18,7 +18,7 @@ namespace Unvirt {
 				(fileinfo.CKVersion >> 0) & 0xFFFF
 			);
 
-			LibCmo::CKDWORD product_series[4]{
+			LibCmo::CK2::CKDWORD product_series[4]{
 				(fileinfo.ProductBuild >> 24) & 0xFF,
 				(fileinfo.ProductBuild >> 16) & 0xFF,
 				(fileinfo.ProductBuild >> 8) & 0xFF,
@@ -28,7 +28,7 @@ namespace Unvirt {
 				fileinfo.ProductVersion, product_series[0], product_series[1], product_series[2], product_series[3]
 			);
 
-			Unvirt::AccessibleValue::GetFlagEnumName<LibCmo::CK_FILE_WRITEMODE>(
+			Unvirt::AccessibleValue::GetFlagEnumName<LibCmo::CK2::CK_FILE_WRITEMODE>(
 				Unvirt::AccessibleValue::EnumDesc::CK_FILE_WRITEMODE, container, fileinfo.FileWriteMode
 				);
 			fprintf(fout, "Save Flags: %s\n", container.c_str());

@@ -1,13 +1,7 @@
 #include "VTUtils.hpp"
-#if defined(LIBCMO_OS_WIN32)
-#define ZLIB_WINAPI
-#include <zconf.h>
-#endif
-
-#include <zlib.h>
 #include "CKStateChunk.hpp"
 
-namespace LibCmo {
+namespace LibCmo::CK2 {
 
 #pragma region Ctor Dtor
 
@@ -29,7 +23,7 @@ namespace LibCmo {
 		if (rhs.m_pData != nullptr) {
 			this->m_pData = new(std::nothrow) CKDWORD[rhs.m_DataDwSize];
 			if (this->m_pData != nullptr) {
-				memcpy(this->m_pData, rhs.m_pData, sizeof(CKDWORD) * rhs.m_DataDwSize);
+				std::memcpy(this->m_pData, rhs.m_pData, sizeof(CKDWORD) * rhs.m_DataDwSize);
 			}
 		}
 	}
@@ -50,7 +44,7 @@ namespace LibCmo {
 		if (rhs.m_pData != nullptr) {
 			this->m_pData = new(std::nothrow) CKDWORD[rhs.m_DataDwSize];
 			if (this->m_pData != nullptr) {
-				memcpy(this->m_pData, rhs.m_pData, sizeof(CKDWORD) * rhs.m_DataDwSize);
+				std::memcpy(this->m_pData, rhs.m_pData, sizeof(CKDWORD) * rhs.m_DataDwSize);
 			}
 		}
 		this->m_DataDwSize = rhs.m_DataDwSize;
@@ -90,7 +84,7 @@ namespace LibCmo {
 		return sizeof(CKDWORD) * this->m_DataDwSize;
 	}
 
-	void LibCmo::CKStateChunk::_EnsureWriteSpace(CKDWORD size) {
+	void CKStateChunk::_EnsureWriteSpace(CKDWORD size) {
 		;
 	}
 
@@ -129,15 +123,15 @@ namespace LibCmo {
 				this->m_pData = new(std::nothrow) CKDWORD[this->m_DataDwSize];
 				if (m_pData == nullptr) return false;
 
-				memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
+				std::memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
 				bufpos += this->m_DataDwSize;
 			}
 			if (!this->m_ObjectList.empty()) {
-				memcpy(this->m_ObjectList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ObjectList.size());
+				std::memcpy(this->m_ObjectList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ObjectList.size());
 				bufpos += this->m_ObjectList.size();
 			}
 			if (!this->m_ChunkList.empty()) {
-				memcpy(this->m_ChunkList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ChunkList.size());
+				std::memcpy(this->m_ChunkList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ChunkList.size());
 				bufpos += this->m_ChunkList.size();
 			}
 
@@ -156,19 +150,19 @@ namespace LibCmo {
 				this->m_pData = new(std::nothrow) CKDWORD[this->m_DataDwSize];
 				if (m_pData == nullptr) return false;
 
-				memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
+				std::memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
 				bufpos += this->m_DataDwSize;
 			}
 			if (!this->m_ObjectList.empty()) {
-				memcpy(this->m_ObjectList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ObjectList.size());
+				std::memcpy(this->m_ObjectList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ObjectList.size());
 				bufpos += this->m_ObjectList.size();
 			}
 			if (!this->m_ChunkList.empty()) {
-				memcpy(this->m_ChunkList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ChunkList.size());
+				std::memcpy(this->m_ChunkList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ChunkList.size());
 				bufpos += this->m_ChunkList.size();
 			}
 			if (!this->m_ManagerList.empty()) {
-				memcpy(this->m_ManagerList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ManagerList.size());
+				std::memcpy(this->m_ManagerList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ManagerList.size());
 				bufpos += this->m_ManagerList.size();
 			}
 
@@ -193,7 +187,7 @@ namespace LibCmo {
 				this->m_pData = new(std::nothrow) CKDWORD[this->m_DataDwSize];
 				if (m_pData == nullptr) return false;
 
-				memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
+				std::memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
 				bufpos += this->m_DataDwSize;
 			}
 			if (EnumsHelper::FlagEnumHas(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE)) {
@@ -203,19 +197,19 @@ namespace LibCmo {
 			if (EnumsHelper::FlagEnumHas(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS)) {
 				this->m_ObjectList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
-				memcpy(this->m_ObjectList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ObjectList.size());
+				std::memcpy(this->m_ObjectList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ObjectList.size());
 				bufpos += this->m_ObjectList.size();
 			}
 			if (EnumsHelper::FlagEnumHas(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN)) {
 				this->m_ChunkList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
-				memcpy(this->m_ChunkList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ChunkList.size());
+				std::memcpy(this->m_ChunkList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ChunkList.size());
 				bufpos += this->m_ChunkList.size();
 			}
 			if (EnumsHelper::FlagEnumHas(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN)) {
 				this->m_ManagerList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
-				memcpy(this->m_ManagerList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ManagerList.size());
+				std::memcpy(this->m_ManagerList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ManagerList.size());
 				bufpos += this->m_ManagerList.size();
 			}
 
@@ -257,7 +251,7 @@ namespace LibCmo {
 	//		this->m_pData = nullptr;
 	//		this->m_pData = new(std::nothrow) CKDWORD[this->m_DataDwSize];
 	//		if (this->m_pData != nullptr) {
-	//			memcpy(this->m_pData, buffer, this->m_DataDwSize * sizeof(CKDWORD));
+	//			std::memcpy(this->m_pData, buffer, this->m_DataDwSize * sizeof(CKDWORD));
 	//		}
 	//	}
 	//	delete[] buffer;

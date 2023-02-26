@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CKEnums.hpp>
+#include <VTUtils.hpp>
 #include <vector>
 #include <string>
 
@@ -15,10 +16,10 @@ namespace Unvirt {
 		using EnumDescPairArray = std::vector<std::pair<TEnum, const char*>>;
 
 		namespace EnumDesc {
-			extern const EnumDescPairArray<LibCmo::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE;
-			extern const EnumDescPairArray<LibCmo::CK_LOAD_FLAGS> CK_LOAD_FLAGS;
-			extern const EnumDescPairArray<LibCmo::CK_FO_OPTIONS> CK_FO_OPTIONS;
-			extern const EnumDescPairArray<LibCmo::CK_PLUGIN_TYPE> CK_PLUGIN_TYPE;
+			extern const EnumDescPairArray<LibCmo::CK2::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE;
+			extern const EnumDescPairArray<LibCmo::CK2::CK_LOAD_FLAGS> CK_LOAD_FLAGS;
+			extern const EnumDescPairArray<LibCmo::CK2::CK_FO_OPTIONS> CK_FO_OPTIONS;
+			extern const EnumDescPairArray<LibCmo::CK2::CK_PLUGIN_TYPE> CK_PLUGIN_TYPE;
 		}
 
 		template<typename TEnum>
@@ -57,10 +58,10 @@ namespace Unvirt {
 
 #pragma endregion
 
-		void GetClassIdName(std::string& strl, LibCmo::CK_CLASSID cls);
-		void GetCkErrorName(std::string& strl, LibCmo::CKERROR err);
-		void GetClassIdHierarchy(std::string& strl, LibCmo::CK_CLASSID cls);
-		void GetCkErrorDescription(std::string& strl, LibCmo::CKERROR err);
+		void GetClassIdName(std::string& strl, LibCmo::CK2::CK_CLASSID cls);
+		void GetCkErrorName(std::string& strl, LibCmo::CK2::CKERROR err);
+		void GetClassIdHierarchy(std::string& strl, LibCmo::CK2::CK_CLASSID cls);
+		void GetCkErrorDescription(std::string& strl, LibCmo::CK2::CKERROR err);
 
 		void GetAccessibleFileSize(std::string& strl, uint64_t size);
 

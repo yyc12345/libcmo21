@@ -1,12 +1,11 @@
 #pragma once
 
 #include "CKDefines.hpp"
-#include "CKEnums.hpp"
+#include "CKObjects.hpp"
 #include "VTEncoding.hpp"
-#include "VTObjects.hpp"
 #include <filesystem>
 
-namespace LibCmo {
+namespace LibCmo::CK2 {
 
 	class CKMinContext {
 	public:
@@ -15,13 +14,20 @@ namespace LibCmo {
 		CKMinContext& operator=(const CKMinContext&) = delete;
 		~CKMinContext();
 
+		using PrintCallback = void (*)(std::string&);
 		void Printf(CKSTRING fmt, ...);
+		void SetPrintCallback(PrintCallback cb);
 
-		ObjsImpl::CKObject* CreateObject(CK_ID id, CK_CLASSID cls, CKSTRING name);
-		void DestroyObject(ObjsImpl::CKObject* obj);
+		CKObjectImplements::CKObject* CreateCKObject(CK_ID id, CK_CLASSID cls, CKSTRING name);
+		CKObjectImplements::CKObject* GetCKObject(CK_ID id);
+		void DestroyCKObject(CKObjectImplements::CKObject* obj);
 
-		void GetUtf8ObjectName(std::string& native_name, std::string& u8_name);
-		void GetNativeObjectName(std::string& u8_name, std::string& native_name);
+		CKManagerImplements::CKBaseManager* CreateCKManager(CKGUID guid);
+		CKManagerImplements::CKBaseManager* GetCKManager(CKGUID guid);
+		void DestroyCKManager(CKManagerImplements::CKBaseManager* mgr);
+
+		void GetUtf8String(std::string& native_name, std::string& u8_name);
+		void GetNativeString(std::string& u8_name, std::string& native_name);
 
 		void SetEncoding(CKSTRING encoding);
 		void SetTempPath(CKSTRING u8_temp);
@@ -31,9 +37,10 @@ namespace LibCmo {
 	private:
 		void RefetchEncodingToken(void);
 
-		std::string NameEncoding;
-		Encoding::ENCODING_TOKEN NameEncodingToken;
-		std::filesystem::path TempFolder;
+		std::string m_NameEncoding;
+		EncodingHelper::ENCODING_TOKEN m_NameEncodingToken;
+		std::filesystem::path m_TempFolder;
+		PrintCallback m_PrintCallback;
 	};
 
 }

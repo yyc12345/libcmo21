@@ -103,6 +103,7 @@
       <AdditionalIncludeDirectories>$(ZLIB_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,6 +122,7 @@
       <AdditionalIncludeDirectories>$(ZLIB_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,6 +141,7 @@
       <AdditionalIncludeDirectories>$(ZLIB_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -159,6 +162,7 @@
       <AdditionalIncludeDirectories>$(ZLIB_PATH);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -175,7 +179,7 @@
     <ClCompile Include="CKFileWriter.cpp" />
     <ClCompile Include="CKGlobals.cpp" />
     <ClCompile Include="CKMinContext.cpp" />
-    <ClCompile Include="ObjsImpl\CKObject.cpp" />
+    <ClCompile Include="CKObjectImplements\CKObject.cpp" />
     <ClCompile Include="VTEncoding.cpp" />
     <ClCompile Include="CKFileReader.cpp" />
     <ClCompile Include="CKStateChunk.cpp" />
@@ -187,11 +191,11 @@
     <ClInclude Include="CKEnums.hpp" />
     <ClInclude Include="CKFile.hpp" />
     <ClInclude Include="CKGlobals.hpp" />
+    <ClInclude Include="CKManagers.hpp" />
     <ClInclude Include="CKMinContext.hpp" />
     <ClInclude Include="CKStateChunk.hpp" />
     <ClInclude Include="VTEncoding.hpp" />
-    <ClInclude Include="VTManagers.hpp" />
-    <ClInclude Include="VTObjects.hpp" />
+    <ClInclude Include="CKObjects.hpp" />
     <ClInclude Include="VTUtils.hpp" />
     <ClInclude Include="VxMemoryMappedFile.hpp" />
   </ItemGroup>

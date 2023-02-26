@@ -1,7 +1,7 @@
 #include "VxMemoryMappedFile.hpp"
 #include "VTEncoding.hpp"
 
-namespace LibCmo {
+namespace LibCmo::VxMath {
 
 	VxMemoryMappedFile::VxMemoryMappedFile(const char* u8_filepath) :
 		// init members
@@ -16,7 +16,7 @@ namespace LibCmo {
 
 		// save file path
 #if defined(LIBCMO_OS_WIN32)
-		Encoding::SetStdPathFromU8Path(m_szFilePath, u8_filepath);
+		EncodingHelper::SetStdPathFromU8Path(m_szFilePath, u8_filepath);
 #else
 		this->m_szFilePath = u8_filepath;
 #endif

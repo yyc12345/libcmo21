@@ -42,9 +42,31 @@
 #endif
 
 #include <cstdio>
+#include <type_traits>
+#include <cinttypes>
+#include <cstdint>
+#include <cstdarg>
 
 namespace LibCmo {
-	namespace Utils {
+
+    namespace EnumsHelper {
+        template<typename TEnum>
+        inline TEnum FlagEnumAdd(TEnum e, ...) {
+            TEnum result = e;
+            va_list argptr;
+            va_start(argptr, e);
+            result = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(result) | static_cast<std::underlying_type_t<TEnum>>(va_arg(argptr, TEnum)));
+            va_end(argptr);
+            return result;
+        }
+
+        template<typename TEnum>
+        inline bool FlagEnumHas(TEnum e, TEnum probe) {
+            return static_cast<bool>(static_cast<std::underlying_type_t<TEnum>>(e) & static_cast<std::underlying_type_t<TEnum>>(probe));
+        }
+    }
+
+	namespace StreamHelper {
 
 		void CopyStream(const void* src, FILE* dest, size_t len);
 		void CopyStream(FILE* src, void* dest, size_t len);

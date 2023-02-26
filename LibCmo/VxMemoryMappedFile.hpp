@@ -10,7 +10,7 @@
 #include <string>
 #include <filesystem>
 
-namespace LibCmo {
+namespace LibCmo::VxMath {
 
 	class VxMemoryMappedFile {
 	private:

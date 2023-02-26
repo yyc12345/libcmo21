@@ -4,12 +4,10 @@
 #include <zconf.h>
 #endif
 
-#include "CKDefines.hpp"
 #include "CKGlobals.hpp"
 #include <zlib.h>
 
-namespace LibCmo {
-
+namespace LibCmo::CK2 {
 
 	void* CKUnPackData(CKINT DestSize, const void* SrcBuffer, CKINT SrcSize) {
 		char* DestBuffer = new(std::nothrow) char[DestSize];
@@ -26,13 +24,12 @@ namespace LibCmo {
 		return DestBuffer;
 	}
 
-	CKDWORD LibCmo::CKComputeDataCRC(const void* data, size_t size, CKDWORD PreviousCRC) {
+	CKDWORD CKComputeDataCRC(const void* data, size_t size, CKDWORD PreviousCRC) {
 		return static_cast<CKDWORD>(adler32(
 			static_cast<uLong>(PreviousCRC),
 			reinterpret_cast<const Bytef*>(data),
 			static_cast<uInt>(size)
 			));
 	}
-
 
 }

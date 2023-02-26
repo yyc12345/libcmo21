@@ -1,28 +1,9 @@
 #pragma once
 
-#include <type_traits>
 #include <cinttypes>
 #include <cstdint>
-#include <cstdarg>
 
-namespace LibCmo {
-
-    namespace EnumsHelper {
-        template<typename TEnum>
-        inline TEnum FlagEnumAdd(TEnum e, ...) {
-            TEnum result = e;
-            va_list argptr;
-            va_start(argptr, e);
-            result = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(result) | static_cast<std::underlying_type_t<TEnum>>(va_arg(argptr, TEnum)));
-            va_end(argptr);
-            return result;
-        }
-
-        template<typename TEnum>
-        inline bool FlagEnumHas(TEnum e, TEnum probe) {
-            return static_cast<bool>(static_cast<std::underlying_type_t<TEnum>>(e) & static_cast<std::underlying_type_t<TEnum>>(probe));
-        }
-    }
+namespace LibCmo::CK2 {
 
     enum class CK_CLASSID : uint32_t {
         CKCID_OBJECT = 1,
@@ -150,14 +131,14 @@ namespace LibCmo {
         CKERR_INVALIDANIMATION = -123
     };
 
-    enum class CK_FILE_WRITEMODE : int32_t {
+    enum class CK_FILE_WRITEMODE : uint32_t {
         CKFILE_UNCOMPRESSED = 0,
         CKFILE_CHUNKCOMPRESSED_OLD = 1,
         CKFILE_EXTERNALTEXTURES_OLD = 2,
         CKFILE_FORVIEWER = 4,
         CKFILE_WHOLECOMPRESSED = 8
     };
-    enum class CK_LOAD_FLAGS : int32_t {
+    enum class CK_LOAD_FLAGS : uint32_t {
         CK_LOAD_ANIMATION = 1 << 0,
         CK_LOAD_GEOMETRY = 1 << 1,
         CK_LOAD_DEFAULT = CK_LOAD_GEOMETRY | CK_LOAD_ANIMATION,
@@ -169,13 +150,13 @@ namespace LibCmo {
         CK_LOAD_CHECKDEPENDENCIES = 1 << 7,
         CK_LOAD_ONLYBEHAVIORS = 1 << 8
     };
-    enum class CK_FO_OPTIONS : int32_t {
+    enum class CK_FO_OPTIONS : uint32_t {
         CK_FO_DEFAULT = 0,
         CK_FO_RENAMEOBJECT,
         CK_FO_REPLACEOBJECT,
         CK_FO_DONTLOADOBJECT
     };
-    enum class CK_PLUGIN_TYPE : int32_t {
+    enum class CK_PLUGIN_TYPE : uint32_t {
         CKPLUGIN_BITMAP_READER = 0,
         CKPLUGIN_SOUND_READER = 1,
         CKPLUGIN_MODEL_READER = 2,
@@ -185,7 +166,7 @@ namespace LibCmo {
         CKPLUGIN_MOVIE_READER = 6,
         CKPLUGIN_EXTENSION_DLL = 7
     };
-    enum class CK_STATECHUNK_DATAVERSION : int32_t {
+    enum class CK_STATECHUNK_DATAVERSION : uint32_t {
         CHUNKDATA_OLDVERSION = 0,
         CHUNKDATA_BASEVERSION = 1,
         CHUNK_WAVESOUND_VERSION2 = 2,
@@ -199,14 +180,14 @@ namespace LibCmo {
         CHUNK_DEV_2_1 = 10,
         CHUNKDATA_CURRENTVERSION = CHUNK_DEV_2_1
     };
-    enum class CK_STATECHUNK_CHUNKVERSION : int32_t {
+    enum class CK_STATECHUNK_CHUNKVERSION : uint32_t {
         CHUNK_VERSIONBASE = 0,
         CHUNK_VERSION1 = 4,
         CHUNK_VERSION2 = 5,
         CHUNK_VERSION3 = 6,
         CHUNK_VERSION4 = 7
     };
-    enum class CK_STATECHUNK_CHUNKOPTIONS : int32_t {
+    enum class CK_STATECHUNK_CHUNKOPTIONS : uint32_t {
         CHNK_OPTION_IDS = 0x01,
         CHNK_OPTION_MAN = 0x02,
         CHNK_OPTION_CHN = 0x04,
@@ -215,6 +196,41 @@ namespace LibCmo {
         CHNK_OPTION_LISTBIG = 0x20,
         CHNK_DONTDELETE_PTR = 0x40,
         CHNK_DONTDELETE_PARSER = 0x80
+    };
+    enum class CK_OBJECT_FLAGS : uint32_t {
+        CK_OBJECT_INTERFACEOBJ = 0x00000001,
+        CK_OBJECT_PRIVATE = 0x00000002,
+        CK_OBJECT_INTERFACEMARK = 0x00000004,
+        CK_OBJECT_FREEID = 0x00000008,
+        CK_OBJECT_TOBEDELETED = 0x00000010,
+        CK_OBJECT_NOTTOBESAVED = 0x00000020,
+        CK_OBJECT_VISIBLE = 0x00000040,
+        CK_OBJECT_NAMESHARED = 0x00000080,
+        CK_OBJECT_DYNAMIC = 0x00000108,
+        CK_OBJECT_HIERACHICALHIDE = 0x00000200,
+        CK_OBJECT_UPTODATE = 0x00000400,
+        CK_OBJECT_TEMPMARKER = 0x00000800,
+        CK_OBJECT_ONLYFORFILEREFERENCE = 0x00001000,
+        CK_OBJECT_NOTTOBEDELETED = 0x00002000,
+        CK_OBJECT_APPDATA = 0x00004000,
+        CK_OBJECT_SINGLEACTIVITY = 0x00008000,
+        CK_OBJECT_LOADSKIPBEOBJECT = 0x00010000,
+        CK_OBJECT_NOTTOBELISTEDANDSAVED = 0x00000023,
+        CK_PARAMETEROUT_SETTINGS = 0x00400000,
+        CK_PARAMETEROUT_PARAMOP = 0x00800000,
+        CK_PARAMETERIN_DISABLED = 0x01000000,
+        CK_PARAMETERIN_THIS = 0x02000000,
+        CK_PARAMETERIN_SHARED = 0x04000000,
+        CK_PARAMETEROUT_DELETEAFTERUSE = 0x08000000,
+        CK_OBJECT_PARAMMASK = 0x0FC00000,
+        CK_BEHAVIORIO_IN = 0x10000000,
+        CK_BEHAVIORIO_OUT = 0x20000000,
+        CK_BEHAVIORIO_ACTIVE = 0x40000000,
+        CK_OBJECT_IOTYPEMASK = 0x30000000,
+        CK_OBJECT_IOMASK = 0xF0000000,
+        CKBEHAVIORLINK_RESERVED = 0x10000000,
+        CKBEHAVIORLINK_ACTIVATEDLASTFRAME = 0x20000000,
+        CK_OBJECT_BEHAVIORLINKMASK = 0x30000000
     };
 
 }

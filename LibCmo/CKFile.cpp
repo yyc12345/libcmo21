@@ -1,7 +1,9 @@
 #include "CKFile.hpp"
+#include "CKStateChunk.hpp"
+#include "CKMinContext.hpp"
 #include <cstdarg>
 
-namespace LibCmo {
+namespace LibCmo::CK2 {
 
 #pragma region CKBufferParser
 
@@ -29,12 +31,12 @@ namespace LibCmo {
 
 #pragma region CKFileObject
 
-	LibCmo::CKFileObject::CKFileObject() :
-	Data(nullptr) {
+	CKFileObject::CKFileObject() :
+		Data(nullptr) {
 		;
 	}
 
-	LibCmo::CKFileObject::~CKFileObject() {
+	CKFileObject::~CKFileObject() {
 		;
 	}
 
@@ -60,29 +62,33 @@ namespace LibCmo {
 
 #pragma endregion
 
+	namespace CKFileData {
+
 #pragma region ShallowDocument
 
-	LibCmo::CKFileData::ShallowDocument::ShallowDocument() {
-		this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));
-	}
+		ShallowDocument::ShallowDocument() {
+			this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));
+		}
 
-	LibCmo::CKFileData::ShallowDocument::~ShallowDocument() {
+		ShallowDocument::~ShallowDocument() {
 
-	}
+		}
 
 #pragma endregion
 
 #pragma region DeepDocument
 
-	LibCmo::CKFileData::DeepDocument::DeepDocument() {
-		this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));
-	}
+		DeepDocument::DeepDocument() {
+			this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));
+		}
 
-	LibCmo::CKFileData::DeepDocument::~DeepDocument() {
+		DeepDocument::~DeepDocument() {
 
-	}
+		}
 
 #pragma endregion
+
+	}
 
 #pragma region CKFile Misc
 
