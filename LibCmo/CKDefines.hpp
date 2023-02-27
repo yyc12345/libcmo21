@@ -26,6 +26,7 @@ namespace LibCmo {
 		using XIntArray = std::vector<int32_t>;
 		template<typename T>
 		using XClassArray = std::vector<T>;
+		using XObjectArray = std::vector<CK_ID>;
 		//using CKObjectArray = std::vector<CKObject*>;
 
 
@@ -129,6 +130,39 @@ namespace LibCmo {
 				m_Data[0][0] = m_Data[1][1] = m_Data[2][2] = m_Data[3][3] = 1.0f;
 			}
 			VxMatrix(float m[4][4]) : m_Data() { std::memcpy(m_Data, m, sizeof(m_Data)); }
+		};
+
+		struct VxImageDescEx {
+			CK2::CKINT Size;
+			CK2::CKDWORD Flags;
+
+			CK2::CKINT Width;
+			CK2::CKINT Height;
+			union {
+				CK2::CKINT BytesPerLine;
+				CK2::CKINT TotalImageSize;
+			};
+			CK2::CKINT BitsPerPixel;
+			union {
+				CK2::CKDWORD RedMask;
+				CK2::CKDWORD BumpDuMask;
+			};
+			union {
+				CK2::CKDWORD GreenMask;
+				CK2::CKDWORD BumpDvMask;
+			};
+			union {
+				CK2::CKDWORD BlueMask;
+				CK2::CKDWORD BumpLumMask;
+
+			};
+			CK2::CKDWORD AlphaMask;
+
+			CK2::CKWORD BytesPerColorEntry;
+			CK2::CKWORD ColorMapEntries;
+
+			CK2::CKBYTE* ColorMap;
+			CK2::CKBYTE* Image;
 		};
 
 	}
