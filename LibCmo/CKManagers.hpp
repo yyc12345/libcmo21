@@ -7,20 +7,21 @@ namespace LibCmo::CK2::CKManagerImplements {
 
 	class CKBaseManager {
 	public:
-		CKBaseManager();
+		CKBaseManager(CKMinContext* ctx, CK_ID ckid);
 		CKBaseManager(const CKBaseManager&) = delete;
 		CKBaseManager& operator=(const CKBaseManager&) = delete;
 		virtual ~CKBaseManager();
 
 		virtual CKERROR LoadData(CKStateChunk* statechunk, CKFileData::ShallowDocument* doc);
 		virtual CKStateChunk* SaveData(CKFileData::ShallowDocument* doc);
+
 	private:
 
 	};
 
-	class CKAttributeManager {
+	class CKAttributeManager : public CKBaseManager {
 	public:
-		CKAttributeManager();
+		CKAttributeManager(CKMinContext* ctx, CK_ID ckid);
 		CKAttributeManager(const CKAttributeManager&) = delete;
 		CKAttributeManager& operator=(const CKAttributeManager&) = delete;
 		virtual ~CKAttributeManager();

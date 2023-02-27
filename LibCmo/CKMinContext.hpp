@@ -1,9 +1,11 @@
 #pragma once
 
 #include "CKDefines.hpp"
-#include "CKObjects.hpp"
+#include "CKEnums.hpp"
 #include "VTEncoding.hpp"
 #include <filesystem>
+#include <map>
+#include <functional>
 
 namespace LibCmo::CK2 {
 
@@ -23,7 +25,7 @@ namespace LibCmo::CK2 {
 		void DestroyCKObject(CKObjectImplements::CKObject* obj);
 
 		CKManagerImplements::CKBaseManager* CreateCKManager(CKGUID guid);
-		CKManagerImplements::CKBaseManager* GetCKManager(CKGUID guid);
+		CKManagerImplements::CKBaseManager* GetCKManager(CK_ID guid);
 		void DestroyCKManager(CKManagerImplements::CKBaseManager* mgr);
 
 		void GetUtf8String(std::string& native_name, std::string& u8_name);
@@ -36,6 +38,12 @@ namespace LibCmo::CK2 {
 
 	private:
 		void RefetchEncodingToken(void);
+
+		std::map<CK_ID, CKObjectImplements::CKObject*> m_ObjectsList;
+		std::map<CK_ID, CKManagerImplements::CKBaseManager*> m_ManagersList;
+
+		std::map<CK_CLASSID, std::function<CKObjectImplements::CKObject* (CKMinContext*, CK_ID, CKSTRING)>> m_ObjectsCreationMap;
+		std::map<CKGUID, std::function<CKManagerImplements::CKBaseManager* (CKMinContext*, CK_ID)>> m_ManagersCreationMap;
 
 		std::string m_NameEncoding;
 		EncodingHelper::ENCODING_TOKEN m_NameEncodingToken;

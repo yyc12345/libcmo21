@@ -178,6 +178,7 @@
     <ClCompile Include="CKFile.cpp" />
     <ClCompile Include="CKFileWriter.cpp" />
     <ClCompile Include="CKGlobals.cpp" />
+    <ClCompile Include="CKManagerImplements\CKBaseManager.cpp" />
     <ClCompile Include="CKMinContext.cpp" />
     <ClCompile Include="CKObjectImplements\CKObject.cpp" />
     <ClCompile Include="VTEncoding.cpp" />

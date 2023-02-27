@@ -89,6 +89,39 @@ struct XBitArray {
     DWORD m_Size;
 };
 
+struct VxImageDescEx {
+	int		Size;				// Size of the structure
+	DWORD	Flags;				// Reserved for special formats (such as compressed ) 0 otherwise
+
+	int		Width;				// Width in pixel of the image
+	int		Height;				// Height in pixel of the image
+	union   {
+		int		BytesPerLine;		// Pitch (width in bytes) of the image
+		int		TotalImageSize;		// For compressed image (DXT1...) the total size of the image
+	};
+	int		BitsPerPixel;		// Number of bits per pixel
+	union {
+		DWORD	RedMask;			// Mask for Red component
+		DWORD   BumpDuMask;			// Mask for Bump Du component
+	};
+	union {
+		DWORD	GreenMask;			// Mask for Green component	
+		DWORD	BumpDvMask;			// Mask for Bump Dv component
+	};
+	union {
+		DWORD	BlueMask;			// Mask for Blue component
+		DWORD   BumpLumMask;		// Mask for Luminance component
+		
+	};
+	DWORD	AlphaMask;			// Mask for Alpha component
+
+	short	BytesPerColorEntry;	// ColorMap Stride
+	short	ColorMapEntries;	// If other than 0 image is palletized
+
+	BYTE*	ColorMap;			// Palette colors
+	BYTE*	Image;				// Image
+};
+
 // <T, K> = <int, CK_ID>
 typedef struct XFileObjectsTable::Entry {
     CK_ID key;

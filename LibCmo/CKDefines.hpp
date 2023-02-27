@@ -81,7 +81,47 @@ namespace LibCmo {
 				};
 				CKDWORD d[2];
 			};
-			CKGUID(CKDWORD gd1 = 0, CKDWORD gd2 = 0) { d[0] = gd1; d[1] = gd2; }
+			constexpr CKGUID(CKDWORD gd1 = 0, CKDWORD gd2 = 0) : d1(gd1), d2(gd2) {}
+			CKGUID(const CKGUID& rhs) : d1(rhs.d1), d2(rhs.d2) {}
+			CKGUID& operator=(const CKGUID& rhs) {
+				this->d1 = rhs.d1;
+				this->d2 = rhs.d2;
+			}
+
+			bool operator ==(const CKGUID& rhs) const {
+				return ((this->d1 == rhs.d1) && (this->d2 == rhs.d2));
+			}
+			bool operator !=(const CKGUID& rhs) const {
+				return ((this->d1 != rhs.d1) || (this->d2 != rhs.d2));
+			}
+			bool operator <(const CKGUID& rhs) const {
+				if (this->d1 < rhs.d1) {
+					return true;
+				}
+
+				if (this->d1 == rhs.d1) {
+					return (this->d2 < rhs.d2);
+				}
+
+				return false;
+			}
+			bool operator <=(const CKGUID& rhs) const {
+				return (this->d1 <= rhs.d1);
+			}
+			bool operator >(const CKGUID& rhs) const {
+				if (this->d1 > rhs.d1) {
+					return true;
+				}
+
+				if (this->d1 == rhs.d1) {
+					return (this->d2 > rhs.d2);
+				}
+
+				return false;
+			}
+			bool operator >=(const CKGUID& rhs) const {
+				return (this->d1 >= rhs.d1);
+			}
 		};
 
 
@@ -125,7 +165,7 @@ namespace LibCmo {
 		struct VxMatrix {
 			float m_Data[4][4];
 
-			VxMatrix() : m_Data() { 
+			VxMatrix() : m_Data() {
 				memset(m_Data, 0, sizeof(m_Data));
 				m_Data[0][0] = m_Data[1][1] = m_Data[2][2] = m_Data[3][3] = 1.0f;
 			}

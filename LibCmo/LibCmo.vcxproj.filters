@@ -51,6 +51,9 @@
     <ClCompile Include="VTUtils.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="CKManagerImplements\CKBaseManager.cpp">
+      <Filter>Sources\CKManagerImplements</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VTUtils.hpp">

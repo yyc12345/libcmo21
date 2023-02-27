@@ -7,14 +7,18 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	class CKObject {
 	public:
-		CKObject();
+		CKObject(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CKObject(const CKObject&) = delete;
 		CKObject& operator=(const CKObject&) = delete;
 		virtual ~CKObject();
 
 		CK_ID GetID(void) { return this->m_ID; }
-		CKSTRING GetName(void) { return this->m_Name.c_str(); }
-		void SetName(CKSTRING u8_name) { this->m_Name = u8_name; }
+		CKSTRING GetName(void) { return m_HasName ? this->m_Name.c_str() : nullptr; }
+		void SetName(CKSTRING u8_name) { 
+			this->m_HasName = u8_name != nullptr;
+			if (this->m_HasName) this->m_Name = u8_name;
+			else this->m_Name.clear();
+		}
 		CK_OBJECT_FLAGS GetObjectFlags(void) { return this->m_ObjectFlags; }
 		void SetObjectFlags(CK_OBJECT_FLAGS flags) { this->m_ObjectFlags = flags; }
 
@@ -24,13 +28,14 @@ namespace LibCmo::CK2::CKObjectImplements {
 	protected:
 		CK_ID m_ID;
 		std::string m_Name;
+		bool m_HasName;
 		CK_OBJECT_FLAGS m_ObjectFlags;
 		CKMinContext* m_Context;
 	};
 
 	class CKSceneObject : public CKObject {
 	public:
-		CKSceneObject();
+		CKSceneObject(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CKSceneObject(const CKSceneObject&) = delete;
 		CKSceneObject& operator=(const CKSceneObject&) = delete;
 		virtual ~CKSceneObject();
@@ -42,7 +47,7 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	class CKBeObject : public CKSceneObject {
 	public:
-		CKBeObject();
+		CKBeObject(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CKBeObject(const CKBeObject&) = delete;
 		CKBeObject& operator=(const CKBeObject&) = delete;
 		virtual ~CKBeObject();
@@ -54,7 +59,7 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	class CKGroup : public CKBeObject {
 	public:
-		CKGroup();
+		CKGroup(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CKGroup(const CKGroup&) = delete;
 		CKGroup& operator=(const CKGroup&) = delete;
 		virtual ~CKGroup();
@@ -66,7 +71,7 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	class CKMesh : public CKBeObject {
 	public:
-		CKMesh();
+		CKMesh(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CKMesh(const CKMesh&) = delete;
 		CKMesh& operator=(const CKMesh&) = delete;
 		virtual ~CKMesh();
@@ -78,7 +83,7 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	class CKTexture : public CKBeObject {
 	public:
-		CKTexture();
+		CKTexture(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CKTexture(const CKTexture&) = delete;
 		CKTexture& operator=(const CKTexture&) = delete;
 		virtual ~CKTexture();
@@ -90,7 +95,7 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	class CKMaterial : public CKBeObject {
 	public:
-		CKMaterial();
+		CKMaterial(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CKMaterial(const CKMaterial&) = delete;
 		CKMaterial& operator=(const CKMaterial&) = delete;
 		virtual ~CKMaterial();
@@ -102,7 +107,7 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	class CKRenderObject : public CKBeObject {
 	public:
-		CKRenderObject();
+		CKRenderObject(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CKRenderObject(const CKRenderObject&) = delete;
 		CKRenderObject& operator=(const CKRenderObject&) = delete;
 		~CKRenderObject();
@@ -112,9 +117,9 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	};
 
-	class CK3dEntity : public CKBeObject {
+	class CK3dEntity : public CKRenderObject {
 	public:
-		CK3dEntity();
+		CK3dEntity(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CK3dEntity(const CK3dEntity&) = delete;
 		CK3dEntity& operator=(const CK3dEntity&) = delete;
 		virtual ~CK3dEntity();
@@ -126,7 +131,7 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	class CK3dObject :public CK3dEntity {
 	public:
-		CK3dObject();
+		CK3dObject(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CK3dObject(const CK3dObject&) = delete;
 		CK3dObject& operator=(const CK3dObject&) = delete;
 		~CK3dObject();

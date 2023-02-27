@@ -132,11 +132,13 @@ namespace LibCmo::CK2 {
 			needed = dwsize + this->m_Parser.m_CurrentPos;
 
 			// try resizing it
-			this->ResizeBuffer(needed);
+			if (!this->ResizeBuffer(needed)) return false;
 
 			// update size
 			this->m_Parser.m_DataSize = needed;
 		}
+
+		return true;
 	}
 
 	bool CKStateChunk::Skip(CKDWORD DwordCount) {
@@ -392,6 +394,8 @@ namespace LibCmo::CK2 {
 			std::memcpy(strl.data(), this->m_pData + this->m_Parser.m_CurrentPos, strByteSize);
 			this->m_Parser.m_CurrentPos += strDwordSize;
 		} else strl.clear();
+
+		return CKERROR::CKERR_OK;
 	}
 
 
