@@ -62,9 +62,17 @@ namespace LibCmo::CK2 {
 
 	public:
 		void StartRead(void);
-		bool SeekIdentifier(CKDWORD identifier);
-		bool SeekIdentifierAndReturnSize(CKDWORD identifier, CKDWORD* out_size);
-		CKERROR ReadString(std::string& strl);
+		bool SeekIdentifierDword(CKDWORD identifier);
+		bool SeekIdentifierDwordAndReturnSize(CKDWORD identifier, CKDWORD* out_size);
+		template<typename TEnum>
+		inline bool SeekIdentifier(TEnum enum_v) {
+			return SeekIdentifierDword(static_cast<CKDWORD>(enum_v));
+		}
+		template<typename TEnum>
+		inline bool SeekIdentifierAndReturnSize(TEnum enum_v, CKDWORD* out_size) {
+			return SeekIdentifierDwordAndReturnSize(static_cast<CKDWORD>(enum_v), out_size);
+		}
+
 		/*
 		* Read Struct
 		Primitive type: ReadInt, ReadByte, ReadWord, ReadDword, ReadFloat, etc...
@@ -89,15 +97,17 @@ namespace LibCmo::CK2 {
 		inline CKERROR ReadStructRef(T& data) {
 			return ReadStructPtr(&data);
 		}
-		/*
-		* Read Enum Data
-		A wrapper for ReadStructPtr.
-		All Enum read redirect to this.
-		*/
-		template<typename T>
-		inline CKERROR ReadEnum(T& data) {
-			return ReadStructPtr(reinterpret_cast<std::underlying_type_t<T>*>(&data));
-		}
+		///*
+		//* Read Enum Data
+		//A wrapper for ReadStructPtr.
+		//All Enum read redirect to this.
+		//*/
+		//template<typename T>
+		//inline CKERROR ReadEnum(T& data) {
+		//	return ReadStructPtr(reinterpret_cast<std::underlying_type_t<T>*>(&data));
+		//}
+
+		CKERROR ReadString(std::string& strl);
 
 		CKERROR ReadBuffer(void* allocatedBuf);
 		CKERROR ReadNoSizeBuffer(CKDWORD size, void* allocatedBuf);

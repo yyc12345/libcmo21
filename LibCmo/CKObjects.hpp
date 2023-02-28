@@ -6,6 +6,12 @@
 namespace LibCmo::CK2::CKObjectImplements {
 
 	class CKObject {
+	protected:
+		CK_ID m_ID;
+		std::string m_Name;
+		CK_OBJECT_FLAGS m_ObjectFlags;
+		CKMinContext* m_Context;
+
 	public:
 		CKObject(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CKObject(const CKObject&) = delete;
@@ -13,7 +19,7 @@ namespace LibCmo::CK2::CKObjectImplements {
 		virtual ~CKObject();
 
 		CK_ID GetID(void) { return this->m_ID; }
-		CKSTRING GetName(void) { (this->m_Name.empty()) ? (nullptr) : (this->m_Name.c_str()); }
+		CKSTRING GetName(void) { return (this->m_Name.empty() ? nullptr : this->m_Name.c_str()); }
 		void SetName(CKSTRING u8_name) { this->m_Name = (u8_name == nullptr ? "" : u8_name); }
 		CK_OBJECT_FLAGS GetObjectFlags(void) { return this->m_ObjectFlags; }
 		void SetObjectFlags(CK_OBJECT_FLAGS flags) { this->m_ObjectFlags = flags; }
@@ -21,11 +27,6 @@ namespace LibCmo::CK2::CKObjectImplements {
 		virtual CK_CLASSID GetClassID(void) { return CK_CLASSID::CKCID_OBJECT; }
 		virtual CKERROR Load(CKStateChunk* chunk, const CKFileData::ShallowDocument* doc);
 		virtual CKStateChunk* Save(CKFileData::ShallowDocument* doc);
-	protected:
-		CK_ID m_ID;
-		std::string m_Name;
-		CK_OBJECT_FLAGS m_ObjectFlags;
-		CKMinContext* m_Context;
 	};
 
 	class CKSceneObject : public CKObject {

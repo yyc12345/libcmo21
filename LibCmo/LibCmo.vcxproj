@@ -192,6 +192,7 @@
     <ClInclude Include="CKEnums.hpp" />
     <ClInclude Include="CKFile.hpp" />
     <ClInclude Include="CKGlobals.hpp" />
+    <ClInclude Include="CKIdentifiers.hpp" />
     <ClInclude Include="CKManagers.hpp" />
     <ClInclude Include="CKMinContext.hpp" />
     <ClInclude Include="CKStateChunk.hpp" />

@@ -344,12 +344,12 @@ namespace LibCmo::CK2 {
 		this->m_Parser.m_Status = CKStateChunkStatus::READ;
 	}
 
-	bool CKStateChunk::SeekIdentifier(CKDWORD identifier) {
+	bool CKStateChunk::SeekIdentifierDword(CKDWORD identifier) {
 		CKDWORD cache;
-		return SeekIdentifierAndReturnSize(identifier, &cache);
+		return SeekIdentifierDwordAndReturnSize(identifier, &cache);
 	}
 
-	bool CKStateChunk::SeekIdentifierAndReturnSize(CKDWORD identifier, CKDWORD* out_size) {
+	bool CKStateChunk::SeekIdentifierDwordAndReturnSize(CKDWORD identifier, CKDWORD* out_size) {
 		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return false;
 
 		CKDWORD pos = 0u;

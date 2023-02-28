@@ -1,4 +1,7 @@
 #include "../CKObjects.hpp"
+#include "../CKStateChunk.hpp"
+#include "../CKIdentifiers.hpp"
+#include "../VTUtils.hpp"
 
 namespace LibCmo::CK2::CKObjectImplements {
 
@@ -14,6 +17,32 @@ namespace LibCmo::CK2::CKObjectImplements {
 	}
 
 	CKERROR CKObject::Load(CKStateChunk* chunk, const CKFileData::ShallowDocument* doc) {
+		if (chunk->SeekIdentifier(Identifiers::CK_STATESAVEFLAGS_OBJECT::CK_STATESAVE_OBJECTHIDDEN)) {
+			EnumsHelper::FlagEnumRm(this->m_ObjectFlags,
+				{ CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE,
+				CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE }
+			);
+		} else {
+			if (chunk->SeekIdentifier(Identifiers::CK_STATESAVEFLAGS_OBJECT::CK_STATESAVE_OBJECTHIERAHIDDEN)) {
+				// != 0
+				EnumsHelper::FlagEnumRm(this->m_ObjectFlags,
+					{ CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE, }
+				);
+				EnumsHelper::FlagEnumAdd(this->m_ObjectFlags,
+					{ CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE, }
+				);
+
+			} else {
+				// == 0
+				EnumsHelper::FlagEnumAdd(this->m_ObjectFlags,
+					{ CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE, }
+				);
+				EnumsHelper::FlagEnumRm(this->m_ObjectFlags,
+					{ CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE, }
+				);
+			}
+		}
+
 		return CKERROR::CKERR_OK;
 	}
 	CKStateChunk* CKObject::Save(CKFileData::ShallowDocument* doc) {

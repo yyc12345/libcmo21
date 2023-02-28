@@ -86,6 +86,8 @@ namespace LibCmo {
 			CKGUID& operator=(const CKGUID& rhs) {
 				this->d1 = rhs.d1;
 				this->d2 = rhs.d2;
+
+				return *this;
 			}
 
 			bool operator ==(const CKGUID& rhs) const {

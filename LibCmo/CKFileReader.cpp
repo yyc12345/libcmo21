@@ -71,7 +71,7 @@ namespace LibCmo::CK2 {
 		// force reset too big product ver?
 		if (rawHeader.ProductVersion >= 12u) {
 			rawHeader.ProductVersion = 0u;
-			rawHeader.ProductBuild = 0x01010000;
+			rawHeader.ProductBuild = 0x01010000u;
 		}
 
 		// ========== assign value ==========
@@ -393,7 +393,9 @@ namespace LibCmo::CK2 {
 
 			// todo: special treat for CK_LEVEL
 			// try parsing data
+			obj.Data->StartRead();
 			CKERROR err = createdObjs[index]->Load(obj.Data, shallowDoc.get());
+			obj.Data->StopRead();
 			if (err != CKERROR::CKERR_OK) {
 				delete (createdObjs[index]);
 				createdObjs[index] = nullptr;

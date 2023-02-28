@@ -59,8 +59,8 @@ namespace LibCmo::CK2 {
 	class CKFileInfo {
 	public:
 		CKFileInfo();
-		CKFileInfo(const CKFileInfo&) = delete;
-		CKFileInfo& operator=(const CKFileInfo&) = delete;
+		CKFileInfo(const CKFileInfo&);
+		CKFileInfo& operator=(const CKFileInfo&);
 		~CKFileInfo();
 
 		CKDWORD ProductVersion;		// Virtools Version (Dev/Creation). (CK_VIRTOOLS_VERSION)
@@ -84,8 +84,8 @@ namespace LibCmo::CK2 {
 	class CKFileObject {
 	public:
 		CKFileObject();
-		//CKFileObject(const CKFileObject&) = delete;
-		//CKFileObject& operator=(const CKFileObject&) = delete;
+		CKFileObject(const CKFileObject&);
+		CKFileObject& operator=(const CKFileObject&);
 		~CKFileObject();
 
 		CK_ID ObjectId;
@@ -100,8 +100,8 @@ namespace LibCmo::CK2 {
 	class CKFileManagerData {
 	public:
 		CKFileManagerData();
-		//CKFileManagerData(const CKFileManagerData&) = delete;
-		//CKFileManagerData& operator=(const CKFileManagerData&) = delete;
+		CKFileManagerData(const CKFileManagerData&);
+		CKFileManagerData& operator=(const CKFileManagerData&);
 		~CKFileManagerData();
 
 		CKStateChunk* Data;
@@ -113,8 +113,8 @@ namespace LibCmo::CK2 {
 	class CKFilePluginDependencies {
 	public:
 		CKFilePluginDependencies();
-		//CKFilePluginDependencies(const CKFilePluginDependencies&) = delete;
-		//CKFilePluginDependencies& operator=(const CKFilePluginDependencies&) = delete;
+		CKFilePluginDependencies(const CKFilePluginDependencies&);
+		CKFilePluginDependencies& operator=(const CKFilePluginDependencies&);
 		~CKFilePluginDependencies();
 
 		CK_PLUGIN_TYPE m_PluginCategory;

@@ -11,8 +11,8 @@ namespace Unvirt {
 			std::string container;
 
 			fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKFileInfo\n")), fout);
-			fprintf(fout, "Version (File / CK): %" PRIu32 " / %02" PRIX32 "/%02" PRIX32 "/%04" PRIX32 "\n",
-				fileinfo.FileVersion, 
+			fprintf(fout, "FileVersion: %" PRIu32 "\n", fileinfo.FileVersion);
+			fprintf(fout, "CKVersion: %02" PRIX32 "/%02" PRIX32 "/%04" PRIX32 "\n",
 				(fileinfo.CKVersion >> 24) & 0xFF,
 				(fileinfo.CKVersion >> 16) & 0xFF,
 				(fileinfo.CKVersion >> 0) & 0xFFFF

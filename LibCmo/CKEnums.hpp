@@ -6,6 +6,8 @@
 
 namespace LibCmo::CK2 {
 
+	constexpr const CKDWORD CKVERSION = 0x05082002;
+
 	namespace PredefinedGuids {
 
 		constexpr const CKDWORD OBJECT_MANAGER_GUID1 = 0x7cbb3b91;
