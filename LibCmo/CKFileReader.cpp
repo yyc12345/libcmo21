@@ -1,6 +1,7 @@
 #include "CKFile.hpp"
 #include "CKGlobals.hpp"
 #include "CKStateChunk.hpp"
+#include "CKObjects.hpp"
 #include "VxMemoryMappedFile.hpp"
 #include "CKMinContext.hpp"
 #include <memory>
@@ -351,6 +352,65 @@ namespace LibCmo::CK2 {
 	}
 
 	CKERROR CKFile::DeepLoad(CKSTRING u8_filename, CKFileData::DeepDocument** out_doc) {
+		// ========== prepare work ==========
+		// preset value
+		*out_doc = nullptr;
+		
+		// get shallow document first
+		CKFileData::ShallowDocument* rawShallowDoc = nullptr;
+		CKERROR err = this->ShallowLoad(u8_filename, &rawShallowDoc);
+		if (rawShallowDoc == nullptr) return err;
+		std::unique_ptr<CKFileData::ShallowDocument> shallowDoc(rawShallowDoc);
+		if (err != CKERROR::CKERR_OK) return err;
+
+		// create deep document
+		std::unique_ptr<CKFileData::DeepDocument> deepDoc(new(std::nothrow) CKFileData::DeepDocument());
+		if (deepDoc == nullptr) return CKERROR::CKERR_OUTOFMEMORY;
+
+		// ========== create object first ==========
+		size_t index = 0u;
+		std::vector<CKObjectImplements::CKObject*> createdObjs(shallowDoc->m_FileObjects.size(), nullptr);
+		for (index = 0u; index < shallowDoc->m_FileObjects.size(); ++index) {
+			// todo: skip CK_LEVEL
+			// todo: resolve references
+			const auto& obj = shallowDoc->m_FileObjects[index];
+			if (obj.Data == nullptr) continue;
+
+			createdObjs[index] = m_MinCtx->CreateCKObject(obj.ObjectId, obj.ObjectCid, obj.Name.c_str());
+		}
+
+		// ========== CKStateChunk remap ==========
+		// todo: remap
+		// todo: CK_LEVEL special proc
+
+		// ========== consume Managers ==========
+		// todo...
+
+		// ========== analyze objects CKStateChunk ==========
+		for (index = 0u; index < shallowDoc->m_FileObjects.size(); ++index) {
+			const auto& obj = shallowDoc->m_FileObjects[index];
+			if (obj.Data == nullptr || createdObjs[index] == nullptr) continue;
+
+			// todo: special treat for CK_LEVEL
+			// try parsing data
+			CKERROR err = createdObjs[index]->Load(obj.Data, shallowDoc.get());
+			if (err != CKERROR::CKERR_OK) {
+				delete (createdObjs[index]);
+				createdObjs[index] = nullptr;
+			} else {
+				// add into result
+				deepDoc->m_Objects.push_back(createdObjs[index]);
+			}
+
+		}
+
+		// ========== finalize work ==========
+		// copy misc structure
+		deepDoc->m_IncludedFiles = shallowDoc->m_IncludedFiles;
+		deepDoc->m_SaveIDMax = shallowDoc->m_SaveIDMax;
+		deepDoc->m_FileInfo = shallowDoc->m_FileInfo;
+		// detach and return
+		*out_doc = deepDoc.release();
 		return CKERROR::CKERR_OK;
 	}
 

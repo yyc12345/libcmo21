@@ -4,13 +4,20 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	CKObject::CKObject(CKMinContext* ctx, CK_ID ckid, CKSTRING name) :
 		m_ID(ckid), m_Context(ctx),
-		m_Name(name == nullptr ? "" : name), m_HasName(name != nullptr),
+		m_Name(name == nullptr ? "" : name),
 		m_ObjectFlags(CK_OBJECT_FLAGS::CK_PARAMETERIN_DISABLED) {
 		;
 	}
 
 	CKObject::~CKObject() {
 
+	}
+
+	CKERROR CKObject::Load(CKStateChunk* chunk, const CKFileData::ShallowDocument* doc) {
+		return CKERROR::CKERR_OK;
+	}
+	CKStateChunk* CKObject::Save(CKFileData::ShallowDocument* doc) {
+		return nullptr;
 	}
 
 	CKSceneObject::CKSceneObject(CKMinContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
@@ -34,6 +41,11 @@ namespace LibCmo::CK2::CKObjectImplements {
 	}
 
 	CKTexture::CKTexture(CKMinContext* ctx, CK_ID ckid, CKSTRING name) : CKBeObject(ctx, ckid, name) {
+	}
+	CKTexture::~CKTexture() {
+	}
+
+	CKMaterial::CKMaterial(CKMinContext* ctx, CK_ID ckid, CKSTRING name) : CKBeObject(ctx, ckid, name) {
 	}
 	CKMaterial::~CKMaterial() {
 	}

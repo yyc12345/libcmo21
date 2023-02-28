@@ -17,8 +17,8 @@ int main(int argc, char* argv[]) {
 	vtctx.SetEncoding("850");
 
 	LibCmo::CK2::CKFile vtfile(&vtctx);
-	LibCmo::CK2::CKFileData::ShallowDocument* doc;
-	LibCmo::CK2::CKERROR err = vtfile.ShallowLoad("Language.old.nmo", &doc);
+	LibCmo::CK2::CKFileData::DeepDocument* doc;
+	LibCmo::CK2::CKERROR err = vtfile.DeepLoad("Language.old.nmo", &doc);
 
 	if (doc)
 		Unvirt::StructFormatter::PrintCKFileInfo(doc->m_FileInfo);

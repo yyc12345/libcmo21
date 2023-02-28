@@ -37,17 +37,19 @@ namespace LibCmo::CK2 {
 	}
 
 	CKFileObject::~CKFileObject() {
-		;
+		if (Data != nullptr) delete Data;
 	}
 
 #pragma endregion
 
 #pragma region CKFileManagerData
 
-	CKFileManagerData::CKFileManagerData() {
+	CKFileManagerData::CKFileManagerData() :
+		Data(nullptr) {
 	}
 
 	CKFileManagerData::~CKFileManagerData() {
+		if (Data != nullptr) delete Data;
 	}
 
 #pragma endregion
@@ -67,7 +69,7 @@ namespace LibCmo::CK2 {
 #pragma region ShallowDocument
 
 		ShallowDocument::ShallowDocument() {
-			this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));
+			/*this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));*/
 		}
 
 		ShallowDocument::~ShallowDocument() {
@@ -79,7 +81,7 @@ namespace LibCmo::CK2 {
 #pragma region DeepDocument
 
 		DeepDocument::DeepDocument() {
-			this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));
+			/*this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));*/
 		}
 
 		DeepDocument::~DeepDocument() {

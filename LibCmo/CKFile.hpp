@@ -137,7 +137,7 @@ namespace LibCmo::CK2 {
 			XArray<CKFileObject> m_FileObjects;
 			XArray<CKFileManagerData> m_FileManagersData;
 			XClassArray<CKFilePluginDependencies> m_PluginDep;
-			XClassArray<XIntArray> m_IndexByClassId;
+			/*XClassArray<XIntArray> m_IndexByClassId;*/
 			XClassArray<XString> m_IncludedFiles;
 
 		private:
@@ -155,7 +155,7 @@ namespace LibCmo::CK2 {
 			CKFileInfo m_FileInfo;
 
 			XArray<CKObjectImplements::CKObject*> m_Objects;
-			XClassArray<XIntArray> m_IndexByClassId;
+			/*XClassArray<XIntArray> m_IndexByClassId;*/
 			XClassArray<XString> m_IncludedFiles;
 		private:
 

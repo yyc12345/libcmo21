@@ -13,22 +13,17 @@ namespace LibCmo::CK2::CKObjectImplements {
 		virtual ~CKObject();
 
 		CK_ID GetID(void) { return this->m_ID; }
-		CKSTRING GetName(void) { return m_HasName ? this->m_Name.c_str() : nullptr; }
-		void SetName(CKSTRING u8_name) { 
-			this->m_HasName = u8_name != nullptr;
-			if (this->m_HasName) this->m_Name = u8_name;
-			else this->m_Name.clear();
-		}
+		CKSTRING GetName(void) { (this->m_Name.empty()) ? (nullptr) : (this->m_Name.c_str()); }
+		void SetName(CKSTRING u8_name) { this->m_Name = (u8_name == nullptr ? "" : u8_name); }
 		CK_OBJECT_FLAGS GetObjectFlags(void) { return this->m_ObjectFlags; }
 		void SetObjectFlags(CK_OBJECT_FLAGS flags) { this->m_ObjectFlags = flags; }
 
 		virtual CK_CLASSID GetClassID(void) { return CK_CLASSID::CKCID_OBJECT; }
-		virtual CKERROR Load(CKStateChunk* chunk, CKFileData::ShallowDocument* doc);
+		virtual CKERROR Load(CKStateChunk* chunk, const CKFileData::ShallowDocument* doc);
 		virtual CKStateChunk* Save(CKFileData::ShallowDocument* doc);
 	protected:
 		CK_ID m_ID;
 		std::string m_Name;
-		bool m_HasName;
 		CK_OBJECT_FLAGS m_ObjectFlags;
 		CKMinContext* m_Context;
 	};
