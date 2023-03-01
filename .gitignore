@@ -5,6 +5,7 @@
 *.vmo
 CodeGen/dest/*.txt
 PyCmoOld/
+out/
 
 .vscode/
 

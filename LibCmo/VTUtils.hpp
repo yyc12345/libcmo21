@@ -45,6 +45,7 @@
 #include <type_traits>
 #include <cinttypes>
 #include <cstdint>
+#include <initializer_list>
 
 namespace LibCmo {
 

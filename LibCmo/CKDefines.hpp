@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <cstring>
 
 namespace LibCmo {
 	namespace CK2 {
@@ -151,10 +152,6 @@ namespace LibCmo {
 		struct VxQuaternion {
 			union {
 				struct {
-					VxVector axis;
-					float angle;
-				};
-				struct {
 					float x, y, z, w;
 				};
 				float v[4];
@@ -168,7 +165,7 @@ namespace LibCmo {
 			float m_Data[4][4];
 
 			VxMatrix() : m_Data() {
-				memset(m_Data, 0, sizeof(m_Data));
+				std::memset(m_Data, 0, sizeof(m_Data));
 				m_Data[0][0] = m_Data[1][1] = m_Data[2][2] = m_Data[3][3] = 1.0f;
 			}
 			VxMatrix(float m[4][4]) : m_Data() { std::memcpy(m_Data, m, sizeof(m_Data)); }

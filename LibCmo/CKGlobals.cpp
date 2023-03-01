@@ -1,8 +1,9 @@
 #include "VTUtils.hpp"
 #if defined(LIBCMO_OS_WIN32)
 #define ZLIB_WINAPI
-#include <zconf.h>
 #endif
+#include <zconf.h>
+
 
 #include "CKGlobals.hpp"
 #include <zlib.h>
