@@ -116,7 +116,7 @@ namespace LibCmo::CK2 {
 			if (decomp_buffer != nullptr) {
 				parser = std::unique_ptr<CKBufferParser>(new(std::nothrow) CKBufferParser(decomp_buffer, doc->m_FileInfo.Hdr1UnPackSize, true));
 				if (parser == nullptr) {
-					delete[] decomp_buffer;
+					delete[] reinterpret_cast<char*>(decomp_buffer);
 					return CKERROR::CKERR_OUTOFMEMORY;
 				}
 			}
@@ -221,7 +221,7 @@ namespace LibCmo::CK2 {
 				parser = std::unique_ptr<CKBufferParser>(new(std::nothrow) CKBufferParser(decomp_buffer, doc->m_FileInfo.DataUnPackSize, true));
 
 				if (parser == nullptr) {
-					delete[] decomp_buffer;
+					delete[] reinterpret_cast<char*>(decomp_buffer);
 					return CKERROR::CKERR_OUTOFMEMORY;
 				}
 			}

@@ -29,7 +29,9 @@ namespace LibCmo::EncodingHelper {
 	bool CharToChar(std::string& src, std::string& dest, UINT src_codepage, UINT dest_codepage);
 
 #else
-#error NO IMPLEMENTATION FOR LINUX ENCODING!
+
+	bool DoIconv(const char* enc_from, const char* enc_to, std::string& str_from, std::string& str_to);
+
 #endif
 
 #pragma endregion
@@ -38,12 +40,17 @@ namespace LibCmo::EncodingHelper {
 
 #if defined(LIBCMO_OS_WIN32)
 
-	/// <summary>
-	/// Token is the ticket for using encoding functions.
-	/// It should be created by "GenerateEncodingToken" and free by "DestroyEncodingToken".
-	/// </summary>
+	// Token is the ticket for using encoding functions.
+	// It should be created by "GenerateEncodingToken" and free by "DestroyEncodingToken".
 	using ENCODING_TOKEN = UINT*;
-	extern const ENCODING_TOKEN ENCODING_TOKEN_DEFAULT;
+	constexpr const ENCODING_TOKEN ENCODING_TOKEN_DEFAULT = nullptr;
+
+#else
+
+	using ENCODING_TOKEN = char*;
+	constexpr const ENCODING_TOKEN ENCODING_TOKEN_DEFAULT = nullptr;
+
+#endif
 
 	ENCODING_TOKEN CreateEncodingToken(std::string& token_string);
 	void DestroyEncodingToken(ENCODING_TOKEN token);
@@ -53,18 +60,6 @@ namespace LibCmo::EncodingHelper {
 
 	void SetStdPathFromU8Path(std::filesystem::path& stdpath, const char* u8_path);
 	FILE* OpenStdPathFile(std::filesystem::path& u8_filepath, bool is_read);
-
-#else
-
-	/// <summary>
-	/// Token is the ticket for using encoding functions.
-	/// It should be created by "GenerateEncodingToken" and free by "DestroyEncodingToken".
-	/// </summary>
-	using ENCODING_TOKEN = char*;
-	extern const ENCODING_TOKEN ENCODING_TOKEN_DEFAULT;
-
-#error NO IMPLEMENTATION FOR LINUX ENCODING!
-#endif
 
 #pragma endregion
 
