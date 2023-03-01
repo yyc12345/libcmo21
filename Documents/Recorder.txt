@@ -47,7 +47,14 @@ typedef int CKBOOL;
 typedef unsigned char CKBYTE;	
 typedef unsigned int CKDWORD; 	
 typedef unsigned short CKWORD;		
-typedef int CKERROR;			
+typedef int CKERROR;	
+typedef void* CKSOUNDHANDLE;
+typedef int CKParameterType; 
+typedef int CKOperationType; 
+typedef int CKMessageType; 
+typedef int CKAttributeType; 
+typedef int CKAttributeCategory; 
+		
 
 struct CKGUID {
 DWORD d1,d2;
@@ -89,6 +96,11 @@ struct XBitArray {
     DWORD m_Size;
 };
 
+struct CKAttributeVal {
+    CKAttributeType AttribType;
+    CK_ID Parameter;
+};
+
 struct VxImageDescEx {
 	int		Size;				// Size of the structure
 	DWORD	Flags;				// Reserved for special formats (such as compressed ) 0 otherwise
@@ -123,22 +135,29 @@ struct VxImageDescEx {
 };
 
 // <T, K> = <int, CK_ID>
-typedef struct XFileObjectsTable::Entry {
-    CK_ID key;
-    int data;
-    struct Entry* next;
-} *XFileObjectsTable::pEntry;
-struct XFileObjectsTable {
-    struct XFileObjectsTable::XSArray_pEntry_ {
-        XFileObjectsTable::pEntry* m_Begin;
-        XFileObjectsTable::pEntry* m_End;
+struct XHashTable_int_int_::Entry
+{
+  int key;
+  int data;
+  struct XHashTable_int_int_::Entry *next;
+} *XHashTable_int_int_::pEntry;
+struct XHashTable_int_int_ {
+    struct XHashTable_int_int_::XSArray_pEntry_ {
+        XHashTable_int_int_::pEntry* m_Begin;
+        XHashTable_int_int_::pEntry* m_End;
     }m_Table;
-    struct XFileObjectsTable::XClassArray_pEntry_ {
-        XFileObjectsTable::pEntry*			m_Begin;
-        XFileObjectsTable::pEntry*			m_End;
-        XFileObjectsTable::pEntry*			m_AllocatedEnd;
+    struct XHashTable_int_int_::XClassArray_pEntry_ {
+        XHashTable_int_int_::Entry*			m_Begin;
+        XHashTable_int_int_::Entry*			m_End;
+        XHashTable_int_int_::Entry*			m_AllocatedEnd;
     }m_Pool;
 };
+struct XHashTable_int_int_::Iterator {
+    XHashTable_int_int_::pEntry m_Node;
+    XHashTable_int_int_* m_Table;
+};
+typedef XHashTable_int_int_ XFileObjectsTable;
+typedef XHashTable_int_int_ XAttributeList;
 
 
 struct CKObject {
@@ -151,6 +170,20 @@ struct CKObject {
 
 struct CKSceneObject : CKObject {
     XBitArray	m_Scenes;
+};
+struct CKBeObject : CKSceneObject {
+	XBitArray				m_Groups;				
+	XArray* 	m_ScriptArray;			
+	XArray*				m_LastFrameMessages;
+	DWORD			m_Waiting;  // expanded from unsigned short
+	DWORD			m_Priority; // expanded from signed short
+	float					m_LastExecutionTime;
+	XAttributeList*			m_Attributes;
+    CKDWORD*        m_unknow15;
+    CKDWORD m_unknow16;
+    CKDWORD m_AttributeCount;
+    CKDWORD m_unknow18;
+    CKDWORD m_unknow19;
 };
 
 struct BehaviorBlockData{};		
