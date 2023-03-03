@@ -9,10 +9,10 @@ namespace LibCmo::CK2::CKManagerImplements {
 
 	}
 
-	CKERROR CKBaseManager::LoadData(CKStateChunk* statechunk, CKFileData::ShallowDocument* doc) {
+	CKERROR CKBaseManager::LoadData(CKStateChunk* statechunk, CKFileDocument* doc) {
 		return CKERROR::CKERR_OK;
 	}
-	CKStateChunk* CKBaseManager::SaveData(CKFileData::ShallowDocument* doc) {
+	CKStateChunk* CKBaseManager::SaveData(CKFileDocument* doc) {
 		return nullptr;
 	}
 

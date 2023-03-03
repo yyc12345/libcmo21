@@ -68,20 +68,12 @@ namespace LibCmo {
 		class CKMinContext;
 		class CKStateChunk;
 		class CKFile;
-		namespace CKFileData {
-			class ShallowDocument;
-			class DeepDocument;
-			class HybridDocument;
-		}
+		class CKFileDocument;
 
 		// useful struct define
 		struct CKGUID {
-			union {
-				struct {
-					CKDWORD d1, d2;
-				};
-				CKDWORD d[2];
-			};
+			CKDWORD d1, d2;
+
 			constexpr CKGUID(CKDWORD gd1 = 0, CKDWORD gd2 = 0) : d1(gd1), d2(gd2) {}
 			CKGUID(const CKGUID& rhs) : d1(rhs.d1), d2(rhs.d2) {}
 			CKGUID& operator=(const CKGUID& rhs) {
@@ -136,12 +128,7 @@ namespace LibCmo {
 		class VxMemoryMappedFile;
 
 		struct VxVector {
-			union {
-				struct {
-					float x, y, z;
-				};
-				float v[3];
-			};
+			float x, y, z;
 
 			VxVector() : x(0.0f), y(0.0f), z(0.0f) { ; }
 			VxVector(float f) : x(f), y(f), z(f) { ; }
@@ -150,12 +137,7 @@ namespace LibCmo {
 		};
 
 		struct VxQuaternion {
-			union {
-				struct {
-					float x, y, z, w;
-				};
-				float v[4];
-			};
+			float x, y, z, w;
 
 			VxQuaternion() : x(0.0f), y(0.0f), z(0.0f), w(1.0f) { ; }
 			VxQuaternion(float X, float Y, float Z, float W) : x(X), y(Y), z(Z), w(W) { ; }

@@ -64,13 +64,15 @@ namespace LibCmo::CK2 {
 
 	CKFileObject::CKFileObject() :
 		ObjectId(0u), ObjectCid(CK_CLASSID::CKCID_OBJECT), Name(),
-		Data(nullptr), FileIndex(0u) {
+		ObjPtr(nullptr), Data(nullptr), FileIndex(0u) {
 	}
 
 	CKFileObject::CKFileObject(const CKFileObject& rhs) :
 		ObjectId(rhs.ObjectId), ObjectCid(rhs.ObjectCid), Name(rhs.Name),
-		Data(rhs.Data), FileIndex(rhs.FileIndex) {
+		ObjPtr(rhs.ObjPtr), Data(rhs.Data), FileIndex(rhs.FileIndex) {
 
+		// CKObject is managed by CKMinContext, so we just copy its pointer.
+		// however, we need copy CKStateChunk.
 		if (this->Data != nullptr) {
 			this->Data = new(std::nothrow) CKStateChunk(*(rhs.Data));
 		}
@@ -83,6 +85,10 @@ namespace LibCmo::CK2 {
 		this->Name = rhs.Name;
 		this->FileIndex = rhs.FileIndex;
 
+		// CKObject is managed by CKMinContext, so we just copy its pointer.
+		this->ObjPtr = rhs.ObjPtr;
+
+		// however, we need copy CKStateChunk.
 		this->Data = rhs.Data;
 		if (this->Data != nullptr) {
 			this->Data = new(std::nothrow) CKStateChunk(*(rhs.Data));
@@ -100,11 +106,11 @@ namespace LibCmo::CK2 {
 #pragma region CKFileManagerData
 
 	CKFileManagerData::CKFileManagerData() :
-		Data(nullptr), Manager(0u, 0u) {
+		MgrPtr(nullptr), Data(nullptr), Manager(0u, 0u) {
 	}
 
 	CKFileManagerData::CKFileManagerData(const CKFileManagerData& rhs) :
-		Data(rhs.Data), Manager(rhs.Manager) {
+		MgrPtr(rhs.MgrPtr), Data(rhs.Data), Manager(rhs.Manager) {
 
 		if (this->Data != nullptr) {
 			this->Data = new(std::nothrow) CKStateChunk(*(rhs.Data));
@@ -114,6 +120,7 @@ namespace LibCmo::CK2 {
 
 	CKFileManagerData& CKFileManagerData::operator=(const CKFileManagerData& rhs) {
 		this->Manager = rhs.Manager;
+		this->MgrPtr = rhs.MgrPtr;
 
 		this->Data = rhs.Data;
 		if (this->Data != nullptr) {
@@ -151,33 +158,17 @@ namespace LibCmo::CK2 {
 
 #pragma endregion
 
-	namespace CKFileData {
-
 #pragma region ShallowDocument
 
-		ShallowDocument::ShallowDocument() {
-			/*this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));*/
-		}
+	CKFileDocument::CKFileDocument() {
+		/*this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));*/
+	}
 
-		ShallowDocument::~ShallowDocument() {
-
-		}
-
-#pragma endregion
-
-#pragma region DeepDocument
-
-		DeepDocument::DeepDocument() {
-			/*this->m_IndexByClassId.resize(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));*/
-		}
-
-		DeepDocument::~DeepDocument() {
-
-		}
-
-#pragma endregion
+	CKFileDocument::~CKFileDocument() {
 
 	}
+
+#pragma endregion
 
 #pragma region CKFile Misc
 

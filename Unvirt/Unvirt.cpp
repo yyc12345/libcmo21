@@ -17,8 +17,8 @@ int main(int argc, char* argv[]) {
 	vtctx.SetEncoding("850");
 
 	LibCmo::CK2::CKFile vtfile(&vtctx);
-	LibCmo::CK2::CKFileData::DeepDocument* doc;
-	LibCmo::CK2::CKERROR err = vtfile.DeepLoad("Level_01.NMO", &doc);
+	LibCmo::CK2::CKFileDocument* doc;
+	LibCmo::CK2::CKERROR err = vtfile.DeepLoad("Level_02.NMO", &doc);
 
 	if (doc)
 		Unvirt::StructFormatter::PrintCKFileInfo(doc->m_FileInfo);

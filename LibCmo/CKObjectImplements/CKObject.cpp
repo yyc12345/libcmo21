@@ -16,7 +16,7 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	}
 
-	CKERROR CKObject::Load(CKStateChunk* chunk, const CKFileData::ShallowDocument* doc) {
+	CKERROR CKObject::Load(CKStateChunk* chunk, const CKFileDocument* doc) {
 		if (chunk->SeekIdentifier(Identifiers::CK_STATESAVEFLAGS_OBJECT::CK_STATESAVE_OBJECTHIDDEN)) {
 			EnumsHelper::FlagEnumRm(this->m_ObjectFlags,
 				{ CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE,
@@ -45,7 +45,7 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 		return CKERROR::CKERR_OK;
 	}
-	CKStateChunk* CKObject::Save(CKFileData::ShallowDocument* doc) {
+	CKStateChunk* CKObject::Save(const CKFileDocument* doc) {
 		return nullptr;
 	}
 

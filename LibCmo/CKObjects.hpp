@@ -25,8 +25,8 @@ namespace LibCmo::CK2::CKObjectImplements {
 		void SetObjectFlags(CK_OBJECT_FLAGS flags) { this->m_ObjectFlags = flags; }
 
 		virtual CK_CLASSID GetClassID(void) { return CK_CLASSID::CKCID_OBJECT; }
-		virtual CKERROR Load(CKStateChunk* chunk, const CKFileData::ShallowDocument* doc);
-		virtual CKStateChunk* Save(CKFileData::ShallowDocument* doc);
+		virtual CKERROR Load(CKStateChunk* chunk, const CKFileDocument* doc);
+		virtual CKStateChunk* Save(const CKFileDocument* doc);
 	};
 
 	class CKSceneObject : public CKObject {

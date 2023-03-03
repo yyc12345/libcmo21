@@ -12,8 +12,8 @@ namespace LibCmo::CK2::CKManagerImplements {
 		CKBaseManager& operator=(const CKBaseManager&) = delete;
 		virtual ~CKBaseManager();
 
-		virtual CKERROR LoadData(CKStateChunk* statechunk, CKFileData::ShallowDocument* doc);
-		virtual CKStateChunk* SaveData(CKFileData::ShallowDocument* doc);
+		virtual CKERROR LoadData(CKStateChunk* statechunk, CKFileDocument* doc);
+		virtual CKStateChunk* SaveData(CKFileDocument* doc);
 
 	private:
 

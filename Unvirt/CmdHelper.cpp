@@ -1,77 +1,242 @@
 #include "CmdHelper.hpp"
 #include "TerminalHelper.hpp"
-#include "VTUtils.hpp"
-#include "VTEncoding.hpp"
+
+#include <CKMinContext.hpp>
+#include <CKFile.hpp>
+
 #include <iostream>
+#include <cstdio>
+#include <cstdarg>
 
-/*
-
-namespace Unvirt {
-	namespace CmdHelper {
+namespace Unvirt::CmdHelper {
 
 #pragma region CmdSplitter
 
-		CmdSplitter::CmdSplitter() :
-			mCmdChar(0), mBuffer(nullptr), mResult(nullptr),
-			mState(StateType::NORMAL), mPreState(StateType::NORMAL) {
-			;
-		}
-		CmdSplitter::~CmdSplitter() {
-			;
-		}
+	CmdSplitter::CmdSplitter() :
+		mCmdChar(0), mBuffer(nullptr), mResult(nullptr),
+		mState(StateType::NORMAL), mPreState(StateType::NORMAL) {
+		;
+	}
+	CmdSplitter::~CmdSplitter() {
+		;
+	}
 
-		const std::vector<std::string> CmdSplitter::Convert(const std::string& u8cmd) {
-			// set up variables
-			std::vector<std::string> result;
-			std::string buffer;
-			mBuffer = &buffer;
-			mResult = &result;
-			mState = mPreState = StateType::SPACE;
+	const std::deque<std::string> CmdSplitter::Convert(const std::string& u8cmd) {
+		// set up variables
+		std::deque<std::string> result;
+		std::string buffer;
+		mBuffer = &buffer;
+		mResult = &result;
+		mState = mPreState = StateType::SPACE;
 
-			// split
-			for (auto it = u8cmd.begin(); it != u8cmd.end(); ++it) {
-				mCmdChar = (*it);
+		// split
+		for (auto it = u8cmd.begin(); it != u8cmd.end(); ++it) {
+			mCmdChar = (*it);
 
-				switch (mState) {
-					case StateType::SPACE:
-						ProcSpace();
-						break;
-					case StateType::SINGLE:
-						ProcSingle();
-						break;
-					case StateType::DOUBLE:
-						ProcDouble();
-						break;
-					case StateType::ESCAPE:
-						ProcEscape();
-						break;
-					case StateType::NORMAL:
-						ProcNormal();
-						break;
-				}
-			}
-
-			// final proc
 			switch (mState) {
 				case StateType::SPACE:
-					break;
-				case StateType::NORMAL:
-					// push the last one
-					mResult->push_back(*mBuffer);
+					ProcSpace();
 					break;
 				case StateType::SINGLE:
+					ProcSingle();
+					break;
 				case StateType::DOUBLE:
+					ProcDouble();
+					break;
 				case StateType::ESCAPE:
-					// error
-					result.clear();
+					ProcEscape();
+					break;
+				case StateType::NORMAL:
+					ProcNormal();
 					break;
 			}
-
-			// return value
-			return result;
 		}
 
+		// final proc
+		switch (mState) {
+			case StateType::SPACE:
+				break;
+			case StateType::NORMAL:
+				// push the last one
+				mResult->push_back(*mBuffer);
+				break;
+			case StateType::SINGLE:
+			case StateType::DOUBLE:
+			case StateType::ESCAPE:
+				// error
+				result.clear();
+				break;
+		}
+
+		// return value
+		return result;
+	}
+
 #pragma endregion
+
+#pragma region ArgParser
+
+	bool ArgParser::ParseInt(const std::vector<std::string>& cmd, const size_t expected_index, int32_t& result) {
+		if (expected_index >= cmd.size()) {
+			result = 0;
+			return false;
+		}
+
+		char* pend = nullptr;
+		errno = 0;
+		int64_t v = std::strtoll(cmd[expected_index].c_str(), &pend, 10);
+
+		if (pend == cmd[expected_index].c_str() || errno == ERANGE) {
+			result = 0;
+			return false;
+		}
+
+		result = static_cast<int>(v);
+		return true;
+	}
+
+	bool ArgParser::ParseString(const std::vector<std::string>& cmd, const size_t expected_index, std::string& result) {
+		if (expected_index >= cmd.size()) {
+			result.clear();
+			return false;
+		} else {
+			result = cmd[expected_index];
+			return true;
+		}
+	}
+
+	bool ArgParser::ParseSwitch(const std::vector<std::string>& cmd, const size_t expected_index, const std::vector<std::string>& switches, std::string& gotten) {
+		if (expected_index >= cmd.size()) {
+			gotten.clear();
+			return false;
+		}
+
+		for (const auto& sw : switches) {
+			if (cmd[expected_index] == sw) {
+				gotten = cmd[expected_index];
+				return true;
+			}
+		}
+
+		gotten.clear();
+		return false;
+	}
+
+#pragma endregion
+
+#pragma region InteractiveCmd
+
+	InteractiveCmd::InteractiveCmd() :
+		m_CmdSplitter(), m_ExitRunFlag(false),
+		m_Ctx(nullptr), m_Doc(nullptr) {
+
+	}
+
+	InteractiveCmd::~InteractiveCmd() {
+		if (m_Doc != nullptr) delete m_Doc;
+		if (m_Ctx != nullptr) delete m_Ctx;
+	}
+
+	void InteractiveCmd::Run(void) {
+		std::string u8cmd;
+
+		m_ExitRunFlag = false;
+		while (!m_ExitRunFlag) {
+			// get command
+			GetCmdLine(u8cmd);
+
+			// split cmd and parse it
+			auto cmds = m_CmdSplitter.Convert(u8cmd);
+
+			// get sub command
+			if (cmds.size() < 1u) {
+				this->PrintCommonError("No command specified!");
+				this->PrintHelp();
+				continue;
+			}
+			std::string subcmd(cmds.front());
+			cmds.pop_front();
+
+			// dispatch command
+			bool success = true;
+			if (subcmd == "load") success = this->ProcLoad(cmds);
+			else if (subcmd == "unload") success = this->ProcUnLoad(cmds);
+			else if (subcmd == "info") success = this->ProcInfo(cmds);
+			else if (subcmd == "ls") success = this->ProcLs(cmds);
+			else {
+				this->PrintCommonError("No such command \"\".", subcmd.c_str());
+				this->PrintHelp();
+			}
+
+			if (!success) this->PrintHelp();
+		}
+	}
+
+	void InteractiveCmd::GetCmdLine(std::string& u8cmd) {
+#if defined(LIBCMO_OS_WIN32)
+		std::wstring wcmd;
+		std::getline(std::wcin, wcmd);
+		LibCmo::EncodingHelper::WcharToChar(wcmd, u8cmd, CP_UTF8);
+#else
+		std::getline(std::cin, u8cmd);
+#endif
+	}
+
+	bool InteractiveCmd::HasOpenedFile(void) {
+		return (m_Ctx != nullptr || m_Doc != nullptr);
+	}
+
+	void InteractiveCmd::PrintHelp(void) {
+		FILE* f = stdout;
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("Allowed Subcommands: \n")), f);
+	}
+
+	void InteractiveCmd::PrintArgParseError(const std::deque<std::string>& cmd, size_t pos) {
+		if (pos >= cmd.size()) {
+			fprintf(stdout, UNVIRT_TERMCOL_LIGHT_RED(("Lost argument at position %zu.\n")), pos);
+		} else {
+			fprintf(stdout, UNVIRT_TERMCOL_LIGHT_RED(("Unexpected argument \"%s\".\n")), cmd[pos].c_str());
+		}
+
+		// arg error always print help
+		this->PrintHelp();
+	}
+
+	void InteractiveCmd::PrintCommonError(const char* u8_fmt, ...) {
+		va_list argptr;
+		va_start(argptr, u8_fmt);
+		std::fputs(UNVIRT_TERMCOLHDR_LIGHT_RED, stdout);
+		std::vfprintf(stdout, u8_fmt, argptr);
+		std::fputs(UNVIRT_TERMCOLTAIL, stdout);
+		va_end(argptr);
+	}
+
+
+#pragma endregion
+
+#pragma region Command Processors
+
+	bool InteractiveCmd::ProcLoad(const std::deque<std::string>& cmd) {
+	}
+
+	bool InteractiveCmd::ProcUnLoad(const std::deque<std::string>& cmd) {
+	}
+
+	bool InteractiveCmd::ProcInfo(const std::deque<std::string>& cmd) {
+	}
+
+	bool InteractiveCmd::ProcLs(const std::deque<std::string>& cmd) {
+		static const std::vector<std::string> c_AllowedSwitches {
+			"obj", "mgr"
+		};
+
+
+	}
+
+#pragma endregion
+
+
+	/*
 
 #pragma region OptionsDescription
 
@@ -444,7 +609,7 @@ namespace Unvirt {
 
 #pragma endregion
 
-		}
-	}
 
 */
+
+}

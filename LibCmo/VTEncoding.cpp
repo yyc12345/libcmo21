@@ -29,11 +29,11 @@ namespace LibCmo::EncodingHelper {
 		int count, write_result;
 
 		//converter to CHAR
-		count = WideCharToMultiByte(CP_UTF8, 0, src, -1, NULL, 0, NULL, NULL);
+		count = WideCharToMultiByte(codepage, 0, src, -1, NULL, 0, NULL, NULL);
 		if (count <= 0) return false;
 
 		dest.resize(count);
-		write_result = WideCharToMultiByte(CP_UTF8, 0, src, -1, dest.data(), count, NULL, NULL);
+		write_result = WideCharToMultiByte(codepage, 0, src, -1, dest.data(), count, NULL, NULL);
 		if (write_result <= 0) return false;
 
 		return true;
@@ -50,7 +50,7 @@ namespace LibCmo::EncodingHelper {
 		if (wcount <= 0) return false;
 
 		dest.resize(wcount);
-		write_result = MultiByteToWideChar(CP_UTF8, 0, src, -1, dest.data(), wcount);
+		write_result = MultiByteToWideChar(codepage, 0, src, -1, dest.data(), wcount);
 		if (write_result <= 0) return false;
 
 		return true;
@@ -71,9 +71,9 @@ namespace LibCmo::EncodingHelper {
 
 #else
 
-	static constexpr const IconvInc = 16;
-	bool DoIconv(const char* enc_from, const char* enc_to, 
-			std::string& str_from, std::string& str_to) {
+	static constexpr const size_t IconvInc = 16;
+
+	bool DoIconv(const char* enc_from, const char* enc_to, std::string& str_from, std::string& str_to) {
 		iconv_t cd;
 		char *inbuf = nullptr, *outbuf = nullptr;
 		size_t inbytesleft, outbytesleft, nchars, result_len;
@@ -199,7 +199,7 @@ namespace LibCmo::EncodingHelper {
 
 #else
 
-	static const char UTF8_SYMBOL[] = "UTF-8";
+	static constexpr const char UTF8_SYMBOL[] = "UTF-8";
 
 	ENCODING_TOKEN CreateEncodingToken(std::string& token_string) {
 		ENCODING_TOKEN token = new(std::nothrow) char[token_string.size() + 1];

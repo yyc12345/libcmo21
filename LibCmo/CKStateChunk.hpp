@@ -85,7 +85,7 @@ namespace LibCmo::CK2 {
 			if (EnsureReadSpace(static_cast<CKDWORD>(size))) {
 				std::memcpy(data, this->m_pData + this->m_Parser.m_CurrentPos, size);
 
-			} return CKERROR::CKERR_OUTOFMEMORY;
+			} else return CKERROR::CKERR_OUTOFMEMORY;
 			return CKERROR::CKERR_OK;
 		}
 		/*

@@ -42,6 +42,11 @@ namespace LibCmo::CK2 {
 		std::filesystem::create_directory(m_TempFolder);
 	}
 	CKMinContext::~CKMinContext() {
+		// free all created objects
+		for (const auto& [key, value] : this->m_ObjectsList) {
+			delete value;
+		}
+		// todo: free all created managers
 
 	}
 

@@ -88,11 +88,12 @@ namespace LibCmo::CK2 {
 		CKFileObject& operator=(const CKFileObject&);
 		~CKFileObject();
 
-		CK_ID ObjectId;
-		CK_CLASSID ObjectCid;
-		std::string Name;
-		CKStateChunk* Data;
-		CKDWORD FileIndex;
+		CK_ID ObjectId;							// ID of the object being load/saved (as it will be/was saved in the file)
+		CK_CLASSID ObjectCid;					// Class Identifier of the object
+		CKObjectImplements::CKObject* ObjPtr;	// A pointer to the object itself (as CreatedObject when loading)
+		std::string Name;						// Name of the Object
+		CKStateChunk* Data;						// A CKStateChunk that contains object information
+		CKDWORD FileIndex;						// Position of the object data inside uncompressed file buffer
 	private:
 
 	};
@@ -104,6 +105,7 @@ namespace LibCmo::CK2 {
 		CKFileManagerData& operator=(const CKFileManagerData&);
 		~CKFileManagerData();
 
+		CKManagerImplements::CKBaseManager* MgrPtr;
 		CKStateChunk* Data;
 		CKGUID Manager;
 	private:
@@ -123,56 +125,22 @@ namespace LibCmo::CK2 {
 
 	};
 
-	namespace CKFileData {
-		class ShallowDocument {
-		public:
-			ShallowDocument();
-			ShallowDocument(const ShallowDocument&) = delete;
-			ShallowDocument& operator=(const ShallowDocument&) = delete;
-			~ShallowDocument();
+	class CKFileDocument {
+	public:
+		CKFileDocument();
+		~CKFileDocument();
 
-			int32_t m_SaveIDMax;
-			CKFileInfo m_FileInfo;
+		int32_t m_SaveIDMax;
+		CKFileInfo m_FileInfo;
 
-			XArray<CKFileObject> m_FileObjects;
-			XArray<CKFileManagerData> m_FileManagersData;
-			XClassArray<CKFilePluginDependencies> m_PluginDep;
-			/*XClassArray<XIntArray> m_IndexByClassId;*/
-			XClassArray<XString> m_IncludedFiles;
+		XArray<CKFileObject> m_FileObjects;
+		XArray<CKFileManagerData> m_FileManagersData;
+		XClassArray<CKFilePluginDependencies> m_PluginDep;
+		/*XClassArray<XIntArray> m_IndexByClassId;*/
+		XClassArray<XString> m_IncludedFiles;
+	private:
 
-		private:
-
-		};
-
-		class DeepDocument {
-		public:
-			DeepDocument();
-			DeepDocument(const DeepDocument&) = delete;
-			DeepDocument& operator=(const DeepDocument&) = delete;
-			~DeepDocument();
-
-			int32_t m_SaveIDMax;
-			CKFileInfo m_FileInfo;
-
-			XArray<CKObjectImplements::CKObject*> m_Objects;
-			/*XClassArray<XIntArray> m_IndexByClassId;*/
-			XClassArray<XString> m_IncludedFiles;
-		private:
-
-		};
-
-		class HybridDocument {
-		public:
-			HybridDocument();
-			HybridDocument(const HybridDocument&) = delete;
-			HybridDocument& operator=(const HybridDocument&) = delete;
-			~HybridDocument();
-
-		private:
-
-		};
-
-	}
+	};
 
 	class CKFile {
 	public:
@@ -183,16 +151,10 @@ namespace LibCmo::CK2 {
 
 		void ClearData(void);
 
-		CKERROR ShallowLoad(CKSTRING u8_filename, CKFileData::ShallowDocument** out_doc);
-		CKERROR DeepLoad(CKSTRING u8_filename, CKFileData::DeepDocument** out_doc);
+		CKERROR ShallowLoad(CKSTRING u8_filename, CKFileDocument** out_doc);
+		CKERROR DeepLoad(CKSTRING u8_filename, CKFileDocument** out_doc);
 
-		CKERROR ShallowSave(CKSTRING u8_filename, CKFileData::ShallowDocument* in_doc);
-		CKERROR DeepSave(CKSTRING u8_filename, CKFileData::DeepDocument* out_doc);
-		CKERROR HybridSave(CKSTRING u8_filename, CKFileData::HybridDocument* out_doc);
-
-		CKERROR DestroyDocument(CKFileData::ShallowDocument* in_doc);
-		CKERROR DestroyDocument(CKFileData::DeepDocument* in_doc);
-		CKERROR DestroyDocument(CKFileData::HybridDocument* in_doc);
+		CKERROR Save(CKSTRING u8_filename, CKFileDocument* in_doc);
 
 		//CKERROR Load(CKSTRING u8_filename, /*CKObjectArray list, */ CK_LOAD_FLAGS flags);
 		//CKERROR OpenFile(CKSTRING u8_filename, CK_LOAD_FLAGS flags);
@@ -218,8 +180,8 @@ namespace LibCmo::CK2 {
 
 	private:
 		// reader function and variables
-		CKERROR ReadFileHeader(CKBufferParser* ParserPtr, CKFileData::ShallowDocument* doc);
-		CKERROR ReadFileData(CKBufferParser* ParserPtr, CKFileData::ShallowDocument* doc);
+		CKERROR ReadFileHeader(CKBufferParser* ParserPtr, CKFileDocument* doc);
+		CKERROR ReadFileData(CKBufferParser* ParserPtr, CKFileDocument* doc);
 
 		// writer function and varibales
 
