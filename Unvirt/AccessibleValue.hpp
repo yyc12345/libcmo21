@@ -8,7 +8,7 @@
 namespace Unvirt {
 	namespace AccessibleValue {
 
-		extern const char c_InvalidEnumName[];
+		constexpr const char c_InvalidEnumName[] = "[undefined]";
 
 #pragma region universal enum name
 
@@ -23,23 +23,25 @@ namespace Unvirt {
 		}
 
 		template<typename TEnum>
-		void GetEnumName(const EnumDescPairArray<TEnum>& desc, std::string& strl, TEnum val) {
+		std::string GetEnumName(const EnumDescPairArray<TEnum>& desc, TEnum val) {
+			std::string strl;
 			for (auto it = desc.begin(); it != desc.end(); ++it) {
 				if ((*it).first == val) {
 					strl = (*it).second;
-					return;
+					return strl;
 				}
 			}
 			strl = c_InvalidEnumName;
+			return strl;
 		}
 		template<typename TEnum>
-		void GetFlagEnumName(const EnumDescPairArray<TEnum>& desc, std::string& strl, TEnum val) {
-			strl.clear();
+		std::string GetFlagEnumName(const EnumDescPairArray<TEnum>& desc, TEnum val) {
+			std::string strl;
 			for (auto it = desc.begin(); it != desc.end(); ++it) {
 				// if it have exacelt same entry, return directly
 				if ((*it).first == val) {
 					strl = (*it).second;
-					return;
+					return strl;
 				}
 
 				// check flag match
@@ -54,16 +56,17 @@ namespace Unvirt {
 				// nothing was gotten. set to undefined
 				strl = c_InvalidEnumName;
 			} // otherwise return directly
+			return strl;
 		}
 
 #pragma endregion
 
-		void GetClassIdName(std::string& strl, LibCmo::CK2::CK_CLASSID cls);
-		void GetCkErrorName(std::string& strl, LibCmo::CK2::CKERROR err);
-		void GetClassIdHierarchy(std::string& strl, LibCmo::CK2::CK_CLASSID cls);
-		void GetCkErrorDescription(std::string& strl, LibCmo::CK2::CKERROR err);
+		std::string GetClassIdName(LibCmo::CK2::CK_CLASSID cls);
+		std::string GetCkErrorName(LibCmo::CK2::CKERROR err);
+		std::string GetClassIdHierarchy(LibCmo::CK2::CK_CLASSID cls);
+		std::string GetCkErrorDescription(LibCmo::CK2::CKERROR err);
 
-		void GetAccessibleFileSize(std::string& strl, uint64_t size);
+		std::string GetAccessibleFileSize(uint64_t size);
 
 	}
 }

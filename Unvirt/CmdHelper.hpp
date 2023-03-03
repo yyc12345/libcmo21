@@ -127,9 +127,9 @@ namespace Unvirt::CmdHelper {
 		ArgParser& operator=(const ArgParser&) = delete;
 		~ArgParser() {}
 
-		static bool ParseInt(const std::vector<std::string>& cmd, const size_t expected_index, int32_t& result);
-		static bool ParseString(const std::vector<std::string>& cmd, const size_t expected_index, std::string& result);
-		static bool ParseSwitch(const std::vector<std::string>& cmd, const size_t expected_index, const std::vector<std::string>& switches, std::string& gotten);
+		static bool ParseInt(const std::deque<std::string>& cmd, const size_t expected_index, int32_t& result);
+		static bool ParseString(const std::deque<std::string>& cmd, const size_t expected_index, std::string& result);
+		static bool ParseSwitch(const std::deque<std::string>& cmd, const size_t expected_index, const std::vector<std::string>& switches, std::string& gotten);
 	};
 
 	class InteractiveCmd {
@@ -148,14 +148,16 @@ namespace Unvirt::CmdHelper {
 		void PrintArgParseError(const std::deque<std::string>& cmd, size_t pos);
 		void PrintCommonError(const char* u8_fmt, ...);
 
-		bool ProcLoad(const std::deque<std::string>& cmd);
-		bool ProcUnLoad(const std::deque<std::string>& cmd);
-		bool ProcInfo(const std::deque<std::string>& cmd);
-		bool ProcLs(const std::deque<std::string>& cmd);
+		void ProcLoad(const std::deque<std::string>& cmd);
+		void ProcUnLoad(const std::deque<std::string>& cmd);
+		void ProcInfo(const std::deque<std::string>& cmd);
+		void ProcLs(const std::deque<std::string>& cmd);
+		void ProcPage(const std::deque<std::string>& cmd);
 
-		bool m_ExitRunFlag;
 		CmdSplitter m_CmdSplitter;
+		size_t m_PageLen;
 		LibCmo::CK2::CKMinContext* m_Ctx;
+		LibCmo::CK2::CKFile* m_File;
 		LibCmo::CK2::CKFileDocument* m_Doc;
 	};
 

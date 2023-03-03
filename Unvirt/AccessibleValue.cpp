@@ -8,8 +8,6 @@ namespace Unvirt {
 
 #pragma region universal enum name
 
-		const char c_InvalidEnumName[] = "[undefined]";
-
 		namespace EnumDesc {
 			const EnumDescPairArray<LibCmo::CK2::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE{
 			{ LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED, "CKFILE_UNCOMPRESSED" },
@@ -115,7 +113,8 @@ namespace Unvirt {
 			{ LibCmo::CK2::CKERROR::CKERR_INVALIDANIMATION, {"CKERR_INVALIDANIMATION", "the animation is invalid (no entity associated or zero length)"} }
 		};
 
-		void GetCkErrorName(std::string& strl, LibCmo::CK2::CKERROR err) {
+		std::string GetCkErrorName(LibCmo::CK2::CKERROR err) {
+			std::string strl;
 			const std::array<const char*, 2>* pErrDesc = GetEnumData<LibCmo::CK2::CKERROR, std::array<const char*, 2>>(
 				_CkErrorData, err
 				);
@@ -125,9 +124,11 @@ namespace Unvirt {
 			} else {
 				strl = c_InvalidEnumName;
 			}
+			return strl;
 		}
 
-		void GetCkErrorDescription(std::string& strl, LibCmo::CK2::CKERROR err) {
+		std::string GetCkErrorDescription( LibCmo::CK2::CKERROR err) {
+			std::string strl;
 			const std::array<const char*, 2>* pErrDesc = GetEnumData<LibCmo::CK2::CKERROR, std::array<const char*, 2>>(
 				_CkErrorData, err
 				);
@@ -137,6 +138,7 @@ namespace Unvirt {
 			} else {
 				strl = c_InvalidEnumName;
 			}
+			return strl;
 		}
 
 		static const std::vector<std::pair<LibCmo::CK2::CK_CLASSID, std::vector<const char*>>> _CkClassHierarchy{
@@ -209,7 +211,8 @@ namespace Unvirt {
 			{ LibCmo::CK2::CK_CLASSID::CKCID_MAXMAXCLASSID, {"CKCID_MAXMAXCLASSID"} }
 		};
 
-		void GetClassIdName(std::string& strl, LibCmo::CK2::CK_CLASSID cls) {
+		std::string GetClassIdName(LibCmo::CK2::CK_CLASSID cls) {
+			std::string strl;
 			const std::vector<const char*>* pHierarchy = GetEnumData<LibCmo::CK2::CK_CLASSID, std::vector<const char*>>(
 				_CkClassHierarchy, cls
 				);
@@ -219,9 +222,11 @@ namespace Unvirt {
 			} else {
 				strl = c_InvalidEnumName;
 			}
+			return strl;
 		}
 
-		void GetClassIdHierarchy(std::string& strl, LibCmo::CK2::CK_CLASSID cls) {
+		std::string GetClassIdHierarchy(LibCmo::CK2::CK_CLASSID cls) {
+			std::string strl;
 			const std::vector<const char*>* pHierarchy = GetEnumData<LibCmo::CK2::CK_CLASSID, std::vector<const char*>>(
 				_CkClassHierarchy, cls
 				);
@@ -235,38 +240,41 @@ namespace Unvirt {
 			} else {
 				strl = c_InvalidEnumName;
 			}
+
+			return strl;
 		}
 
 #pragma endregion
 
-		void GetAccessibleFileSize(std::string& strl, uint64_t size) {
+		std::string GetAccessibleFileSize(uint64_t size) {
+			std::string strl;
 			static double denominator = (double)0b1111111111;
 			uint64_t probe = size;
 
 			// check bytes
 			if ((probe >> 10) == UINT64_C(0)) {
 				StringHelper::StdstringPrintf(strl, "%" PRIu64 "Bytes", probe);
-				return;
+				return strl;
 			}
 			probe >>= 10;
 
 			// check kb
 			if ((probe >> 10) == UINT64_C(0)) {
 				StringHelper::StdstringPrintf(strl, "%.2lfKiB", size / static_cast<double>(UINT64_C(1) << 10));
-				return;
+				return strl;
 			}
 			probe >>= 10;
 
 			// check mb
 			if ((probe >> 10) == UINT64_C(0)) {
 				StringHelper::StdstringPrintf(strl, "%.2lfMiB", size / static_cast<double>(UINT64_C(1) << 20));
-				return;
+				return strl;
 			}
 			probe >>= 10;
 
 			// otherwise gb
 			StringHelper::StdstringPrintf(strl, "%.2lfGiB", size / static_cast<double>(UINT64_C(1) << 30));
-			return;
+			return strl;
 
 		}
 

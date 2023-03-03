@@ -1,5 +1,7 @@
 #include "CmdHelper.hpp"
 #include "TerminalHelper.hpp"
+#include "StructFormatter.hpp"
+#include "AccessibleValue.hpp"
 
 #include <CKMinContext.hpp>
 #include <CKFile.hpp>
@@ -7,6 +9,11 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdarg>
+
+/* TODO:
+do not re-allocated ctx and file for each loading in future.
+this will be implemented by free all objects within doc.
+*/
 
 namespace Unvirt::CmdHelper {
 
@@ -76,7 +83,7 @@ namespace Unvirt::CmdHelper {
 
 #pragma region ArgParser
 
-	bool ArgParser::ParseInt(const std::vector<std::string>& cmd, const size_t expected_index, int32_t& result) {
+	bool ArgParser::ParseInt(const std::deque<std::string>& cmd, const size_t expected_index, int32_t& result) {
 		if (expected_index >= cmd.size()) {
 			result = 0;
 			return false;
@@ -95,7 +102,7 @@ namespace Unvirt::CmdHelper {
 		return true;
 	}
 
-	bool ArgParser::ParseString(const std::vector<std::string>& cmd, const size_t expected_index, std::string& result) {
+	bool ArgParser::ParseString(const std::deque<std::string>& cmd, const size_t expected_index, std::string& result) {
 		if (expected_index >= cmd.size()) {
 			result.clear();
 			return false;
@@ -105,7 +112,7 @@ namespace Unvirt::CmdHelper {
 		}
 	}
 
-	bool ArgParser::ParseSwitch(const std::vector<std::string>& cmd, const size_t expected_index, const std::vector<std::string>& switches, std::string& gotten) {
+	bool ArgParser::ParseSwitch(const std::deque<std::string>& cmd, const size_t expected_index, const std::vector<std::string>& switches, std::string& gotten) {
 		if (expected_index >= cmd.size()) {
 			gotten.clear();
 			return false;
@@ -127,21 +134,21 @@ namespace Unvirt::CmdHelper {
 #pragma region InteractiveCmd
 
 	InteractiveCmd::InteractiveCmd() :
-		m_CmdSplitter(), m_ExitRunFlag(false),
-		m_Ctx(nullptr), m_Doc(nullptr) {
+		m_CmdSplitter(), m_PageLen(10),
+		m_Ctx(nullptr), m_File(nullptr), m_Doc(nullptr) {
 
 	}
 
 	InteractiveCmd::~InteractiveCmd() {
 		if (m_Doc != nullptr) delete m_Doc;
+		if (m_File != nullptr) delete m_File;
 		if (m_Ctx != nullptr) delete m_Ctx;
 	}
 
 	void InteractiveCmd::Run(void) {
 		std::string u8cmd;
 
-		m_ExitRunFlag = false;
-		while (!m_ExitRunFlag) {
+		while (true) {
 			// get command
 			GetCmdLine(u8cmd);
 
@@ -158,21 +165,23 @@ namespace Unvirt::CmdHelper {
 			cmds.pop_front();
 
 			// dispatch command
-			bool success = true;
-			if (subcmd == "load") success = this->ProcLoad(cmds);
-			else if (subcmd == "unload") success = this->ProcUnLoad(cmds);
-			else if (subcmd == "info") success = this->ProcInfo(cmds);
-			else if (subcmd == "ls") success = this->ProcLs(cmds);
+			if (subcmd == "load") this->ProcLoad(cmds);
+			else if (subcmd == "unload") this->ProcUnLoad(cmds);
+			else if (subcmd == "info") this->ProcInfo(cmds);
+			else if (subcmd == "ls") this->ProcLs(cmds);
+			else if (subcmd == "page") this->ProcPage(cmds);
+			else if (subcmd == "help") this->PrintHelp();
+			else if (subcmd == "exit") break;
 			else {
 				this->PrintCommonError("No such command \"\".", subcmd.c_str());
 				this->PrintHelp();
 			}
 
-			if (!success) this->PrintHelp();
 		}
 	}
 
 	void InteractiveCmd::GetCmdLine(std::string& u8cmd) {
+		fputs("Unvirt> ", stdout);
 #if defined(LIBCMO_OS_WIN32)
 		std::wstring wcmd;
 		std::getline(std::wcin, wcmd);
@@ -183,12 +192,37 @@ namespace Unvirt::CmdHelper {
 	}
 
 	bool InteractiveCmd::HasOpenedFile(void) {
-		return (m_Ctx != nullptr || m_Doc != nullptr);
+		return (m_Ctx != nullptr || m_File == nullptr || m_Doc != nullptr);
 	}
 
 	void InteractiveCmd::PrintHelp(void) {
 		FILE* f = stdout;
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("Allowed Subcommands: \n")), f);
+
+		fputs("load\n", f);
+		fputs("\tDescription: Load a Virtools composition.\n", f);
+		fputs("\tSyntax: load <file path> [encoding] [temp path]\n", f);
+
+		fputs("unload\n", f);
+		fputs("\tDescription: Release loaded Virtools composition.\n", f);
+		fputs("\tSyntax: unload\n", f);
+
+		fputs("info\n", f);
+		fputs("\tDescription: Show the header info of loaded Virtools composition.\n", f);
+		fputs("\tSyntax: info\n", f);
+
+		fputs("ls\n", f);
+		fputs("\tDescription: List something about loaded Virtools composition.\n", f);
+		fputs("\tSyntax: ls <obj | mgr> [page]\n", f);
+
+		fputs("page\n", f);
+		fputs("\tDescription: Set up how many items should be listed in one page when using \"ls\" command.\n", f);
+		fputs("\tSyntax: page <num>\n", f);
+
+		fputs("exit\n", f);
+		fputs("\tDescription: Exit program\n", f);
+		fputs("\tSyntax: exit\n", f);
+
 	}
 
 	void InteractiveCmd::PrintArgParseError(const std::deque<std::string>& cmd, size_t pos) {
@@ -216,21 +250,97 @@ namespace Unvirt::CmdHelper {
 
 #pragma region Command Processors
 
-	bool InteractiveCmd::ProcLoad(const std::deque<std::string>& cmd) {
+	void InteractiveCmd::ProcLoad(const std::deque<std::string>& cmd) {
+		// check pre-requirement
+		if (HasOpenedFile()) {
+			this->PrintCommonError("Already have a opened file. Close it before calling \"load\".");
+			return;
+		}
+
+		// check requirement
+		size_t pos = 0u;
+		std::string filepath;
+		if (!ArgParser::ParseString(cmd, pos, filepath)) {
+			this->PrintArgParseError(cmd, pos);
+			return;
+		}
+		++pos;
+		std::string encoding;
+		if (!ArgParser::ParseString(cmd, pos, encoding)) {
+			this->PrintArgParseError(cmd, pos);
+			return;
+		}
+		++pos;
+		std::string temppath;
+		if (!ArgParser::ParseString(cmd, pos, temppath)) {
+			this->PrintArgParseError(cmd, pos);
+			return;
+		}
+
+		// proc
+		m_Ctx = new LibCmo::CK2::CKMinContext();
+		m_Ctx->SetEncoding(encoding.c_str());
+		m_Ctx->SetTempPath(temppath.c_str());
+
+		m_File = new LibCmo::CK2::CKFile(m_Ctx);
+		m_Doc = new LibCmo::CK2::CKFileDocument();
+		LibCmo::CK2::CKERROR err = m_File->DeepLoad(filepath.c_str(), &m_Doc);
+		if (err != LibCmo::CK2::CKERROR::CKERR_OK) {
+			// fail to load. release all.
+			this->PrintCommonError("Fail to open file. Function return: %s\n%s",
+				Unvirt::AccessibleValue::GetCkErrorName(err),
+				Unvirt::AccessibleValue::GetCkErrorDescription(err)
+			);
+
+			if (m_Doc != nullptr) delete m_Doc;
+			if (m_File != nullptr) delete m_File;
+			if (m_Ctx != nullptr) delete m_Ctx;
+		}
 	}
 
-	bool InteractiveCmd::ProcUnLoad(const std::deque<std::string>& cmd) {
+	void  InteractiveCmd::ProcUnLoad(const std::deque<std::string>& cmd) {
+		// check pre-requirement
+		if (!HasOpenedFile()) {
+			this->PrintCommonError("No loaded file.");
+			return;
+		}
+
+		// free all
+		if (m_Doc != nullptr) delete m_Doc;
+		if (m_File != nullptr) delete m_File;
+		if (m_Ctx != nullptr) delete m_Ctx;
 	}
 
-	bool InteractiveCmd::ProcInfo(const std::deque<std::string>& cmd) {
+	void  InteractiveCmd::ProcInfo(const std::deque<std::string>& cmd) {
+		// check pre-requirement
+		if (!HasOpenedFile()) {
+			this->PrintCommonError("No loaded file.");
+			return;
+		}
+
+		// print
+		Unvirt::StructFormatter::PrintCKFileInfo(m_Doc->m_FileInfo);
 	}
 
-	bool InteractiveCmd::ProcLs(const std::deque<std::string>& cmd) {
-		static const std::vector<std::string> c_AllowedSwitches {
+	void  InteractiveCmd::ProcLs(const std::deque<std::string>& cmd) {
+		static const std::vector<std::string> c_AllowedSwitches{
 			"obj", "mgr"
 		};
 
 
+	}
+
+	void InteractiveCmd::ProcPage(const std::deque<std::string>& cmd) {
+		// check requirement
+		size_t pos = 0u;
+		int32_t count;
+		if (!ArgParser::ParseInt(cmd, pos, count) || count <= 0) {
+			this->PrintArgParseError(cmd, pos);
+			return;
+		}
+
+		// assign
+		m_PageLen = static_cast<size_t>(count);
 	}
 
 #pragma endregion
