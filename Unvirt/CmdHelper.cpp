@@ -13,6 +13,9 @@
 /* TODO:
 do not re-allocated ctx and file for each loading in future.
 this will be implemented by free all objects within doc.
+
+split encoding and temp folder setting
+and load command only have file name arg.
 */
 
 namespace Unvirt::CmdHelper {
@@ -39,6 +42,7 @@ namespace Unvirt::CmdHelper {
 		// split
 		for (auto it = u8cmd.begin(); it != u8cmd.end(); ++it) {
 			mCmdChar = (*it);
+			if (!std::isprint(mCmdChar)) continue;	// skip all invalid characters
 
 			switch (mState) {
 				case StateType::SPACE:
@@ -169,14 +173,14 @@ namespace Unvirt::CmdHelper {
 			else if (subcmd == "unload") this->ProcUnLoad(cmds);
 			else if (subcmd == "info") this->ProcInfo(cmds);
 			else if (subcmd == "ls") this->ProcLs(cmds);
-			else if (subcmd == "page") this->ProcPage(cmds);
+			else if (subcmd == "items") this->ProcItems(cmds);
 			else if (subcmd == "help") this->PrintHelp();
 			else if (subcmd == "exit") break;
 			else {
-				this->PrintCommonError("No such command \"\".", subcmd.c_str());
+				this->PrintCommonError("No such command \"%s\".", subcmd.c_str());
 				this->PrintHelp();
 			}
-
+			
 		}
 	}
 
@@ -192,7 +196,7 @@ namespace Unvirt::CmdHelper {
 	}
 
 	bool InteractiveCmd::HasOpenedFile(void) {
-		return (m_Ctx != nullptr || m_File == nullptr || m_Doc != nullptr);
+		return (m_Ctx != nullptr || m_File != nullptr || m_Doc != nullptr);
 	}
 
 	void InteractiveCmd::PrintHelp(void) {
@@ -215,9 +219,9 @@ namespace Unvirt::CmdHelper {
 		fputs("\tDescription: List something about loaded Virtools composition.\n", f);
 		fputs("\tSyntax: ls <obj | mgr> [page]\n", f);
 
-		fputs("page\n", f);
+		fputs("items\n", f);
 		fputs("\tDescription: Set up how many items should be listed in one page when using \"ls\" command.\n", f);
-		fputs("\tSyntax: page <num>\n", f);
+		fputs("\tSyntax: items <num>\n", f);
 
 		fputs("exit\n", f);
 		fputs("\tDescription: Exit program\n", f);
@@ -243,6 +247,7 @@ namespace Unvirt::CmdHelper {
 		std::vfprintf(stdout, u8_fmt, argptr);
 		std::fputs(UNVIRT_TERMCOLTAIL, stdout);
 		va_end(argptr);
+		std::fputc('\n', stdout);
 	}
 
 
@@ -288,13 +293,17 @@ namespace Unvirt::CmdHelper {
 		if (err != LibCmo::CK2::CKERROR::CKERR_OK) {
 			// fail to load. release all.
 			this->PrintCommonError("Fail to open file. Function return: %s\n%s",
-				Unvirt::AccessibleValue::GetCkErrorName(err),
-				Unvirt::AccessibleValue::GetCkErrorDescription(err)
+				Unvirt::AccessibleValue::GetCkErrorName(err).c_str(),
+				Unvirt::AccessibleValue::GetCkErrorDescription(err).c_str()
 			);
 
 			if (m_Doc != nullptr) delete m_Doc;
 			if (m_File != nullptr) delete m_File;
 			if (m_Ctx != nullptr) delete m_Ctx;
+
+			m_Doc = nullptr;
+			m_File = nullptr;
+			m_Ctx = nullptr;
 		}
 	}
 
@@ -309,6 +318,10 @@ namespace Unvirt::CmdHelper {
 		if (m_Doc != nullptr) delete m_Doc;
 		if (m_File != nullptr) delete m_File;
 		if (m_Ctx != nullptr) delete m_Ctx;
+
+		m_Doc = nullptr;
+		m_File = nullptr;
+		m_Ctx = nullptr;
 	}
 
 	void  InteractiveCmd::ProcInfo(const std::deque<std::string>& cmd) {
@@ -323,14 +336,54 @@ namespace Unvirt::CmdHelper {
 	}
 
 	void  InteractiveCmd::ProcLs(const std::deque<std::string>& cmd) {
+		// static values of switches
 		static const std::vector<std::string> c_AllowedSwitches{
 			"obj", "mgr"
 		};
 
+		// check pre-requirement
+		if (!HasOpenedFile()) {
+			this->PrintCommonError("No loaded file.");
+			return;
+		}
+
+		// check requirement
+		size_t pos = 0u;
+		std::string sw;
+		if (!ArgParser::ParseSwitch(cmd, pos, c_AllowedSwitches, sw)) {
+			this->PrintArgParseError(cmd, pos);
+			return;
+		}
+		++pos;
+		int32_t gotten_page;
+		if (!ArgParser::ParseInt(cmd, pos, gotten_page) || gotten_page <= 0) {
+			gotten_page = 0;	// asssume as zero
+		}
+		size_t page = static_cast<size_t>(gotten_page);
+
+		// show list
+		if (sw == c_AllowedSwitches[0]) {
+			// obj list
+			if (page * this->m_PageLen >= m_Doc->m_FileObjects.size()) {
+				this->PrintCommonError("Page out of range.");
+				return;
+			}
+
+			Unvirt::StructFormatter::PrintObjectList(this->m_Doc->m_FileObjects, page, this->m_PageLen);
+
+		} else {
+			// mgr list
+			if (page * this->m_PageLen >= m_Doc->m_FileManagersData.size()) {
+				this->PrintCommonError("Page out of range.");
+				return;
+			}
+
+			Unvirt::StructFormatter::PrintManagerList(this->m_Doc->m_FileManagersData, page, this->m_PageLen);
+		}
 
 	}
 
-	void InteractiveCmd::ProcPage(const std::deque<std::string>& cmd) {
+	void InteractiveCmd::ProcItems(const std::deque<std::string>& cmd) {
 		// check requirement
 		size_t pos = 0u;
 		int32_t count;

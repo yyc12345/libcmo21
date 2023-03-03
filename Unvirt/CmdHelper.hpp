@@ -1,6 +1,6 @@
 #pragma once
 
-#include <VTUtils.h>
+#include <VTUtils.hpp>
 #include <CKDefines.hpp>
 #include <string>
 #include <vector>
@@ -152,7 +152,7 @@ namespace Unvirt::CmdHelper {
 		void ProcUnLoad(const std::deque<std::string>& cmd);
 		void ProcInfo(const std::deque<std::string>& cmd);
 		void ProcLs(const std::deque<std::string>& cmd);
-		void ProcPage(const std::deque<std::string>& cmd);
+		void ProcItems(const std::deque<std::string>& cmd);
 
 		CmdSplitter m_CmdSplitter;
 		size_t m_PageLen;
