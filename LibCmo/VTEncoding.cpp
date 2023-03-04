@@ -72,9 +72,21 @@ namespace LibCmo::EncodingHelper {
 #else
 
 	static constexpr const size_t IconvInc = 16;
+	static const iconv_t InvalidIconvDescriptor = reinterpret_cast<iconv_t>(-1);
 
-	bool DoIconv(const char* enc_from, const char* enc_to, std::string& str_from, std::string& str_to) {
-		iconv_t cd;
+	bool CreateIconvDescriptor(const char* enc_from, const char* enc_to, iconv_t& val) {
+		val = iconv_open(enc_to, enc_from);
+		return val != InvalidIconvDescriptor;
+	}
+	void DestroyIconvDescriptor(iconv_t& val) {
+		if (val == InvalidIconvDescriptor) return;
+
+		iconv_close(val);
+		val = InvalidIconvDescriptor;
+	}
+
+	// Reference: https://stackoverflow.com/questions/13297458/simple-utf8-utf16-string-conversion-with-iconv
+	bool DoIconv(iconv_t& cd, const std::string& str_from, std::string& str_to) {
 		char *inbuf = nullptr, *outbuf = nullptr;
 		size_t inbytesleft, outbytesleft, nchars, result_len;
 
@@ -84,10 +96,9 @@ namespace LibCmo::EncodingHelper {
 			return true;
 		}
 
-		// create iconv descriptor
-		cd = iconv_open(enc_to, enc_from);
-		if (cd == (iconv_t) -1) {
-			// fail to create iconv descriptor
+		// check iconv descriptor
+		if (cd == InvalidIconvDescriptor) {
+			// invalid iconv descriptor
 			return false;
 		}
 
@@ -95,9 +106,9 @@ namespace LibCmo::EncodingHelper {
 		str_to.resize(str_from.size() + IconvInc);
 		// setup some variables
 		inbytesleft = str_from.size();
-		inbuf = str_from.data();
+		inbuf = const_cast<char*>(str_from.c_str());
 		
-		outbytesleft = str_to_size();
+		outbytesleft = str_to.size();
 		outbuf = str_to.data();
 		
 		result_len = str_to.size();
@@ -115,13 +126,13 @@ namespace LibCmo::EncodingHelper {
 			// resize for container
 			str_to.resize(result_len);
 			
-		        // assign new outbuf from failed position	
+		    // assign new outbuf from failed position	
 			outbuf = str_to.data() + len;
 			nchars = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
 		}
 
-		// close iconv descriptor
-		iconv_close(cd);
+		// restore descriptor initial state
+		iconv(cd, nullptr, nullptr, nullptr, nullptr);
 
 		// check error
 		if (nchars == (size_t)-1) {
@@ -185,45 +196,45 @@ namespace LibCmo::EncodingHelper {
 
 #else
 
+	IconvPair::IconvPair() :
+		FromUtf8(InvalidIconvDescriptor), ToUtf8(InvalidIconvDescriptor) {
+	}
+
+	IconvPair::~IconvPair() {
+		DestroyIconvDescriptor(this->FromUtf8);
+		DestroyIconvDescriptor(this->ToUtf8);
+	}
+
+
 	static constexpr const char UTF8_SYMBOL[] = "UTF-8";
 
-	ENCODING_TOKEN CreateEncodingToken(std::string& token_string) {
-		ENCODING_TOKEN token = new(std::nothrow) char[token_string.size() + 1];
-		if (token == nullptr) return ENCODING_TOKEN_DFAULT;
+	ENCODING_TOKEN CreateEncodingToken(const std::string& token_string) {
+		ENCODING_TOKEN token = new(std::nothrow) IconvPair();
+		if (token == nullptr) return ENCODING_TOKEN_DEFAULT;
 
-		std::memcpy(token, token_string.c_str(), token_string.size() + 1);
+		if (!CreateIconvDescriptor(UTF8_SYMBOL, token_string.c_str(), token->FromUtf8) ||
+			!CreateIconvDescriptor(token_string.c_str(), UTF8_SYMBOL, token->ToUtf8)) {
+			delete token;
+			return ENCODING_TOKEN_DEFAULT;
+		}
+
 		return token;
 	}
 
-	void DestroyEncodingToken(ENCODING_TOKEN token) {
+	void DestroyEncodingToken(const ENCODING_TOKEN& token) {
 		if (token != ENCODING_TOKEN_DEFAULT) {
-			delete[] token;
+			delete token;
 		}
 	}
 	
-	void GetUtf8VirtoolsName(std::string& native_name, std::string& u8_name, ENCODING_TOKEN token) {
-		if (token == ENCODING_TOKEN_DEFAULT) {
-			u8_name = native_name.c_str();
-			return;
-		}
-
-		// convert with fallback
-		if (!DoIconv(token, UTF8_SYMBOL, native_name, u8_name)) {
-			u8_name = native_name.c_str();
-		}
+	bool GetUtf8VirtoolsName(const std::string& native_name, std::string& u8_name, const ENCODING_TOKEN& token) {
+		if (token == ENCODING_TOKEN_DEFAULT) return false;
+		return DoIconv(token->ToUtf8, native_name, u8_name);
 	}
 
-	void GetNativeVirtoolsName(std::string& u8_name, std::string& native_name, ENCODING_TOKEN token) {
-
-		if (token == ENCODING_TOKEN_DEFAULT) {
-			native_name = u8_name.c_str();
-			return;
-		}
-
-		// convert with fallback
-		if (!DoIconv(UTF8_SYMBOL, token, u8_name, native_name)) {
-			native_name = u8_name.c_str();
-		}
+	bool GetNativeVirtoolsName(const std::string& u8_name, std::string& native_name, const ENCODING_TOKEN& token) {
+		if (token == ENCODING_TOKEN_DEFAULT) return false;
+		return DoIconv(token->FromUtf8, u8_name, native_name);
 	}
 
 	void SetStdPathFromU8Path(std::filesystem::path& stdpath, const char* u8_path) {

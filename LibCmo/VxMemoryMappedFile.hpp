@@ -5,6 +5,10 @@
 #include <Windows.h>
 #else
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
 #endif
 
 #include <string>
@@ -15,15 +19,15 @@ namespace LibCmo::VxMath {
 	class VxMemoryMappedFile {
 	private:
 
-
 #if defined(LIBCMO_OS_WIN32)
 		HANDLE m_hFile;
 		DWORD m_dwFileSizeLow, m_dwFileSizeHigh;
 		HANDLE m_hFileMapping;
 		LPVOID m_hFileMapView;
 #else
-		
-#error NO IMPLEMENTATION FOR LINUX MMAP!
+		int m_hFile;
+		off_t m_offFileSize;
+		void* m_pFileAddr;
 #endif
 
 		std::filesystem::path m_szFilePath;

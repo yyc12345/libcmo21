@@ -9,7 +9,7 @@ namespace LibCmo::VxMath {
 		m_hFile(NULL), m_hFileMapping(NULL), m_hFileMapView(NULL),
 		m_dwFileSizeLow(0), m_dwFileSizeHigh(0),
 #else
-#error NO IMPLEMENTATION FOR LINUX MMAP!
+		m_hFile(-1), m_offFileSize(0), m_pFileAddr((void*)-1),
 #endif
 		m_szFilePath(),
 		m_bIsValid(false), m_pMemoryMappedFileBase(nullptr), m_cbFile(0u) {
@@ -75,9 +75,43 @@ namespace LibCmo::VxMath {
 		m_cbFile = static_cast<size_t>(static_cast<uint64_t>(m_dwFileSizeLow) | (static_cast<uint64_t>(m_dwFileSizeHigh) << 32));
 
 #else
-#error NO IMPLEMENTATION FOR LINUX MMAP!
-#endif
+		// create file
+		// we do not need provide mode_t, because is served for new created file.
+		// we are opening a existed file.
+		this->m_hFile = open(m_szFilePath.string().c_str(), O_RDONLY);
+		if (m_hFile == -1) {
+			return;
+		}
 
+		// calculate file size
+		struct stat sb;
+		int err = fstat(m_hFile, &sb);
+		// if failed or not a regular file, exit
+		if (err == -1 || (sb.st_mode & S_IFMT) != S_IFREG) {
+			close(m_hFile);
+			return;
+		}
+		// setup size
+		this->m_offFileSize = sb.st_size;
+
+		// map file
+		this->m_pFileAddr = mmap(
+			nullptr,	// request linux distribute one
+			this->m_offFileSize,	// map the full file
+			PROT_READ,	// only for reading
+			MAP_PRIVATE,
+			this->m_hFile,
+			0	// no offset
+		);
+		if (this->m_pFileAddr == MAP_FAILED) {
+			close(m_hFile);
+			return;
+		}
+
+		// write member data
+		m_pMemoryMappedFileBase = m_pFileAddr;
+		m_cbFile = static_cast<size_t>(this->m_offFileSize);
+#endif
 
 		// set valid
 		this->m_bIsValid = true;
@@ -95,7 +129,8 @@ namespace LibCmo::VxMath {
 			CloseHandle(m_hFileMapping);
 			CloseHandle(m_hFile);
 #else
-#error NO IMPLEMENTATION FOR LINUX MMAP!
+			munmap(this->m_pFileAddr, this->m_offFileSize);
+			close(m_hFile);
 #endif
 		}
 	}

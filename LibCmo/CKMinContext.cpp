@@ -2,6 +2,7 @@
 #include "CKMinContext.hpp"
 #include "CKObjects.hpp"
 #include "CKManagers.hpp"
+#include <cstdarg>
 
 namespace LibCmo::CK2 {
 

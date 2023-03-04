@@ -30,7 +30,10 @@ namespace LibCmo::EncodingHelper {
 
 #else
 
-	bool DoIconv(const char* enc_from, const char* enc_to, std::string& str_from, std::string& str_to);
+	bool CreateIconvDescriptor(const char* enc_from, const char* enc_to, iconv_t& val);
+	void DestroyIconvDescriptor(iconv_t& val);
+
+	bool DoIconv(iconv_t& cd, const std::string& str_from, std::string& str_to);
 
 #endif
 
@@ -47,7 +50,17 @@ namespace LibCmo::EncodingHelper {
 
 #else
 
-	using ENCODING_TOKEN = char*;
+	class IconvPair {
+	public:
+		IconvPair();
+		IconvPair(const IconvPair&) = delete;
+		IconvPair& operator=(const IconvPair&) = delete;
+		~IconvPair();
+		
+		iconv_t FromUtf8;
+		iconv_t ToUtf8;
+	};
+	using ENCODING_TOKEN = IconvPair*;
 	constexpr const ENCODING_TOKEN ENCODING_TOKEN_DEFAULT = nullptr;
 
 #endif
