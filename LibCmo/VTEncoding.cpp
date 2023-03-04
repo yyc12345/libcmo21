@@ -25,7 +25,7 @@ namespace LibCmo::EncodingHelper {
 	}
 #undef LIBCMO_STR_EQUAL
 
-	bool WcharToChar(const wchar_t* src, std::string& dest, UINT codepage) {
+	bool WcharToChar(const wchar_t* src, std::string& dest, const UINT codepage) {
 		int count, write_result;
 
 		//converter to CHAR
@@ -38,11 +38,11 @@ namespace LibCmo::EncodingHelper {
 
 		return true;
 	}
-	bool WcharToChar(std::wstring& src, std::string& dest, UINT codepage) {
+	bool WcharToChar(const std::wstring& src, std::string& dest, const UINT codepage) {
 		return WcharToChar(src.c_str(), dest, codepage);
 	}
 
-	bool CharToWchar(const char* src, std::wstring& dest, UINT codepage) {
+	bool CharToWchar(const char* src, std::wstring& dest, const UINT codepage) {
 		int wcount, write_result;
 
 		// convert to WCHAR
@@ -55,17 +55,17 @@ namespace LibCmo::EncodingHelper {
 
 		return true;
 	}
-	bool CharToWchar(std::string& src, std::wstring& dest, UINT codepage) {
+	bool CharToWchar(const std::string& src, std::wstring& dest, const UINT codepage) {
 		return CharToWchar(src.c_str(), dest, codepage);
 	}
 
-	bool CharToChar(const char* src, std::string& dest, UINT src_codepage, UINT dest_codepage) {
+	bool CharToChar(const char* src, std::string& dest, const UINT src_codepage, const UINT dest_codepage) {
 		std::wstring intermediary;
 		if (!CharToWchar(src, intermediary, src_codepage)) return false;
 		if (!WcharToChar(intermediary, dest, dest_codepage)) return false;
 		return true;
 	}
-	bool CharToChar(std::string& src, std::string& dest, UINT src_codepage, UINT dest_codepage) {
+	bool CharToChar(const std::string& src, std::string& dest, const UINT src_codepage, const UINT dest_codepage) {
 		return CharToChar(src.c_str(), dest, src_codepage, dest_codepage);
 	}
 
@@ -144,7 +144,7 @@ namespace LibCmo::EncodingHelper {
 
 #if defined(LIBCMO_OS_WIN32)
 
-	ENCODING_TOKEN CreateEncodingToken(std::string& token_string) {
+	ENCODING_TOKEN CreateEncodingToken(const std::string& token_string) {
 		ENCODING_TOKEN token = new(std::nothrow) UINT();
 		if (token == nullptr) return ENCODING_TOKEN_DEFAULT;
 
@@ -153,34 +153,20 @@ namespace LibCmo::EncodingHelper {
 		}
 		return token;
 	}
-	void DestroyEncodingToken(ENCODING_TOKEN token) {
+	void DestroyEncodingToken(const ENCODING_TOKEN& token) {
 		if (token != ENCODING_TOKEN_DEFAULT) {
 			delete token;
 		}
 	}
 
-	void GetUtf8VirtoolsName(std::string& native_name, std::string& u8_name, ENCODING_TOKEN token) {
-		if (token == ENCODING_TOKEN_DEFAULT) {
-			u8_name = native_name.c_str();
-			return;
-		}
-
-		// convert with fallback
-		if (!CharToChar(native_name, u8_name, *token, CP_UTF8)) {
-			u8_name = native_name.c_str();
-		}
+	bool GetUtf8VirtoolsName(const std::string& native_name, std::string& u8_name, const ENCODING_TOKEN& token) {
+		if (token == ENCODING_TOKEN_DEFAULT) return false;
+		return CharToChar(native_name, u8_name, *token, CP_UTF8);
 	}
 
-	void GetNativeVirtoolsName(std::string& u8_name, std::string& native_name, ENCODING_TOKEN token) {
-		if (token == ENCODING_TOKEN_DEFAULT) {
-			native_name = u8_name.c_str();
-			return;
-		}
-
-		// convert with fallback
-		if (!CharToChar(u8_name, native_name, CP_UTF8, *token)) {
-			native_name = u8_name.c_str();
-		}
+	bool GetNativeVirtoolsName(const std::string& u8_name, std::string& native_name, const ENCODING_TOKEN& token) {
+		if (token == ENCODING_TOKEN_DEFAULT) return false;
+		return CharToChar(u8_name, native_name, CP_UTF8, *token);
 	}
 
 	void SetStdPathFromU8Path(std::filesystem::path& stdpath, const char* u8_path) {

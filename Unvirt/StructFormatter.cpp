@@ -78,13 +78,14 @@ namespace Unvirt::StructFormatter {
 			fullpage = fulllen / pageitems;
 
 		// print header
-		fputs("Index\tCK ID\tCKObject\tCKStateChunk\tName\n", fout);
+		fputs("CK ID\tType\tCKObject\tCKStateChunk\tName\n", fout);
 
 		// print body
 		for (size_t counter = startpos; counter < fulllen && (counter - startpos) < pageitems; ++counter) {
 			const auto& obj = ls[counter];
 
-			fprintf(stdout, "%zu\t%" PRIu32 "\t", counter, obj.ObjectId);
+			fprintf(fout, "%" PRIu32 "\t", obj.ObjectId);
+			fprintf(fout, "%s\t", Unvirt::AccessibleValue::GetClassIdName(obj.ObjectCid).c_str());
 			PrintPointer(obj.ObjPtr);
 			fputc('\t', fout);
 			PrintPointer(obj.Data);
@@ -93,7 +94,7 @@ namespace Unvirt::StructFormatter {
 			fputc('\n', fout);
 		}
 
-		fprintf(fout, "Page %zu of %zu\n", page, fullpage);
+		fprintf(fout, "Page %zu of %zu\n", page + 1, fullpage + 1);
 	}
 
 	void PrintManagerList(const LibCmo::CK2::XArray<LibCmo::CK2::CKFileManagerData>& ls, size_t page, size_t pageitems) {
@@ -104,13 +105,12 @@ namespace Unvirt::StructFormatter {
 			fullpage = fulllen / pageitems;
 
 		// print header
-		fputs("Index\tCKGUID\tCKBaseManager\tCKStateChunk\n", fout);
+		fputs("CKGUID\tCKBaseManager\tCKStateChunk\n", fout);
 
 		// print body
 		for (size_t counter = startpos; counter < fulllen && (counter - startpos) < pageitems; ++counter) {
 			const auto& mgr = ls[counter];
 
-			fprintf(stdout, "%zu\t", counter);
 			PrintCKGUID(mgr.Manager);
 			fputc('\t', fout);
 			PrintPointer(mgr.MgrPtr);
@@ -119,7 +119,7 @@ namespace Unvirt::StructFormatter {
 			fputc('\n', fout);
 		}
 
-		fprintf(fout, "Page %zu of %zu\n", page, fullpage);
+		fprintf(fout, "Page %zu of %zu\n", page + 1, fullpage + 1);
 	}
 
 }

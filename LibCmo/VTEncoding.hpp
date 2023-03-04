@@ -19,14 +19,14 @@ namespace LibCmo::EncodingHelper {
 
 	bool GetWindowsCodePage(const char* u8_encoding_spec, UINT* result);
 
-	bool WcharToChar(const wchar_t* src, std::string& dest, UINT codepage);
-	bool WcharToChar(std::wstring& src, std::string& dest, UINT codepage);
+	bool WcharToChar(const wchar_t* src, std::string& dest, const UINT codepage);
+	bool WcharToChar(const std::wstring& src, std::string& dest, const UINT codepage);
 
-	bool CharToWchar(const char* src, std::wstring& dest, UINT codepage);
-	bool CharToWchar(std::string& src, std::wstring& dest, UINT codepage);
+	bool CharToWchar(const char* src, std::wstring& dest, const UINT codepage);
+	bool CharToWchar(const std::string& src, std::wstring& dest, const UINT codepage);
 
-	bool CharToChar(const char* src, std::string& dest, UINT src_codepage, UINT dest_codepage);
-	bool CharToChar(std::string& src, std::string& dest, UINT src_codepage, UINT dest_codepage);
+	bool CharToChar(const char* src, std::string& dest, const UINT src_codepage, const UINT dest_codepage);
+	bool CharToChar(const std::string& src, std::string& dest, const UINT src_codepage, const UINT dest_codepage);
 
 #else
 
@@ -52,11 +52,11 @@ namespace LibCmo::EncodingHelper {
 
 #endif
 
-	ENCODING_TOKEN CreateEncodingToken(std::string& token_string);
-	void DestroyEncodingToken(ENCODING_TOKEN token);
+	ENCODING_TOKEN CreateEncodingToken(const std::string& token_string);
+	void DestroyEncodingToken(const ENCODING_TOKEN& token);
 
-	void GetUtf8VirtoolsName(std::string& native_name, std::string& u8_name, ENCODING_TOKEN token);
-	void GetNativeVirtoolsName(std::string& u8_name, std::string& native_name, ENCODING_TOKEN token);
+	bool GetUtf8VirtoolsName(const std::string& native_name, std::string& u8_name, const ENCODING_TOKEN& token);
+	bool GetNativeVirtoolsName(const std::string& u8_name, std::string& native_name, const ENCODING_TOKEN& token);
 
 	void SetStdPathFromU8Path(std::filesystem::path& stdpath, const char* u8_path);
 	FILE* OpenStdPathFile(std::filesystem::path& u8_filepath, bool is_read);

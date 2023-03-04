@@ -9,16 +9,11 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdarg>
-
-/* TODO:
-do not re-allocated ctx and file for each loading in future.
-this will be implemented by free all objects within doc.
-
-split encoding and temp folder setting
-and load command only have file name arg.
-*/
+#include <functional>
 
 namespace Unvirt::CmdHelper {
+
+	static FILE* fout = stdout;
 
 #pragma region CmdSplitter
 
@@ -42,7 +37,11 @@ namespace Unvirt::CmdHelper {
 		// split
 		for (auto it = u8cmd.begin(); it != u8cmd.end(); ++it) {
 			mCmdChar = (*it);
-			if (!std::isprint(mCmdChar)) continue;	// skip all invalid characters
+
+			// skip all invalid characters, \0 and etc.
+			// mCmdChar >= 0 to ensure all non-ASCII UTF8 char can be accepted directly.
+			if (mCmdChar >= 0 && (!std::isprint(mCmdChar)))
+				continue;
 
 			switch (mState) {
 				case StateType::SPACE:
@@ -135,19 +134,53 @@ namespace Unvirt::CmdHelper {
 
 #pragma endregion
 
-#pragma region InteractiveCmd
+#pragma region InteractiveCmd Misc
 
 	InteractiveCmd::InteractiveCmd() :
 		m_CmdSplitter(), m_PageLen(10),
 		m_Ctx(nullptr), m_File(nullptr), m_Doc(nullptr) {
 
+		// create context and file
+		m_Ctx = new LibCmo::CK2::CKMinContext();
+		m_File = new LibCmo::CK2::CKFile(m_Ctx);
+
+		// bind callback
+		m_Ctx->SetPrintCallback(std::bind(&InteractiveCmd::PrintMinContextMsg, this, std::placeholders::_1));
+
 	}
 
 	InteractiveCmd::~InteractiveCmd() {
+		// delete doc if necessary
 		if (m_Doc != nullptr) delete m_Doc;
-		if (m_File != nullptr) delete m_File;
-		if (m_Ctx != nullptr) delete m_Ctx;
+		// delete file and ctx
+		delete m_File;
+		delete m_Ctx;
 	}
+
+	bool InteractiveCmd::HasOpenedFile(void) {
+		return m_Doc != nullptr;
+	}
+
+	void InteractiveCmd::ClearDocument(void) {
+		if (m_Doc == nullptr) return;
+
+		// clear doc
+		delete m_Doc;
+		m_Doc = nullptr;
+
+		// clear all loaded objects
+		m_Ctx->ClearCKObject();
+	}
+
+	void InteractiveCmd::PrintMinContextMsg(const std::string& msg) {
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("[CKMinContext] ")), fout);
+		fputs(msg.c_str(), fout);
+		fputc('\n', fout);
+	}
+
+#pragma endregion
+
+#pragma region InteractiveCmd Dispatch
 
 	void InteractiveCmd::Run(void) {
 		std::string u8cmd;
@@ -174,6 +207,8 @@ namespace Unvirt::CmdHelper {
 			else if (subcmd == "info") this->ProcInfo(cmds);
 			else if (subcmd == "ls") this->ProcLs(cmds);
 			else if (subcmd == "items") this->ProcItems(cmds);
+			else if (subcmd == "encoding") this->ProcEncoding(cmds);
+			else if (subcmd == "temp") this->ProcTemp(cmds);
 			else if (subcmd == "help") this->PrintHelp();
 			else if (subcmd == "exit") break;
 			else {
@@ -185,7 +220,7 @@ namespace Unvirt::CmdHelper {
 	}
 
 	void InteractiveCmd::GetCmdLine(std::string& u8cmd) {
-		fputs("Unvirt> ", stdout);
+		fputs("Unvirt> ", fout);
 #if defined(LIBCMO_OS_WIN32)
 		std::wstring wcmd;
 		std::getline(std::wcin, wcmd);
@@ -195,45 +230,48 @@ namespace Unvirt::CmdHelper {
 #endif
 	}
 
-	bool InteractiveCmd::HasOpenedFile(void) {
-		return (m_Ctx != nullptr || m_File != nullptr || m_Doc != nullptr);
-	}
-
 	void InteractiveCmd::PrintHelp(void) {
-		FILE* f = stdout;
-		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("Allowed Subcommands: \n")), f);
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("Allowed Subcommands: \n")), fout);
 
-		fputs("load\n", f);
-		fputs("\tDescription: Load a Virtools composition.\n", f);
-		fputs("\tSyntax: load <file path> [encoding] [temp path]\n", f);
+		fputs("load\n", fout);
+		fputs("\tDescription: Load a Virtools composition.\n", fout);
+		fputs("\tSyntax: load <file path>\n", fout);
 
-		fputs("unload\n", f);
-		fputs("\tDescription: Release loaded Virtools composition.\n", f);
-		fputs("\tSyntax: unload\n", f);
+		fputs("unload\n", fout);
+		fputs("\tDescription: Release loaded Virtools composition.\n", fout);
+		fputs("\tSyntax: unload\n", fout);
 
-		fputs("info\n", f);
-		fputs("\tDescription: Show the header info of loaded Virtools composition.\n", f);
-		fputs("\tSyntax: info\n", f);
+		fputs("info\n", fout);
+		fputs("\tDescription: Show the header info of loaded Virtools composition.\n", fout);
+		fputs("\tSyntax: info\n", fout);
 
-		fputs("ls\n", f);
-		fputs("\tDescription: List something about loaded Virtools composition.\n", f);
-		fputs("\tSyntax: ls <obj | mgr> [page]\n", f);
+		fputs("ls\n", fout);
+		fputs("\tDescription: List something about loaded Virtools composition.\n", fout);
+		fputs("\tSyntax: ls <obj | mgr> [page]\n", fout);
 
-		fputs("items\n", f);
-		fputs("\tDescription: Set up how many items should be listed in one page when using \"ls\" command.\n", f);
-		fputs("\tSyntax: items <num>\n", f);
+		fputs("items\n", fout);
+		fputs("\tDescription: Set up how many items should be listed in one page when using \"ls\" command.\n", fout);
+		fputs("\tSyntax: items <num>\n", fout);
 
-		fputs("exit\n", f);
-		fputs("\tDescription: Exit program\n", f);
-		fputs("\tSyntax: exit\n", f);
+		fputs("encoding\n", fout);
+		fputs("\tDescription: Set the encoding series for CKMinContext.\n", fout);
+		fputs("\tSyntax: encoding [encoding name1] [encoding name2] [encoding name3] ...\n", fout);
+
+		fputs("temp\n", fout);
+		fputs("\tDescription: Set the Temp path for CKMinContext.\n", fout);
+		fputs("\tSyntax: temp <temp path>\n", fout);
+
+		fputs("exit\n", fout);
+		fputs("\tDescription: Exit program\n", fout);
+		fputs("\tSyntax: exit\n", fout);
 
 	}
 
 	void InteractiveCmd::PrintArgParseError(const std::deque<std::string>& cmd, size_t pos) {
 		if (pos >= cmd.size()) {
-			fprintf(stdout, UNVIRT_TERMCOL_LIGHT_RED(("Lost argument at position %zu.\n")), pos);
+			fprintf(fout, UNVIRT_TERMCOL_LIGHT_RED(("Lost argument at position %zu.\n")), pos);
 		} else {
-			fprintf(stdout, UNVIRT_TERMCOL_LIGHT_RED(("Unexpected argument \"%s\".\n")), cmd[pos].c_str());
+			fprintf(fout, UNVIRT_TERMCOL_LIGHT_RED(("Unexpected argument \"%s\".\n")), cmd[pos].c_str());
 		}
 
 		// arg error always print help
@@ -243,17 +281,17 @@ namespace Unvirt::CmdHelper {
 	void InteractiveCmd::PrintCommonError(const char* u8_fmt, ...) {
 		va_list argptr;
 		va_start(argptr, u8_fmt);
-		std::fputs(UNVIRT_TERMCOLHDR_LIGHT_RED, stdout);
-		std::vfprintf(stdout, u8_fmt, argptr);
-		std::fputs(UNVIRT_TERMCOLTAIL, stdout);
+		std::fputs(UNVIRT_TERMCOLHDR_LIGHT_RED, fout);
+		std::vfprintf(fout, u8_fmt, argptr);
+		std::fputs(UNVIRT_TERMCOLTAIL, fout);
 		va_end(argptr);
-		std::fputc('\n', stdout);
+		std::fputc('\n', fout);
 	}
 
 
 #pragma endregion
 
-#pragma region Command Processors
+#pragma region InteractiveCmd Processors
 
 	void InteractiveCmd::ProcLoad(const std::deque<std::string>& cmd) {
 		// check pre-requirement
@@ -269,25 +307,8 @@ namespace Unvirt::CmdHelper {
 			this->PrintArgParseError(cmd, pos);
 			return;
 		}
-		++pos;
-		std::string encoding;
-		if (!ArgParser::ParseString(cmd, pos, encoding)) {
-			this->PrintArgParseError(cmd, pos);
-			return;
-		}
-		++pos;
-		std::string temppath;
-		if (!ArgParser::ParseString(cmd, pos, temppath)) {
-			this->PrintArgParseError(cmd, pos);
-			return;
-		}
 
 		// proc
-		m_Ctx = new LibCmo::CK2::CKMinContext();
-		m_Ctx->SetEncoding(encoding.c_str());
-		m_Ctx->SetTempPath(temppath.c_str());
-
-		m_File = new LibCmo::CK2::CKFile(m_Ctx);
 		m_Doc = new LibCmo::CK2::CKFileDocument();
 		LibCmo::CK2::CKERROR err = m_File->DeepLoad(filepath.c_str(), &m_Doc);
 		if (err != LibCmo::CK2::CKERROR::CKERR_OK) {
@@ -297,13 +318,7 @@ namespace Unvirt::CmdHelper {
 				Unvirt::AccessibleValue::GetCkErrorDescription(err).c_str()
 			);
 
-			if (m_Doc != nullptr) delete m_Doc;
-			if (m_File != nullptr) delete m_File;
-			if (m_Ctx != nullptr) delete m_Ctx;
-
-			m_Doc = nullptr;
-			m_File = nullptr;
-			m_Ctx = nullptr;
+			this->ClearDocument();
 		}
 	}
 
@@ -315,13 +330,7 @@ namespace Unvirt::CmdHelper {
 		}
 
 		// free all
-		if (m_Doc != nullptr) delete m_Doc;
-		if (m_File != nullptr) delete m_File;
-		if (m_Ctx != nullptr) delete m_Ctx;
-
-		m_Doc = nullptr;
-		m_File = nullptr;
-		m_Ctx = nullptr;
+		this->ClearDocument();
 	}
 
 	void  InteractiveCmd::ProcInfo(const std::deque<std::string>& cmd) {
@@ -356,10 +365,14 @@ namespace Unvirt::CmdHelper {
 		}
 		++pos;
 		int32_t gotten_page;
-		if (!ArgParser::ParseInt(cmd, pos, gotten_page) || gotten_page <= 0) {
-			gotten_page = 0;	// asssume as zero
+		if (!ArgParser::ParseInt(cmd, pos, gotten_page)) {
+			gotten_page = 1;	// asssume as 1
 		}
-		size_t page = static_cast<size_t>(gotten_page);
+		if (gotten_page <= 0) {
+			this->PrintCommonError("Page out of range.");
+			return;
+		}
+		size_t page = static_cast<size_t>(gotten_page) - 1;
 
 		// show list
 		if (sw == c_AllowedSwitches[0]) {
@@ -396,383 +409,40 @@ namespace Unvirt::CmdHelper {
 		m_PageLen = static_cast<size_t>(count);
 	}
 
-#pragma endregion
+	void InteractiveCmd::ProcEncoding(const std::deque<std::string>& cmd) {
+		// create list first
+		std::vector<std::string> encoding_list;
 
-
-	/*
-
-#pragma region OptionsDescription
-
-		OptionsDescription::OptionsDescription() :
-			mLongNameDict(), mShortNameMapping(), mPositionalArgMapping() {
-			;
-		}
-		OptionsDescription::~OptionsDescription() { ; }
-
-		void OptionsDescription::AddOption(
-			const char* fullname, char shortname, CmdArgType type, const char* description) {
-			// pre-check
-			if (fullname == nullptr ||
-				fullname[0] == '\0' ||
-				fullname[0] == '-')
-				throw std::invalid_argument("Invalid Option Long Name.");
-
-			// construct data
-			std::string sfullname(fullname);
-			OptionDescription data{
-				fullname, shortname, type, (description != nullptr ? description : "")
-			};
-
-			// check requirement
-			if (mLongNameDict.contains(sfullname)) throw std::invalid_argument("Duplicated Option Long Name.");
-			if (shortname != '\0')
-				if (mShortNameMapping.contains(shortname)) throw std::invalid_argument("Duplicated Option Short Name.");
-
-			// add them
-			mShortNameMapping.emplace(shortname, sfullname);
-			mLongNameDict.emplace(sfullname, std::move(data));
-		}
-
-		void OptionsDescription::AddPositionalOption(const char* corresponding_longname) {
-			// pre-check
-			if (corresponding_longname == nullptr) throw std::invalid_argument("Invalid Option Long Name.");
-
-			// construct data
-			std::string fullname(corresponding_longname);
-
-			// check requirement
-			if (!mLongNameDict.contains(fullname)) throw std::invalid_argument("No Matched Option.");
-			if (!mPositionalArgMapping.empty()) {
-				for (const auto& i : mPositionalArgMapping) {
-					if (i == fullname)throw std::invalid_argument("Duplicated Option.");
-				}
+		// get list item
+		size_t pos = 0u;
+		while (true) {
+			std::string pending;
+			if (!ArgParser::ParseString(cmd, pos, pending)) {
+				break;	// no more encoding, break
 			}
 
-			// set value
-			mPositionalArgMapping.push_back(std::move(fullname));
+			// add and move to next
+			++pos;
+			encoding_list.push_back(std::move(pending));
 		}
 
-		OptionDescription* OptionsDescription::GetDescByLongName(const std::string& longname) {
-			const auto search = mLongNameDict.find(longname);
-			if (search == mLongNameDict.end()) return nullptr;
-			return &(*search).second;
-		}
-		OptionDescription* OptionsDescription::GetDescByShortName(const char shortname) {
-			const auto search = mShortNameMapping.find(shortname);
-			if (search == mShortNameMapping.end()) return nullptr;
-			return GetDescByLongName((*search).second);
-		}
-		OptionDescription* OptionsDescription::GetDescByPosition(size_t pos) {
-			if (pos >= mPositionalArgMapping.size()) return nullptr;
-			return GetDescByLongName(mPositionalArgMapping[pos]);
+		// apply list
+		this->m_Ctx->SetEncoding(encoding_list);
+	}
+
+	void InteractiveCmd::ProcTemp(const std::deque<std::string>& cmd) {
+		// check requirement
+		size_t pos = 0u;
+		std::string temppath;
+		if (!ArgParser::ParseString(cmd, pos, temppath)) {
+			this->PrintArgParseError(cmd, pos);
+			return;
 		}
 
-		void OptionsDescription::PrintHelp(FILE* f) {
-			fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("Allowed Options: \n")), f);
-			for (const auto& [key, value] : mLongNameDict) {
-				fprintf(f, "--%s\t%s\n", value.mLongName.c_str(), value.mDescription.c_str());
-			}
-
-			if (!mPositionalArgMapping.empty()) {
-				fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("\nPositional Options: \n")), f);
-				for (const auto& i : mPositionalArgMapping) {
-					fprintf(f, "[%s] ", i.c_str());
-				}
-			}
-		}
-
+		// assign
+		m_Ctx->SetTempPath(temppath.c_str());
+	}
 
 #pragma endregion
-
-#pragma region VariablesMap
-
-		VariablesMap::VariablesMap() : mDataPair() {
-			;
-		}
-		VariablesMap::~VariablesMap() {
-			this->Clear();
-		}
-
-		void VariablesMap::Clear(void) {
-			for (const auto& [key, value] : mDataPair) {
-				if (value.mData != nullptr) free(value.mData);
-			}
-			mDataPair.clear();
-		}
-
-		bool VariablesMap::AddPair(const std::string& name, CmdArgType t, const std::string& val) {
-			if (mDataPair.contains(name)) return false;
-
-			AnyVariable var;
-			switch (t) {
-				case Unvirt::CmdHelper::CmdArgType::NONE:
-				{
-					var.mDataBasicSize = 1;
-					var.mData = nullptr;
-					break;
-				}
-				case Unvirt::CmdHelper::CmdArgType::STRING:
-				{
-					var.mDataBasicSize = sizeof(char);
-					var.mData = malloc(val.size() + 1);
-					if (var.mData == nullptr) break;
-
-					memcpy(var.mData, val.c_str(), val.size() + 1);
-					break;
-				}
-				case Unvirt::CmdHelper::CmdArgType::INT:
-				{
-					var.mDataBasicSize = sizeof(int);
-					var.mData = malloc(sizeof(int));
-					if (var.mData == nullptr) break;
-
-					char* pend = nullptr;
-					errno = 0;
-					int64_t v = std::strtoll(val.c_str(), &pend, 10);
-
-					if (pend == val.c_str() || errno == ERANGE) v = INT64_C(0);
-					*((int*)var.mData) = static_cast<int>(v);
-					break;
-				}
-				default:
-					throw std::invalid_argument("Invalid Option Type.");
-			}
-
-			mDataPair.emplace(name, std::move(var));
-			return true;
-		}
-
-#pragma endregion
-
-#pragma region ExecEnvironment
-
-		ExecEnvironment::ExecEnvironment() :
-			mVtFile(nullptr), mVtFileEnv(nullptr) {
-			;
-		}
-
-		ExecEnvironment::~ExecEnvironment() {
-			if (mVtFile != nullptr) delete mVtFile;
-			if (mVtFileEnv != nullptr) delete mVtFileEnv;
-		}
-
-		void ExecEnvironment::ProcLoad(OptionsDescription& od, VariablesMap& vm) {
-			if (mVtFile != nullptr || mVtFileEnv != nullptr) {
-				printf(UNVIRT_TERMCOL_LIGHT_RED(("Please close current opened Vrtools file first.\n")));
-				return;
-			}
-
-			const char* filename = vm.GetData<char>("file");
-			if (filename == nullptr) {
-				printf(UNVIRT_TERMCOL_LIGHT_RED(("You should specify a file first.\n")));
-				od.PrintHelp(stdout);
-				return;
-			}
-
-			mVtFileEnv = new LibCmo::Utils::VirtoolsContext();
-			const char* enc = vm.GetData<char>("encoding");
-			mVtFileEnv->NameEncoding = enc == nullptr ? "" : enc;
-
-			mVtFile = new LibCmo::CKFile(*mVtFileEnv);
-			mVtFile->Load(filename, LibCmo::CK_LOAD_FLAGS::CK_LOAD_DEFAULT);
-		}
-
-		void ExecEnvironment::ProcInfo(OptionsDescription& od, VariablesMap& vm) {
-			printf(UNVIRT_TERMCOL_LIGHT_RED(("Sorry. This feature is not supported now.\n")));
-		}
-
-		void ExecEnvironment::ProcClear(OptionsDescription& od, VariablesMap& vm) {
-			if (mVtFile == nullptr && mVtFileEnv == nullptr) {
-				printf(UNVIRT_TERMCOL_LIGHT_RED(("Virtools file already is empty.\n")));
-				return;
-			}
-
-			if (mVtFile != nullptr) delete mVtFile;
-			if (mVtFileEnv != nullptr) delete mVtFileEnv;
-
-			mVtFile = nullptr;
-			mVtFileEnv = nullptr;
-		}
-
-		void ExecEnvironment::ProcExportSql(OptionsDescription& od, VariablesMap& vm) {
-			printf(UNVIRT_TERMCOL_LIGHT_RED(("Sorry. This feature is not supported now.\n")));
-		}
-
-
-#pragma endregion
-
-#pragma region InteractiveCmd
-
-		InteractiveCmd::InteractiveCmd() :
-			mCmdDispatcher(), mExecEnv(), mVm(), mBlank(), mExitRunFlag(false), mCmdSplitter() {
-			// add load subcommand
-			CmdRegisteryEntry entryLoad;
-			const std::string entryLoadName = "load";
-			entryLoad.mSubCmdDesc = "Load Virtools file.";
-			entryLoad.mOptDesc.AddOption("file", 'f', CmdArgType::STRING, "The loaded Virtools file.");
-			entryLoad.mOptDesc.AddPositionalOption("file");
-			entryLoad.mOptDesc.AddOption("encoding", 'e', CmdArgType::STRING, "The encoding to decode Virtools string.");
-			entryLoad.mOptDesc.AddPositionalOption("encoding");
-			entryLoad.mOptDesc.AddOption("temp", 't', CmdArgType::STRING, "The temp folder used by engine.");
-			entryLoad.mOptDesc.AddPositionalOption("temp");
-			entryLoad.mBindProc = std::bind(&ExecEnvironment::ProcLoad, &this->mExecEnv, std::placeholders::_1, std::placeholders::_2);
-			//mCmdDispatcher.emplace("load", std::move(entryLoad));
-
-			CmdRegisteryEntry entryInfo;
-			entryInfo.mSubCmdDesc = "Show loaded Virtools file header info.";
-			entryInfo.mBindProc = std::bind(&ExecEnvironment::ProcInfo, &this->mExecEnv, std::placeholders::_1, std::placeholders::_2);
-			//mCmdDispatcher.emplace("info", std::move(entryInfo));
-
-			CmdRegisteryEntry entryClear;
-			entryClear.mSubCmdDesc = "Clear current loaded Virtools file.";
-			entryClear.mBindProc = std::bind(&ExecEnvironment::ProcClear, &this->mExecEnv, std::placeholders::_1, std::placeholders::_2);
-			//mCmdDispatcher.emplace("clear", std::move(entryClear));
-
-			CmdRegisteryEntry entryExportSql;
-			entryExportSql.mSubCmdDesc = "Export loaded Virtools file as a SQList database file.";
-			entryExportSql.mOptDesc.AddOption("file", 'f', CmdArgType::STRING, "The exported SQL file.");
-			entryExportSql.mOptDesc.AddPositionalOption("file");
-			entryExportSql.mBindProc = std::bind(&ExecEnvironment::ProcExportSql, &this->mExecEnv, std::placeholders::_1, std::placeholders::_2);
-			//mCmdDispatcher.emplace("sql", std::move(entryExportSql));
-
-			CmdRegisteryEntry entryExit;
-			entryExit.mSubCmdDesc = "Exit this interactive commander.";
-			entryExit.mBindProc = std::bind(&InteractiveCmd::ProcExit, this, std::placeholders::_1, std::placeholders::_2);
-			//mCmdDispatcher.emplace("exit", std::move(entryExit));
-
-		}
-
-		InteractiveCmd::~InteractiveCmd() {
-			;
-		}
-
-		void InteractiveCmd::Run(void) {
-			std::string u8cmd;
-
-			mExitRunFlag = false;
-			while (!mExitRunFlag) {
-				// get command
-				GetCmdLine(u8cmd);
-
-				// split cmd and parse it
-				CmdParser(mCmdSplitter.Convert(u8cmd));
-			}
-		}
-
-		void InteractiveCmd::GetCmdLine(std::string& u8cmd) {
-#if defined(LIBCMO_OS_WIN32)
-			std::wstring wcmd;
-			std::getline(std::wcin, wcmd);
-			LibCmo::Encoding::WcharToChar(wcmd, u8cmd, CP_UTF8);
-#else
-			std::getline(std::cin, u8cmd);
-#endif
-		}
-
-		void InteractiveCmd::CmdParser(const std::vector<std::string>& args) {
-			FILE* f = stdout;
-
-			if (args.size() == 0) {
-				fputs(UNVIRT_TERMCOL_LIGHT_RED(("Error! Fail to get subcommand token.\n")), f);
-				PrintHelp(f);
-				return;
-			}
-
-			auto arg = args.begin();
-			auto subcmd = mCmdDispatcher.find(*arg);
-			if (subcmd == mCmdDispatcher.end()) {
-				fprintf(f, UNVIRT_TERMCOL_LIGHT_RED(("Error! No such subcommand \"%s\"! \n")), arg->c_str());
-				PrintHelp(f);
-				return;
-			}
-
-			// analyze options
-			++arg;
-			auto& optsDesc = subcmd->second.mOptDesc;
-			mVm.Clear();
-			int position_counter = 0;
-			while (true) {
-				if (arg == args.end()) break;
-
-				const std::string& opt = *arg;
-				OptionDescription* optDesc;
-				if (opt.starts_with("--")) {
-					// long name
-					optDesc = optsDesc.GetDescByLongName(opt.substr(2));
-				} else if (opt.starts_with("-")) {
-					// short name
-					if (opt.size() != 2u) {
-						// invalid short name
-						fprintf(f, UNVIRT_TERMCOL_LIGHT_RED(("Error! Invalid short name option \"%s\"! \n")), opt.c_str());
-						optsDesc.PrintHelp(f);
-						return;
-					}
-					optDesc = optsDesc.GetDescByShortName(opt[1]);
-				} else {
-					// position
-					optDesc = optsDesc.GetDescByPosition(position_counter++);
-				}
-
-				// invalid option
-				if (optDesc == nullptr) {
-					fprintf(f, UNVIRT_TERMCOL_LIGHT_RED(("Error! Invalid option \"%s\"! \n")), opt.c_str());
-					optsDesc.PrintHelp(f);
-					return;
-				}
-
-				// get value
-				bool add_success = true;
-				switch (optDesc->mType) {
-					case CmdArgType::NONE:
-						// just a switch
-						add_success = mVm.AddPair(optDesc->mLongName, optDesc->mType, this->mBlank);
-						++arg;
-						if (!add_success) {
-							fprintf(f, UNVIRT_TERMCOL_LIGHT_RED(("Error!  Duplicated option \"%s\"! \n")), opt.c_str());
-							optsDesc.PrintHelp(f);
-							return;
-						}
-						break;
-					case CmdArgType::INT:
-					case CmdArgType::STRING:
-						// check next value
-						++arg;
-						if (arg == args.end()) {
-							fprintf(f, UNVIRT_TERMCOL_LIGHT_RED(("Error! Option \"%s\" lost parameter! \n")), opt.c_str());
-							optsDesc.PrintHelp(f);
-							return;
-						}
-						add_success = mVm.AddPair(optDesc->mLongName, optDesc->mType, *arg);
-						++arg;
-						if (!add_success) {
-							fprintf(f, UNVIRT_TERMCOL_LIGHT_RED(("Error!  Duplicated option \"%s\"! \n")), opt.c_str());
-							optsDesc.PrintHelp(f);
-							return;
-						}
-						break;
-					default:
-						throw std::invalid_argument("Invalid Option Type.");
-				}
-			}
-
-			// execute proc
-			subcmd->second.mBindProc(optsDesc, mVm);
-		}
-
-		void InteractiveCmd::PrintHelp(FILE* f) {
-			fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("Allowed Subcommands: \n")), f);
-			for (const auto& [key, value] : mCmdDispatcher) {
-				fprintf(f, "%s\t- %s\n", key.c_str(), value.mSubCmdDesc.c_str());
-			}
-		}
-
-		void InteractiveCmd::ProcExit(OptionsDescription&, VariablesMap&) {
-			mExitRunFlag = true;
-		}
-
-#pragma endregion
-
-
-*/
 
 }

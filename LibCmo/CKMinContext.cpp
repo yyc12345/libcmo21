@@ -14,8 +14,7 @@ namespace LibCmo::CK2 {
 #pragma region Ctor Dtor
 
 	CKMinContext::CKMinContext() :
-		m_NameEncoding(), m_NameEncodingToken(EncodingHelper::ENCODING_TOKEN_DEFAULT),
-		m_TempFolder(),
+		m_NameEncoding(), m_TempFolder(),
 		m_PrintCallback(nullptr),
 		m_CKObjectMaxID(0u),
 		// register CKObjects
@@ -106,6 +105,15 @@ namespace LibCmo::CK2 {
 		}
 	}
 
+	void CKMinContext::ClearCKObject(void) {
+		// free all created objects
+		for (const auto& [key, value] : this->m_ObjectsList) {
+			delete value;
+		}
+		// clear list
+		this->m_ObjectsList.clear();
+	}
+
 	CK_ID CKMinContext::GetObjectMaxID(void) {
 		return this->m_CKObjectMaxID;
 	}
@@ -122,17 +130,45 @@ namespace LibCmo::CK2 {
 
 #pragma region Misc Funcs
 
-	void CKMinContext::GetUtf8String(std::string& native_name, std::string& u8_name) {
-		EncodingHelper::GetUtf8VirtoolsName(native_name, u8_name, this->m_NameEncodingToken);
+	void CKMinContext::GetUtf8String(const std::string& native_name, std::string& u8_name) {
+		bool success = false;
+		for (const auto& token : this->m_NameEncoding) {
+			success = LibCmo::EncodingHelper::GetUtf8VirtoolsName(native_name, u8_name, token);
+			if (success) break;
+		}
+
+		// fallback
+		if (!success) {
+			u8_name = native_name;
+			this->Printf("Error when converting to UTF8 string.");
+		}
 	}
 
-	void CKMinContext::GetNativeString(std::string& u8_name, std::string& native_name) {
-		EncodingHelper::GetNativeVirtoolsName(u8_name, native_name, this->m_NameEncodingToken);
+	void CKMinContext::GetNativeString(const std::string& u8_name, std::string& native_name) {
+		bool success = false;
+		for (const auto& token : this->m_NameEncoding) {
+			success = LibCmo::EncodingHelper::GetNativeVirtoolsName(u8_name, native_name, token);
+			if (success) break;
+		}
+		
+		// fallback
+		if (!success) {
+			native_name = u8_name;
+			this->Printf("Error when converting to native string.");
+		}
 	}
 
-	void CKMinContext::SetEncoding(CKSTRING encoding) {
-		this->m_NameEncoding = encoding;
-		this->RefetchEncodingToken();
+	void CKMinContext::SetEncoding(const std::vector<std::string> encoding_series) {
+		// free all current series
+		for (const auto& encoding : this->m_NameEncoding) {
+			LibCmo::EncodingHelper::DestroyEncodingToken(encoding);
+		}
+		this->m_NameEncoding.clear();
+
+		// add new encoding
+		for (const auto& encoding_str : encoding_series) {
+			this->m_NameEncoding.push_back(LibCmo::EncodingHelper::CreateEncodingToken(encoding_str));
+		}
 	}
 
 	void CKMinContext::SetTempPath(CKSTRING u8_temp) {
@@ -147,10 +183,6 @@ namespace LibCmo::CK2 {
 		return EncodingHelper::OpenStdPathFile(realfile, is_read);
 	}
 
-	void CKMinContext::RefetchEncodingToken(void) {
-		EncodingHelper::DestroyEncodingToken(this->m_NameEncodingToken);
-		this->m_NameEncodingToken = EncodingHelper::CreateEncodingToken(this->m_NameEncoding);
-	}
 
 #pragma endregion
 
