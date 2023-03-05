@@ -25,7 +25,7 @@ namespace LibCmo::CK2::CKObjectImplements {
 		void SetObjectFlags(CK_OBJECT_FLAGS flags) { this->m_ObjectFlags = flags; }
 
 		virtual CK_CLASSID GetClassID(void) { return CK_CLASSID::CKCID_OBJECT; }
-		virtual CKERROR Load(CKStateChunk* chunk, const CKFileDocument* doc);
+		virtual bool Load(CKStateChunk* chunk, const CKFileDocument* doc);
 		virtual CKStateChunk* Save(const CKFileDocument* doc);
 	};
 

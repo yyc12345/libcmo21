@@ -91,9 +91,37 @@ namespace LibCmo::CK2 {
 		this->m_DataVersion = version;
 	}
 
-	bool CKStateChunk::EnsureReadSpace(CKDWORD dword_required) {
-		return (m_Parser.m_Status == CKStateChunkStatus::READ) &&
-			(this->m_Parser.m_CurrentPos + dword_required <= this->m_Parser.m_DataSize);
+	void CKStateChunk::DeleteBuffer(void* buf) {
+		if (buf == nullptr) return;
+		delete[] reinterpret_cast<char*>(buf);
+	}
+
+	bool CKStateChunk::Skip(CKDWORD DwordCount) {
+		bool result;
+		switch (this->m_Parser.m_Status) {
+			case CKStateChunkStatus::READ:
+				result = EnsureReadSpace(DwordCount);
+				break;
+			case CKStateChunkStatus::WRITE:
+				result = EnsureWriteSpace(DwordCount);
+				break;
+			case CKStateChunkStatus::IDLE:
+			default:
+				result = false;
+				break;
+		}
+
+		// if success, move cursor
+		if (result) {
+			this->m_Parser.m_CurrentPos += DwordCount;
+		}
+		return result;
+	}
+
+
+
+	size_t CKStateChunk::GetCeilDwordSize(size_t char_size) {
+		return (char_size + 3) >> 3;
 	}
 
 	bool CKStateChunk::ResizeBuffer(CKDWORD new_dwsize) {
@@ -141,26 +169,9 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-	bool CKStateChunk::Skip(CKDWORD DwordCount) {
-		bool result;
-		switch (this->m_Parser.m_Status) {
-			case CKStateChunkStatus::READ:
-				result = EnsureReadSpace(DwordCount);
-				break;
-			case CKStateChunkStatus::WRITE:
-				result = EnsureWriteSpace(DwordCount);
-				break;
-			case CKStateChunkStatus::IDLE:
-			default:
-				result = false;
-				break;
-		}
-
-		// if success, move cursor
-		if (result) {
-			this->m_Parser.m_CurrentPos += DwordCount;
-		}
-		return result;
+	bool CKStateChunk::EnsureReadSpace(CKDWORD dword_required) {
+		return (m_Parser.m_Status == CKStateChunkStatus::READ) &&
+			(this->m_Parser.m_CurrentPos + dword_required <= this->m_Parser.m_DataSize);
 	}
 
 
@@ -344,6 +355,17 @@ namespace LibCmo::CK2 {
 		this->m_Parser.m_Status = CKStateChunkStatus::READ;
 	}
 
+	void CKStateChunk::StopRead(void) {
+		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return;
+
+		this->m_Parser.m_CurrentPos = 0u;
+		this->m_Parser.m_DataSize = this->m_DataDwSize;
+		this->m_Parser.m_PrevIdentifierPos = 0u;
+		this->m_Parser.m_Status = CKStateChunkStatus::IDLE;
+	}
+
+	/* ========== Identifier Functions ==========*/
+
 	bool CKStateChunk::SeekIdentifierDword(CKDWORD identifier) {
 		CKDWORD cache;
 		return SeekIdentifierDwordAndReturnSize(identifier, &cache);
@@ -376,37 +398,73 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-	CKERROR CKStateChunk::ReadString(std::string& strl) {
+	/* ========== Basic Data Read Functions ==========*/
+
+	bool CKStateChunk::ReadByteData(void* data_ptr, CKDWORD size_in_byte) {
+		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return false;
+		if (data_ptr == nullptr) return false;
+
+		CKDWORD size_in_dword = this->GetCeilDwordSize(size_in_byte);
+		if (this->EnsureReadSpace(size_in_dword)) {
+			std::memcpy(data_ptr, this->m_pData + this->m_Parser.m_CurrentPos, size_in_byte);
+			return true;
+		} else return false;
+	}
+
+	bool CKStateChunk::ReadString(std::string* strl) {
+		if (strl == nullptr) return false;
+
 		// get byte based size
 		CKDWORD strByteSize = 0u;
-		CKERROR err = this->ReadStructPtr(&strByteSize);
-		if (err != CKERROR::CKERR_OK) {
-			strl.clear();
-			return err;
+		if (!this->ReadStruct(strByteSize)) {
+			strl->clear();
+			return false;
 		}
 
-		// convert to DWORD based
-		CKDWORD strDwordSize = this->GetCeilDwordSize(strByteSize);
-
-		// cp
-		if (this->EnsureReadSpace(strDwordSize)) {
-			strl.resize(strByteSize);
-			std::memcpy(strl.data(), this->m_pData + this->m_Parser.m_CurrentPos, strByteSize);
-			this->m_Parser.m_CurrentPos += strDwordSize;
-		} else strl.clear();
-
-		return CKERROR::CKERR_OK;
+		// read data
+		strl->resize(strByteSize);
+		if (!this->ReadByteData(strl->data(), strByteSize)) {
+			strl->clear();
+			return false;
+		}
+		return true;
 	}
 
-
-	void CKStateChunk::StopRead(void) {
-		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return;
-
-		this->m_Parser.m_CurrentPos = 0u;
-		this->m_Parser.m_DataSize = this->m_DataDwSize;
-		this->m_Parser.m_PrevIdentifierPos = 0u;
-		this->m_Parser.m_Status = CKStateChunkStatus::IDLE;
+	bool CKStateChunk::ReadNoSizeBuffer(CKDWORD size_in_byte, void* allocatedBuf) {
+		if (allocatedBuf == nullptr) return false;
+		return this->ReadByteData(allocatedBuf, size_in_byte);
 	}
+
+	bool CKStateChunk::ReadBuffer(void** buf, CKDWORD* len_in_byte) {
+		if (buf == nullptr || len_in_byte == nullptr) return false;
+
+		// get buffer size.
+		CKDWORD bufByteSize = 0u;
+		if (!this->ReadStruct(bufByteSize)) {
+			*buf = nullptr;
+			*len_in_byte = 0;
+			return false;
+		}
+		*len_in_byte = bufByteSize;
+
+		// create buffer
+		*buf = new(std::nothrow) char[bufByteSize];
+		if (*buf == nullptr) {
+			*len_in_byte = 0;
+			return false;
+		}
+
+		// read data
+		if (!this->ReadByteData(*buf, bufByteSize)) {
+			this->DeleteBuffer(*buf);
+			*buf = nullptr;
+			*len_in_byte = 0;
+			return false;
+		}
+
+		return true;
+	}
+
 
 #pragma endregion
 

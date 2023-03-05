@@ -387,16 +387,16 @@ namespace LibCmo::CK2 {
 			// todo: special treat for CK_LEVEL
 			// try parsing data
 			obj.Data->StartRead();
-			err = obj.ObjPtr->Load(obj.Data, deepDoc.get());
+			bool success = obj.ObjPtr->Load(obj.Data, deepDoc.get());
 			obj.Data->StopRead();
-			if (err != CKERROR::CKERR_OK) {
-				// if failed, delete it
-				m_MinCtx->DestroyCKObject(obj.ObjectId);
-				obj.ObjPtr = nullptr;
-			} else {
+			if (success) {
 				// if success, clear CKStateChunk*
 				delete obj.Data;
 				obj.Data = nullptr;
+			} else {
+				// if failed, delete it
+				m_MinCtx->DestroyCKObject(obj.ObjectId);
+				obj.ObjPtr = nullptr;
 			}
 		}
 
