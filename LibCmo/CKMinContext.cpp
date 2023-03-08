@@ -23,13 +23,22 @@ namespace LibCmo::CK2 {
 			{CK_CLASSID::CKCID_OBJECT, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKObject(ctx, id, name); })},
 			{CK_CLASSID::CKCID_SCENEOBJECT, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKSceneObject(ctx, id, name); })},
 			{CK_CLASSID::CKCID_BEOBJECT, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBeObject(ctx, id, name); })},
+
 			{CK_CLASSID::CKCID_GROUP, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKGroup(ctx, id, name); })},
 			{CK_CLASSID::CKCID_MESH, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKMesh(ctx, id, name); })},
 			{CK_CLASSID::CKCID_TEXTURE, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKTexture(ctx, id, name); })},
 			{CK_CLASSID::CKCID_MATERIAL, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKMaterial(ctx, id, name); })},
 			{CK_CLASSID::CKCID_RENDEROBJECT, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKRenderObject(ctx, id, name); })},
 			{CK_CLASSID::CKCID_3DENTITY, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CK3dEntity(ctx, id, name); })},
-			{CK_CLASSID::CKCID_3DOBJECT, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CK3dObject(ctx, id, name); })}
+
+			{CK_CLASSID::CKCID_PARAMETERIN, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterIn(ctx, id, name); })},
+			{CK_CLASSID::CKCID_PARAMETER, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameter(ctx, id, name); })},
+			{CK_CLASSID::CKCID_PARAMETEROUT, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterOut(ctx, id, name); })},
+			{CK_CLASSID::CKCID_PARAMETERLOCAL, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterLocal(ctx, id, name); })},
+			{CK_CLASSID::CKCID_PARAMETEROPERATION, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterOperation(ctx, id, name); })},
+			{CK_CLASSID::CKCID_BEHAVIORLINK, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBehaviorLink(ctx, id, name); })},
+			{CK_CLASSID::CKCID_BEHAVIORIO, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBehaviorLink(ctx, id, name); })},
+			{CK_CLASSID::CKCID_BEHAVIOR, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBehavior(ctx, id, name); })}
 	},
 		// register CKBaseManagers
 		m_ManagersCreationMap{

@@ -52,6 +52,8 @@ namespace LibCmo::CK2::CKObjectImplements {
 
 	};
 
+#pragma region Map Related
+
 	class CKGroup : public CKBeObject {
 	public:
 		CKGroup(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
@@ -135,6 +137,108 @@ namespace LibCmo::CK2::CKObjectImplements {
 	protected:
 
 	};
+
+#pragma endregion
+
+#pragma region Behavior Related
+
+	class CKParameterIn :public CKObject {
+	public:
+		CKParameterIn(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
+		CKParameterIn(const CKParameterIn&) = delete;
+		CKParameterIn& operator=(const CKParameterIn&) = delete;
+		~CKParameterIn();
+
+		virtual CK_CLASSID GetClassID(void) override { return CK_CLASSID::CKCID_PARAMETERIN; }
+	protected:
+
+	};
+
+	class CKParameter :public CKObject {
+	public:
+		CKParameter(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
+		CKParameter(const CKParameter&) = delete;
+		CKParameter& operator=(const CKParameter&) = delete;
+		~CKParameter();
+
+		virtual CK_CLASSID GetClassID(void) override { return CK_CLASSID::CKCID_PARAMETER; }
+	protected:
+
+	};
+
+	class CKParameterOut :public CKParameter {
+	public:
+		CKParameterOut(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
+		CKParameterOut(const CKParameterOut&) = delete;
+		CKParameterOut& operator=(const CKParameterOut&) = delete;
+		~CKParameterOut();
+
+		virtual CK_CLASSID GetClassID(void) override { return CK_CLASSID::CKCID_PARAMETEROUT; }
+	protected:
+
+	};
+
+	class CKParameterLocal :public CKParameter {
+	public:
+		CKParameterLocal(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
+		CKParameterLocal(const CKParameterLocal&) = delete;
+		CKParameterLocal& operator=(const CKParameterLocal&) = delete;
+		~CKParameterLocal();
+
+		virtual CK_CLASSID GetClassID(void) override { return CK_CLASSID::CKCID_PARAMETERLOCAL; }
+	protected:
+
+	};
+
+	class CKParameterOperation :public CKObject {
+	public:
+		CKParameterOperation(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
+		CKParameterOperation(const CKParameterOperation&) = delete;
+		CKParameterOperation& operator=(const CKParameterOperation&) = delete;
+		~CKParameterOperation();
+
+		virtual CK_CLASSID GetClassID(void) override { return CK_CLASSID::CKCID_PARAMETEROPERATION; }
+	protected:
+
+	};
+
+	class CKBehaviorLink :public CKObject {
+	public:
+		CKBehaviorLink(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
+		CKBehaviorLink(const CKBehaviorLink&) = delete;
+		CKBehaviorLink& operator=(const CKBehaviorLink&) = delete;
+		~CKBehaviorLink();
+
+		virtual CK_CLASSID GetClassID(void) override { return CK_CLASSID::CKCID_BEHAVIORLINK; }
+	protected:
+
+	};
+
+	class CKBehaviorIO :public CKObject {
+	public:
+		CKBehaviorIO(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
+		CKBehaviorIO(const CKBehaviorIO&) = delete;
+		CKBehaviorIO& operator=(const CKBehaviorIO&) = delete;
+		~CKBehaviorIO();
+
+		virtual CK_CLASSID GetClassID(void) override { return CK_CLASSID::CKCID_BEHAVIORIO; }
+	protected:
+
+	};
+
+	class CKBehavior :public CKSceneObject {
+	public:
+		CKBehavior(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
+		CKBehavior(const CKBehavior&) = delete;
+		CKBehavior& operator=(const CKBehavior&) = delete;
+		~CKBehavior();
+
+		virtual CK_CLASSID GetClassID(void) override { return CK_CLASSID::CKCID_BEHAVIOR; }
+	protected:
+
+	};
+
+#pragma endregion
 
 
 }

@@ -94,4 +94,45 @@ namespace LibCmo::CK2::CKObjectImplements {
 	CK3dObject::~CK3dObject() {
 	}
 
+
+	CKParameterIn::CKParameterIn(CKMinContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
+	}
+	CKParameterIn::~CKParameterIn() {
+	}
+
+	CKParameter::CKParameter(CKMinContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
+	}
+	CKParameter::~CKParameter() {
+	}
+
+	CKParameterOut::CKParameterOut(CKMinContext* ctx, CK_ID ckid, CKSTRING name) : CKParameter(ctx, ckid, name) {
+	}
+	CKParameterOut::~CKParameterOut() {
+	}
+
+	CKParameterLocal::CKParameterLocal(CKMinContext* ctx, CK_ID ckid, CKSTRING name) : CKParameter(ctx, ckid, name) {
+	}
+	CKParameterLocal::~CKParameterLocal() {
+	}
+
+	CKParameterOperation::CKParameterOperation(CKMinContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
+	}
+	CKParameterOperation::~CKParameterOperation() {
+	}
+
+	CKBehaviorLink::CKBehaviorLink(CKMinContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
+	}
+	CKBehaviorLink::~CKBehaviorLink() {
+	}
+
+	CKBehaviorIO::CKBehaviorIO(CKMinContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
+	}
+	CKBehaviorIO::~CKBehaviorIO() {
+	}
+
+	CKBehavior::CKBehavior(CKMinContext* ctx, CK_ID ckid, CKSTRING name) : CKSceneObject(ctx, ckid, name) {
+	}
+	CKBehavior::~CKBehavior() {
+	}
+
 }

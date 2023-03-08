@@ -181,6 +181,7 @@
     <ClCompile Include="CKManagerImplements\CKBaseManager.cpp" />
     <ClCompile Include="CKMinContext.cpp" />
     <ClCompile Include="CKObjectImplements\CKObject.cpp" />
+    <ClCompile Include="CKObjects.cpp" />
     <ClCompile Include="VTEncoding.cpp" />
     <ClCompile Include="CKFileReader.cpp" />
     <ClCompile Include="CKStateChunk.cpp" />
