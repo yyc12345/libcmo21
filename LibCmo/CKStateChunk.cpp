@@ -121,7 +121,7 @@ namespace LibCmo::CK2 {
 
 
 	size_t CKStateChunk::GetCeilDwordSize(size_t char_size) {
-		return (char_size + 3) >> 3;
+		return (char_size + 3) >> 2;
 	}
 
 	bool CKStateChunk::ResizeBuffer(CKDWORD new_dwsize) {
@@ -430,6 +430,22 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
+	/* ========== Complex Data Read Functions ==========*/
+
+	bool CKStateChunk::ReadObjectID(CK_ID* id) {
+		return false;
+	}
+
+	bool CKStateChunk::ReadManagerInt(CKGUID* guid, CKINT* intval) {
+		return false;
+	}
+
+	CKStateChunk* CKStateChunk::ReadSubChunk(void) {
+		return nullptr;
+	}
+
+	/* ========== Buffer Functions ==========*/
+
 	bool CKStateChunk::ReadNoSizeBuffer(CKDWORD size_in_byte, void* allocatedBuf) {
 		if (allocatedBuf == nullptr) return false;
 		return this->ReadByteData(allocatedBuf, size_in_byte);
@@ -465,6 +481,23 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
+	/* ========== Sequence Functions ==========*/
+
+	bool CKStateChunk::ReadObjectIDSequence(std::vector<CK_ID>* ls) {
+		return false;
+	}
+
+	bool CKStateChunk::ReadManagerIntSequence(CKGUID* guid, std::vector<CKINT>* ls) {
+		return false;
+	}
+
+	bool CKStateChunk::ReadSubChunkSequence(std::vector<CKStateChunk*>* ls) {
+		return false;
+	}
+
+	bool CKStateChunk::ReadObjectArray(std::vector<CK_ID>* ls) {
+		return false;
+	}
 
 #pragma endregion
 

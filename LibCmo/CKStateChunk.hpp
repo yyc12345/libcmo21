@@ -135,18 +135,39 @@ namespace LibCmo::CK2 {
 			return ReadString(&strl);
 		}
 
+		/* ========== Complex Data Read Functions ==========*/
+
+		bool ReadObjectID(CK_ID* id);
+		inline bool ReadObjectID(CK_ID& id) {
+			return ReadObjectID(&id);
+		}
+
+		bool ReadManagerInt(CKGUID* guid, CKINT* intval);
+		inline bool ReadManagerInt(CKGUID& guid, CKINT& intval) {
+			return ReadManagerInt(&guid, &intval);
+		}
+
+		/// <summary>
+		/// Read sub chunk
+		/// <para>Return nullptr if failed.</para>
+		/// <para>Returned CKStateChunk should be manually released!</para>
+		/// </summary>
+		/// <param name=""></param>
+		/// <returns></returns>
+		CKStateChunk* ReadSubChunk(void);
+
 		/* ========== Buffer Functions ==========*/
 
 		/*
 		Buffer related function implements:
 
-		ReadBuffer(void**)			Read Byte based size.
-		ReadAndFillBuffer(int, void*)		User give Byte based size.
-		ReadAndFillBuffer(void*)		Read Byte based size.
-		ReadAndFillBuffer_LEndian(int, void*)	User give Byte based size.
-		ReadAndFillBuffer_LEndian(void*)	Read Byte based size.
-		ReadAndFillBuffer_LEndian16(int, void*)	User give Byte based size.
-		ReadAndFillBuffer_LEndian16(void*)	Read Byte based size.
+		ReadBuffer(void**)						Read Byte based size.		-> ReadBuffer
+		ReadAndFillBuffer(int, void*)			User give Byte based size.	-> ReadNoSizeBuffer
+		ReadAndFillBuffer(void*)				Read Byte based size.		-> ReadBuffer
+		ReadAndFillBuffer_LEndian(int, void*)	User give Byte based size.	-> ReadNoSizeBuffer
+		ReadAndFillBuffer_LEndian(void*)		Read Byte based size.		-> ReadBuffer
+		ReadAndFillBuffer_LEndian16(int, void*)	User give Byte based size.	-> ReadNoSizeBuffer
+		ReadAndFillBuffer_LEndian16(void*)		Read Byte based size.		-> ReadBuffer
 		*/
 
 		/// <summary>
@@ -170,6 +191,52 @@ namespace LibCmo::CK2 {
 		bool ReadBuffer(void** buf, CKDWORD* len_in_byte);
 
 		/* ========== Sequence Functions ==========*/
+
+		/// <summary>
+		/// Read Object ID Sequence
+		/// <para>The combination using of StartReadSequence(), ReadObjectID(), and ReadObject() redirect to this.</para>
+		/// </summary>
+		/// <param name="ls"></param>
+		/// <returns></returns>
+		bool ReadObjectIDSequence(std::vector<CK_ID>* ls);
+		inline bool ReadObjectIDSequence(std::vector<CK_ID>& ls) {
+			return ReadObjectIDSequence(&ls);
+		}
+
+		/// <summary>
+		/// Read Manager Sequence
+		/// <para>The combination using of StartManagerReadSequence() and ReadManagerIntSequence() redirect to this.</para>
+		/// </summary>
+		/// <param name="guid"></param>
+		/// <param name="ls"></param>
+		/// <returns></returns>
+		bool ReadManagerIntSequence(CKGUID* guid, std::vector<CKINT>* ls);
+		inline bool ReadManagerIntSequence(CKGUID& guid, std::vector<CKINT>& ls) {
+			return ReadManagerIntSequence(&guid, &ls);
+		}
+
+		/// <summary>
+		/// Read Sub Chunk Sequence
+		/// <para>The combination using of StartReadSequence() and ReadSubChunk() redirect to this.</para>
+		/// <para>The item of returned CKStateChunk* list should be manually released!</para>
+		/// </summary>
+		/// <param name="ls"></param>
+		/// <returns></returns>
+		bool ReadSubChunkSequence(std::vector<CKStateChunk*>* ls);
+		inline bool ReadSubChunkSequence(std::vector<CKStateChunk*>& ls) {
+			return ReadSubChunkSequence(&ls);
+		}
+
+		/// <summary>
+		/// Read Object Array (actually still is CK_ID)
+		/// <para>ReadXObjectArray() and ReadObjectArray() redirect to this.</para>
+		/// </summary>
+		/// <param name="ls"></param>
+		/// <returns></returns>
+		bool ReadObjectArray(std::vector<CK_ID>* ls);
+		inline bool ReadObjectArray(std::vector<CK_ID>& ls) {
+			return ReadObjectArray(&ls);
+		}
 
 		//int		ReadInt();
 		//int 		StartReadSequence();
