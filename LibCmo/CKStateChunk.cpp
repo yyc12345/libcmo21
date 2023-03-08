@@ -1,15 +1,27 @@
 #include "VTUtils.hpp"
 #include "CKStateChunk.hpp"
+#include "CKMinContext.hpp"
+#include "CKFile.hpp"
 
 namespace LibCmo::CK2 {
 
 #pragma region Ctor Dtor
 
-	CKStateChunk::CKStateChunk() :
+	//CKStateChunk::CKStateChunk() :
+	//	m_ClassId(CK_CLASSID::CKCID_OBJECT), m_DataDwSize(0u), m_pData(nullptr),
+	//	m_DataVersion(CK_STATECHUNK_DATAVERSION::CHUNKDATA_CURRENTVERSION), m_ChunkVersion(CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4),
+	//	m_Parser{ CKStateChunkStatus::IDLE, 0u, 0u, 0u },
+	//	m_ObjectList(), m_ChunkList(), m_ManagerList(),
+	//	m_BindDoc(nullptr), m_BindContext(nullptr)
+	//{
+	//	;
+	//}
+	CKStateChunk::CKStateChunk(CKFileDocument* doc, CKMinContext* ctx) :
 		m_ClassId(CK_CLASSID::CKCID_OBJECT), m_DataDwSize(0u), m_pData(nullptr),
 		m_DataVersion(CK_STATECHUNK_DATAVERSION::CHUNKDATA_CURRENTVERSION), m_ChunkVersion(CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4),
 		m_Parser{ CKStateChunkStatus::IDLE, 0u, 0u, 0u },
-		m_ObjectList(), m_ChunkList(), m_ManagerList()
+		m_ObjectList(), m_ChunkList(), m_ManagerList(),
+		m_BindDoc(doc), m_BindContext(ctx)
 	{
 		;
 	}
@@ -17,7 +29,8 @@ namespace LibCmo::CK2 {
 		m_ClassId(rhs.m_ClassId), m_DataVersion(rhs.m_DataVersion), m_ChunkVersion(rhs.m_ChunkVersion),
 		m_Parser(rhs.m_Parser),
 		m_ObjectList(rhs.m_ObjectList), m_ManagerList(rhs.m_ManagerList), m_ChunkList(rhs.m_ChunkList),
-		m_pData(nullptr), m_DataDwSize(rhs.m_DataDwSize) {
+		m_pData(nullptr), m_DataDwSize(rhs.m_DataDwSize),
+		m_BindDoc(rhs.m_BindDoc), m_BindContext(rhs.m_BindContext) {
 		// copy buffer
 		if (rhs.m_pData != nullptr) {
 			this->m_pData = new(std::nothrow) CKDWORD[rhs.m_DataDwSize];
@@ -38,6 +51,9 @@ namespace LibCmo::CK2 {
 		this->m_ObjectList = rhs.m_ObjectList;
 		this->m_ManagerList = rhs.m_ManagerList;
 		this->m_ChunkList = rhs.m_ChunkList;
+
+		this->m_BindDoc = rhs.m_BindDoc;
+		this->m_BindContext = rhs.m_BindContext;
 
 		// copy buffer
 		if (rhs.m_pData != nullptr) {
@@ -408,7 +424,11 @@ namespace LibCmo::CK2 {
 		if (this->EnsureReadSpace(size_in_dword)) {
 			std::memcpy(data_ptr, this->m_pData + this->m_Parser.m_CurrentPos, size_in_byte);
 			return true;
-		} else return false;
+		} else {
+			// failed, report to context
+			m_BindContext->Printf("CKStateChunk read length error at %" PRICKdword ".", this->m_Parser.m_CurrentPos);
+			return false;
+		}
 	}
 
 	bool CKStateChunk::ReadString(std::string* strl) {
@@ -433,14 +453,147 @@ namespace LibCmo::CK2 {
 	/* ========== Complex Data Read Functions ==========*/
 
 	bool CKStateChunk::ReadObjectID(CK_ID* id) {
+		if (id == nullptr) return false;
+
+		// get basic value
+		CKINT gotten_id = 0;
+		if (!this->ReadStruct(gotten_id)) return false;
+
+		// different strategy according to chunk ver
+		if (this->m_ChunkVersion >= CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1) {
+			// new file
+
+			// if no doc associated, return directly
+			if (this->m_BindDoc == nullptr) {
+				*id = static_cast<CK_ID>(gotten_id);
+				return true;
+			}
+			// if it is positive, return corresponding value
+			if (gotten_id >= 0) {
+				*id = this->m_BindDoc->m_FileObjects[gotten_id].CreatedObject;
+				return true;
+			}
+
+		} else {
+			// old file
+			// i don't know why I need skip 2 DWORD
+			// just copy IDA code.
+
+			if (gotten_id) {
+				this->Skip(2);
+				return this->ReadStruct(id);
+			}
+		}
+
+		// all failed
+		*id = 0u;
 		return false;
 	}
 
 	bool CKStateChunk::ReadManagerInt(CKGUID* guid, CKINT* intval) {
-		return false;
+		if (guid == nullptr || intval == nullptr) return false;
+
+		// read guid first
+		if (!this->ReadStruct(guid)) return false;
+		// then read int value
+		if (!this->ReadStruct(intval)) return false;
+
+		return true;
 	}
 
 	CKStateChunk* CKStateChunk::ReadSubChunk(void) {
+		CKStateChunk* subchunk = nullptr;
+
+		// get size and do a enough space check
+		CKDWORD subChunkSize;
+		if (!this->ReadStruct(subChunkSize)) goto subchunk_defer;
+		if (!this->EnsureReadSpace(subChunkSize)) goto subchunk_defer;
+
+		// create statechunk
+		subchunk = new(std::nothrow) CKStateChunk(this->m_BindDoc, this->m_BindContext);
+		if (subchunk == nullptr) goto subchunk_defer;
+
+		// start read data
+		// read class id
+		if (!this->ReadStruct(subchunk->m_ClassId)) goto subchunk_defer;
+
+		// different read strategy by chunk version
+		if (this->m_ChunkVersion >= CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1) {
+			// new file
+
+			// read combined version
+			CKDWORD versionInfo;
+			if (!this->ReadStruct(versionInfo)) goto subchunk_defer;
+			subchunk->m_DataVersion = static_cast<CK_STATECHUNK_DATAVERSION>(versionInfo & 0xffff);
+			subchunk->m_ChunkVersion = static_cast<CK_STATECHUNK_CHUNKVERSION>((versionInfo >> 16) & 0xffff);
+
+			// read data size and create it
+			if (!this->ReadStruct(subchunk->m_DataDwSize)) goto subchunk_defer;
+			subchunk->m_pData = new(std::nothrow) CKDWORD[subchunk->m_DataDwSize];
+			if (subchunk->m_pData == nullptr) goto subchunk_defer;
+
+			// has bind file?
+			CKDWORD hasBindFile;
+			if (!this->ReadStruct(hasBindFile)) goto subchunk_defer;
+			if (hasBindFile == 1) subchunk->m_BindDoc = nullptr;
+
+			// 3 list size
+			// manager only existed when ver > 4
+			CKDWORD lssize;
+			if (!this->ReadStruct(lssize)) goto subchunk_defer;
+			subchunk->m_ObjectList.resize(lssize);
+			if (!this->ReadStruct(lssize)) goto subchunk_defer;
+			subchunk->m_ChunkList.resize(lssize);
+			if (this->m_ChunkVersion > CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1) {
+				if (!this->ReadStruct(lssize)) goto subchunk_defer;
+				subchunk->m_ManagerList.resize(lssize);
+			}
+
+			// core data
+			if (subchunk->m_DataDwSize != 0) {
+				if (!this->ReadByteData(subchunk->m_pData, subchunk->m_DataDwSize * sizeof(CKDWORD))) goto subchunk_defer;
+			}
+
+			// 3 list data
+			if (!subchunk->m_ObjectList.empty()) {
+				if (!this->ReadByteData(
+					subchunk->m_ObjectList.data(),
+					subchunk->m_ObjectList.size() * sizeof(CKDWORD)
+					)) goto subchunk_defer;
+			}
+			if (!subchunk->m_ChunkList.empty()) {
+				if (!this->ReadByteData(
+					subchunk->m_ChunkList.data(),
+					subchunk->m_ChunkList.size() * sizeof(CKDWORD)
+					)) goto subchunk_defer;
+			}
+			if (!subchunk->m_ManagerList.empty()) {
+				if (!this->ReadByteData(
+					subchunk->m_ManagerList.data(),
+					subchunk->m_ManagerList.size() * sizeof(CKDWORD)
+					)) goto subchunk_defer;
+			}
+
+		} else {
+			// old file
+
+			// read data size and create it
+			if (!this->ReadStruct(subchunk->m_DataDwSize)) goto subchunk_defer;
+			subchunk->m_pData = new(std::nothrow) CKDWORD[subchunk->m_DataDwSize];
+			if (subchunk->m_pData == nullptr) goto subchunk_defer;
+
+			// skip one?
+			// I don't know why
+			this->Skip(1u);
+
+			// read core buf
+			if (!this->ReadByteData(subchunk->m_pData, subchunk->m_DataDwSize * sizeof(CKDWORD))) goto subchunk_defer;
+
+		}
+
+		return subchunk;
+	subchunk_defer:
+		if (subchunk != nullptr) delete subchunk;
 		return nullptr;
 	}
 
@@ -484,19 +637,119 @@ namespace LibCmo::CK2 {
 	/* ========== Sequence Functions ==========*/
 
 	bool CKStateChunk::ReadObjectIDSequence(std::vector<CK_ID>* ls) {
-		return false;
+		if (ls == nullptr) return false;
+		ls->clear();
+
+		// read count
+		CKDWORD count;
+		if (!this->ReadStruct(count)) return false;
+
+		// resize list and read it
+		ls->resize(count);
+		for (size_t i = 0; i < count; ++i) {
+			if (!this->ReadObjectID(ls->data() + i)) {
+				ls->clear();
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	bool CKStateChunk::ReadManagerIntSequence(CKGUID* guid, std::vector<CKINT>* ls) {
-		return false;
+		if (guid == nullptr || ls == nullptr) return false;
+
+		// read count
+		CKDWORD count;
+		if (!this->ReadStruct(count)) return false;
+
+		// read guid
+		if (!this->ReadStruct(guid))  return false;
+
+		// resize list and read it
+		ls->resize(count);
+		for (size_t i = 0; i < count; ++i) {
+			if (!this->ReadStruct(ls->data() + i)) {
+				ls->clear();
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	bool CKStateChunk::ReadSubChunkSequence(std::vector<CKStateChunk*>* ls) {
-		return false;
+		if (ls == nullptr) return false;
+
+		// clear first
+		for (auto& item : *ls) {
+			if (item != nullptr)
+				delete (item);
+		}
+		ls->clear();
+
+		// read count
+		CKDWORD count;
+		if (!this->ReadStruct(count)) return false;
+
+		// resize list and read it
+		ls->resize(count, nullptr);
+		for (size_t i = 0; i < count; ++i) {
+			(*ls)[i] = this->ReadSubChunk();
+			if ((*ls)[i] == nullptr) {
+				// fail. remove all created statechunk and clear it
+				for (auto& item : *ls) {
+					if (item != nullptr)
+						delete (item);
+				}
+				ls->clear();
+				// return
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	bool CKStateChunk::ReadObjectArray(std::vector<CK_ID>* ls) {
-		return false;
+		if (ls == nullptr) return false;
+		ls->clear();
+
+		// read count
+		CKDWORD count;
+		if (!this->ReadStruct(count)) return false;
+		if (!count) return true;	// 0 size array
+		
+		// old file size correction
+		if (this->m_ChunkVersion < CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1) {
+			// skip 4. but I don't know why!!!
+			this->Skip(4);
+			if (!this->ReadStruct(count)) return false;
+		}
+
+		// resize list and read
+		ls->resize(count);
+		for (auto& id : *ls) {
+			// read ID first
+			CKINT cache;
+			if (!this->ReadStruct(cache)) {
+				ls->clear();
+				return false;
+			}
+
+			// remap id
+			if (this->m_BindDoc != nullptr) {
+				if (cache < 0) {
+					id = 0u;
+				} else {
+					id = this->m_BindDoc->m_FileObjects[cache].CreatedObject;
+				}
+			} else {
+				id = static_cast<CK_ID>(cache);
+			}
+		}
+
+		return true;
 	}
 
 #pragma endregion

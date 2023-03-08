@@ -288,7 +288,7 @@ struct CKStateChunk {
     CKFile* m_BindFile;
     DWORD m_unknow;
 };
-struct CKStateChunkRemap {  // 0x40 count 16
+struct ChunkIteratorData {  // 0x40 count 16
 DWORD m_ChunkVersion;
 DWORD* m_pData;
 DWORD m_DataDwordSize;

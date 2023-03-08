@@ -6,13 +6,12 @@
 namespace LibCmo::CK2::CKObjectImplements {
 
 	class CKObject {
-	protected:
+	public:
 		CK_ID m_ID;
 		std::string m_Name;
 		CK_OBJECT_FLAGS m_ObjectFlags;
 		CKMinContext* m_Context;
 
-	public:
 		CKObject(CKMinContext* ctx, CK_ID ckid, CKSTRING name);
 		CKObject(const CKObject&) = delete;
 		CKObject& operator=(const CKObject&) = delete;

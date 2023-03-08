@@ -89,6 +89,7 @@ namespace LibCmo::CK2 {
 		~CKFileObject();
 
 		CK_ID ObjectId;							// ID of the object being load/saved (as it will be/was saved in the file)
+		CK_ID CreatedObject;	// ID of the object being created
 		CK_CLASSID ObjectCid;					// Class Identifier of the object
 		CKObjectImplements::CKObject* ObjPtr;	// A pointer to the object itself (as CreatedObject when loading)
 		std::string Name;						// Name of the Object
@@ -186,7 +187,6 @@ namespace LibCmo::CK2 {
 		// writer function and varibales
 
 		// shared function and variables
-		std::string m_FileName;
 		CKMinContext* m_MinCtx;
 	};
 

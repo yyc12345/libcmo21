@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstring>
+#include <cinttypes>
 
 namespace LibCmo {
 	namespace CK2 {
@@ -30,6 +31,11 @@ namespace LibCmo {
 		using XObjectArray = std::vector<CK_ID>;
 		//using CKObjectArray = std::vector<CKObject*>;
 
+		// some print macro define
+#define PRICKdword PRIu32
+#define PRICKword PRIu16
+#define PRICKbyte PRIu8
+#define PRICKint PRIi32
 
 		// forward decl for some CKObjects
 		namespace CKObjectImplements {

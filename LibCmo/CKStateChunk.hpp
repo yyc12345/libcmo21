@@ -9,7 +9,8 @@ namespace LibCmo::CK2 {
 
 	class CKStateChunk {
 	public:
-		CKStateChunk();
+		//CKStateChunk();
+		CKStateChunk(CKFileDocument* doc, CKMinContext* ctx);
 		CKStateChunk(const CKStateChunk&);
 		CKStateChunk& operator=(const CKStateChunk&);
 		~CKStateChunk();
@@ -38,6 +39,9 @@ namespace LibCmo::CK2 {
 		std::vector<CKDWORD> m_ObjectList;
 		std::vector<CKDWORD> m_ChunkList;
 		std::vector<CKDWORD> m_ManagerList;
+
+		CKFileDocument* m_BindDoc;
+		CKMinContext* m_BindContext;
 
 #pragma region Buffer Related
 

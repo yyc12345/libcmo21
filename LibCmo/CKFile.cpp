@@ -63,12 +63,12 @@ namespace LibCmo::CK2 {
 #pragma region CKFileObject
 
 	CKFileObject::CKFileObject() :
-		ObjectId(0u), ObjectCid(CK_CLASSID::CKCID_OBJECT), Name(),
+		ObjectId(0u), CreatedObject(0u), ObjectCid(CK_CLASSID::CKCID_OBJECT), Name(),
 		ObjPtr(nullptr), Data(nullptr), FileIndex(0u) {
 	}
 
 	CKFileObject::CKFileObject(const CKFileObject& rhs) :
-		ObjectId(rhs.ObjectId), ObjectCid(rhs.ObjectCid), Name(rhs.Name),
+		ObjectId(rhs.ObjectId), CreatedObject(rhs.CreatedObject), ObjectCid(rhs.ObjectCid), Name(rhs.Name),
 		ObjPtr(rhs.ObjPtr), Data(rhs.Data), FileIndex(rhs.FileIndex) {
 
 		// CKObject is managed by CKMinContext, so we just copy its pointer.
@@ -81,6 +81,7 @@ namespace LibCmo::CK2 {
 
 	CKFileObject& CKFileObject::operator=(const CKFileObject& rhs) {
 		this->ObjectId = rhs.ObjectId;
+		this->CreatedObject = rhs.CreatedObject;
 		this->ObjectCid = rhs.ObjectCid;
 		this->Name = rhs.Name;
 		this->FileIndex = rhs.FileIndex;
@@ -173,7 +174,7 @@ namespace LibCmo::CK2 {
 #pragma region CKFile Misc
 
 	CKFile::CKFile(CKMinContext* ctx) :
-		m_FileName(), m_MinCtx(ctx) {
+		m_MinCtx(ctx) {
 		;
 	}
 

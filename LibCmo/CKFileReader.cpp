@@ -27,7 +27,7 @@ namespace LibCmo::CK2 {
 			return CKERROR::CKERR_OUTOFMEMORY;
 		}
 		if (!mappedFile->IsValid()) {
-			this->m_MinCtx->Printf("Fail to create Memory File for \"%s\".", this->m_FileName.c_str());
+			this->m_MinCtx->Printf("Fail to create Memory File for \"%s\".", u8_filename);
 			return CKERROR::CKERR_INVALIDFILE;
 		}
 
@@ -270,7 +270,7 @@ namespace LibCmo::CK2 {
 				}
 
 				// read statechunk
-				mgr.Data = new(std::nothrow) CKStateChunk();
+				mgr.Data = new(std::nothrow) CKStateChunk(doc, this->m_MinCtx);
 				if (mgr.Data != nullptr) {
 					stateChkParseSuccess = mgr.Data->ConvertFromBuffer(parser->GetPtr());
 					if (!stateChkParseSuccess) {
@@ -298,7 +298,7 @@ namespace LibCmo::CK2 {
 				}
 
 				// read state chunk
-				obj.Data = new(std::nothrow) CKStateChunk();
+				obj.Data = new(std::nothrow) CKStateChunk(doc, this->m_MinCtx);
 				if (obj.Data != nullptr) {
 					stateChkParseSuccess = obj.Data->ConvertFromBuffer(parser->GetPtr());
 					if (!stateChkParseSuccess) {
@@ -370,7 +370,13 @@ namespace LibCmo::CK2 {
 			// todo: resolve references
 			if (obj.Data == nullptr) continue;
 
+			// create object and assign created obj ckid
 			obj.ObjPtr = m_MinCtx->CreateCKObject(obj.ObjectId, obj.ObjectCid, obj.Name.c_str());
+			if (obj.ObjPtr == nullptr) {
+				obj.CreatedObject = 0u;
+			} else {
+				obj.CreatedObject = obj.ObjPtr->m_ID;
+			}
 		}
 
 		// ========== CKStateChunk remap ==========
@@ -397,6 +403,7 @@ namespace LibCmo::CK2 {
 				// if failed, delete it
 				m_MinCtx->DestroyCKObject(obj.ObjectId);
 				obj.ObjPtr = nullptr;
+				obj.CreatedObject = 0u;
 			}
 		}
 
