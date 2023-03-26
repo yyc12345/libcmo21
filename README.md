@@ -2,13 +2,19 @@
 
 The Library for CMO File Read/Write. Also the Minimalist Virtools Environment.
 
+## Status
+
+This is a long time project and I am stucked at the analyze of CKBeObject. I don't know its class layout, And I don't know its complex `CKBeObject::Save()`.  
+This project welcome everyone's contribution, except the employee of Dassault, which created Virtools.  
+
 ## Introduction
 
 The aim of this project is creating a universal library which can read / write CMO files or any other Virtools files without any Virtools dependencies.  
 This project will not link any original Virtools dynamic library. So this project can be ported to any platform if the compiler supports.  
 This project only involving specific Virtools version, 2.1. Other Virtools versions are not considered by this project.  
-The difference between this project and doyaGu's Virtools libraries, is that we are not focusing on re-creating the whole Virtools engine. We only focus on the Virtools files RW, and we only just implement a minimalist Virtools environment for achieving this.  
-This project is based on reverse work of CK2.dll, VxMath.dll and CK2_3D.dll. The program [unvirt](https://aluigi.altervista.org/papers.htm#unvirt) created by Luigi Auriemma, which is licensed by GPL-v2, also help my work.  
+This project is based on reverse work of CK2.dll, VxMath.dll and CK2_3D.dll. The program [unvirt](https://aluigi.altervista.org/papers.htm#unvirt) created by Luigi Auriemma, which is licensed by GPL-v2, also help my work.
+
+**The difference between this project and other Virtools libraries, is that we are not focusing on re-creating the whole Virtools engine. We only focus on the Virtools files RW, and we only just implement a minimalist Virtools environment for achieving this.**
 
 ## Goals
 
@@ -18,7 +24,46 @@ The ultimate goals of this project are:
 * Create a user-firendly Python binding. And allow user can export Ballance Map from Blender on Linux platform natively.
 * Create a Godot Extension which can load Ballance Map natively.
 
-There is still a long way need to go. But I will try my best.
+There is still a long way to go. But I will try my best.
+
+## Contributions
+
+However, not all contribution will be accepted. Just like I said, we create **Minimalist** Virtools Environment. The basic RW functions is enough. We do not accept complex function implementations.  
+There are 3 lists which indicate our accept guideline.
+
+### Wanted Features
+
+These features will be accepted as soon as possible.
+
+* The save steps of Virtools file.
+* The bug fix of Virtools file reader.
+* Class layout, `Save()` and `Load()` functions of following `CKObject` based classes.
+  - `CKBeObject`
+  - `CKGroup`
+  - `CKMaterial`
+  - `CKTexture`
+  - `CKMesh`
+  - `CKRenderObject`
+  - `CK3dEntity`
+  - `CK3dObject`
+* Class layout, `SaveData()` and `LoadData()` functions of following `CKBaseManager` based classes.
+  - `CKAttributeManager`
+  - `CKBehaviorManager`
+
+### Not Urgent Features
+
+These features are in plan, but not urge to merge.
+
+* The `CK_ID` remap system of Reader & Writer.
+* Other CK classes implementations.
+* Non-Virtools 2.1 implementations.
+
+### Don't Care Features
+
+These features explicitly will not be merged.
+
+* Run Virtools file.
+* Plugin system.
 
 ## Compile
 
