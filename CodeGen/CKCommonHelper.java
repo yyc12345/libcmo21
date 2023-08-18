@@ -1,8 +1,6 @@
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -60,17 +58,65 @@ public class CKCommonHelper {
 		}
 	}
 
-	public static String getEnumUnderlayingType(boolean canUnsigned) {
+	/**
+	 * Get underlying type of enum.
+	 * @param canUnsigned The parameter stored in Enum_t that indiccate 
+	 * whether this enum can use unsigned int as its underlying type.
+	 * @return The string form of its underlying type.
+	 */
+	public static String getEnumUnderlyingType(boolean canUnsigned) {
 		return canUnsigned ? "uint32_t" : "int32_t";
 	}
+
+	// =========== File Operations ===========
 	
+	public static class InputFilePair {
+		public CharStream mAntlrStream;
+		public FileInputStream mUnderlyingStream;
+	}
+	public static InputFilePair openInputFile(String filename) throws Exception {
+		InputFilePair pair = new InputFilePair();
+		pair.mUnderlyingStream = new FileInputStream(filename);
+		pair.mAntlrStream = CharStreams.fromStream(pair.mUnderlyingStream, StandardCharsets.UTF_8);
+		return pair;
+	}
+	
+	/**
+	 * Get output file for writing.
+	 * @param filename The name of file opening.
+	 * @return An OutputStreamWriter.
+	 * @throws Exception
+	 */
 	public static OutputStreamWriter openOutputFile(String filename) throws Exception {
 		FileOutputStream fs = new FileOutputStream(filename);
 		return new OutputStreamWriter(fs, StandardCharsets.UTF_8);
 	}
 
+	// =========== String Process ===========
+
+	/**
+	 * Escape String
+	 * 
+	 * Escape all characters which are invalid in string quote.
+	 * 
+	 * @param strl The string need to be escaped.
+	 * @return The escaped string.
+	 * @see removeEol
+	 */
 	public static String escapeString(String strl) {
-		
+		return strl.replace("\\", "\\\\").replace("\t", "\\t").replace("\b", "\\b").replace("\n", "\\n")
+				.replace("\r", "\\r").replace("\f", "\\f").replace("\"", "\\\"");
 	}
-	
+
+	/**
+	 * Remove all EOL (End of Line) characters.
+	 * 
+	 * @param strl The string need to be processed.
+	 * @return The string eliminated all EOL.
+	 * @see escapeString
+	 */
+	public static String removeEol(String strl) {
+		return strl.replace("\n", "").replace("\r", "");
+	}
+
 }

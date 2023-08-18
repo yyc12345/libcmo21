@@ -12,7 +12,7 @@ temp/
 
 ## Special Treat of CodeGen
 CodeGen.old/
-CodeGen/dest/*.txt
+CodeGen/dest/*.hpp
 CodeGen/.*
 CodeGen/*.class
 

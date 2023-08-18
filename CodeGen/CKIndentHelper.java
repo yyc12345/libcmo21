@@ -3,6 +3,7 @@ import java.io.OutputStreamWriter;
 public class CKIndentHelper {
 	public CKIndentHelper(OutputStreamWriter writer) {
 		mIndent = 0;
+		mWriter = writer;
 	}
 
 	private int mIndent;
@@ -35,13 +36,14 @@ public class CKIndentHelper {
 	
 	public void briefComment(String fmt) throws Exception {
 		if (fmt == null) return;
-		printf("/**< {} */", fmt.replaceAll("[\\r\\n]+", ""));
+		puts("/**");
+		puts(fmt);
+		puts(" */");
 	}
 	
 	public void afterMemberComment(String fmt) throws Exception {
 		if (fmt == null) return;
-		mWriter.write("\t");
-		mWriter.write(fmt);
+		mWriter.write(String.format("\t/**< %s */", CKCommonHelper.removeEol(fmt)));
 	}
 
 }

@@ -139,54 +139,125 @@ public class CKEnumRunner {
 
 	}
 
-	public static class EnumProgWriter {
-		public static void writeEnums(OutputStreamWriter writer, CKCommonHelper.CKParts parts, List<Enum_t> prog)
-				throws Exception {
-			CKIndentHelper indent = new CKIndentHelper(writer);
-			indent.puts("#pragma once");
-			indent.puts("#include <cstdint>");
-			indent.printf("namespace LibCmo::{} {{", CKCommonHelper.getCKPartsNamespace(parts));
-			indent.inc();
-
-			// write enums
+	public static class EnumWriter {
+		private static void writeEnum(CKIndentHelper indent, List<Enum_t> prog) throws Exception {
 			for (Enum_t enum_t : prog) {
 				// write enum comment
 				indent.briefComment(enum_t.mEnumComment);
 
 				// write enum start
-				indent.printf("enum class {} : {} {{", enum_t.mEnumName,
-						CKCommonHelper.getEnumUnderlayingType(enum_t.mCanUnsigned));
+				indent.printf("enum class %s : %s {", enum_t.mEnumName,
+						CKCommonHelper.getEnumUnderlyingType(enum_t.mCanUnsigned));
 				indent.inc();
 
 				// write enum entries
 				for (EnumEntry_t enumEntry_t : enum_t.mEntries) {
 					// write entry self
 					if (enumEntry_t.mEntryValue == null) {
-						indent.printf("{},", enumEntry_t.mEntryName);
+						indent.printf("%s,", enumEntry_t.mEntryName);
 					} else {
-						indent.printf("{} = {},", enumEntry_t.mEntryName, enumEntry_t.mEntryValue);
+						indent.printf("%s = %s,", enumEntry_t.mEntryName, enumEntry_t.mEntryValue);
 					}
-					
+
 					// write entry comment after member
 					indent.afterMemberComment(enumEntry_t.mEntryComment);
 				}
 
 				// write enum tail
 				indent.dec();
-				indent.puts("}");
+				indent.puts("};");
 			}
+		}
 
+		public static void writeEnums(OutputStreamWriter writer, List<Enum_t> ck2_prog, List<Enum_t> vxmath_prog)
+				throws Exception {
+			CKIndentHelper indent = new CKIndentHelper(writer);
+			indent.puts("#pragma once");
+			indent.puts("#include <cstdint>");
+			
+			indent.puts("namespace LibCmo::CK2 {");
+			indent.inc();
+			writeEnum(indent, ck2_prog);
+			indent.dec();
+			indent.puts("}");
+
+			indent.puts("namespace LibCmo::VxMath {");
+			indent.inc();
+			writeEnum(indent, vxmath_prog);
 			indent.dec();
 			indent.puts("}");
 		}
 
-		public static void writeComments(OutputStreamWriter writer, List<Enum_t> prog) throws Exception {
-			CKIndentHelper indent = new CKIndentHelper(writer);
+		private static void writeAccessibleValue(CKIndentHelper indent, String parts, List<Enum_t> prog) throws Exception {
+			for (Enum_t enum_t : prog) {
+				// write enum desc header
+				indent.printf("const EnumNameofArray<LibCmo::%s::%s> {} {", 
+						parts, enum_t.mEnumName, enum_t.mEnumName);
+				indent.inc();
 
+				// write enum desc entries
+				for (EnumEntry_t enumEntry_t : enum_t.mEntries) {
+					indent.printf("{ LibCmo::%s::%s::%s, \"%s\" },", 
+							parts, enum_t.mEnumName, enumEntry_t.mEntryName, enumEntry_t.mEntryName);
+				}
+
+				// write enum tail
+				indent.dec();
+				indent.puts("};");
+			}
+		}
+		
+		public static void writeAccessibleValues(OutputStreamWriter writer, List<Enum_t> ck2_prog, List<Enum_t> vxmath_prog) throws Exception {
+			CKIndentHelper indent = new CKIndentHelper(writer);
+			indent.puts("#pragma once");
+			indent.puts("#include \"CKEnums.hpp\"");
+			indent.puts("#include <cstdint>");
+			indent.puts("#include <string>");
+			indent.puts("#include <vector>");
+			indent.puts("namespace Unvirt::AccessibleValue::EnumDesc {");
+			indent.inc();
+
+			indent.puts("namespace CK2 {");
+			indent.inc();
+			writeAccessibleValue(indent, "CK2", ck2_prog);
+			indent.dec();
+			indent.puts("}");
+
+			indent.puts("namespace VxMath {");
+			indent.inc();
+			writeAccessibleValue(indent, "VxMath", vxmath_prog);
+			indent.dec();
+			indent.puts("}");
+			
+			indent.dec();
+			indent.puts("}");
 		}
 	}
 
-	public static void Run(String infilename, String outfilename) {
-
+	private static List<Enum_t> getProg(String infile) throws Exception {
+		CKCommonHelper.InputFilePair pair = CKCommonHelper.openInputFile(infile);
+		CKGeneralLexer lexer = new CKGeneralLexer(pair.mAntlrStream);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		CKEnumParser parser = new CKEnumParser(tokens);
+		
+		ParseTree tree = parser.prog();
+		ParseTreeWalker walker = new ParseTreeWalker();
+		EnumWalker worker = new EnumWalker(tokens);
+		walker.walk(worker, tree);
+		
+		pair.mUnderlyingStream.close();
+		return worker.getResult();
+	}
+	public static void run(String inCk2Enums, String inVxEnums, String outEnums, String outAccessibleValues) throws Exception {
+		List<Enum_t> ck2prog = getProg(inCk2Enums);
+		List<Enum_t> vxprog = getProg(inVxEnums);
+		
+		OutputStreamWriter fs = CKCommonHelper.openOutputFile(outEnums);
+		EnumWriter.writeEnums(fs, ck2prog, vxprog);
+		fs.close();
+		
+		fs = CKCommonHelper.openOutputFile(outAccessibleValues);
+		EnumWriter.writeAccessibleValues(fs, ck2prog, vxprog);
+		fs.close();
 	}
 }

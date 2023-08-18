@@ -1,7 +1,7 @@
 parser grammar CKEnumParser;
 options { tokenVocab = CKGeneralLexer; }
 
-prog: enumBody+ ;
+prog: enumBody* ;
 
 enumBody: CKGENERAL_TYPEDEF? CKGENERAL_ENUM CKGENERAL_ID CKGENERAL_LBRACKET 
 entryPair+
