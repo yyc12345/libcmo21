@@ -13,6 +13,8 @@ temp/
 ## Special Treat of CodeGen
 CodeGen.old/
 CodeGen/dest/*.txt
+CodeGen/.*
+CodeGen/*.class
 
 CodeGen/CKGeneralLexer*.*
 CodeGen/CKEnumParser*.*

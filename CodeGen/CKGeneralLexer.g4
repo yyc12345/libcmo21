@@ -17,7 +17,7 @@ CKGENERAL_COMMA: ',' ;
 
 // identifider and number
 CKGENERAL_ID: [_a-zA-Z][_a-zA-Z0-9]* ;
-CKGENERAL_NUM: '-'? ('0' [xX])? [0-9a-fA-F]+ [uUlL]* ;
+CKGENERAL_NUM: (('0'[xX]) | '-')? [0-9a-fA-F]+ [uUlL]* ;
 
 // comments
 CKGENERAL_LINE_COMMENT: '//' ~[\r\n]* -> channel(COMMENTS);
