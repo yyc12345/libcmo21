@@ -24,7 +24,7 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 
 	private String getEnumComment(Token enumHead) {
 		return CommonHelper
-				.cutComment(CommonHelper.getPreChannelToken(mTokenStream, enumHead, CKGeneralLexer.COMMENTS));
+				.cutComments(CommonHelper.getPreChannelTokens(mTokenStream, enumHead, CKGeneralLexer.COMMENTS));
 	}
 
 	private BufferedTokenStream mTokenStream;

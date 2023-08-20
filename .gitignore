@@ -7,13 +7,10 @@ PyCmoOld/
 out/
 temp/
 .vscode/
-CodeGen.old/
 
-## Ban Generated Code
-LibCmo/Generated/*.hpp
-LibCmo/Generated/*.cpp
-Unvirt/Generated/*.hpp
-Unvirt/Generated/*.cpp
+CodeGen.old/
+CodeGen/dest/*.hpp
+CodeGen/dest/*.cpp
 
 ## CMake Banned
 CMakeLists.txt.user
