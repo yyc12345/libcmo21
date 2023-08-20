@@ -4,10 +4,9 @@ A helper program to generate some definations.
 
 ```
 antlr4 CKGeneralLexer.g4
-antlr4 CKEnumParser.g4
-antlr4 CKErrorParser.g4
-antlr4 CKClassidParser.g4
+antlr4 CKEnumsParser.g4
+antlr4 CKDefinesParser.g4
 
-javac CK*.java
-java CKMainGen
+javac *.java
+java CKMain
 ```

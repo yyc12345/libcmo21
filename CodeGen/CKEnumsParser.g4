@@ -1,4 +1,4 @@
-parser grammar CKEnumParser;
+parser grammar CKEnumsParser;
 options { tokenVocab = CKGeneralLexer; }
 
 prog: enumBody* ;

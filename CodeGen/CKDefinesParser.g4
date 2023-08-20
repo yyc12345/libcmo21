@@ -1,4 +1,4 @@
-parser grammar CKErrorParser;
+parser grammar CKDefinesParser;
 options { tokenVocab = CKGeneralLexer; }
 
 prog: definePair+ ;

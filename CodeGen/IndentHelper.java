@@ -1,7 +1,7 @@
 import java.io.OutputStreamWriter;
 
-public class CKIndentHelper {
-	public CKIndentHelper(OutputStreamWriter writer) {
+public class IndentHelper {
+	public IndentHelper(OutputStreamWriter writer) {
 		mIndent = 0;
 		mWriter = writer;
 	}
@@ -23,27 +23,29 @@ public class CKIndentHelper {
 			mWriter.write("\t");
 		}
 	}
-	
+
 	public void puts(String data) throws Exception {
 		indent();
 		mWriter.write(data);
 	}
-	
+
 	public void printf(String fmt, Object... args) throws Exception {
 		indent();
 		mWriter.write(String.format(fmt, args));
 	}
-	
-	public void briefComment(String fmt) throws Exception {
-		if (fmt == null) return;
+
+	public void briefComment(String comment) throws Exception {
+		if (comment == null)
+			return;
 		puts("/**");
-		puts(fmt);
+		puts(comment);
 		puts(" */");
 	}
-	
-	public void afterMemberComment(String fmt) throws Exception {
-		if (fmt == null) return;
-		mWriter.write(String.format("\t/**< %s */", CKCommonHelper.removeEol(fmt)));
+
+	public void afterMemberComment(String comment) throws Exception {
+		if (comment == null)
+			return;
+		mWriter.write(String.format("\t/**< %s */", CommonHelper.removeEol(comment)));
 	}
 
 }

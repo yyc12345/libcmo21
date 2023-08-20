@@ -1,12 +1,14 @@
+import java.util.List;
+
 import org.antlr.v4.runtime.*;
 
-public class CKEnumCommentsHelper {
+public class CommentsFinder {
 
 	enum CommentsPosition {
 		Unknown, Precomment, Postcomment
 	}
 
-	public CKEnumCommentsHelper(BufferedTokenStream tokenStream) {
+	public CommentsFinder(BufferedTokenStream tokenStream) {
 		mTokenStream = tokenStream;
 		mCommentsPos = CommentsPosition.Unknown;
 	}
@@ -20,28 +22,26 @@ public class CKEnumCommentsHelper {
 			// if we don't know where is our token,
 			// we should assume it is from precomment to postcomment
 			// and check it.
-			Token precomment = CKCommonHelper.getPreChannelToken(mTokenStream, preToken, CKGeneralLexer.COMMENTS);
+			List<Token> precomment = CommonHelper.getPreChannelTokens(mTokenStream, preToken, CKGeneralLexer.COMMENTS);
 			if (precomment != null) {
 				mCommentsPos = CommentsPosition.Precomment;
-				return CKCommonHelper.cutComment(precomment);
+				return CommonHelper.cutComments(precomment);
 			}
 			
-			Token postcomment = CKCommonHelper.getPostChannelToken(mTokenStream, postToken, CKGeneralLexer.COMMENTS);
+			List<Token> postcomment = CommonHelper.getPostChannelTokens(mTokenStream, postToken, CKGeneralLexer.COMMENTS);
 			if (postcomment != null) {
 				mCommentsPos = CommentsPosition.Postcomment;
-				return CKCommonHelper.cutComment(postcomment);
+				return CommonHelper.cutComments(postcomment);
 			}
 			
 			// really do not have comment, return empty and keep comment pos
 			return null;
 		}
 		case Precomment: {
-			Token comment = CKCommonHelper.getPreChannelToken(mTokenStream, preToken, CKGeneralLexer.COMMENTS);
-			return CKCommonHelper.cutComment(comment);
+			return CommonHelper.cutComments(CommonHelper.getPreChannelTokens(mTokenStream, preToken, CKGeneralLexer.COMMENTS));
 		}
 		case Postcomment: {
-			Token comment = CKCommonHelper.getPostChannelToken(mTokenStream, postToken, CKGeneralLexer.COMMENTS);
-			return CKCommonHelper.cutComment(comment);
+			return CommonHelper.cutComments(CommonHelper.getPostChannelTokens(mTokenStream, postToken, CKGeneralLexer.COMMENTS));
 		}
 		default:
 			return null;
