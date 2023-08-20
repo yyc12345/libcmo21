@@ -56,14 +56,14 @@ public class EnumsWriter {
 			EnumsHelper.EnumCollection_t prog) throws Exception {
 		for (EnumsHelper.Enum_t enum_t : prog.mEnums) {
 			// write enum desc header
-			indent.printf("const EnumNameofArray<LibCmo::%s::%s> {} {", CommonHelper.getCKPartsNamespace(parts),
+			indent.printf("const GeneralReflectionArray<LibCmo::%s::%s> %s {", CommonHelper.getCKPartsNamespace(parts),
 					enum_t.mEnumName, enum_t.mEnumName);
 			indent.inc();
 
 			// write enum desc entries
 			for (EnumsHelper.EnumEntry_t enumEntry_t : enum_t.mEntries) {
-				indent.printf("{ LibCmo::%s::%s::%s, \"%s\" },", parts, enum_t.mEnumName, enumEntry_t.mEntryName,
-						enumEntry_t.mEntryName);
+				indent.printf("{ LibCmo::%s::%s::%s, {\"%s\"} },", CommonHelper.getCKPartsNamespace(parts),
+						enum_t.mEnumName, enumEntry_t.mEntryName, enumEntry_t.mEntryName);
 			}
 
 			// write enum tail
@@ -80,8 +80,12 @@ public class EnumsWriter {
 		indent.puts("#include <cstdint>");
 		indent.puts("#include <string>");
 		indent.puts("#include <vector>");
-		indent.puts("namespace Unvirt::AccessibleValue::EnumDesc {");
+		indent.puts("namespace Unvirt::AccessibleValue::EnumReflection {");
 		indent.inc();
+
+		indent.puts("struct GeneralReflection { const char* mName; };");
+		indent.puts("template<typename _Ty>;");
+		indent.puts("using GeneralReflectionArray = std::vector<std::pair<TEnum, GeneralReflection>>;");
 
 		indent.puts("namespace CK2 {");
 		indent.inc();

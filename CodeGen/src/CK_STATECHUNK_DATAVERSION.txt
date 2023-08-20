@@ -1,0 +1,14 @@
+
+#define CHUNKDATA_OLDVERSION			0	// Before any version was saved 
+#define CHUNKDATA_BASEVERSION			1	// First version	
+#define CHUNK_WAVESOUND_VERSION2		2	// Changes in wavesound format	
+#define CHUNK_WAVESOUND_VERSION3		3	// Changes in wavesound format	
+#define CHUNK_MATERIAL_VERSION_ZTEST	4	// Change in material save format	
+#define CHUNK_MAJORCHANGE_VERSION		5	// Optimisations on many save functions		
+#define CHUNK_MACCHANGE_VERSION			6	// Misc new Statechunk functions for macintosh (Big-Endian <-> Little Endian conversion )	
+#define CHUNK_WAVESOUND_VERSION4		7	// Changes in wavesound format (Added sound length)	
+#define CHUNK_SCENECHANGE_VERSION		8	// Changes in sceneObjectDesc format (Remove lasttimevalue)	
+#define CHUNK_MESHCHANGE_VERSION		9	// Changes in Mesh save format (primitives)	
+#define CHUNK_DEV_2_1				   10	// Changes in wavesound reading of inside, outside angles 
+
+#define CHUNKDATA_CURRENTVERSION		CHUNK_DEV_2_1	

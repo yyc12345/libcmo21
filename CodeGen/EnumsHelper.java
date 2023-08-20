@@ -15,7 +15,20 @@ public class EnumsHelper {
 		public String mEntryValue; ///< The value of this entry. null if this entry do not have explicit value.
 		public String mEntryComment; ///< The comment of this entry. null if no comment.
 	}
-
+	
+	/**
+	 * The specialized EnumEntry type which can store extra hierarchy info.
+	 * Used in CK_CLASSID parsing.
+	 */
+	public static class EnumEntryWithHierarchy_t extends EnumEntry_t {
+		public EnumEntryWithHierarchy_t() {
+			super();
+			mHierarchy = new Vector<EnumEntryWithHierarchy_t>();
+		}
+		
+		public Vector<EnumEntryWithHierarchy_t> mHierarchy; ///< The list to store this CK_CLASSID inheritance relationship.
+	}
+	
 	/**
 	 * The struct to describe an enum.
 	 */

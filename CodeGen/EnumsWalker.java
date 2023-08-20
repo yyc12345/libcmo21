@@ -104,7 +104,7 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 		case 2: {
 			// set value
 			TerminalNode num = nums.get(0), offset = nums.get(1);
-			mCurrentEntry.mEntryValue = String.format("{} << {}", num.getText(), offset.getText());
+			mCurrentEntry.mEntryValue = String.format("%s << %s", num.getText(), offset.getText());
 
 			// << operator appears. this enum must have flags feature
 			mCurrentEnum.mUseFlags = true;

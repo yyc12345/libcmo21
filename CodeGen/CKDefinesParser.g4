@@ -3,4 +3,4 @@ options { tokenVocab = CKGeneralLexer; }
 
 prog: definePair+ ;
 
-definePair: CKGENERAL_DEFINE CKGENERAL_ID CKGENERAL_NUM ;
+definePair: CKGENERAL_DEFINE CKGENERAL_ID (CKGENERAL_NUM | CKGENERAL_ID) ;

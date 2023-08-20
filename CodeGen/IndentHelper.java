@@ -34,6 +34,13 @@ public class IndentHelper {
 		mWriter.write(String.format(fmt, args));
 	}
 
+	/**
+	 * Write standard Doxygen document comment.
+	 * <p>
+	 * Usually be called before writing content.
+	 * @param comment
+	 * @throws Exception
+	 */
 	public void briefComment(String comment) throws Exception {
 		if (comment == null)
 			return;
@@ -42,6 +49,13 @@ public class IndentHelper {
 		puts(" */");
 	}
 
+	/**
+	 * Write suffix style Doxygen document comment.
+	 * <p>
+	 * Usually be called after writing content.
+	 * @param comment
+	 * @throws Exception
+	 */
 	public void afterMemberComment(String comment) throws Exception {
 		if (comment == null)
 			return;

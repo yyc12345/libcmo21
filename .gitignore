@@ -9,6 +9,12 @@ temp/
 .vscode/
 CodeGen.old/
 
+## Ban Generated Code
+LibCmo/Generated/*.hpp
+LibCmo/Generated/*.cpp
+Unvirt/Generated/*.hpp
+Unvirt/Generated/*.cpp
+
 ## CMake Banned
 CMakeLists.txt.user
 CMakeCache.txt

@@ -2,6 +2,10 @@
 *.interp
 *.tokens
 
+CKGeneralLexer*.java
+CKEnumsParser*.java
+CKDefinesParser*.java
+
 # Eclipse projects
 .classpath
 .project

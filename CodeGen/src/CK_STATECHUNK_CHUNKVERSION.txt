@@ -1,0 +1,6 @@
+
+	#define CHUNK_VERSIONBASE	0 
+	#define CHUNK_VERSION1		4	// equal to file version : WriteObjectID => table
+	#define CHUNK_VERSION2		5	// add Manager Data
+	#define CHUNK_VERSION3		6	// New ConvertToBuffer / ReadFromBuffer (file system changed to reflect this )
+	#define CHUNK_VERSION4		7	// New WriteObjectID when saving to a file 

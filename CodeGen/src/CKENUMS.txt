@@ -76,30 +76,9 @@ typedef enum CK_PLUGIN_TYPE {
 	CKPLUGIN_EXTENSION_DLL		= 7,	// Generic extension (definition of new parameter types or operations for ex.)	
 } CK_PLUGIN_TYPE;
 
-enum CK_STATECHUNK_DATAVERSION {
-	CHUNKDATA_OLDVERSION=			0,	// Before any version was saved 
-	CHUNKDATA_BASEVERSION=			1,	// First version	
-	CHUNK_WAVESOUND_VERSION2=		2,	// Changes in wavesound format	
-	CHUNK_WAVESOUND_VERSION3=		3,	// Changes in wavesound format	
-	CHUNK_MATERIAL_VERSION_ZTEST=	4,	// Change in material save format	
-	CHUNK_MAJORCHANGE_VERSION=		5,	// Optimisations on many save functions		
-	CHUNK_MACCHANGE_VERSION=		6,	// Misc new Statechunk functions for macintosh (Big-Endian <-> Little Endian conversion )	
-	CHUNK_WAVESOUND_VERSION4=		7,	// Changes in wavesound format (Added sound length)	
-	CHUNK_SCENECHANGE_VERSION=		8,	// Changes in sceneObjectDesc format (Remove lasttimevalue)	
-	CHUNK_MESHCHANGE_VERSION=		9,	// Changes in Mesh save format (primitives)	
-	CHUNK_DEV_2_1=				   10,	// Changes in wavesound reading of inside, outside angles 
-
-	CHUNKDATA_CURRENTVERSION=		CHUNK_DEV_2_1	,
-};
-
-enum CK_STATECHUNK_CHUNKVERSION {
-	CHUNK_VERSIONBASE=	0, 
-	CHUNK_VERSION1=		4,	// equal to file version : WriteObjectID => table
-	CHUNK_VERSION2=		5,	// add Manager Data
-	CHUNK_VERSION3=		6,	// New ConvertToBuffer / ReadFromBuffer (file system changed to reflect this )
-	CHUNK_VERSION4=		7,	// New WriteObjectID when saving to a file 
-};
-
+/***************************************************
+CHUNK_OPTIONS in Virtools header.
+*************************************************/
 enum CK_STATECHUNK_CHUNKOPTIONS {
 	CHNK_OPTION_IDS			= 0x01,		// IDS are stored inside chunk
 	CHNK_OPTION_MAN			= 0x02,		// Managers ints are store inside chunk
