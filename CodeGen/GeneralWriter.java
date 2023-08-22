@@ -31,6 +31,7 @@ public class GeneralWriter {
 			// write enum tail
 			indent.dec();
 			indent.puts("};");
+			indent.printf("LIBCMO_BITFLAG_OPERATORS(%s);", enum_t.mEnumName);
 		}
 	}
 

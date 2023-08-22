@@ -47,40 +47,45 @@
 #include <cstdint>
 #include <initializer_list>
 
-namespace LibCmo {
+#pragma region Enum Helper
 
-    namespace EnumsHelper {
-        template<typename TEnum>
-        inline TEnum FlagEnumMerge(std::initializer_list<TEnum> il) {
-            std::underlying_type_t<TEnum> result = 0u;
-            for (auto it = il.begin(); it != il.end(); ++it) {
-                result |= static_cast<std::underlying_type_t<TEnum>>(*it);
-            }
-            return static_cast<TEnum>(result);
-        }
-
-        template<typename TEnum>
-        inline TEnum FlagEnumInv(TEnum e) {
-            return static_cast<TEnum>(~(static_cast<std::underlying_type_t<TEnum>>(e)));
-        }
-
-        template<typename TEnum>
-        inline void FlagEnumRm(TEnum& e, std::initializer_list<TEnum> il) {
-            auto mask = FlagEnumInv(FlagEnumMerge(il));
-            e = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e) & static_cast<std::underlying_type_t<TEnum>>(mask));
-        }
-
-        template<typename TEnum>
-        inline void FlagEnumAdd(TEnum& e, std::initializer_list<TEnum> il) {
-            auto mask = FlagEnumMerge(il);
-            e = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e) | static_cast<std::underlying_type_t<TEnum>>(mask));
-        }
-
-        template<typename TEnum>
-        inline bool FlagEnumHas(TEnum e, TEnum probe) {
-            return static_cast<bool>(static_cast<std::underlying_type_t<TEnum>>(e) & static_cast<std::underlying_type_t<TEnum>>(probe));
-        }
+#define LIBCMO_BITFLAG_OPERATORS_BITWISE(OP, ENUM_TYPE) \
+    constexpr ENUM_TYPE operator OP(ENUM_TYPE lhs, ENUM_TYPE rhs) noexcept { \
+        typedef std::underlying_type_t<ENUM_TYPE> underlying; \
+        return static_cast<ENUM_TYPE>(static_cast<underlying>(lhs) OP static_cast<underlying>(rhs)); \
+    } \
+    constexpr ENUM_TYPE& operator OP ## = (ENUM_TYPE& lhs, ENUM_TYPE rhs) noexcept { \
+        return (lhs = lhs OP rhs); \
     }
+
+#define LIBCMO_BITFLAG_OPERATORS_BOOLEAN(OP, ENUM_TYPE) \
+    constexpr bool operator OP(ENUM_TYPE lhs, std::underlying_type_t<ENUM_TYPE> rhs) noexcept { \
+        return static_cast<std::underlying_type_t<ENUM_TYPE>>(lhs) OP rhs; \
+    } \
+    constexpr bool operator OP(std::underlying_type_t<ENUM_TYPE> lhs, ENUM_TYPE rhs) noexcept { \
+        return lhs OP static_cast<std::underlying_type_t<ENUM_TYPE>>(rhs); \
+    }
+
+#define LIBCMO_BITFLAG_OPERATORS(ENUM_TYPE) \
+    LIBCMO_BITFLAG_OPERATORS_BITWISE(|, ENUM_TYPE) \
+    LIBCMO_BITFLAG_OPERATORS_BITWISE(&, ENUM_TYPE) \
+    LIBCMO_BITFLAG_OPERATORS_BITWISE(^, ENUM_TYPE) \
+    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(==, ENUM_TYPE) \
+    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(!=, ENUM_TYPE) \
+    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(<, ENUM_TYPE) \
+    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(>, ENUM_TYPE) \
+    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(>=, ENUM_TYPE) \
+    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(<=, ENUM_TYPE) \
+    constexpr ENUM_TYPE operator~(ENUM_TYPE e) noexcept { \
+        return static_cast<ENUM_TYPE>(~static_cast<std::underlying_type_t<ENUM_TYPE>>(e)); \
+    } \
+    constexpr bool operator!(ENUM_TYPE e) noexcept { \
+        return static_cast<bool>(static_cast<std::underlying_type_t<ENUM_TYPE>>(e)); \
+    }
+
+#pragma endregion
+
+namespace LibCmo {
 
 	namespace StreamHelper {
 

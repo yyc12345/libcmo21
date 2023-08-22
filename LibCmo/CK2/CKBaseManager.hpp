@@ -7,7 +7,7 @@ namespace LibCmo::CK2::CKManagerImplements {
 
 	class CKBaseManager {
 	public:
-		CKBaseManager(CKMinContext* ctx, CK_ID ckid);
+		CKBaseManager(CKContext* ctx, CK_ID ckid);
 		CKBaseManager(const CKBaseManager&) = delete;
 		CKBaseManager& operator=(const CKBaseManager&) = delete;
 		virtual ~CKBaseManager();
@@ -21,7 +21,7 @@ namespace LibCmo::CK2::CKManagerImplements {
 
 	class CKAttributeManager : public CKBaseManager {
 	public:
-		CKAttributeManager(CKMinContext* ctx, CK_ID ckid);
+		CKAttributeManager(CKContext* ctx, CK_ID ckid);
 		CKAttributeManager(const CKAttributeManager&) = delete;
 		CKAttributeManager& operator=(const CKAttributeManager&) = delete;
 		virtual ~CKAttributeManager();

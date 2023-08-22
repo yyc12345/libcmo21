@@ -104,6 +104,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>VTAll.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -123,6 +125,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>VTAll.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,6 +146,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>VTAll.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -163,6 +169,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>VTAll.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -175,32 +183,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CKFile.cpp" />
-    <ClCompile Include="CKFileWriter.cpp" />
-    <ClCompile Include="CKGlobals.cpp" />
-    <ClCompile Include="CKManagerImplements\CKBaseManager.cpp" />
-    <ClCompile Include="CKMinContext.cpp" />
-    <ClCompile Include="CKObjectImplements\CKObject.cpp" />
-    <ClCompile Include="CKObjects.cpp" />
+    <ClCompile Include="CK2\CKFile.cpp" />
+    <ClCompile Include="CK2\CKFileWriter.cpp" />
+    <ClCompile Include="CK2\CKGlobals.cpp" />
+    <ClCompile Include="CK2\CKManagerImplements\CKBaseManager.cpp" />
+    <ClCompile Include="CK2\CKContext.cpp" />
+    <ClCompile Include="CK2\CKObjectImplements\CKObject.cpp" />
     <ClCompile Include="VTEncoding.cpp" />
-    <ClCompile Include="CKFileReader.cpp" />
-    <ClCompile Include="CKStateChunk.cpp" />
+    <ClCompile Include="CK2\CKFileReader.cpp" />
+    <ClCompile Include="CK2\CKStateChunk.cpp" />
     <ClCompile Include="VTUtils.cpp" />
-    <ClCompile Include="VxMemoryMappedFile.cpp" />
+    <ClCompile Include="VxMath\VxMemoryMappedFile.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CKDefines.hpp" />
-    <ClInclude Include="CKEnums.hpp" />
-    <ClInclude Include="CKFile.hpp" />
-    <ClInclude Include="CKGlobals.hpp" />
-    <ClInclude Include="CKIdentifiers.hpp" />
-    <ClInclude Include="CKManagers.hpp" />
-    <ClInclude Include="CKMinContext.hpp" />
-    <ClInclude Include="CKStateChunk.hpp" />
+    <ClInclude Include="CK2\CKDefines.hpp" />
+    <ClInclude Include="CK2\CKEnums.hpp" />
+    <ClInclude Include="CK2\CKFile.hpp" />
+    <ClInclude Include="CK2\CKGlobals.hpp" />
+    <ClInclude Include="CK2\CKIdentifiers.hpp" />
+    <ClInclude Include="CK2\CKBaseManager.hpp" />
+    <ClInclude Include="CK2\CKContext.hpp" />
+    <ClInclude Include="CK2\CKStateChunk.hpp" />
+    <ClInclude Include="CK2\CKTypes.hpp" />
+    <ClInclude Include="VTAll.hpp" />
     <ClInclude Include="VTEncoding.hpp" />
-    <ClInclude Include="CKObjects.hpp" />
+    <ClInclude Include="CK2\CKObject.hpp" />
     <ClInclude Include="VTUtils.hpp" />
-    <ClInclude Include="VxMemoryMappedFile.hpp" />
+    <ClInclude Include="VxMath\VxMemoryMappedFile.hpp" />
+    <ClInclude Include="VxMath\VxTypes.hpp" />
+    <ClInclude Include="XContainer\XTypes.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

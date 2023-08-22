@@ -13,49 +13,70 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Sources\CKObjectImplements">
-      <UniqueIdentifier>{a8cd2188-b552-478c-9801-a6286b3d48a0}</UniqueIdentifier>
+    <Filter Include="Headers\CK2">
+      <UniqueIdentifier>{bef3546d-1182-4641-a95f-59edb8326e2a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\CKManagerImplements">
+    <Filter Include="Headers\VxMath">
+      <UniqueIdentifier>{fe29ae7b-12c4-43b9-b7ae-c09c473e9ee9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\XContainer">
+      <UniqueIdentifier>{d8192b09-d1fa-438f-a4ae-a4019b05cef3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\CK2">
+      <UniqueIdentifier>{7724b40c-b489-4639-a5d8-0cefc7b5a951}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\VxMath">
+      <UniqueIdentifier>{26f55ef2-f788-474f-a908-6488986ad03a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\XContainer">
+      <UniqueIdentifier>{3dee80b5-d27a-4071-9194-3c817ba38c4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\CK2\CKManagerImplements">
+      <UniqueIdentifier>{bc2c80b7-8622-41f4-9bef-480a71430eb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\CK2\CKObjectImplements">
+      <UniqueIdentifier>{9bec41df-78db-4753-ab80-86345545227d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\CK2\CKManagerImplements">
       <UniqueIdentifier>{784282d9-4adb-40ca-bbac-902c74e9a2e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\CK2\CKObjectImplements">
+      <UniqueIdentifier>{a8cd2188-b552-478c-9801-a6286b3d48a0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CKFileReader.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="VTEncoding.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="CKStateChunk.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="VxMemoryMappedFile.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CKFileWriter.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CKObjectImplements\CKObject.cpp">
-      <Filter>Sources\CKObjectImplements</Filter>
-    </ClCompile>
-    <ClCompile Include="CKGlobals.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CKFile.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CKMinContext.cpp">
-      <Filter>Sources</Filter>
+    <ClCompile Include="CK2\CKObjectImplements\CKObject.cpp">
+      <Filter>Sources\CK2\CKObjectImplements</Filter>
     </ClCompile>
     <ClCompile Include="VTUtils.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="CKManagerImplements\CKBaseManager.cpp">
-      <Filter>Sources\CKManagerImplements</Filter>
+    <ClCompile Include="CK2\CKManagerImplements\CKBaseManager.cpp">
+      <Filter>Sources\CK2\CKManagerImplements</Filter>
     </ClCompile>
-    <ClCompile Include="CKObjects.cpp">
-      <Filter>Sources</Filter>
+    <ClCompile Include="VxMath\VxMemoryMappedFile.cpp">
+      <Filter>Sources\VxMath</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\CKFile.cpp">
+      <Filter>Sources\CK2</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\CKFileReader.cpp">
+      <Filter>Sources\CK2</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\CKFileWriter.cpp">
+      <Filter>Sources\CK2</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\CKGlobals.cpp">
+      <Filter>Sources\CK2</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\CKContext.cpp">
+      <Filter>Sources\CK2</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\CKStateChunk.cpp">
+      <Filter>Sources\CK2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,35 +86,47 @@
     <ClInclude Include="VTEncoding.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="CKObjects.hpp">
+    <ClInclude Include="CK2\CKDefines.hpp">
+      <Filter>Headers\CK2</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\CKEnums.hpp">
+      <Filter>Headers\CK2</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\CKFile.hpp">
+      <Filter>Headers\CK2</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\CKGlobals.hpp">
+      <Filter>Headers\CK2</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\CKIdentifiers.hpp">
+      <Filter>Headers\CK2</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\CKContext.hpp">
+      <Filter>Headers\CK2</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\CKStateChunk.hpp">
+      <Filter>Headers\CK2</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\CKTypes.hpp">
+      <Filter>Headers\CK2</Filter>
+    </ClInclude>
+    <ClInclude Include="VxMath\VxMemoryMappedFile.hpp">
+      <Filter>Headers\VxMath</Filter>
+    </ClInclude>
+    <ClInclude Include="VxMath\VxTypes.hpp">
+      <Filter>Headers\VxMath</Filter>
+    </ClInclude>
+    <ClInclude Include="XContainer\XTypes.hpp">
+      <Filter>Headers\XContainer</Filter>
+    </ClInclude>
+    <ClInclude Include="VTAll.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="CKDefines.hpp">
-      <Filter>Headers</Filter>
+    <ClInclude Include="CK2\CKBaseManager.hpp">
+      <Filter>Headers\CK2\CKObjectImplements</Filter>
     </ClInclude>
-    <ClInclude Include="CKEnums.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="CKStateChunk.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="CKGlobals.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="CKFile.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="VxMemoryMappedFile.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="CKMinContext.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="CKManagers.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="CKIdentifiers.hpp">
-      <Filter>Headers</Filter>
+    <ClInclude Include="CK2\CKObject.hpp">
+      <Filter>Headers\CK2\CKManagerImplements</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

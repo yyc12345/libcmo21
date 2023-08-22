@@ -1,7 +1,4 @@
-#include "VTUtils.hpp"
-#include "CKMinContext.hpp"
-#include "CKObjects.hpp"
-#include "CKManagers.hpp"
+#include "CKContext.hpp"
 #include <cstdarg>
 
 namespace LibCmo::CK2 {
@@ -42,7 +39,7 @@ namespace LibCmo::CK2 {
 	},
 		// register CKBaseManagers
 		m_ManagersCreationMap{
-			{PredefinedGuids::ATTRIBUTE_MANAGER_GUID, ([](CKMinContext* ctx, CK_ID id) ->CKManagerImplements::CKBaseManager* { return new(std::nothrow) CKManagerImplements::CKAttributeManager(ctx, id); })},
+			{ATTRIBUTE_MANAGER_GUID, ([](CKMinContext* ctx, CK_ID id) ->CKManagerImplements::CKBaseManager* { return new(std::nothrow) CKManagerImplements::CKAttributeManager(ctx, id); })},
 	}
 	{
 		// preset for temp folder

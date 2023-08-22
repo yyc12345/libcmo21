@@ -108,7 +108,7 @@ public class MainRunner {
 		fs = CommonHelper.openOutputFile("dest/Def2.hpp");
 		GeneralWriter.writeEnums(fs, def2);
 		fs.close();
-
+		
 		// print message.
 		System.out.println("DONE!");
 	}
