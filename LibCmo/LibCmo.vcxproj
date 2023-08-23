@@ -104,8 +104,6 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <PrecompiledHeaderFile>VTAll.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -125,8 +123,6 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <PrecompiledHeaderFile>VTAll.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,8 +142,6 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <PrecompiledHeaderFile>VTAll.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -169,8 +163,6 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <PrecompiledHeaderFile>VTAll.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -201,13 +193,13 @@
     <ClInclude Include="CK2\CKFile.hpp" />
     <ClInclude Include="CK2\CKGlobals.hpp" />
     <ClInclude Include="CK2\CKIdentifiers.hpp" />
-    <ClInclude Include="CK2\CKBaseManager.hpp" />
+    <ClInclude Include="CK2\CKManagerImplements\CKBaseManager.hpp" />
     <ClInclude Include="CK2\CKContext.hpp" />
     <ClInclude Include="CK2\CKStateChunk.hpp" />
     <ClInclude Include="CK2\CKTypes.hpp" />
     <ClInclude Include="VTAll.hpp" />
     <ClInclude Include="VTEncoding.hpp" />
-    <ClInclude Include="CK2\CKObject.hpp" />
+    <ClInclude Include="CK2\CKObjectImplements\CKObject.hpp" />
     <ClInclude Include="VTUtils.hpp" />
     <ClInclude Include="VxMath\VxMemoryMappedFile.hpp" />
     <ClInclude Include="VxMath\VxTypes.hpp" />

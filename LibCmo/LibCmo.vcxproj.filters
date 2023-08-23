@@ -122,10 +122,10 @@
     <ClInclude Include="VTAll.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="CK2\CKBaseManager.hpp">
+    <ClInclude Include="CK2\CKManagerImplements\CKBaseManager.hpp">
       <Filter>Headers\CK2\CKObjectImplements</Filter>
     </ClInclude>
-    <ClInclude Include="CK2\CKObject.hpp">
+    <ClInclude Include="CK2\CKObjectImplements\CKObject.hpp">
       <Filter>Headers\CK2\CKManagerImplements</Filter>
     </ClInclude>
   </ItemGroup>

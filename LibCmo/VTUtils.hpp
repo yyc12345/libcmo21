@@ -39,6 +39,8 @@
 
 #if defined(_WIN32)
 #define LIBCMO_OS_WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #endif
 
 #include <cstdio>
@@ -47,45 +49,48 @@
 #include <cstdint>
 #include <initializer_list>
 
-#pragma region Enum Helper
+#pragma region Batch Ctor operator= Operations
 
-#define LIBCMO_BITFLAG_OPERATORS_BITWISE(OP, ENUM_TYPE) \
-    constexpr ENUM_TYPE operator OP(ENUM_TYPE lhs, ENUM_TYPE rhs) noexcept { \
-        typedef std::underlying_type_t<ENUM_TYPE> underlying; \
-        return static_cast<ENUM_TYPE>(static_cast<underlying>(lhs) OP static_cast<underlying>(rhs)); \
-    } \
-    constexpr ENUM_TYPE& operator OP ## = (ENUM_TYPE& lhs, ENUM_TYPE rhs) noexcept { \
-        return (lhs = lhs OP rhs); \
-    }
-
-#define LIBCMO_BITFLAG_OPERATORS_BOOLEAN(OP, ENUM_TYPE) \
-    constexpr bool operator OP(ENUM_TYPE lhs, std::underlying_type_t<ENUM_TYPE> rhs) noexcept { \
-        return static_cast<std::underlying_type_t<ENUM_TYPE>>(lhs) OP rhs; \
-    } \
-    constexpr bool operator OP(std::underlying_type_t<ENUM_TYPE> lhs, ENUM_TYPE rhs) noexcept { \
-        return lhs OP static_cast<std::underlying_type_t<ENUM_TYPE>>(rhs); \
-    }
-
-#define LIBCMO_BITFLAG_OPERATORS(ENUM_TYPE) \
-    LIBCMO_BITFLAG_OPERATORS_BITWISE(|, ENUM_TYPE) \
-    LIBCMO_BITFLAG_OPERATORS_BITWISE(&, ENUM_TYPE) \
-    LIBCMO_BITFLAG_OPERATORS_BITWISE(^, ENUM_TYPE) \
-    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(==, ENUM_TYPE) \
-    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(!=, ENUM_TYPE) \
-    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(<, ENUM_TYPE) \
-    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(>, ENUM_TYPE) \
-    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(>=, ENUM_TYPE) \
-    LIBCMO_BITFLAG_OPERATORS_BOOLEAN(<=, ENUM_TYPE) \
-    constexpr ENUM_TYPE operator~(ENUM_TYPE e) noexcept { \
-        return static_cast<ENUM_TYPE>(~static_cast<std::underlying_type_t<ENUM_TYPE>>(e)); \
-    } \
-    constexpr bool operator!(ENUM_TYPE e) noexcept { \
-        return static_cast<bool>(static_cast<std::underlying_type_t<ENUM_TYPE>>(e)); \
-    }
+#define LIBCMO_DISABLE_COPY_MOVE(CLSNAME) \
+	CLSNAME(const CLSNAME&) = delete; \
+	CLSNAME(CLSNAME&&) = delete; \
+    CLSNAME& operator=(const CLSNAME&) = delete; \
+    CLSNAME& operator=(CLSNAME&&) = delete;
 
 #pragma endregion
 
 namespace LibCmo {
+
+    namespace EnumsHelper {
+        template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+        inline TEnum Merge(std::initializer_list<TEnum> il) {
+            std::underlying_type_t<TEnum> result = 0;
+            for (auto it = il.begin(); it != il.end(); ++it) {
+                result |= static_cast<std::underlying_type_t<TEnum>>(*it);
+            }
+            return static_cast<TEnum>(result);
+        }
+
+        template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+        inline TEnum Inv(TEnum e) {
+            return static_cast<TEnum>(~(static_cast<std::underlying_type_t<TEnum>>(e)));
+        }
+
+        template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+        inline TEnum Rm(TEnum& e1, TEnum e2) {
+            e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) & static_cast<std::underlying_type_t<TEnum>>(Inv(e2)));
+        }
+
+        template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+        inline TEnum Add(TEnum& e1, TEnum e2) {
+            e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) | static_cast<std::underlying_type_t<TEnum>>(e2));
+        }
+
+        template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+        inline bool Has(TEnum e, TEnum probe) {
+            return static_cast<bool>(static_cast<std::underlying_type_t<TEnum>>(e) & static_cast<std::underlying_type_t<TEnum>>(probe));
+        }
+    }
 
 	namespace StreamHelper {
 

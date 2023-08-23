@@ -3,6 +3,7 @@
 #include "../VTAll.hpp"
 #include <filesystem>
 #include <map>
+#include <deque>
 #include <functional>
 
 namespace LibCmo::CK2 {
@@ -24,49 +25,72 @@ namespace LibCmo::CK2 {
 		CKContext& operator=(const CKContext&) = delete;
 		~CKContext();
 
-		using PrintCallback = std::function<void(const std::string&)>;
-		void Printf(CKSTRING fmt, ...);
-		void SetPrintCallback(PrintCallback cb);
+		// ========== Objects Management ==========
 
 		/**
 		 * @brief Creates a CKObject or derived class instance.
 		 * @param[in] cls Class Identifier (CK_CLASSID) of the object to create.
 		 * @param[in] name The name of this object.
+		 * @param[in] options Tell CKContext how to create this object when conflict happended.
+		 * @param[out] res The value indicate the real method how this object created.
 		 * @return A pointer to the newly created object.
 		 * @remark CKObjects must be destroy with the DestroyObject method.
 		 * @see CKObject, DestroyObject
 		*/
-		CKObject* CreateCKObject(CK_CLASSID cls, CKSTRING name);
+		CKObject* CreateCKObject(CK_CLASSID cls, CKSTRING name, 
+			CK_OBJECTCREATION_OPTIONS options = CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_NONAMECHECK, 
+			CK_CREATIONMODE* res = nullptr);
 		CKObject* GetCKObject(CK_ID id);
 		void DestroyCKObject(CK_ID id);
+
+		// ========== Object Access ==========
 
 		//CKManagerImplements::CKBaseManager* CreateCKManager(CKGUID guid);
 		//CKManagerImplements::CKBaseManager* GetCKManager(CK_ID guid);
 		//void DestroyCKManager(CKManagerImplements::CKBaseManager* mgr);
 
-		CK_ID GetObjectMaxID(void);
-		void SetObjectMaxID(CK_ID id);
+		//CKObject* GetObjectByName(CKSTRING name, CKObject* previous = NULL);
+		//CKObject* GetObjectByNameAndClass(CKSTRING name, CK_CLASSID cid, CKObject* previous = NULL);
+		//CKObject* GetObjectByNameAndParentClass(CKSTRING name, CK_CLASSID pcid, CKObject* previous);
+		//const XContainer::XObjectPointerArray GetObjectListByType(CK_CLASSID cid, CKBOOL derived);
+		//CKINT GetObjectsCountByClassID(CK_CLASSID cid);
+		//CK_ID* GetObjectsListByClassID(CK_CLASSID cid);
+
+		// ========== Encoding utilities ==========
 
 		void GetUtf8String(const std::string& native_name, std::string& u8_name);
 		void GetNativeString(const std::string& u8_name, std::string& native_name);
-
 		void SetEncoding(const std::vector<std::string> encoding_series);
+
+		// ========== Temp IO utilities ==========
+
 		void SetTempPath(CKSTRING u8_temp);
+		FILE* OpenTempFile(CKSTRING u8_filename, CKBOOL is_read);
 
-		FILE* OpenTempFile(CKSTRING u8_filename, bool is_read);
+		// ========== Print utilities ==========
 
-	public:
-		std::map<CK_ID, CKObject*> m_ObjectsList;
-		std::map<CK_ID, CKBaseManager*> m_ManagersList;
+		using OutputCallback = std::function<void(CKSTRING)>;
+		void OutputToConsole(CKSTRING str);
+		void OutputToConsoleEx(CKSTRING fmt, ...);
+		void SetOutputCallback(OutputCallback cb);
 
-		std::map<CK_CLASSID, std::function<CKObject* (CKContext*, CK_ID, CKSTRING)>> m_ObjectsCreationMap;
-		std::map<CKGUID, std::function<CKBaseManager* (CKContext*, CK_ID)>> m_ManagersCreationMap;
+	protected:
+		// ========== Objects Management ==========
 
-		CK_ID m_CKObjectMaxID;
+		XContainer::XArray<CKObject*> m_ObjectsList;
+		std::deque<CK_ID> m_ReturnedObjectIds;
+
+		// ========== Encoding utilities ==========
 
 		std::vector<EncodingHelper::ENCODING_TOKEN> m_NameEncoding;
+
+		// ========== Temp IO utilities ==========
+
 		std::filesystem::path m_TempFolder;
-		PrintCallback m_PrintCallback;
+
+		// ========== Print utilities ==========
+
+		OutputCallback m_OutputCallback;
 	};
 
 }

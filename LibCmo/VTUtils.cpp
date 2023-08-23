@@ -1,6 +1,10 @@
 #include "VTUtils.hpp"
 
 namespace LibCmo {
+
+	void SystemPanic(const char* reason) {
+	}
+
 	namespace StreamHelper {
 
 		static constexpr const size_t CHUNK_SIZE = 10240;

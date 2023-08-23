@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CKTypes.hpp"
+#include "CkDefines.hpp"
 
 namespace LibCmo::CK2 {
 
@@ -43,6 +43,23 @@ namespace LibCmo::CK2 {
 	 * @return CRC of the buffer.
 	 * @see CKPackData, CKUnPackData
 	*/
-	CKDWORD CKComputeDataCRC(const void* data, size_t size, CKDWORD PreviousCRC = 0);
+	CKDWORD CKComputeDataCRC(const void* data, CKINT size, CKDWORD PreviousCRC = 0);
+
+	// ========== CKClass Registration ==========
+	void CKClassRegister(CK_CLASSID cid, CK_CLASSID parentCid,
+		CKClassCreationFct createFct, CKClassReleaseFct relFct, CKClassNameFct nameFct);
+
+	// ========== Class Hierarchy Management ==========
+	CKINT CKGetClassCount();
+	const CKClassDesc* CKGetClassDesc(CK_CLASSID cid);
+	CKSTRING CKClassIDToString(CK_CLASSID cid);
+
+	CKBOOL CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent);
+	CK_CLASSID CKGetParentClassID(CK_CLASSID child);
+	CK_CLASSID CKGetCommonParent(CK_CLASSID cid1, CK_CLASSID cid2);
+
+	// ========== Initializations functions ==========
+	CKERROR CKStartUp();
+	CKERROR CKShutdown();
 
 }

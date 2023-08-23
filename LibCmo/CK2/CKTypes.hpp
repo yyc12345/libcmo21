@@ -166,12 +166,14 @@ namespace LibCmo::CK2 {
 	using CKSTRING = const char*;
 
 	using CKCHAR = char;
-	using CKBOOL = int32_t;
+	using CKBOOL = bool;
 	using CKBYTE = uint8_t;
 	using CKDWORD = uint32_t;
 	using CKWORD = uint16_t;
 
 	using CKINT = int32_t;
+	constexpr CKBOOL CKFALSE = false;
+	constexpr CKBOOL CKTRUE = true;
 
 	using CKParameterType = int32_t;
 	using CKOperationType = int32_t;

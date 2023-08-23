@@ -64,7 +64,6 @@ namespace LibCmo::CK2 {
 		CKFILE_FORVIEWER = 4,	/**< Don't save Interface Data within the file, the level won't be editable anymore in the interface  */
 		CKFILE_WHOLECOMPRESSED = 8,	/**< Compress the whole file  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_FILE_WRITEMODE);
 	/**
 	Load Options.
 	@remark
@@ -88,7 +87,6 @@ namespace LibCmo::CK2 {
 		CK_LOAD_CHECKDEPENDENCIES = 1 << 7,	/**< Check if every plugins needed are availables  */
 		CK_LOAD_ONLYBEHAVIORS = 1 << 8,	/**<   */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_LOAD_FLAGS);
 	/**
 	Options that will be used to create this object...
 	 */
@@ -97,6 +95,36 @@ namespace LibCmo::CK2 {
 		CK_FO_RENAMEOBJECT,	/**< Renaming : a new object will be created with the name stored in CKFileObject + a integer value XXX to ensure its uniqueness  */
 		CK_FO_REPLACEOBJECT,	/**< Do not create a new object, instead use an existing one which CK_ID is given by CreatedObject to load the chunk on  */
 		CK_FO_DONTLOADOBJECT,	/**< Object chunk will not be read either because it is a reference or because the loaded object already exist in the current level and the user choose to keep the existing one.  */
+	};
+	/**
+	Summary: Specify the way an object just loaded should be handled when it already exists in the level.
+	 */
+	enum class CK_LOADMODE : int32_t {
+		CKLOAD_INVALID = -1, /**< Use the existing object instead of loading   */
+		CKLOAD_OK = 0, /**< Ignore ( Name unicity is broken )  */
+		CKLOAD_REPLACE = 1, /**< Replace the existing object (Not yet implemented)  */
+		CKLOAD_RENAME = 2, /**< Rename the loaded object  */
+		CKLOAD_USECURRENT = 3,/**< Use the existing object instead of loading   */
+	};
+	using CK_CREATIONMODE = CK_LOADMODE;
+	/**
+	Specify the way an object is created through CKCreateObject.
+	@remark
+		+ These flag controls the way an object is created, the most important of these flags
+		being CK_OBJECTCREATION_DYNAMIC which, if set in CKCreateObject, make the newly created object
+		dynamic.
+	@see CKContext::CreateObject
+	 */
+	enum class CK_OBJECTCREATION_OPTIONS : uint32_t {
+		CK_OBJECTCREATION_NONAMECHECK = 0, /**< Do not test for name unicity (may be overriden in special case)  */
+		CK_OBJECTCREATION_REPLACE = 1, /**< Replace the current object by the object being loaded  */
+		CK_OBJECTCREATION_RENAME = 2, /**< Rename the created object to ensure its uniqueness  */
+		CK_OBJECTCREATION_USECURRENT = 3, /**< Do not create a new object, use the one with the same name instead  */
+		CK_OBJECTCREATION_ASK = 4, /**< If a duplicate name if found, opens a dialog box to ask the useror use automatic load mode if any.  */
+		CK_OBJECTCREATION_FLAGSMASK = 0x0000000F, /**< Mask for previous values  */
+		CK_OBJECTCREATION_DYNAMIC = 0x00000010, /**< The object must be created dynamic  */
+		CK_OBJECTCREATION_ACTIVATE = 0x00000020, /**< The object will be copied/created active  */
+		CK_OBJECTCREATION_NONAMECOPY = 0x00000040 /**< The object will take control of the string given to it directly, without copying it  */
 	};
 	/**
 	Type identifier for a Virtools plugin.
@@ -130,7 +158,6 @@ namespace LibCmo::CK2 {
 		CHNK_DONTDELETE_PTR = 0x40,	/**< Data buffer stored in m_Buffer is not owned by CKStateChunk , it must not be deleted...  */
 		CHNK_DONTDELETE_PARSER = 0x80,	/**< m_Parser Ptr is not owned by CKStateChunk , it must not be deleted...  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATECHUNK_CHUNKOPTIONS);
 	enum class CK_STATECHUNK_CHUNKVERSION : uint32_t {
 		CHUNK_VERSIONBASE = 0,
 		CHUNK_VERSION1 = 4,	/**< equal to file version : WriteObjectID => table  */
@@ -196,6 +223,5 @@ namespace LibCmo::CK2 {
 		CKBEHAVIORLINK_ACTIVATEDLASTFRAME = 0x20000000,	/**< This link had been activated last frame  */
 		CK_OBJECT_BEHAVIORLINKMASK = 0x30000000,
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_OBJECT_FLAGS);
 	
 }

@@ -1,4 +1,5 @@
 #include "CKContext.hpp"
+#include "CKObjectImplements/CKObject.hpp"
 #include <cstdarg>
 
 namespace LibCmo::CK2 {
@@ -9,59 +10,112 @@ namespace LibCmo::CK2 {
 	static char g_UniqueFolder[] = "LibCmo";
 #endif
 
+#pragma region Objects Management
+
+	CKObject* CKContext::CreateCKObject(CK_CLASSID cls, CKSTRING name,
+		CK_OBJECTCREATION_OPTIONS options = CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_NONAMECHECK,
+		CK_CREATIONMODE* res = nullptr) {
+		// todo: Process paramter options and res
+
+		// get description first
+		const CKClassDesc* desc = CKGetClassDesc(cls);
+		if (desc == nullptr) return nullptr;
+
+		// allocate a CK_ID first
+		CK_ID decided_id;
+		if (this->m_ReturnedObjectIds.empty()) {
+			// create new CK_ID.
+			decided_id = m_ObjectsList.size();
+			m_ObjectsList.resize(decided_id + 1);
+		} else {
+			// use returned CK_ID.
+			decided_id = m_ReturnedObjectIds.back();
+			m_ReturnedObjectIds.pop_back();
+		}
+
+		// create one
+		CKObject* obj = desc->CreationFct(this, decided_id, name);
+
+		// put into slot
+		m_ObjectsList[decided_id] = obj;
+	}
+
+	CKObject* CKContext::GetCKObject(CK_ID id) {
+		if (id >= m_ObjectsList.size()) return nullptr;
+		return m_ObjectsList[id];
+	}
+
+	/**
+	 * @brief The real CKObject destroy worker shared by CKContext::DestroyCKObject and CKContext::~CKContext
+	 * @param[in] ctx The CKContext
+	 * @param[in] obj The CKObject need to be free.
+	*/
+	static void InternalDestroy(CKContext* ctx, CKObject* obj) {
+		// find desc by classid
+		// if really we can not find it, we only can delete it directly.
+		const CKClassDesc* desc = CKGetClassDesc(obj->GetClassID());
+		if (desc == nullptr) {
+			delete obj;
+			return;
+		}
+
+		// free it and return its value
+		desc->ReleaseFct(ctx, obj);
+	}
+	void CKContext::DestroyCKObject(CK_ID id) {
+		if (id >= m_ObjectsList.size()) return;
+
+		// get object and free it
+		CKObject* obj = m_ObjectsList[id];
+		if (obj == nullptr) return;
+		InternalDestroy(this, obj);
+		
+		// return its allocated id.
+		m_ObjectsList[id] = nullptr;
+		m_ReturnedObjectIds.emplace_back(id);
+
+	}
+
+#pragma endregion
+
 #pragma region Ctor Dtor
 
-	CKMinContext::CKMinContext() :
+	CKContext::CKContext() :
+		m_ObjectsList(), m_ReturnedObjectIds(),
 		m_NameEncoding(), m_TempFolder(),
-		m_PrintCallback(nullptr),
-		m_CKObjectMaxID(0u),
-		// register CKObjects
-		m_ObjectsCreationMap{
-			{CK_CLASSID::CKCID_OBJECT, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKObject(ctx, id, name); })},
-			{CK_CLASSID::CKCID_SCENEOBJECT, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKSceneObject(ctx, id, name); })},
-			{CK_CLASSID::CKCID_BEOBJECT, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBeObject(ctx, id, name); })},
-
-			{CK_CLASSID::CKCID_GROUP, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKGroup(ctx, id, name); })},
-			{CK_CLASSID::CKCID_MESH, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKMesh(ctx, id, name); })},
-			{CK_CLASSID::CKCID_TEXTURE, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKTexture(ctx, id, name); })},
-			{CK_CLASSID::CKCID_MATERIAL, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKMaterial(ctx, id, name); })},
-			{CK_CLASSID::CKCID_RENDEROBJECT, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKRenderObject(ctx, id, name); })},
-			{CK_CLASSID::CKCID_3DENTITY, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CK3dEntity(ctx, id, name); })},
-
-			{CK_CLASSID::CKCID_PARAMETERIN, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterIn(ctx, id, name); })},
-			{CK_CLASSID::CKCID_PARAMETER, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameter(ctx, id, name); })},
-			{CK_CLASSID::CKCID_PARAMETEROUT, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterOut(ctx, id, name); })},
-			{CK_CLASSID::CKCID_PARAMETERLOCAL, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterLocal(ctx, id, name); })},
-			{CK_CLASSID::CKCID_PARAMETEROPERATION, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterOperation(ctx, id, name); })},
-			{CK_CLASSID::CKCID_BEHAVIORLINK, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBehaviorLink(ctx, id, name); })},
-			{CK_CLASSID::CKCID_BEHAVIORIO, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBehaviorLink(ctx, id, name); })},
-			{CK_CLASSID::CKCID_BEHAVIOR, ([](CKMinContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBehavior(ctx, id, name); })}
-	},
-		// register CKBaseManagers
-		m_ManagersCreationMap{
-			{ATTRIBUTE_MANAGER_GUID, ([](CKMinContext* ctx, CK_ID id) ->CKManagerImplements::CKBaseManager* { return new(std::nothrow) CKManagerImplements::CKAttributeManager(ctx, id); })},
-	}
+		m_OutputCallback(nullptr)
 	{
 		// preset for temp folder
+		// todo: add current CKContext pointer as the part of temp path.
+		// thus multiple CKContext can work.
 		m_TempFolder = std::filesystem::temp_directory_path();
 		m_TempFolder /= g_UniqueFolder;
 		std::filesystem::create_directory(m_TempFolder);
 	}
-	CKMinContext::~CKMinContext() {
+
+	CKContext::~CKContext() {
 		// free all created objects
-		for (const auto& [key, value] : this->m_ObjectsList) {
-			delete value;
+		for (auto& ptr : m_ObjectsList) {
+			if (ptr != nullptr) {
+				InternalDestroy(this, ptr);
+			}
 		}
+
 		// todo: free all created managers
 
 	}
 
 #pragma endregion
 
-#pragma region Print
+#pragma region Output utilities
 
-	void CKMinContext::Printf(CKSTRING fmt, ...) {
-		if (m_PrintCallback == nullptr) return;
+	void CKContext::OutputToConsole(CKSTRING str) {
+		if (m_OutputCallback == nullptr) return;
+		m_OutputCallback(str);
+	}
+
+	void CKContext::OutputToConsoleEx(CKSTRING fmt, ...) {
+		if (m_OutputCallback == nullptr) return;
 
 		va_list argptr;
 		va_start(argptr, fmt);
@@ -75,69 +129,34 @@ namespace LibCmo::CK2 {
 
 		va_end(argptr);
 
-		m_PrintCallback(result);
+		m_OutputCallback(result.c_str());
 	}
 
-	void CKMinContext::SetPrintCallback(PrintCallback cb) {
-		m_PrintCallback = cb;
-	}
-
-#pragma endregion
-
-#pragma region Objects
-
-	CKObjectImplements::CKObject* CKMinContext::CreateCKObject(CK_ID id, CK_CLASSID cls, CKSTRING name) {
-		// pick creation function
-		const auto& creation = m_ObjectsCreationMap.find(cls);
-		if (creation == m_ObjectsCreationMap.end()) return nullptr;
-
-		// check ckid
-		if (m_ObjectsList.contains(id)) return nullptr;
-		
-		// create it
-		return creation->second(this, id, name);
-	}
-
-	CKObjectImplements::CKObject* CKMinContext::GetCKObject(CK_ID id) {
-		const auto& probe = m_ObjectsList.find(id);
-		if (probe == m_ObjectsList.end()) return nullptr;
-		else return probe->second;
-	}
-
-	void CKMinContext::DestroyCKObject(CK_ID id) {
-		const auto& probe = m_ObjectsList.find(id);
-		if (probe != m_ObjectsList.end()) {
-			delete (probe->second);
-			m_ObjectsList.erase(probe);
-		}
-	}
-
-	void CKMinContext::ClearCKObject(void) {
-		// free all created objects
-		for (const auto& [key, value] : this->m_ObjectsList) {
-			delete value;
-		}
-		// clear list
-		this->m_ObjectsList.clear();
-	}
-
-	CK_ID CKMinContext::GetObjectMaxID(void) {
-		return this->m_CKObjectMaxID;
-	}
-
-	void CKMinContext::SetObjectMaxID(CK_ID id) {
-		this->m_CKObjectMaxID = id;
+	void CKContext::SetOutputCallback(OutputCallback cb) {
+		m_OutputCallback = cb;
 	}
 
 #pragma endregion
 
-#pragma region Managers
+#pragma region Temp IO utilities
+
+	void CKContext::SetTempPath(CKSTRING u8_temp) {
+		EncodingHelper::SetStdPathFromU8Path(this->m_TempFolder, u8_temp);
+	}
+
+	FILE* CKContext::OpenTempFile(CKSTRING u8_filename, CKBOOL is_read) {
+		std::filesystem::path stdfilename;
+		EncodingHelper::SetStdPathFromU8Path(stdfilename, u8_filename);
+
+		auto realfile = this->m_TempFolder / stdfilename;
+		return EncodingHelper::OpenStdPathFile(realfile, is_read);
+	}
 
 #pragma endregion
 
-#pragma region Misc Funcs
+#pragma region Encoding utilities
 
-	void CKMinContext::GetUtf8String(const std::string& native_name, std::string& u8_name) {
+	void CKContext::GetUtf8String(const std::string& native_name, std::string& u8_name) {
 		bool success = false;
 		for (const auto& token : this->m_NameEncoding) {
 			success = LibCmo::EncodingHelper::GetUtf8VirtoolsName(native_name, u8_name, token);
@@ -147,11 +166,11 @@ namespace LibCmo::CK2 {
 		// fallback
 		if (!success) {
 			u8_name = native_name;
-			this->Printf("Error when converting to UTF8 string.");
+			this->OutputToConsole("Error when converting to UTF8 string.");
 		}
 	}
 
-	void CKMinContext::GetNativeString(const std::string& u8_name, std::string& native_name) {
+	void CKContext::GetNativeString(const std::string& u8_name, std::string& native_name) {
 		bool success = false;
 		for (const auto& token : this->m_NameEncoding) {
 			success = LibCmo::EncodingHelper::GetNativeVirtoolsName(u8_name, native_name, token);
@@ -161,11 +180,11 @@ namespace LibCmo::CK2 {
 		// fallback
 		if (!success) {
 			native_name = u8_name;
-			this->Printf("Error when converting to native string.");
+			this->OutputToConsole("Error when converting to native string.");
 		}
 	}
 
-	void CKMinContext::SetEncoding(const std::vector<std::string> encoding_series) {
+	void CKContext::SetEncoding(const std::vector<std::string> encoding_series) {
 		// free all current series
 		for (const auto& encoding : this->m_NameEncoding) {
 			LibCmo::EncodingHelper::DestroyEncodingToken(encoding);
@@ -178,17 +197,6 @@ namespace LibCmo::CK2 {
 		}
 	}
 
-	void CKMinContext::SetTempPath(CKSTRING u8_temp) {
-		EncodingHelper::SetStdPathFromU8Path(this->m_TempFolder, u8_temp);
-	}
-
-	FILE* CKMinContext::OpenTempFile(CKSTRING u8_filename, bool is_read) {
-		std::filesystem::path stdfilename;
-		EncodingHelper::SetStdPathFromU8Path(stdfilename, u8_filename);
-
-		auto realfile = this->m_TempFolder / stdfilename;
-		return EncodingHelper::OpenStdPathFile(realfile, is_read);
-	}
 
 
 #pragma endregion

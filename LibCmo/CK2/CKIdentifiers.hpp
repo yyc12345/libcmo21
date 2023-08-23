@@ -22,7 +22,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_OBJECTHIERAHIDDEN = 0x00000018,	/**< The object is hidden hierarchically  */
 		CK_STATESAVE_OBJECTALL = 0x0000000F,
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_OBJECT);
 	/**
 	Be Object
 	 */
@@ -39,7 +38,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_BEOBJECTONLY = 0x00000FF0,	/**< Save only BeObject specific datas  */
 		CK_STATESAVE_BEOBJECTALL = 0x00000FFF,	/**< Save All datas  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_BEOBJECT);
 	/**
 	3dEntity
 	 */
@@ -57,7 +55,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_3DENTITYONLY = 0x003FF000,	/**< Save only 3dEntity specific datas  */
 		CK_STATESAVE_3DENTITYALL = 0x003FFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_3DENTITY);
 	/**
 	Light
 	 */
@@ -77,7 +74,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_TLIGHTONLY = 0xF0000000,	/**< Save only Target Light specific datas  */
 		CK_STATESAVE_TLIGHTALL = 0xFFFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_LIGHT);
 	/**
 	Camera
 	 */
@@ -96,7 +92,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_TCAMERAONLY = 0x70000000,	/**< Save only Target camera specific datas  */
 		CK_STATESAVE_TCAMERAALL = 0x7FFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_CAMERA);
 	/**
 	Sprite3D
 	 */
@@ -110,7 +105,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_SPRITE3DONLY = 0x0FC00000,	/**< Save only Sprite3D specific datas  */
 		CK_STATESAVE_SPRITE3DALL = 0x0FFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_SPRITE3D);
 	/**
 	Object 3D
 	 */
@@ -120,7 +114,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_3DOBJECTRONLY = 0x00C00000,	/**< Save only 3dObject specific datas  */
 		CK_STATESAVE_3DOBJECTALL = 0x03FFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_3DOBJECT);
 	/**
 	BodyPart
 	 */
@@ -135,7 +128,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_BODYPARTONLY = 0x7F000000,	/**< Save only bodypart specific datas  */
 		CK_STATESAVE_BODYPARTALL = 0x7FFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_BODYPART);
 	/**
 	Character
 	 */
@@ -153,7 +145,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_CHARACTERONLY = 0xFFC00000,	/**< Save only character specific datas  */
 		CK_STATESAVE_CHARACTERALL = 0xFFFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_CHARACTER);
 	/**
 	CURVE && Curve Point
 	 */
@@ -172,7 +163,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_CURVEONLY = 0xFFC00000,	/**< Save only curve specific data  */
 		CK_STATESAVE_CURVEALL = 0xFFFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_CURVE);
 	/**
 	2dEntity
 	 */
@@ -187,7 +177,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_2DENTITYHIERARCHY = 0x00400000,	/**< Save Material  */
 		CK_STATESAVE_2DENTITYALL = 0x0070FFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_2DENTITY);
 	/**
 	Sprite
 	 */
@@ -208,7 +197,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_SPRITEONLY = 0xF0EF0000,	/**< Save only sprite specific data  */
 		CK_STATESAVE_SPRITEALL = 0x70FFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_SPRITE);
 	/**
 	Sprite Text
 	 */
@@ -222,7 +210,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_SPRITETEXTONLY = 0x0F000000,	/**< Save only SpriteText specific data  */
 		CK_STATESAVE_SPRITETEXTALL = 0x3FFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_SPRITETEXT);
 	/**
 	Sound
 	 */
@@ -238,7 +225,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_SOUNDONLY = 0x000FF000,	/**< Save only Sound specific data  */
 		CK_STATESAVE_SOUNDALL = 0x000FFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_SOUND);
 	/**
 	Wave Sound
 	 */
@@ -254,7 +240,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_WAVSOUNDONLY = 0x0FF00000,	/**< Save All datas for sub-classes  */
 		CK_STATESAVE_WAVSOUNDALL = 0x0FFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_WAVSOUND);
 	/**
 	Wave Sound
 	 */
@@ -270,7 +255,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_MIDISOUNDONLY = 0x0FF00000,
 		CK_STATESAVE_MIDISOUNDALL = 0x0FFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_MIDISOUND);
 	/**
 	Place
 	 */
@@ -281,7 +265,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_PLACELEVEL = 0x00008000,	/**< Save level using the place  */
 		CK_STATESAVE_PLACEALL = 0x0000FFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_PLACE);
 	/**
 	Level CKSaveObjectState will not save any data
 	 */
@@ -293,7 +276,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_LEVELSCENE = 0x80000000,	/**< Default and active  scene  */
 		CK_STATESAVE_LEVELALL = 0xFFFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_LEVEL);
 	/**
 	GROUP
 	 */
@@ -308,7 +290,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_GROUPRESERVED7 = 0x00080000,	/**< Reserved for future use  */
 		CK_STATESAVE_GROUPALL = 0x000FFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_GROUP);
 	/**
 	MESH CKSaveOjectSave will save all data and does not take flags into account
 	 */
@@ -328,7 +309,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_MESHONLY = 0x00FFF000,	/**< Save All datas for sub-classes  */
 		CK_STATESAVE_MESHALL = 0x00FFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_MESH);
 	/**
 	PATCH MESH CKSaveOjectSave will save all data and does not take flags into account
 	 */
@@ -341,7 +321,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_PATCHMESHONLY = 0x0FF00000,	/**< Save All datas for sub-classes  */
 		CK_STATESAVE_PATCHMESHALL = 0x0FFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_PATCHMESH);
 	/**
 	Material
 	 */
@@ -357,7 +336,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_MATERIALONLY = 0x000FF000,	/**< Save All datas for sub-classes  */
 		CK_STATESAVE_MATERIALALL = 0x0FFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_MATERIAL);
 	/**
 	Texture CKSaveOjectSave will save all relevant data and does not take flags into account
 	 */
@@ -378,7 +356,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_TEXONLY = 0x00FFF000,	/**< Save Only Texture Data (Dot NOT MODIFY ! Texture loading/saving relies on this value)  */
 		CK_STATESAVE_TEXALL = 0x002FFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_TEXTURE);
 	/**
 	2d CURVE && 2d Curve Point
 	 */
@@ -400,7 +377,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_2DCURVESAVEPOINTS = 0x0003F800,	/**< Obsolete  */
 		CK_STATESAVE_2DCURVEALL = 0x0007FFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_2DCURVE);
 	/**
 	Kinematic Chain
 	 */
@@ -411,7 +387,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_KINEMATICCHAINRESERVED3 = 0x00000080,	/**< Reserved for future use  */
 		CK_STATESAVE_KINEMATICCHAINALL = 0x000000FF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_KINEMATICCHAIN);
 	/**
 	Animation
 	 */
@@ -426,7 +401,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_ANIMATIONRESERVED6 = 0x00000800,	/**< Reserved for future use  */
 		CK_STATESAVE_ANIMATIONALL = 0x0FFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_ANIMATION);
 	/**
 	Keyed Anim
 	 */
@@ -446,7 +420,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_KEYEDANIMRESERVED2 = 0x01000000,	/**< Reserved for future use  */
 		CK_STATESAVE_KEYEDANIMRESERVED3 = 0x02000000,	/**< Reserved for future use  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_KEYEDANIMATION);
 	/**
 	Object Animation CKSaveOjectSave will save all relevant data and does not take flags into account
 	 */
@@ -471,7 +444,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_KEYEDANIMONLY = 0x03FFF000,	/**< Save All datas for sub-classes  */
 		CK_STATESAVE_KEYEDANIMALL = 0x03FFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_OBJECTANIMATION);
 	/**
 	IK Animation
 	 */
@@ -487,7 +459,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_IKANIMATIONRESERVED9 = 0x00200000,	/**< Reserved for future use  */
 		CK_STATESAVE_IKANIMATIONALL = 0x003FFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_IKANIMATION);
 	/**
 	BehaviorLink
 	 */
@@ -501,7 +472,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_BEHAV_LINKONLY = 0x000000F0,	/**<   */
 		CK_STATESAVE_BEHAV_LINKALL = 0x000000FF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_BEHAV_LINK);
 	/**
 	BehaviorIO
 	 */
@@ -514,7 +484,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_BEHAVIOONLY = 0x000000F0,	/**<   */
 		CK_STATESAVE_BEHAVIOALL = 0x000000FF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_BEHAV_IO);
 	/**
 	BehaviorPrototype
 	 */
@@ -537,7 +506,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_PROTORESERVED14 = 0x00080000,	/**< Reserved for future use  */
 		CK_STATESAVE_PROTOALL = 0x000FFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_PROTOTYPE);
 	/**
 	Behavior
 	 */
@@ -566,7 +534,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_BEHAVIORONLY = 0x01FFFFF0,
 		CK_STATESAVE_BEHAVIORALL = 0x01FFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_BEHAVIOR);
 	/**
 	SCENE CKSaveOjectSave will save all relevant data and does not take flags into account
 	 */
@@ -589,7 +556,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_SCENERESERVED14 = 0x08000000,	/**< Reserved for future use  */
 		CK_STATESAVE_SCENEALL = 0x0FFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_SCENE);
 	/**
 	ParameterIn
 	 */
@@ -606,7 +572,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_PARAMETERIN_DISABLED = 0x00002000,	/**< The parameter was disabled  */
 		CK_STATESAVE_PARAMETERIN_ALL = 0x0000FFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_PARAMETERIN);
 	/**
 	ParameterLocal et ParameterOut
 	 */
@@ -619,7 +584,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_PARAMETEROUT_ISSETTING = 0x00000400,	/**< Reserved for future use  */
 		CK_STATESAVE_PARAMETEROUT_ALL = 0x0000FFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_PARAMETEROUT);
 	/**
 	Parameter Operation
 	 */
@@ -633,7 +597,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_OPERATIONNEWDATA = 0x00000400,
 		CK_STATESAVE_OPERATIONALL = 0x000007FF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_OPERATION);
 	/**
 	Synchro Object CKSaveOjectSave will save all relevant data and does not take flags into account
 	 */
@@ -645,7 +608,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_SYNCHRORESERVED3 = 0x00000200,	/**< Reserved for future use  */
 		CK_STATESAVE_SYNCHRONALL = 0x000003FF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_SYNCHRO);
 	/**
 	Grid
 	 */
@@ -659,7 +621,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_GRIDONLY = 0x0FC00000,	/**<   */
 		CK_STATESAVE_GRIDALL = 0x0FFFFFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_GRID);
 	/**
 	Layer (For Grids)
 	 */
@@ -673,7 +634,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_LAYERONLY = 0x000003F0,	/**<   */
 		CK_STATESAVE_LAYERALL = 0x000003FF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_LAYER);
 	/**
 	DataArray CKSaveOjectSave will save all relevant data and does not take flags into account
 	 */
@@ -683,7 +643,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_DATAARRAYMEMBERS = 0x00004000,	/**< Save members  */
 		CK_STATESAVE_DATAARRAYALL = 0x0000FFFF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_DATAARRAY);
 	/**
 	SceneObjectDesc
 	 */
@@ -694,6 +653,6 @@ namespace LibCmo::CK2 {
 		CK_STATESAVE_SCENEOBJECTRES3 = 0x00000080,	/**< Reserved for future use  */
 		CK_STATESAVE_SCENEOBJECTDESCALL = 0x000000FF,	/**< Save All datas for sub-classes  */
 	};
-	LIBCMO_BITFLAG_OPERATORS(CK_STATESAVEFLAGS_SCENEOBJECTDESC);
+	
 
 }
