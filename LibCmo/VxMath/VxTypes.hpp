@@ -42,7 +42,7 @@ namespace LibCmo::VxMath {
 
 		Vx2DVector() : x(0.0f), y(0.0f) {}
 		Vx2DVector(float f) : x(f), y(f) {}
-		Vx2DVector(float _x, float _y, float _z) : x(_x), y(_y) {}
+		Vx2DVector(float _x, float _y) : x(_x), y(_y) {}
 		Vx2DVector(CK2::CKINT iX, CK2::CKINT iY) : x((float)iX), y((float)iY) {}
 		Vx2DVector(const float f[2]) : x(f[0]), y(f[1]) {}
 	};

@@ -39,9 +39,9 @@ namespace LibCmo::CK2 {
 			return CK_CLASSID::CKCID_OBJECT; 
 		}
 
-		virtual void PreSave(CKFile* file, CKDWORD flags);
-		virtual CKStateChunk* Save(CKFile* file, CKDWORD flags);
-		virtual bool Load(CKStateChunk* chunk, CKFile* file);
+		virtual void PreSave(CKFileVisitor* file, CKDWORD flags);
+		virtual CKStateChunk* Save(CKFileVisitor* file, CKDWORD flags);
+		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file);
 		virtual void PostLoad();
 
 	private:

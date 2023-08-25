@@ -69,7 +69,7 @@ namespace LibCmo::CK2 {
 			data for your manager.
 		@see CKStateChunk, LoadData
 		*/
-		virtual CKStateChunk* SaveData(CKFile* SavedFile) { 
+		virtual CKStateChunk* SaveData(CKFileVisitor* SavedFile) {
 			return nullptr;
 		}
 		/**
@@ -81,7 +81,7 @@ namespace LibCmo::CK2 {
 			+ During a load operation, each manager is automatically called if there was a chunk saved in the file with SaveData.
 		@see CKStateChunk, SaveData
 		*/
-		virtual CKERROR LoadData(CKStateChunk* chunk, CKFile* LoadedFile) { 
+		virtual CKERROR LoadData(CKStateChunk* chunk, CKFileVisitor* LoadedFile) {
 			return CKERROR::CKERR_OK; 
 		}
 

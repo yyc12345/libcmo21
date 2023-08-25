@@ -64,6 +64,7 @@ namespace LibCmo::CK2 {
 		this->FileIndex = rhs.FileIndex;
 		this->SaveFlags = rhs.SaveFlags;
 
+		return *this;
 	}
 
 	CKFileObject::~CKFileObject() {
@@ -107,6 +108,8 @@ namespace LibCmo::CK2 {
 
 		this->Data = rhs.Data;
 		rhs.Data = nullptr;
+
+		return *this;
 	}
 
 	CKFileManagerData::~CKFileManagerData() {
@@ -115,36 +118,94 @@ namespace LibCmo::CK2 {
 
 #pragma endregion
 
-#pragma region CKFilePluginDependencies
+#pragma region CKFileReader
 
-	CKFilePluginDependencies::CKFilePluginDependencies() :
-		m_PluginCategory(CK_PLUGIN_TYPE::CKPLUGIN_MANAGER_DLL), m_Guids() {}
+	CKFileReader::CKFileReader(CKContext* ctx) :
+		m_Ctx(ctx), m_Visitor(this),
+		m_Done(false),
+		m_SaveIDMax(0),
+		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles(),
+		m_FileInfo() {}
 
-	CKFilePluginDependencies::CKFilePluginDependencies(const CKFilePluginDependencies& rhs) :
-		m_PluginCategory(rhs.m_PluginCategory), m_Guids(rhs.m_Guids) {}
+	CKFileReader::~CKFileReader() {}
 
-	CKFilePluginDependencies& CKFilePluginDependencies::operator=(const CKFilePluginDependencies& rhs) {
-		this->m_PluginCategory = rhs.m_PluginCategory;
-		this->m_Guids = rhs.m_Guids;
+	const XContainer::XArray<CKFileObject>& CKFileReader::GetFileObjects() {
+		return m_FileObjects;
+	}
+
+	const XContainer::XArray<XContainer::XString>& CKFileReader::GetIncludedFiles() {
+		return m_IncludedFiles;
+	}
+
+#pragma endregion
+
+#pragma region CKFileWriter
+
+	CKFileWriter::CKFileWriter(CKContext* ctx) :
+		m_Ctx(ctx), m_Visitor(this) {}
+
+	CKFileWriter::CKFileWriter(CKContext* ctx, CKFileReader* reader) :
+		m_Ctx(ctx), m_Visitor(this) {}
+
+	CKFileWriter::~CKFileWriter() {}
+
+	CKBOOL CKFileWriter::AddSavedObject(CKObject* obj, CKDWORD flags) {
+		return CKFALSE;
+	}
+
+	CKBOOL CKFileWriter::AddSavedObjects(CKObjectArray* objarray, CKDWORD flags) {
+		return CKFALSE;
+	}
+
+	CKBOOL CKFileWriter::AddSavedFile(CKSTRING u8FileName) {
+		return CKFALSE;
+	}
+
+#pragma endregion
+
+
+#pragma region CKFileVisitor
+
+	CKFileVisitor::CKFileVisitor(CKFileReader* reader) :
+		m_IsReader(CKTRUE), m_Reader(reader), m_Writer(nullptr) {
+		if (reader == nullptr) LIBPANIC("Reader is nullptr.");
+	}
+
+	CKFileVisitor::CKFileVisitor(CKFileWriter* writer) :
+		m_IsReader(false), m_Reader(nullptr), m_Writer(nullptr) {
+		if (writer == nullptr) LIBPANIC("Writer is nullptr.");
+	}
+
+	CKFileVisitor::CKFileVisitor(const CKFileVisitor& rhs) :
+		m_IsReader(rhs.m_IsReader), m_Reader(rhs.m_Reader), m_Writer(rhs.m_Writer) {}
+
+	CKFileVisitor::CKFileVisitor(CKFileVisitor&& rhs) :
+		m_IsReader(rhs.m_IsReader), m_Reader(rhs.m_Reader), m_Writer(rhs.m_Writer) {}
+
+	CKFileVisitor& CKFileVisitor::operator=(const CKFileVisitor& rhs) {
+		this->m_IsReader = rhs.m_IsReader;
+		this->m_Reader = rhs.m_Reader;
+		this->m_Writer = rhs.m_Writer;
 
 		return *this;
 	}
 
-	CKFilePluginDependencies::~CKFilePluginDependencies() {}
+	CKFileVisitor& CKFileVisitor::operator=(CKFileVisitor&& rhs) {
+		this->m_IsReader = rhs.m_IsReader;
+		this->m_Reader = rhs.m_Reader;
+		this->m_Writer = rhs.m_Writer;
 
-#pragma endregion
-
-#pragma region CKFile Misc
-
-	CKFile::CKFile(CKContext* ctx) :
-		m_Ctx(ctx) {
-		;
+		return *this;
 	}
 
-	CKFile::~CKFile() {}
-
+	const CKFileObject* CKFileVisitor::GetFileObjectByIndex(size_t index) {
+		if (m_IsReader) {
+			return &m_Reader->m_FileObjects[index];
+		} else {
+			return nullptr;
+		}
+	}
 
 #pragma endregion
-
 
 }

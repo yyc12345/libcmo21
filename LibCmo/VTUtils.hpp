@@ -68,6 +68,9 @@
 
 namespace LibCmo {
 
+	[[noreturn]] void LibPanic(int line, const char* file, const char* errmsg);
+#define LIBPANIC(msg) LibCmo::LibPanic(__LINE__, __FILE__, msg);
+
 	namespace TypeHelper {
 
 		/**
@@ -88,11 +91,13 @@ namespace LibCmo {
 			MKString& operator=(const char* cstr) {
 				m_HasStr = cstr != nullptr;
 				m_Str = m_HasStr ? cstr : "";
+				return *this;
 			}
 			MKString(const std::string& cstr) : m_HasStr(true), m_Str(cstr) {}
 			MKString& operator=(const std::string& cstr) {
 				m_HasStr = true;
 				m_Str = cstr;
+				return *this;
 			}
 
 			MKString(const MKString& rhs) : m_HasStr(rhs.m_HasStr), m_Str(rhs.m_Str) {}
@@ -102,11 +107,13 @@ namespace LibCmo {
 			MKString& operator=(const MKString& rhs) {
 				m_HasStr = rhs.m_HasStr;
 				m_Str = rhs.m_Str;
+				return *this;
 			}
 			MKString& operator=(MKString&& rhs) noexcept {
 				m_HasStr = rhs.m_HasStr;
 				m_Str = std::move(rhs.m_Str);
 				rhs.m_HasStr = false;
+				return *this;
 			}
 
 			const char* c_str() const {
@@ -135,12 +142,12 @@ namespace LibCmo {
 		}
 
 		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
-		inline TEnum Rm(TEnum& e1, TEnum e2) {
+		inline void Rm(TEnum& e1, TEnum e2) {
 			e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) & static_cast<std::underlying_type_t<TEnum>>(Inv(e2)));
 		}
 
 		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
-		inline TEnum Add(TEnum& e1, TEnum e2) {
+		inline void Add(TEnum& e1, TEnum e2) {
 			e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) | static_cast<std::underlying_type_t<TEnum>>(e2));
 		}
 

@@ -1,5 +1,5 @@
 #include "VxMemoryMappedFile.hpp"
-#include "VTEncoding.hpp"
+#include "../VTEncoding.hpp"
 
 namespace LibCmo::VxMath {
 

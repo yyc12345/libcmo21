@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <zlib.h>
 
+#include "CKObjectImplements/CKObject.hpp"
+
 namespace LibCmo::CK2 {
 
 #pragma region Compression utilities
@@ -68,7 +70,7 @@ namespace LibCmo::CK2 {
 
 		// find direct parent
 		auto finder = g_CKClassInfoId2Idx.find(desc.Parent);
-		if (finder == g_CKClassInfoId2Idx.end()) std::abort();
+		if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
 		CKClassDesc& parent = g_CKClassInfo[finder->second];
 
 		// if it is not self inheritance, call recursively
@@ -80,7 +82,7 @@ namespace LibCmo::CK2 {
 		desc.Parents = parent.Parents;
 		// and set self as its parent
 		finder = g_CKClassInfoId2Idx.find(desc.Self);
-		if (finder == g_CKClassInfoId2Idx.end()) std::abort();
+		if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
 		desc.Parents[finder->second] = true;
 
 		// set derivation level
@@ -105,7 +107,7 @@ namespace LibCmo::CK2 {
 		// iterate CKClassDesc::Parents and register it self to gotten parents
 		for (auto& item : g_CKClassInfo) {
 			auto finder = g_CKClassInfoId2Idx.find(item.Self);
-			if (finder == g_CKClassInfoId2Idx.end()) std::abort();
+			if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
 			size_t selfidx = finder->second;
 
 			for (size_t idx = 0; idx < classCount; ++idx) {
@@ -154,10 +156,10 @@ namespace LibCmo::CK2 {
 	CKBOOL CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent) {
 		// get corresponding index first
 		auto finder = g_CKClassInfoId2Idx.find(child);
-		if (finder == g_CKClassInfoId2Idx.end()) std::abort();
+		if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
 		size_t child_idx = finder->second;
 		finder = g_CKClassInfoId2Idx.find(parent);
-		if (finder == g_CKClassInfoId2Idx.end()) std::abort();
+		if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
 		size_t parent_idx = finder->second;
 
 		return g_CKClassInfo[child_idx].Parents[parent_idx];
@@ -165,7 +167,7 @@ namespace LibCmo::CK2 {
 
 	CK_CLASSID CKGetParentClassID(CK_CLASSID child) {
 		auto finder = g_CKClassInfoId2Idx.find(child);
-		if (finder == g_CKClassInfoId2Idx.end()) std::abort();
+		if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
 		return g_CKClassInfo[finder->second].Parent;
 	}
 
@@ -188,6 +190,10 @@ namespace LibCmo::CK2 {
 
 	CKERROR CKStartUp() {
 		// todo: add class type registrations
+		CKClassRegister(CK_CLASSID::CKCID_OBJECT, CK_CLASSID::CKCID_OBJECT,
+			[](CKContext* ctx, CK_ID id, CKSTRING name) -> CKObject* { return new CKObject(ctx, id, name); },
+			[](CKContext* ctx, CKObject* obj) -> void { delete obj; },
+			[]() -> CKSTRING { return "Basic Object"; });
 
 		/*
 				// register CKObjects
@@ -217,6 +223,8 @@ namespace LibCmo::CK2 {
 			{ATTRIBUTE_MANAGER_GUID, ([](CKContext* ctx, CK_ID id) ->CKManagerImplements::CKBaseManager* { return new(std::nothrow) CKManagerImplements::CKAttributeManager(ctx, id); })},
 	}
 		*/
+
+		CKBuildClassHierarchyTable();
 
 		return CKERROR::CKERR_OK;
 	}

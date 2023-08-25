@@ -4,13 +4,13 @@
 namespace LibCmo::CK2 {
 
 
-	void CKObject::PreSave(CKFile* file, CKDWORD flags) {}
+	void CKObject::PreSave(CKFileVisitor* file, CKDWORD flags) {}
 
-	CKStateChunk* CKObject::Save(CKFile* file, CKDWORD flags) {
+	CKStateChunk* CKObject::Save(CKFileVisitor* file, CKDWORD flags) {
 		return nullptr;
 	}
 
-	bool CKObject::Load(CKStateChunk* chunk, CKFile* file) {
+	bool CKObject::Load(CKStateChunk* chunk, CKFileVisitor* file) {
 		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_OBJECT::CK_STATESAVE_OBJECTHIDDEN)) {
 			EnumsHelper::Rm(this->m_ObjectFlags, 
 				EnumsHelper::Merge({ CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE }));

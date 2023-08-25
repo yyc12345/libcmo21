@@ -161,6 +161,7 @@ namespace LibCmo::CK2 {
 	};
 
 	// ========== Type Definition ==========
+	// type define
 
 	using CKMUTSTRING = char*;
 	using CKSTRING = const char*;
@@ -180,6 +181,12 @@ namespace LibCmo::CK2 {
 	using CKMessageType = int32_t;
 	using CKAttributeType = int32_t;
 	using CKAttributeCategory = int32_t;
+
+	// type print style define
+#define PRIckBYTE PRIu8
+#define PRIckDWORD PRIu32
+#define PRIckWORD PRIu16
+#define PRIckINT PRIi32
 
 	// ========== Class List ==========
 	// Objects and derivated classes
@@ -269,7 +276,9 @@ namespace LibCmo::CK2 {
 	//--- Important classes
 	class CKContext;
 	class CKStateChunk;
-	class CKFile;
+	class CKFileReader;
+	class CKFileWriter;
+	class CKFileVisitor;
 
 
 	/**

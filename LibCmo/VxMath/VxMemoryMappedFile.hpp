@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VTUtils.hpp"
+#include "../VTAll.hpp"
 #if defined(LIBCMO_OS_WIN32)
 #include <Windows.h>
 #else
@@ -40,9 +40,9 @@ namespace LibCmo::VxMath {
 		VxMemoryMappedFile& operator=(const VxMemoryMappedFile&) = delete;
 		~VxMemoryMappedFile(void);
 
-		inline void* GetBase(void) { return this->m_pMemoryMappedFileBase; }
-		inline size_t GetFileSize(void) { return this->m_cbFile; }
-		inline bool IsValid(void) { return this->m_bIsValid; }
+		void* GetBase(void) { return this->m_pMemoryMappedFileBase; }
+		size_t GetFileSize(void) { return this->m_cbFile; }
+		bool IsValid(void) { return this->m_bIsValid; }
 	};
 
 }

@@ -1,18 +1,17 @@
 #pragma once
 
-#include "CKDefines.hpp"
-#include "CKEnums.hpp"
-#include <type_traits>
-#include <cinttypes>
+#include "../VTAll.hpp"
 
 namespace LibCmo::CK2 {
 
 	class CKStateChunk {
 	public:
 		//CKStateChunk();
-		CKStateChunk(CKFileDocument* doc, CKMinContext* ctx);
+		CKStateChunk(CKFileVisitor* visitor, CKContext* ctx);
 		CKStateChunk(const CKStateChunk&);
+		CKStateChunk(CKStateChunk&&);
 		CKStateChunk& operator=(const CKStateChunk&);
+		CKStateChunk& operator-(const CKStateChunk&&);
 		~CKStateChunk();
 
 	private:
@@ -40,8 +39,8 @@ namespace LibCmo::CK2 {
 		std::vector<CKDWORD> m_ChunkList;
 		std::vector<CKDWORD> m_ManagerList;
 
-		CKFileDocument* m_BindDoc;
-		CKMinContext* m_BindContext;
+		CKFileVisitor* m_BindFile;
+		CKContext* m_BindContext;
 
 #pragma region Buffer Related
 

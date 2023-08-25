@@ -76,20 +76,20 @@ namespace LibCmo::CK2 {
 		~CKFileInfo() {}
 		LIBCMO_DEFAULT_COPY_MOVE(CKFileInfo);
 
-		CKDWORD ProductVersion;	 ///< Virtools Version (Dev/Creation). (CK_VIRTOOLS_VERSION)
-		CKDWORD ProductBuild; ///< Virtools Build Number.
-		CK_FILE_WRITEMODE FileWriteMode; ///< Options used to save this file. (CK_FILE_WRITEMODE)
-		CKDWORD FileVersion; ///< Version of file format when file was saved.
-		CKDWORD CKVersion; ///< Version of CK when file was saved.
-		CKDWORD FileSize; ///< Size of file in bytes.
-		CKDWORD ObjectCount; ///< Number of objects stored in the file. 	
-		CKDWORD ManagerCount; ///< Number of managers which saved data in the file.
-		CKDWORD MaxIDSaved; ///< Maximum Object identifier saved
-		CKDWORD Crc; ///< Crc of data
-		CKDWORD Hdr1PackSize; ///< Reserved
-		CKDWORD Hdr1UnPackSize; ///< Reserved
-		CKDWORD DataPackSize; ///< Reserved
-		CKDWORD DataUnPackSize; ///< Reserved
+		CKDWORD ProductVersion;	 /**< Virtools Version (Dev/Creation). (CK_VIRTOOLS_VERSION) */
+		CKDWORD ProductBuild; /**< Virtools Build Number. */
+		CK_FILE_WRITEMODE FileWriteMode; /**< Options used to save this file. (CK_FILE_WRITEMODE) */
+		CKDWORD FileVersion; /**< Version of file format when file was saved. */
+		CKDWORD CKVersion; /**< Version of CK when file was saved. */
+		CKDWORD FileSize; /**< Size of file in bytes. */
+		CKDWORD ObjectCount; /**< Number of objects stored in the file. */
+		CKDWORD ManagerCount; /**< Number of managers which saved data in the file. */
+		CKDWORD MaxIDSaved; /**< Maximum Object identifier saved */
+		CKDWORD Crc; /**< Crc of data */
+		CKDWORD Hdr1PackSize; /**< The compressed size of Header section. */
+		CKDWORD Hdr1UnPackSize; /**< The uncompressed size of Header section. */
+		CKDWORD DataPackSize; /**< The compressed size of Data section. */
+		CKDWORD DataUnPackSize; /**< The uncompressed size of Data section. */
 	};
 
 	class CKFileObject {
@@ -101,17 +101,17 @@ namespace LibCmo::CK2 {
 		CKFileObject& operator=(CKFileObject&&);
 		~CKFileObject();
 
-		CK_ID ObjectId; ///< ID of the object being load/saved (as it will be/was saved in the file)
-		CK_ID CreatedObjectId; ///< ID of the object being created
-		CK_CLASSID ObjectCid; ///< Class Identifier of the object
-		CKObject* ObjPtr; ///< A pointer to the object itself (as CreatedObject when loading)
-		TypeHelper::MKString Name; ///< Name of the Object
-		CKStateChunk* Data; ///< A CKStateChunk that contains object information
-		//CKINT PostPackSize; ///< When compressed chunk by chunk : size of Data after compression
-		//CKINT PrePackSize; ///< When compressed chunk by chunk : size of Data before compression
-		CK_FO_OPTIONS Options; ///< When loading an object it may be renamed , use to replace another object 	
-		CKINT FileIndex; ///< Position of the object data inside uncompressed file buffer
-		CKDWORD SaveFlags; ///< Flags used when this object was saved.
+		CK_ID ObjectId; /**< ID of the object being load/saved (as it will be/was saved in the file) */
+		CK_ID CreatedObjectId; /**< ID of the object being created */
+		CK_CLASSID ObjectCid; /**< Class Identifier of the object */
+		CKObject* ObjPtr; /**< A pointer to the object itself (as CreatedObject when loading) */
+		TypeHelper::MKString Name; /**< Name of the Object */
+		CKStateChunk* Data; /**< A CKStateChunk that contains object information */
+		//CKINT PostPackSize; /**< When compressed chunk by chunk : size of Data after compression */
+		//CKINT PrePackSize; /**< When compressed chunk by chunk : size of Data before compression */
+		CK_FO_OPTIONS Options; /**< When loading an object it may be renamed , use to replace another object */
+		CKINT FileIndex; /**< Position of the object data inside uncompressed file buffer */
+		CKDWORD SaveFlags; /**< Flags used when this object was saved. */
 	};
 
 	class CKFileManagerData {
@@ -136,26 +136,32 @@ namespace LibCmo::CK2 {
 
 		CK_PLUGIN_TYPE m_PluginCategory;
 		XContainer::XArray<CKGUID> m_Guids;
-		XContainer::XBitArray ValidGuids;
+		//XContainer::XBitArray ValidGuids;
 	};
 
-	/**
-	@brief CKFile provides functions to save/load files in Virtools format.
-	@remark
-		+ Use CKFile just like a normal C++ class with passing CKCotext pointer.
-		+ Once created a CKFile can be used to save one or more objects to disk.
-		+ Only can load objects when this CKFile is empty. Use ClearData() to clear any existed CKFile.
-		+ In any case, CKFile can run Save(). So you can create a CKFile, add some obejcts and save it.
-		Or you can load a file by CKFile and add/modify something then save it.
-	*/
-	class CKFile {
+	class CKFileVisitor {
 	public:
-		CKFile(CKContext* ctx);
-		~CKFile();
-		LIBCMO_DISABLE_COPY_MOVE(CKFile);
+		CKFileVisitor(CKFileReader* reader);
+		CKFileVisitor(CKFileWriter* writer);
+		CKFileVisitor(const CKFileVisitor&);
+		CKFileVisitor(CKFileVisitor&&);
+		CKFileVisitor& operator=(const CKFileVisitor&);
+		CKFileVisitor& operator=(CKFileVisitor&&);
 
-		// ========== Reset CKFile ==========
-		void ClearData(void);
+		const CKFileObject* GetFileObjectByIndex(size_t index);
+	protected:
+		CKBOOL m_IsReader;
+		CKFileReader* m_Reader;
+		CKFileWriter* m_Writer;
+		CKContext* m_Ctx;
+	};
+
+	class CKFileReader {
+		friend class CKFileVisitor;
+	public:
+		CKFileReader(CKContext* ctx);
+		~CKFileReader();
+		LIBCMO_DISABLE_COPY_MOVE(CKFileReader);
 
 		// ========== Loading ==========
 		CKERROR ShallowLoad(CKSTRING u8_filename);
@@ -165,6 +171,31 @@ namespace LibCmo::CK2 {
 		const XContainer::XArray<CKFileObject>& GetFileObjects();
 		const XContainer::XArray<XContainer::XString>& GetIncludedFiles();
 
+	protected:
+		CKBOOL m_Done;
+		CKINT m_SaveIDMax; /**< Maximum CK_ID found when saving or loading objects */
+		XContainer::XArray<CKFileObject> m_FileObjects; /**< List of objects being saved / loaded */
+		XContainer::XArray<CKFileManagerData> m_ManagersData; /**< Manager Data loaded */
+		XContainer::XArray<CKFilePluginDependencies> m_PluginsDep;	/**< Plugins dependencies for this file */
+		// XContainer::XClassArray<XContainer::XIntArray> m_IndexByClassId; /**< List of index in the m_FileObjects table sorted by ClassID */
+		XContainer::XArray<XContainer::XString> m_IncludedFiles; /**< List of files that should be inserted in the CMO file. */
+		CKFileInfo m_FileInfo; /**< Headers summary */
+
+		CKERROR ReadFileHeader(CKBufferParser* ParserPtr);
+		CKERROR ReadFileData(CKBufferParser* ParserPtr);
+
+		CKContext* m_Ctx;
+		CKFileVisitor m_Visitor;
+	};
+
+	class CKFileWriter {
+		friend class CKFileVisitor;
+	public:
+		CKFileWriter(CKContext* ctx);
+		CKFileWriter(CKContext* ctx, CKFileReader* reader);
+		~CKFileWriter();
+		LIBCMO_DISABLE_COPY_MOVE(CKFileWriter);
+
 		// ========== Saving Preparing ==========
 		CKBOOL AddSavedObject(CKObject* obj, CKDWORD flags = CK_STATESAVE_ALL);
 		CKBOOL AddSavedObjects(CKObjectArray* objarray, CKDWORD flags = CK_STATESAVE_ALL);
@@ -173,41 +204,9 @@ namespace LibCmo::CK2 {
 		// ========== Saving ==========
 		CKERROR Save(CKSTRING u8_filename);
 
-		//CKERROR Load(CKSTRING u8_filename, /*CKObjectArray list, */ CK_LOAD_FLAGS flags);
-		//CKERROR OpenFile(CKSTRING u8_filename, CK_LOAD_FLAGS flags);
-		//CKERROR OpenMemory(void* MemoryBuffer, size_t BufferSize, CK_LOAD_FLAGS Flags);
-		//CKERROR ReadFileHeaders(CKBufferParser** ParserPtr);
-		//CKERROR ReadFileData(CKBufferParser** ParserPtr);
-		//CKERROR LoadFileData(void/*CKObjectArray list*/);
-		//CKERROR FinishLoading(/*CKObjectArray list, */CK_LOAD_FLAGS flags);
-
-		CKINT m_SaveIDMax; // Maximum CK_ID found when saving or loading objects
-		XContainer::XArray<CKFileObject> m_FileObjects; // List of objects being saved / loaded
-		XContainer::XArray<CKFileManagerData> m_ManagersData; // Manager Data loaded
-		XContainer::XArray<CKFilePluginDependencies> m_PluginsDep;	// Plugins dependencies for this file
-		// XContainer::XClassArray<XContainer::XIntArray> m_IndexByClassId; // List of index in the m_FileObjects table sorted by ClassID
-		XContainer::XArray<XContainer::XString> m_IncludedFiles; // List of files that should be inserted in the CMO file.
-		CKFileInfo m_FileInfo; // Headers summary
-
-		//XContainer::XFileObjectsTable m_ObjectsHashTable;
-		//CKBOOL m_ReadFileDataDone;
-		//CKBOOL m_SceneSaved;
-		//XContainer::XIntArray m_DuplicateNameFounds;	// A List of file object index for which a existing object with the same name has been
-		//													// found, this list is build if the load option contains CK_LOAD_AUTOMATICMODE or CK_LOAD_DODIALOG
-		//XContainer::XBitArray m_AlreadySavedMask;			// BitArray of IDs already saved  {secret}
-		//XContainer::XBitArray m_AlreadyReferencedMask;	// BitArray of IDs already referenced  {secret}
-		//XContainer::XObjectPointerArray	 m_ReferencedObjects;
-
-	private:
-		// reader function and variables
-		CKERROR ReadFileHeader(CKBufferParser* ParserPtr);
-		CKERROR ReadFileData(CKBufferParser* ParserPtr);
-
-		// writer function and varibales
-
-		// shared function and variables
-		bool mCanLoad;
+	protected:
 		CKContext* m_Ctx;
+		CKFileVisitor m_Visitor;
 	};
 
 }

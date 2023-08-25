@@ -13,8 +13,7 @@ namespace LibCmo::CK2 {
 #pragma region Objects Management
 
 	CKObject* CKContext::CreateCKObject(CK_CLASSID cls, CKSTRING name,
-		CK_OBJECTCREATION_OPTIONS options = CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_NONAMECHECK,
-		CK_CREATIONMODE* res = nullptr) {
+		CK_OBJECTCREATION_OPTIONS options, CK_CREATIONMODE* res) {
 		// todo: Process paramter options and res
 
 		// get description first

@@ -1,7 +1,6 @@
-#include "VTUtils.hpp"
 #include "CKStateChunk.hpp"
-#include "CKMinContext.hpp"
 #include "CKFile.hpp"
+#include "CKContext.hpp"
 
 namespace LibCmo::CK2 {
 
@@ -16,21 +15,20 @@ namespace LibCmo::CK2 {
 	//{
 	//	;
 	//}
-	CKStateChunk::CKStateChunk(CKFileDocument* doc, CKMinContext* ctx) :
+	CKStateChunk::CKStateChunk(CKFileVisitor* visitor, CKContext* ctx) :
 		m_ClassId(CK_CLASSID::CKCID_OBJECT), m_DataDwSize(0u), m_pData(nullptr),
 		m_DataVersion(CK_STATECHUNK_DATAVERSION::CHUNKDATA_CURRENTVERSION), m_ChunkVersion(CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4),
 		m_Parser{ CKStateChunkStatus::IDLE, 0u, 0u, 0u },
 		m_ObjectList(), m_ChunkList(), m_ManagerList(),
-		m_BindDoc(doc), m_BindContext(ctx)
-	{
-		;
-	}
+		m_BindFile(visitor), m_BindContext(ctx)
+	{}
+
 	CKStateChunk::CKStateChunk(const CKStateChunk& rhs) :
 		m_ClassId(rhs.m_ClassId), m_DataVersion(rhs.m_DataVersion), m_ChunkVersion(rhs.m_ChunkVersion),
 		m_Parser(rhs.m_Parser),
 		m_ObjectList(rhs.m_ObjectList), m_ManagerList(rhs.m_ManagerList), m_ChunkList(rhs.m_ChunkList),
 		m_pData(nullptr), m_DataDwSize(rhs.m_DataDwSize),
-		m_BindDoc(rhs.m_BindDoc), m_BindContext(rhs.m_BindContext) {
+		m_BindFile(rhs.m_BindFile), m_BindContext(rhs.m_BindContext) {
 		// copy buffer
 		if (rhs.m_pData != nullptr) {
 			this->m_pData = new(std::nothrow) CKDWORD[rhs.m_DataDwSize];
@@ -39,6 +37,7 @@ namespace LibCmo::CK2 {
 			}
 		}
 	}
+
 	CKStateChunk& CKStateChunk::operator=(const CKStateChunk& rhs) {
 		this->Clear();
 
@@ -52,7 +51,7 @@ namespace LibCmo::CK2 {
 		this->m_ManagerList = rhs.m_ManagerList;
 		this->m_ChunkList = rhs.m_ChunkList;
 
-		this->m_BindDoc = rhs.m_BindDoc;
+		this->m_BindFile = rhs.m_BindFile;
 		this->m_BindContext = rhs.m_BindContext;
 
 		// copy buffer
@@ -292,23 +291,23 @@ namespace LibCmo::CK2 {
 				std::memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
 				bufpos += this->m_DataDwSize;
 			}
-			if (EnumsHelper::FlagEnumHas(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE)) {
+			if (EnumsHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE)) {
 				// MARK: set ckfile = nullptr;
 				;
 			}
-			if (EnumsHelper::FlagEnumHas(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS)) {
+			if (EnumsHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS)) {
 				this->m_ObjectList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
 				std::memcpy(this->m_ObjectList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ObjectList.size());
 				bufpos += this->m_ObjectList.size();
 			}
-			if (EnumsHelper::FlagEnumHas(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN)) {
+			if (EnumsHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN)) {
 				this->m_ChunkList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
 				std::memcpy(this->m_ChunkList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ChunkList.size());
 				bufpos += this->m_ChunkList.size();
 			}
-			if (EnumsHelper::FlagEnumHas(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN)) {
+			if (EnumsHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN)) {
 				this->m_ManagerList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
 				std::memcpy(this->m_ManagerList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ManagerList.size());
@@ -426,7 +425,7 @@ namespace LibCmo::CK2 {
 			return true;
 		} else {
 			// failed, report to context
-			m_BindContext->Printf("CKStateChunk read length error at %" PRICKdword ".", this->m_Parser.m_CurrentPos);
+			m_BindContext->OutputToConsoleEx("CKStateChunk read length error at %" PRIckDWORD ".", this->m_Parser.m_CurrentPos);
 			return false;
 		}
 	}
@@ -464,13 +463,13 @@ namespace LibCmo::CK2 {
 			// new file
 
 			// if no doc associated, return directly
-			if (this->m_BindDoc == nullptr) {
+			if (this->m_BindFile == nullptr) {
 				*id = static_cast<CK_ID>(gotten_id);
 				return true;
 			}
 			// if it is positive, return corresponding value
 			if (gotten_id >= 0) {
-				*id = this->m_BindDoc->m_FileObjects[gotten_id].CreatedObject;
+				*id = this->m_BindFile->GetFileObjectByIndex(gotten_id)->CreatedObjectId;
 				return true;
 			}
 
@@ -510,7 +509,7 @@ namespace LibCmo::CK2 {
 		if (!this->EnsureReadSpace(subChunkSize)) goto subchunk_defer;
 
 		// create statechunk
-		subchunk = new(std::nothrow) CKStateChunk(this->m_BindDoc, this->m_BindContext);
+		subchunk = new(std::nothrow) CKStateChunk(this->m_BindFile, this->m_BindContext);
 		if (subchunk == nullptr) goto subchunk_defer;
 
 		// start read data
@@ -535,7 +534,7 @@ namespace LibCmo::CK2 {
 			// has bind file?
 			CKDWORD hasBindFile;
 			if (!this->ReadStruct(hasBindFile)) goto subchunk_defer;
-			if (hasBindFile == 1) subchunk->m_BindDoc = nullptr;
+			if (hasBindFile == 1) subchunk->m_BindFile = nullptr;
 
 			// 3 list size
 			// manager only existed when ver > 4
@@ -738,11 +737,11 @@ namespace LibCmo::CK2 {
 			}
 
 			// remap id
-			if (this->m_BindDoc != nullptr) {
+			if (this->m_BindFile != nullptr) {
 				if (cache < 0) {
 					id = 0u;
 				} else {
-					id = this->m_BindDoc->m_FileObjects[cache].CreatedObject;
+					id = this->m_BindFile->GetFileObjectByIndex(cache)->CreatedObjectId;
 				}
 			} else {
 				id = static_cast<CK_ID>(cache);
