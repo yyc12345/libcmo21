@@ -48,6 +48,7 @@
 #include <cinttypes>
 #include <cstdint>
 #include <initializer_list>
+#include <string>
 
 #pragma region Batch Ctor operator= Operations
 
@@ -57,40 +58,97 @@
     CLSNAME& operator=(const CLSNAME&) = delete; \
     CLSNAME& operator=(CLSNAME&&) = delete;
 
+#define LIBCMO_DEFAULT_COPY_MOVE(CLSNAME) \
+	CLSNAME(const CLSNAME&) = default; \
+	CLSNAME(CLSNAME&&) = default; \
+    CLSNAME& operator=(const CLSNAME&) = default; \
+    CLSNAME& operator=(CLSNAME&&) = default;
+
 #pragma endregion
 
 namespace LibCmo {
 
-    namespace EnumsHelper {
-        template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
-        inline TEnum Merge(std::initializer_list<TEnum> il) {
-            std::underlying_type_t<TEnum> result = 0;
-            for (auto it = il.begin(); it != il.end(); ++it) {
-                result |= static_cast<std::underlying_type_t<TEnum>>(*it);
-            }
-            return static_cast<TEnum>(result);
-        }
+	namespace TypeHelper {
 
-        template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
-        inline TEnum Inv(TEnum e) {
-            return static_cast<TEnum>(~(static_cast<std::underlying_type_t<TEnum>>(e)));
-        }
+		/**
+		 * @brief HybridString is a compatible type.
+		 * In some original Virtools case, we need CKSTRING to hold string.
+		 * But CKSTRING is just a pointer and it is very cause memory leak.
+		 * So I invent this. It like CKSTRING but will free memory automatically.
+		 * And it is safe in CKSTRING copying.
+		 * It operate like std::string. Have a function called c_str() to create usable CKSTRING.
+		 * We call it as MKString. (memory-safe CKSTRING.) :pu: =.=
+		*/
+		class MKString {
+		public:
+			MKString() : m_HasStr(false), m_Str() {}
+			~MKString() {}
 
-        template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
-        inline TEnum Rm(TEnum& e1, TEnum e2) {
-            e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) & static_cast<std::underlying_type_t<TEnum>>(Inv(e2)));
-        }
+			MKString(const char* cstr) : m_HasStr(cstr != nullptr), m_Str(m_HasStr ? cstr : "") {}
+			MKString& operator=(const char* cstr) {
+				m_HasStr = cstr != nullptr;
+				m_Str = m_HasStr ? cstr : "";
+			}
+			MKString(const std::string& cstr) : m_HasStr(true), m_Str(cstr) {}
+			MKString& operator=(const std::string& cstr) {
+				m_HasStr = true;
+				m_Str = cstr;
+			}
 
-        template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
-        inline TEnum Add(TEnum& e1, TEnum e2) {
-            e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) | static_cast<std::underlying_type_t<TEnum>>(e2));
-        }
+			MKString(const MKString& rhs) : m_HasStr(rhs.m_HasStr), m_Str(rhs.m_Str) {}
+			MKString(MKString&& rhs) noexcept : m_HasStr(rhs.m_HasStr), m_Str(std::move(rhs.m_Str)) {
+				rhs.m_HasStr = false;
+			}
+			MKString& operator=(const MKString& rhs) {
+				m_HasStr = rhs.m_HasStr;
+				m_Str = rhs.m_Str;
+			}
+			MKString& operator=(MKString&& rhs) noexcept {
+				m_HasStr = rhs.m_HasStr;
+				m_Str = std::move(rhs.m_Str);
+				rhs.m_HasStr = false;
+			}
 
-        template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
-        inline bool Has(TEnum e, TEnum probe) {
-            return static_cast<bool>(static_cast<std::underlying_type_t<TEnum>>(e) & static_cast<std::underlying_type_t<TEnum>>(probe));
-        }
-    }
+			const char* c_str() const {
+				return m_HasStr ? m_Str.c_str() : nullptr;
+			}
+		private:
+			bool m_HasStr;
+			std::string m_Str;
+		};
+
+	}
+
+	namespace EnumsHelper {
+		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+		inline TEnum Merge(std::initializer_list<TEnum> il) {
+			std::underlying_type_t<TEnum> result = 0;
+			for (auto it = il.begin(); it != il.end(); ++it) {
+				result |= static_cast<std::underlying_type_t<TEnum>>(*it);
+			}
+			return static_cast<TEnum>(result);
+		}
+
+		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+		inline TEnum Inv(TEnum e) {
+			return static_cast<TEnum>(~(static_cast<std::underlying_type_t<TEnum>>(e)));
+		}
+
+		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+		inline TEnum Rm(TEnum& e1, TEnum e2) {
+			e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) & static_cast<std::underlying_type_t<TEnum>>(Inv(e2)));
+		}
+
+		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+		inline TEnum Add(TEnum& e1, TEnum e2) {
+			e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) | static_cast<std::underlying_type_t<TEnum>>(e2));
+		}
+
+		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+		inline bool Has(TEnum e, TEnum probe) {
+			return static_cast<bool>(static_cast<std::underlying_type_t<TEnum>>(e) & static_cast<std::underlying_type_t<TEnum>>(probe));
+		}
+	}
 
 	namespace StreamHelper {
 

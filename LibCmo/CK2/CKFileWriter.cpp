@@ -1,6 +1,6 @@
 #include "CKFile.hpp"
 
-namespace LibCmo {
+namespace LibCmo::CK2 {
 
 
 

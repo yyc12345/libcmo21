@@ -60,7 +60,7 @@
     <ClCompile Include="VxMath\VxMemoryMappedFile.cpp">
       <Filter>Sources\VxMath</Filter>
     </ClCompile>
-    <ClCompile Include="CK2\CKFile.cpp">
+    <ClCompile Include="CK2\CKFileOthers.cpp">
       <Filter>Sources\CK2</Filter>
     </ClCompile>
     <ClCompile Include="CK2\CKFileReader.cpp">

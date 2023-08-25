@@ -38,6 +38,9 @@ namespace LibCmo::CK2 {
 
 		// put into slot
 		m_ObjectsList[decided_id] = obj;
+		
+		// set out variable
+		return obj;
 	}
 
 	CKObject* CKContext::GetCKObject(CK_ID id) {

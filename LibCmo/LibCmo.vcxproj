@@ -175,7 +175,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CK2\CKFile.cpp" />
+    <ClCompile Include="CK2\CKFileOthers.cpp" />
     <ClCompile Include="CK2\CKFileWriter.cpp" />
     <ClCompile Include="CK2\CKGlobals.cpp" />
     <ClCompile Include="CK2\CKManagerImplements\CKBaseManager.cpp" />

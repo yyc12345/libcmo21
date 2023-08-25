@@ -9,7 +9,7 @@ namespace LibCmo::CK2 {
 	public:
 		CKObject(CKContext* ctx, CK_ID ckid, CKSTRING name) :
 			m_ID(ckid),
-			m_HasName(name != nullptr ? CKTRUE : CKFALSE), m_Name(name != nullptr ? name : ""),
+			m_Name(name),
 			m_Context(ctx),
 			m_ObjectFlags(CK_OBJECT_FLAGS::CK_PARAMETERIN_DISABLED)
 		{}
@@ -20,17 +20,10 @@ namespace LibCmo::CK2 {
 			return m_ID;
 		}
 		CKSTRING GetName(void) {
-			if (m_HasName) return m_Name.c_str();
-			else return nullptr;
+			return m_Name.c_str();
 		}
 		void SetName(CKSTRING u8_name) {
-			if (u8_name == nullptr) {
-				m_HasName = false;
-				m_Name.clear();
-			} else {
-				m_HasName = true;
-				m_Name = u8_name;
-			}
+			m_Name = u8_name;
 		}
 		CK_OBJECT_FLAGS GetObjectFlags(void) {
 			return m_ObjectFlags;
@@ -53,8 +46,7 @@ namespace LibCmo::CK2 {
 
 	private:
 		CK_ID m_ID;
-		CKBOOL m_HasName;
-		std::string m_Name;
+		TypeHelper::MKString m_Name;
 		CK_OBJECT_FLAGS m_ObjectFlags;
 		CKContext* m_Context;
 	};

@@ -1,9 +1,8 @@
 #include "CKFile.hpp"
-#include "CKGlobals.hpp"
 #include "CKStateChunk.hpp"
-#include "CKObjects.hpp"
-#include "VxMemoryMappedFile.hpp"
-#include "CKMinContext.hpp"
+#include "CKObjectImplements/CKObject.hpp"
+#include "../VxMath/VxMemoryMappedFile.hpp"
+#include "CKContext.hpp"
 #include <memory>
 
 namespace LibCmo::CK2 {
@@ -15,7 +14,7 @@ namespace LibCmo::CK2 {
 	* No need to support them.
 	*/
 
-	CKERROR CKFile::ShallowLoad(CKSTRING u8_filename, CKFileDocument** out_doc) {
+	CKERROR CKFile::ShallowLoad(CKSTRING u8_filename) {
 		// preset value
 		*out_doc = nullptr;
 
