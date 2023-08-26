@@ -74,7 +74,7 @@ namespace LibCmo {
 	namespace TypeHelper {
 
 		/**
-		 * @brief HybridString is a compatible type.
+		 * @brief MKString is a compatible type.
 		 * In some original Virtools case, we need CKSTRING to hold string.
 		 * But CKSTRING is just a pointer and it is very cause memory leak.
 		 * So I invent this. It like CKSTRING but will free memory automatically.

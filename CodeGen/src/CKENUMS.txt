@@ -54,6 +54,45 @@ typedef enum CK_LOAD_FLAGS {
 								// or because the loaded object already exist in the current level 
 								// and the user choose to keep the existing one.
 	};
+    
+/*************************************************
+{filename:CK_LOADMODE}
+Summary: Specify the way an object just loaded should be handled when it already exists in the level.
+{secret}
+
+See also: 
+*************************************************/
+typedef enum CK_LOADMODE 
+{
+	CKLOAD_INVALID=-1,// Use the existing object instead of loading 
+	CKLOAD_OK=0,		// Ignore ( Name unicity is broken )
+	CKLOAD_REPLACE=1,	// Replace the existing object (Not yet implemented)
+	CKLOAD_RENAME=2,	// Rename the loaded object
+	CKLOAD_USECURRENT=3,// Use the existing object instead of loading 
+} CK_LOADMODE;
+
+/*************************************************
+{filename:CK_OBJECTCREATION_OPTIONS}
+Summary: Specify the way an object is created through CKCreateObject.
+
+Remarks: 
+	+ These flag controls the way an object is created, the most important of these flags
+	being CK_OBJECTCREATION_DYNAMIC which, if set in CKCreateObject, make the newly created object 
+	dynamic.
+See also: CKContext::CreateObject,Dynamic Objects
+*************************************************/
+enum CK_OBJECTCREATION_OPTIONS
+{
+	CK_OBJECTCREATION_NONAMECHECK	= 0,	// Do not test for name unicity (may be overriden in special case)
+	CK_OBJECTCREATION_REPLACE		= 1,	// Replace the current object by the object being loaded
+	CK_OBJECTCREATION_RENAME		= 2,	// Rename the created object to ensure its uniqueness
+	CK_OBJECTCREATION_USECURRENT	= 3,	// Do not create a new object, use the one with the same name instead
+	CK_OBJECTCREATION_ASK			= 4,	//	If a duplicate name if found, opens a dialog box to ask the useror use automatic load mode if any.
+	CK_OBJECTCREATION_FLAGSMASK		= 0x0000000F,	// Mask for previous values
+	CK_OBJECTCREATION_DYNAMIC		= 0x00000010,	//	The object must be created dynamic
+	CK_OBJECTCREATION_ACTIVATE		= 0x00000020,	//	The object will be copied/created active
+	CK_OBJECTCREATION_NONAMECOPY	= 0x00000040	//	The object will take control of the string given to it directly, without copying it
+};
 
 /*************************************************
 {filename:CK_PLUGIN_TYPE}

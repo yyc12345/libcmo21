@@ -168,8 +168,12 @@ namespace LibCmo::CK2 {
 		CKERROR DeepLoad(CKSTRING u8_filename);
 
 		// ========== Loading Result ==========
+		CKINT GetSaveIdMax();
 		const XContainer::XArray<CKFileObject>& GetFileObjects();
+		const XContainer::XArray<CKFileManagerData>& GetManagersData();
+		const XContainer::XArray<CKFilePluginDependencies>& GetPluginsDep();
 		const XContainer::XArray<XContainer::XString>& GetIncludedFiles();
+		const CKFileInfo GetFileInfo();
 
 	protected:
 		CKBOOL m_Done;

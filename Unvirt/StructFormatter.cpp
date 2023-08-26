@@ -1,3 +1,4 @@
+#include <VTAll.hpp>
 #include "StructFormatter.hpp"
 #include "AccessibleValue.hpp"
 #include "TerminalHelper.hpp"
@@ -26,23 +27,23 @@ namespace Unvirt::StructFormatter {
 			fileinfo.ProductVersion, product_series[0], product_series[1], product_series[2], product_series[3]
 		);
 
-		fprintf(fout, "Save Flags: %s\n", Unvirt::AccessibleValue::GetFlagEnumName<LibCmo::CK2::CK_FILE_WRITEMODE>(
-			Unvirt::AccessibleValue::EnumDesc::CK_FILE_WRITEMODE, fileinfo.FileWriteMode
+		fprintf(fout, "Save Flags: %s\n", Unvirt::AccessibleValue::GetFlagEnumName(
+			fileinfo.FileWriteMode, Unvirt::AccessibleValue::EnumDesc::CK_FILE_WRITEMODE
 		).c_str());
 
-		fprintf(fout, "File Size: %s\n", Unvirt::AccessibleValue::GetAccessibleFileSize(fileinfo.FileSize).c_str());
+		fprintf(fout, "File Size: %s\n", Unvirt::AccessibleValue::GetReadableFileSize(fileinfo.FileSize).c_str());
 
 		fprintf(fout, "Crc: 0x%" PRIX32 "\n", fileinfo.Crc);
 		fputc('\n', fout);
 
 
 		fputs("Hdr1 (Pack / UnPack): ", fout);
-		fprintf(fout, "%s / ", Unvirt::AccessibleValue::GetAccessibleFileSize(fileinfo.Hdr1PackSize).c_str());
-		fprintf(fout, "%s\n", Unvirt::AccessibleValue::GetAccessibleFileSize(fileinfo.Hdr1UnPackSize).c_str());
+		fprintf(fout, "%s / ", Unvirt::AccessibleValue::GetReadableFileSize(fileinfo.Hdr1PackSize).c_str());
+		fprintf(fout, "%s\n", Unvirt::AccessibleValue::GetReadableFileSize(fileinfo.Hdr1UnPackSize).c_str());
 
 		fputs("Data (Pack / UnPack): ", fout);
-		fprintf(fout, "%s / ", Unvirt::AccessibleValue::GetAccessibleFileSize(fileinfo.DataPackSize).c_str());
-		fprintf(fout, "%s\n", Unvirt::AccessibleValue::GetAccessibleFileSize(fileinfo.DataUnPackSize).c_str());
+		fprintf(fout, "%s / ", Unvirt::AccessibleValue::GetReadableFileSize(fileinfo.DataPackSize).c_str());
+		fprintf(fout, "%s\n", Unvirt::AccessibleValue::GetReadableFileSize(fileinfo.DataUnPackSize).c_str());
 		fputc('\n', fout);
 
 
@@ -52,12 +53,18 @@ namespace Unvirt::StructFormatter {
 
 	}
 
-	static void PrintCKSTRING(const std::string& name) {
-		if (name.empty()) {
+	static void PrintCKSTRING(const LibCmo::TypeHelper::MKString& name) {
+		LibCmo::CK2::CKSTRING ckname = name.c_str();
+		if (ckname == nullptr) {
 			fputs(UNVIRT_TERMCOL_LIGHT_MAGENTA(("<anonymous>")), fout);
 		} else {
-			fputs(name.c_str(), fout);
+			fputs(ckname, fout);
 		}
+		//if (name.empty()) {
+		//	fputs(UNVIRT_TERMCOL_LIGHT_MAGENTA(("<anonymous>")), fout);
+		//} else {
+		//	fputs(name.c_str(), fout);
+		//}
 	}
 	static void PrintPointer(const void* ptr) {
 		if (ptr == nullptr) {
@@ -70,7 +77,7 @@ namespace Unvirt::StructFormatter {
 		fprintf(stdout, "<0x%08" PRIx32 ", 0x%08" PRIx32 ">", guid.d1, guid.d2);
 	}
 
-	void PrintObjectList(const LibCmo::CK2::XArray<LibCmo::CK2::CKFileObject>& ls, size_t page, size_t pageitems) {
+	void PrintObjectList(const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileObject>& ls, size_t page, size_t pageitems) {
 
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKFileObject\n")), fout);
 		size_t fulllen = ls.size(),
@@ -97,7 +104,7 @@ namespace Unvirt::StructFormatter {
 		fprintf(fout, "Page %zu of %zu\n", page + 1, fullpage + 1);
 	}
 
-	void PrintManagerList(const LibCmo::CK2::XArray<LibCmo::CK2::CKFileManagerData>& ls, size_t page, size_t pageitems) {
+	void PrintManagerList(const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileManagerData>& ls, size_t page, size_t pageitems) {
 
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKFileManager\n")), fout);
 		size_t fulllen = ls.size(),
@@ -112,8 +119,6 @@ namespace Unvirt::StructFormatter {
 			const auto& mgr = ls[counter];
 
 			PrintCKGUID(mgr.Manager);
-			fputc('\t', fout);
-			PrintPointer(mgr.MgrPtr);
 			fputc('\t', fout);
 			PrintPointer(mgr.Data);
 			fputc('\n', fout);

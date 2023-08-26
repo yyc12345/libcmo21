@@ -4,12 +4,8 @@ import java.io.OutputStreamWriter;
  * The nameof values writer for CKERROR
  */
 public class ErrorsWriter {
-	public static void writeNameofError(OutputStreamWriter writer, EnumsHelper.Enum_t errors) throws Exception {
+	public static void writeAccVals(OutputStreamWriter writer, EnumsHelper.Enum_t errors) throws Exception {
 		IndentHelper indent = new IndentHelper(writer);
-
-		indent.puts("struct CkErrorReflection { const char* mName; const char* mDescription; };");
-		indent.puts("using CkErrorReflectionArray = std::vector<std::pair<LibCmo::CK2::CKERROR, CkErrorReflection>>;");
-		indent.puts("");
 
 		indent.puts("const CkErrorReflectionArray CKERROR {");
 		indent.inc();

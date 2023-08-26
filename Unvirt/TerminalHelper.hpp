@@ -1,7 +1,8 @@
 #pragma once
 
-namespace Unvirt{
-	namespace TerminalHelper {
+#include <string>
+
+namespace Unvirt::TerminalHelper {
 
 #define UNVIRT_REMOVE_PARENS_IMPL(...) __VA_ARGS__
 #define UNVIRT_REMOVE_PARENS(T) UNVIRT_REMOVE_PARENS_IMPL T
@@ -46,8 +47,8 @@ namespace Unvirt{
 #define UNVIRT_TERMCOL_LIGHT_CYAN(T) "\033[96m" UNVIRT_REMOVE_PARENS(T) "\033[0m"
 #define UNVIRT_TERMCOL_LIGHT_WHITE(T) "\033[97m" UNVIRT_REMOVE_PARENS(T) "\033[0m"
 
-		bool EnsureTerminalColor(void);
-		bool EnsureTerminalEncoding(void);
+	bool EnsureTerminalColor(void);
+	bool EnsureTerminalEncoding(void);
+	void GetCmdLine(std::string&);
 
-	}
 }

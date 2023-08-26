@@ -129,12 +129,28 @@ namespace LibCmo::CK2 {
 
 	CKFileReader::~CKFileReader() {}
 
+	CKINT CKFileReader::GetSaveIdMax() {
+		return m_SaveIDMax;
+	}
+
 	const XContainer::XArray<CKFileObject>& CKFileReader::GetFileObjects() {
 		return m_FileObjects;
 	}
 
+	const XContainer::XArray<CKFileManagerData>& CKFileReader::GetManagersData() {
+		return m_ManagersData;
+	}
+
+	const XContainer::XArray<CKFilePluginDependencies>& CKFileReader::GetPluginsDep() {
+		return m_PluginsDep;
+	}
+
 	const XContainer::XArray<XContainer::XString>& CKFileReader::GetIncludedFiles() {
 		return m_IncludedFiles;
+	}
+
+	const CKFileInfo CKFileReader::GetFileInfo() {
+		return m_FileInfo;
 	}
 
 #pragma endregion

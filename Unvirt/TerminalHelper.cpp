@@ -1,6 +1,9 @@
 #include "TerminalHelper.hpp"
 #include <VTUtils.hpp>
+#include <VTEncoding.hpp>
 #include <cstdarg>
+#include <iostream>
+#include <cstdio>
 
 #if defined(LIBCMO_OS_WIN32)
 #include <Windows.h>
@@ -41,6 +44,17 @@ namespace Unvirt {
 			_setmode(_fileno(stdin), _O_U16TEXT);
 #endif
 			return true;
+		}
+
+		void GetCmdLine(std::string& u8cmd) {
+			fputs("Unvirt> ", stdout);
+#if defined(LIBCMO_OS_WIN32)
+			std::wstring wcmd;
+			std::getline(std::wcin, wcmd);
+			LibCmo::EncodingHelper::WcharToChar(wcmd, u8cmd, CP_UTF8);
+#else
+			std::getline(std::cin, u8cmd);
+#endif
 		}
 
 	}

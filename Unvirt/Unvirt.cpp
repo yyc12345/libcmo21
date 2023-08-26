@@ -3,15 +3,32 @@
 #include "StructFormatter.hpp"
 #include "CmdHelper.hpp"
 
-#include "CKMinContext.hpp"
-#include "CKFile.hpp"
+#include <VTAll.hpp>
+#include <CK2/CKContext.hpp>
+#include <CK2/CKFile.hpp>
 
 #include <cstdio>
 #include <iostream>
 
+namespace Unvirt {
+
+	class UnvirtContext {
+	public:
+		UnvirtContext() {}
+		~UnvirtContext() {}
+
+		void Run() {
+			Unvirt::TerminalHelper::EnsureTerminalColor();
+			Unvirt::TerminalHelper::EnsureTerminalEncoding();
+
+		}
+	private:
+
+	};
+
+}
+
 int main(int argc, char* argv[]) {
-	Unvirt::TerminalHelper::EnsureTerminalColor();
-	Unvirt::TerminalHelper::EnsureTerminalEncoding();
 
 	//LibCmo::CK2::CKMinContext vtctx;
 	//vtctx.SetTempPath("Temp");
@@ -23,9 +40,8 @@ int main(int argc, char* argv[]) {
 
 	//if (doc)
 	//	Unvirt::StructFormatter::PrintCKFileInfo(doc->m_FileInfo);
-	auto cmd = new Unvirt::CmdHelper::InteractiveCmd();
-	cmd->Run();
-	delete cmd;
+	Unvirt::UnvirtContext ctx;
+	ctx.Run();
 
 	return 0;
 }

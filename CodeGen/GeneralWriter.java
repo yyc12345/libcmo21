@@ -4,6 +4,7 @@ import java.io.OutputStreamWriter;
  * Generic Enum Writer. Including Data Type Defination and Nameof Values.
  */
 public class GeneralWriter {
+
 	public static void writeEnums(OutputStreamWriter writer, EnumsHelper.EnumCollection_t prog) throws Exception {
 		IndentHelper indent = new IndentHelper(writer);
 		for (EnumsHelper.Enum_t enum_t : prog.mEnums) {
@@ -31,18 +32,29 @@ public class GeneralWriter {
 			// write enum tail
 			indent.dec();
 			indent.puts("};");
-			indent.printf("LIBCMO_BITFLAG_OPERATORS(%s);", enum_t.mEnumName);
 		}
 	}
 
-	public static void writeNameofValues(OutputStreamWriter writer, EnumsHelper.EnumCollection_t prog,
+	public static void writeEnum(OutputStreamWriter writer, EnumsHelper.Enum_t _enum) throws Exception {
+		EnumsHelper.EnumCollection_t col = new EnumsHelper.EnumCollection_t();
+		col.mEnums.add(_enum);
+		writeEnums(writer, col);
+	}
+
+	public static void writeAccVals(OutputStreamWriter writer, EnumsHelper.EnumCollection_t prog,
 			CommonHelper.CKParts parts) throws Exception {
 		IndentHelper indent = new IndentHelper(writer);
+		// write decls
+		for (EnumsHelper.Enum_t enum_t : prog.mEnums) {
+			indent.printf("extern const GeneralReflectionArray<LibCmo::%s::%s> %s;", CommonHelper.getCKPartsNamespace(parts),
+					enum_t.mEnumName, enum_t.mEnumName);
+		}
 		
-		indent.puts("struct GeneralReflection { const char* mName; };");
-		indent.puts("template<typename _Ty>;");
-		indent.puts("using GeneralReflectionArray = std::vector<std::pair<TEnum, GeneralReflection>>;");
+		indent.puts("");
+		indent.puts("");
+		indent.puts("");
 		
+		// write implements
 		for (EnumsHelper.Enum_t enum_t : prog.mEnums) {
 			// write enum desc header
 			indent.printf("const GeneralReflectionArray<LibCmo::%s::%s> %s {", CommonHelper.getCKPartsNamespace(parts),
@@ -60,4 +72,12 @@ public class GeneralWriter {
 			indent.puts("};");
 		}
 	}
+
+	public static void writeAccVal(OutputStreamWriter writer, EnumsHelper.Enum_t _enum, CommonHelper.CKParts parts)
+			throws Exception {
+		EnumsHelper.EnumCollection_t col = new EnumsHelper.EnumCollection_t();
+		col.mEnums.add(_enum);
+		writeAccVals(writer, col, parts);
+	}
+
 }

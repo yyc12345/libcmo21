@@ -1,7 +1,6 @@
 #pragma once
 
-#include <CKEnums.hpp>
-#include <VTUtils.hpp>
+#include <VTAll.hpp>
 #include <vector>
 #include <string>
 
@@ -10,63 +9,68 @@ namespace Unvirt {
 
 		constexpr const char c_InvalidEnumName[] = "[undefined]";
 
-#pragma region universal enum name
+		struct GeneralReflection { const char* mName; };
+		template<typename _Ty>
+		using GeneralReflectionArray = std::vector<std::pair<_Ty, GeneralReflection>>;
 
-		template<typename TEnum>
-		using EnumDescPairArray = std::vector<std::pair<TEnum, const char*>>;
-
-		namespace EnumDesc {
-			extern const EnumDescPairArray<LibCmo::CK2::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE;
-			extern const EnumDescPairArray<LibCmo::CK2::CK_LOAD_FLAGS> CK_LOAD_FLAGS;
-			extern const EnumDescPairArray<LibCmo::CK2::CK_FO_OPTIONS> CK_FO_OPTIONS;
-			extern const EnumDescPairArray<LibCmo::CK2::CK_PLUGIN_TYPE> CK_PLUGIN_TYPE;
-		}
-
-		template<typename TEnum>
-		std::string GetEnumName(const EnumDescPairArray<TEnum>& desc, TEnum val) {
+		template<typename _Ty>
+		std::string GetEnumName(_Ty val, const GeneralReflectionArray<_Ty>& desc) {
 			std::string strl;
-			for (auto it = desc.begin(); it != desc.end(); ++it) {
-				if ((*it).first == val) {
-					strl = (*it).second;
+			for (auto& item : desc) {
+				if (item.first == val) {
+					strl = item.second.mName;
 					return strl;
 				}
 			}
 			strl = c_InvalidEnumName;
 			return strl;
 		}
-		template<typename TEnum>
-		std::string GetFlagEnumName(const EnumDescPairArray<TEnum>& desc, TEnum val) {
+		template<typename _Ty>
+		std::string GetFlagEnumName(_Ty val, const GeneralReflectionArray<_Ty>& desc) {
 			std::string strl;
-			for (auto it = desc.begin(); it != desc.end(); ++it) {
+			for (auto& item : desc) {
 				// if it have exacelt same entry, return directly
-				if ((*it).first == val) {
-					strl = (*it).second;
+				if (item.first == val) {
+					strl = item.second.mName;
 					return strl;
 				}
 
 				// check flag match
-				if (LibCmo::EnumsHelper::FlagEnumHas(val, (*it).first)) {
-					// matched, add it
+				if (LibCmo::EnumsHelper::Has(val, item.first)) {
 					if (strl.size() != 0u) strl += ", ";
-					strl += (*it).second;
+					strl += item.second.mName;
 				}
 			}
 
+			// if nothing was gotten. set to undefined
 			if (strl.size() == 0u) {
-				// nothing was gotten. set to undefined
 				strl = c_InvalidEnumName;
-			} // otherwise return directly
+			}
+
 			return strl;
 		}
-
-#pragma endregion
 
 		std::string GetClassIdName(LibCmo::CK2::CK_CLASSID cls);
 		std::string GetCkErrorName(LibCmo::CK2::CKERROR err);
 		std::string GetClassIdHierarchy(LibCmo::CK2::CK_CLASSID cls);
 		std::string GetCkErrorDescription(LibCmo::CK2::CKERROR err);
 
-		std::string GetAccessibleFileSize(uint64_t size);
+		std::string GetReadableFileSize(uint64_t size);
+
+		namespace EnumDesc {
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE;
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_LOAD_FLAGS> CK_LOAD_FLAGS;
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_FO_OPTIONS> CK_FO_OPTIONS;
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_LOADMODE> CK_LOADMODE;
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_OBJECTCREATION_OPTIONS> CK_OBJECTCREATION_OPTIONS;
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_PLUGIN_TYPE> CK_PLUGIN_TYPE;
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_STATECHUNK_CHUNKOPTIONS> CK_STATECHUNK_CHUNKOPTIONS;
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_OBJECT_FLAGS> CK_OBJECT_FLAGS;
+
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_STATECHUNK_DATAVERSION> CK_STATECHUNK_DATAVERSION;
+
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_STATECHUNK_CHUNKVERSION> CK_STATECHUNK_CHUNKVERSION;
+		}
 
 	}
 }
