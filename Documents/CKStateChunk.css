@@ -1,0 +1,16 @@
+body {
+    font-family: 'Times New Roman', Times, serif;
+}
+
+td {
+    min-width: 15em;
+    text-align: left;
+    vertical-align: top;
+}
+
+code {
+    font-family: 'Courier New', Courier, monospace;
+}
+pre {
+    font-family: 'Courier New', Courier, monospace;
+}

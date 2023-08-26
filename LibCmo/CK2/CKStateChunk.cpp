@@ -390,7 +390,7 @@ namespace LibCmo::CK2 {
 		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return false;
 
 		CKDWORD pos = 0u;
-		if (this->m_DataDwSize < 2) return false;	// impossible to have a identifier
+		if (this->m_DataDwSize < 2u) return false;	// impossible to have a identifier
 
 		// search identifier
 		while (this->m_pData[pos] != identifier) {
@@ -409,7 +409,7 @@ namespace LibCmo::CK2 {
 			// the last identifier, use chunk size instead
 			nextptr = this->m_DataDwSize;
 		}
-		*out_size = sizeof(CKDWORD) * (nextptr - pos);
+		*out_size = sizeof(CKDWORD) * (nextptr - pos - 2u);
 		return true;
 	}
 

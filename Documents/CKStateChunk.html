@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<link rel="stylesheet" type="text/css" href="CKStateChunk.css" />
+<script src="CKStateChunk.js"></script>
+
+<body>
+    <h1>CKStateChunk Data Structure</h1>
+    <p>
+        NOTE:<br />
+        "Fill Zero" mean that this field still is existed but you should fill zero for it.<br />
+        "Skip" mean that this field is entirely not existed. You should not consider it anymore.
+    </p>
+
+    <h2>Buffer Format</h2>
+    <p>
+        This section will introduce the buffer format of CKStateChunk.<br />
+        Buffer format is the real format of CKStateChunk stored in file.<br />
+        <code>CKStateChunk::ConvertFromBuffer</code> and <code>CKStateChunk::ConvertToBuffer</code> can convert between CKStateChunk and its buffer format.
+    </p>
+    <p>According to the value of CK_STATECHUNK_CHUNKVERSION, we split it into 3 different format.</p>
+    <ul>
+        <li>value &lt; CHUNK_VERSION2: Very Old Format</li>
+        <li>value = CHUNK_VERSION2: Old Format</li>
+        <li>value &gt; CHUNK_VERSION2: New Format</li>
+    </ul>
+    <p>
+        The unit of m_DataDwSize is CKDWORD(uint32), not char(uint8).<br />
+        The core data of CKStateChunk is aligned with 4 byte boundary. so this is the reason why the unit of
+        m_DataDwSize is CKDWORD.<br />
+        Every reading and writing of m_pData should notice this unit issue.
+    </p>
+    <h3>Very Old Format</h3>
+    <table>
+        <tr>
+            <td id="buf-fmt-vold-DataVersion">
+                <code>uint16 m_DataVersion</code>
+                <p>The type of m_DataVersion is CK_STATECHUNK_DATAVERSION.</p>
+            </td>
+            <td id="buf-fmt-vold-ChunkVersion">
+                <code>uint16 m_ChunkVersion</code>
+                <p>The type of m_ChunkVersion is CK_STATECHUNK_CHUNKVERSION.</p>
+            </td>
+            <td id="buf-fmt-vold-ClassId">
+                <code>uint32 m_ClassId</code>
+                <p>The type of m_ClassId is CK_CLASSID.</p>
+            </td>
+            <td id="buf-fmt-vold-DataDwSize">
+                <code>uint32 m_DataDwSize</code>
+                <p>The size of CKStateChunk core data.</p>
+            </td>
+            <td id="buf-fmt-vold-ObjectListSize">
+                <code>uint32 m_ObjectListSize</code>
+                <p>The size of object list.</p>
+            </td>
+            <td id="buf-fmt-vold-ChunkListSize">
+                <code>uint32 m_ChunkListSize</code>
+                <p>The size of chunk list</p>
+            </td>
+            <td id="buf-fmt-vold-pData">
+                <code>uint32[] m_pData</code>
+                <p>The core data. Its length is indicated by m_DataDwSize.</p>
+            </td>
+            <td id="buf-fmt-vold-ObjectList">
+                <code>uint32[] m_ObjectList</code>
+                <p>The object list. Its length is indicated by m_ObjectListSize.</p>
+            </td>
+            <td id="buf-fmt-vold-ChunkList">
+                <code>uint32[] m_ChunkList</code>
+                <p>The chunk list. Its length is indicated by m_ChunkListSize.</p>
+            </td>
+        </tr>
+    </table>
+    <h3>Old Format</h3>
+    <table>
+        <tr>
+            <td class="ph" target="buf-fmt-vold-DataVersion"></td>
+            <td class="ph" target="buf-fmt-vold-ChunkVersion"></td>
+            <td class="ph" target="buf-fmt-vold-ClassId"></td>
+            <td class="ph" target="buf-fmt-vold-DataDwSize"></td>
+            <td class="ph" target="buf-fmt-vold-ObjectListSize"></td>
+            <td class="ph" target="buf-fmt-vold-ChunkListSize"></td>
+            <td>
+                <code>uint32 m_ManagerListSize</code>
+                <p>The size of manager list</p>
+            </td>
+            <td class="ph" target="buf-fmt-vold-pData"></td>
+            <td class="ph" target="buf-fmt-vold-ObjectList"></td>
+            <td class="ph" target="buf-fmt-vold-ChunkList"></td>
+            <td>
+                <code>uint32[] m_ManagerList</code>
+                <p>The manager list. Its length is indicated by m_ManagerListSize.</p>
+            </td>
+        </tr>
+    </table>
+    <h3>New Format</h3>
+    <table>
+        <tr>
+            <td>
+                <code>uint8 m_DataVersion</code>
+                <p>The type of m_DataVersion is CK_STATECHUNK_DATAVERSION.</p>
+            </td>
+            <td>
+                <code>uint8 m_ClassId</code>
+                <p>The type of m_ClassId is CK_CLASSID.</p>
+            </td>
+            <td>
+                <code>uint8 m_ChunkVersion</code>
+                <p>The type of m_ChunkVersion is CK_STATECHUNK_CHUNKVERSION.</p>
+            </td>
+            <td>
+                <code>uint8 m_Options</code>
+                <p>The type of m_Options is CK_STATECHUNK_CHUNKOPTIONS.</p>
+            </td>
+            <td>
+                <code>uint32 m_DataDwSize</code>
+                <p>The size of CKStateChunk core data.</p>
+            </td>
+            <td>
+                <code>uint32[] m_pData</code>
+                <p>The core data. Its length is indicated by m_DataDwSize.</p>
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <td><code>uint32 m_ObjectListSize</code></td>
+                        <td><code>uint32[] m_ObjectList</code></td>
+                    </tr>
+                </table>
+                <p>Enabled when m_Options has CHNK_OPTION_IDS. Skip if not have.</p>
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <td><code>uint32 m_ChunkListSize</code></td>
+                        <td><code>uint32[] m_ChunkList</code></td>
+                    </tr>
+                </table>
+                <p>Enabled when m_Options has CHNK_OPTION_CHN. Skip if not have.</p>
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <td><code>uint32 m_ManagerListSize</code></td>
+                        <td><code>uint32[] m_ManagerList</code></td>
+                    </tr>
+                </table>
+                <p>Enabled when m_Options has CHNK_OPTION_MAN. Skip if not have.</p>
+            </td>
+        </tr>
+    </table>
+
+    <h2>Core Data Format</h2>
+    <p>
+        This section introduce the format of CKStateChunk core data, the format of <code>m_pData</code>.<br />
+        The core data is filled by various Identifiers following various data.<br />
+        It is related to the function of CKStateChunk.
+    </p>
+    <table>
+        <tr>
+            <td>
+                <table id="core-data-fmt-item">
+                    <tr>
+                        <td><code>uint32 m_Identifier</code></td>
+                        <td><code>uint32 m_NextIdentifier</code></td>
+                        <td><code>variable[] m_Payload</code></td>
+                    </tr>
+                </table>
+                <p>
+                    A single identifier area.<br />
+                    m_Identifier is the unique magic word of this identifier area for CKStateChunk locating this area.<br />
+                    m_NextIdentifier point to the m_Identifier in next identifier area.<br />
+                    m_Payload is the data of this identifier area and can be read or written by various CKStateChunk read write functions.<br />
+                    The size of each identifier area can be simply computed by the diff of m_NextIdentifier (<code>*m_pData[pos] - pos</code>)
+                </p>
+            </td>
+            <td>
+                <table class="ph" target="core-data-fmt-item"></table>
+            </td>
+            <td>
+                <code>...</code>
+                <p>More identifier area as much as you like.</p>
+            </td>
+            <td>
+                <table class="ph" target="core-data-fmt-item"></table>
+                <p>The last m_NextIdentifier should set to zero to indicate the end of the series of identifier area.</p>
+            </td>
+        </tr>
+    </table>
+
+    <h2>SubChunk Format</h2>
+    <p>According to the value of CK_STATECHUNK_CHUNKVERSION, we split it into 3 different format.</p>
+    <ul>
+        <li>value &lt; CHUNK_VERSION1: Very Old Format</li>
+        <li>value = CHUNK_VERSION1: Old Format</li>
+        <li>value &gt; CHUNK_VERSION1: New Format</li>
+    </ul>
+    <h3>Very Old Format</h3>
+    <table>
+        <tr>
+            <td id="subchk-fmt-vold-SubChunkSize">
+                <code>uint32 m_SubChunkSize</code>
+                <p>The sum of all following variables' size.</p>
+            </td>
+            <td id="subchk-fmt-vold-ClassId">
+                <code>uint32 m_ClassId</code>
+                <p>The CK_CLASSID of sub chunk.</p>
+            </td>
+            <td id="subchk-fmt-vold-DataDwSize">
+                <code>uint32 m_DataDwSize</code>
+                <p>The size of core data in sub chunk.</p>
+            </td>
+            <td>
+                <code><i>uint32 Blank</i></code>
+                <p>A blank. I don't know why</p>
+            </td>
+            <td id="subchk-fmt-vold-pData">
+                <code>uint32[] m_pData</code>
+                <p>The core data. Its length is indicated by m_DataDwSize.</p>
+            </td>
+        </tr>
+    </table>
+    <h3>Old Format</h3>
+    <table>
+        <tr>
+            <td class="ph" target="subchk-fmt-vold-SubChunkSize"></td>
+            <td class="ph" target="subchk-fmt-vold-ClassId"></td>
+            <td id="subchk-fmt-old-DataVersion">
+                <code>uint16 m_DataVersion</code>
+                <p>The CK_STATECHUNK_DATAVERSION of sub chunk.</p>
+            </td>
+            <td id="subchk-fmt-old-ChunkVersion">
+                <code>uint16 m_ChunkVersion</code>
+                <p>The CK_STATECHUNK_CHUNKVERSION of sub chunk.</p>
+            </td>
+            <td class="ph" target="subchk-fmt-vold-DataDwSize"></td>
+            <td id="subchk-fmt-old-ObjectListSize">
+                <code>uint32 m_ObjectListSize</code>
+                <p>The size of sub chunk object list.</p>
+            </td>
+            <td id="subchk-fmt-old-ChunkListSize">
+                <code>uint32 m_ChunkListSize</code>
+                <p>The size of sub chunk chunk list</p>
+            </td>
+            <td class="ph" target="subchk-fmt-vold-pData"></td>
+            <td id="subchk-fmt-old-ObjectList">
+                <code>uint32[] m_ObjectList</code>
+                <p>The object list. Its length is indicated by m_ObjectListSize.</p>
+            </td>
+            <td id="subchk-fmt-old-ChunkList">
+                <code>uint32[] m_ChunkList</code>
+                <p>The chunk list. Its length is indicated by m_ChunkListSize.</p>
+            </td>
+        </tr>
+    </table>
+    <h3>New Format</h3>
+    <table>
+        <tr>
+            <td class="ph" target="subchk-fmt-vold-SubChunkSize"></td>
+            <td class="ph" target="subchk-fmt-vold-ClassId"></td>
+            <td class="ph" target="subchk-fmt-old-DataVersion"></td>
+            <td class="ph" target="subchk-fmt-old-ChunkVersion"></td>
+            <td class="ph" target="subchk-fmt-vold-DataDwSize"></td>
+            <td class="ph" target="subchk-fmt-old-ObjectListSize"></td>
+            <td class="ph" target="subchk-fmt-old-ChunkListSize"></td>
+            <td>
+                <code>uint32 m_ManagerListSize</code>
+                <p>The size of sub chunk manager list</p>
+            </td>
+            <td class="ph" target="subchk-fmt-vold-pData"></td>
+            <td class="ph" target="subchk-fmt-old-ObjectList"></td>
+            <td class="ph" target="subchk-fmt-old-ChunkList"></td>
+            <td>
+                <code>uint32[] m_ManagerList</code>
+                <p>The manager list. Its length is indicated by m_ManagerListSize.</p>
+            </td>
+        </tr>
+    </table>
+
+</body>
