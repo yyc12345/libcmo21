@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <zlib.h>
 
-#include "CKObjectImplements/CKObject.hpp"
+#include "ObjImpls/CKObject.hpp"
 
 namespace LibCmo::CK2 {
 
@@ -191,8 +191,8 @@ namespace LibCmo::CK2 {
 	CKERROR CKStartUp() {
 		// todo: add class type registrations
 		CKClassRegister(CK_CLASSID::CKCID_OBJECT, CK_CLASSID::CKCID_OBJECT,
-			[](CKContext* ctx, CK_ID id, CKSTRING name) -> CKObject* { return new CKObject(ctx, id, name); },
-			[](CKContext* ctx, CKObject* obj) -> void { delete obj; },
+			[](CKContext* ctx, CK_ID id, CKSTRING name) -> ObjImpls::CKObject* { return new ObjImpls::CKObject(ctx, id, name); },
+			[](CKContext* ctx, ObjImpls::CKObject* obj) -> void { delete obj; },
 			[]() -> CKSTRING { return "Basic Object"; });
 
 		/*

@@ -1,5 +1,5 @@
 #include "CKContext.hpp"
-#include "CKObjectImplements/CKObject.hpp"
+#include "ObjImpls/CKObject.hpp"
 #include <cstdarg>
 
 namespace LibCmo::CK2 {
@@ -12,7 +12,7 @@ namespace LibCmo::CK2 {
 
 #pragma region Objects Management
 
-	CKObject* CKContext::CreateCKObject(CK_CLASSID cls, CKSTRING name,
+	ObjImpls::CKObject* CKContext::CreateCKObject(CK_CLASSID cls, CKSTRING name,
 		CK_OBJECTCREATION_OPTIONS options, CK_CREATIONMODE* res) {
 		// todo: Process paramter options and res
 
@@ -33,7 +33,7 @@ namespace LibCmo::CK2 {
 		}
 
 		// create one
-		CKObject* obj = desc->CreationFct(this, decided_id, name);
+		ObjImpls::CKObject* obj = desc->CreationFct(this, decided_id, name);
 
 		// put into slot
 		m_ObjectsList[decided_id] = obj;
@@ -42,7 +42,7 @@ namespace LibCmo::CK2 {
 		return obj;
 	}
 
-	CKObject* CKContext::GetCKObject(CK_ID id) {
+	ObjImpls::CKObject* CKContext::GetCKObject(CK_ID id) {
 		if (id >= m_ObjectsList.size()) return nullptr;
 		return m_ObjectsList[id];
 	}
@@ -52,7 +52,7 @@ namespace LibCmo::CK2 {
 	 * @param[in] ctx The CKContext
 	 * @param[in] obj The CKObject need to be free.
 	*/
-	static void InternalDestroy(CKContext* ctx, CKObject* obj) {
+	static void InternalDestroy(CKContext* ctx, ObjImpls::CKObject* obj) {
 		// find desc by classid
 		// if really we can not find it, we only can delete it directly.
 		const CKClassDesc* desc = CKGetClassDesc(obj->GetClassID());
@@ -68,7 +68,7 @@ namespace LibCmo::CK2 {
 		if (id >= m_ObjectsList.size()) return;
 
 		// get object and free it
-		CKObject* obj = m_ObjectsList[id];
+		ObjImpls::CKObject* obj = m_ObjectsList[id];
 		if (obj == nullptr) return;
 		InternalDestroy(this, obj);
 		
@@ -102,8 +102,6 @@ namespace LibCmo::CK2 {
 				InternalDestroy(this, ptr);
 			}
 		}
-
-		// todo: free all created managers
 
 	}
 

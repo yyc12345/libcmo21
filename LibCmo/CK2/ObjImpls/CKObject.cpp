@@ -1,7 +1,7 @@
 #include "CKObject.hpp"
 #include "../CKStateChunk.hpp"
 
-namespace LibCmo::CK2 {
+namespace LibCmo::CK2::ObjImpls {
 
 
 	void CKObject::PreSave(CKFileVisitor* file, CKDWORD flags) {}

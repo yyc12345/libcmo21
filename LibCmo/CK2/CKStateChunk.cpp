@@ -18,7 +18,7 @@ namespace LibCmo::CK2 {
 	CKStateChunk::CKStateChunk(CKFileVisitor* visitor, CKContext* ctx) :
 		m_ClassId(CK_CLASSID::CKCID_OBJECT), m_DataDwSize(0u), m_pData(nullptr),
 		m_DataVersion(CK_STATECHUNK_DATAVERSION::CHUNKDATA_CURRENTVERSION), m_ChunkVersion(CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4),
-		m_Parser{ CKStateChunkStatus::IDLE, 0u, 0u, 0u },
+		m_Parser { CKStateChunkStatus::IDLE, 0u, 0u, 0u },
 		m_ObjectList(), m_ChunkList(), m_ManagerList(),
 		m_BindFile(visitor), m_BindContext(ctx)
 	{}
@@ -31,11 +31,21 @@ namespace LibCmo::CK2 {
 		m_BindFile(rhs.m_BindFile), m_BindContext(rhs.m_BindContext) {
 		// copy buffer
 		if (rhs.m_pData != nullptr) {
-			this->m_pData = new(std::nothrow) CKDWORD[rhs.m_DataDwSize];
-			if (this->m_pData != nullptr) {
+			this->m_pData = new CKDWORD[rhs.m_DataDwSize];
 				std::memcpy(this->m_pData, rhs.m_pData, sizeof(CKDWORD) * rhs.m_DataDwSize);
-			}
 		}
+	}
+
+	CKStateChunk::CKStateChunk(CKStateChunk&& rhs) :
+		m_ClassId(rhs.m_ClassId), m_DataVersion(rhs.m_DataVersion), m_ChunkVersion(rhs.m_ChunkVersion),
+		m_Parser(rhs.m_Parser),
+		m_ObjectList(std::move(rhs.m_ObjectList)), m_ManagerList(std::move(rhs.m_ManagerList)), m_ChunkList(std::move(rhs.m_ChunkList)),
+		m_pData(rhs.m_pData), m_DataDwSize(rhs.m_DataDwSize),
+		m_BindFile(rhs.m_BindFile), m_BindContext(rhs.m_BindContext) {
+		// set to null after steal data
+		rhs.m_pData = nullptr;
+		// and clear it
+		rhs.Clear();
 	}
 
 	CKStateChunk& CKStateChunk::operator=(const CKStateChunk& rhs) {
@@ -56,15 +66,41 @@ namespace LibCmo::CK2 {
 
 		// copy buffer
 		if (rhs.m_pData != nullptr) {
-			this->m_pData = new(std::nothrow) CKDWORD[rhs.m_DataDwSize];
-			if (this->m_pData != nullptr) {
+			this->m_pData = new CKDWORD[rhs.m_DataDwSize];
 				std::memcpy(this->m_pData, rhs.m_pData, sizeof(CKDWORD) * rhs.m_DataDwSize);
-			}
 		}
 		this->m_DataDwSize = rhs.m_DataDwSize;
 
 		return *this;
 	}
+
+	CKStateChunk& CKStateChunk::operator=(CKStateChunk&& rhs) {
+		this->Clear();
+
+		this->m_DataVersion = rhs.m_DataVersion;
+		this->m_ChunkVersion = rhs.m_ChunkVersion;
+		this->m_ClassId = rhs.m_ClassId;
+
+		this->m_Parser = rhs.m_Parser;
+
+		this->m_ObjectList = rhs.m_ObjectList;
+		this->m_ManagerList = rhs.m_ManagerList;
+		this->m_ChunkList = rhs.m_ChunkList;
+
+		this->m_BindFile = rhs.m_BindFile;
+		this->m_BindContext = rhs.m_BindContext;
+
+		// steal buffer
+		this->m_pData = rhs.m_pData;
+		rhs.m_pData = nullptr;
+		this->m_DataDwSize = rhs.m_DataDwSize;
+
+		// clear steal chunk
+		rhs.Clear();
+
+		return *this;
+	}
+
 	CKStateChunk::~CKStateChunk() {
 		if (this->m_pData != nullptr)
 			delete[] this->m_pData;
@@ -79,6 +115,7 @@ namespace LibCmo::CK2 {
 		this->m_DataVersion = CK_STATECHUNK_DATAVERSION::CHUNK_DEV_2_1;
 		this->m_ChunkVersion = CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4;
 
+		this->m_Parser.m_Status = CKStateChunkStatus::IDLE;
 		this->m_Parser.m_CurrentPos = 0;
 		this->m_Parser.m_DataSize = 0;
 		this->m_Parser.m_PrevIdentifierPos = 0;
@@ -148,8 +185,7 @@ namespace LibCmo::CK2 {
 			}
 		} else {
 			// otherwise, we create a new buffer instead it
-			CKDWORD* newbuf = new(std::nothrow) CKDWORD[new_dwsize];
-			if (newbuf == nullptr) return false;	// if fail to create, return
+			CKDWORD* newbuf = new CKDWORD[new_dwsize];
 
 			// if no original data, we do not need copy it and free it
 			if (this->m_pData != nullptr) {
@@ -221,9 +257,7 @@ namespace LibCmo::CK2 {
 			bufpos = 6u;
 
 			if (this->m_DataDwSize != 0) {
-				this->m_pData = new(std::nothrow) CKDWORD[this->m_DataDwSize];
-				if (m_pData == nullptr) return false;
-
+				this->m_pData = new CKDWORD[this->m_DataDwSize];
 				std::memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
 				bufpos += this->m_DataDwSize;
 			}
@@ -248,9 +282,7 @@ namespace LibCmo::CK2 {
 			bufpos = 7u;
 
 			if (this->m_DataDwSize != 0) {
-				this->m_pData = new(std::nothrow) CKDWORD[this->m_DataDwSize];
-				if (m_pData == nullptr) return false;
-
+				this->m_pData = new CKDWORD[this->m_DataDwSize];
 				std::memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
 				bufpos += this->m_DataDwSize;
 			}
@@ -285,9 +317,7 @@ namespace LibCmo::CK2 {
 			bufpos = 2u;
 
 			if (this->m_DataDwSize != 0) {
-				this->m_pData = new(std::nothrow) CKDWORD[this->m_DataDwSize];
-				if (m_pData == nullptr) return false;
-
+				this->m_pData = new CKDWORD[this->m_DataDwSize];
 				std::memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
 				bufpos += this->m_DataDwSize;
 			}
@@ -335,8 +365,7 @@ namespace LibCmo::CK2 {
 	//	// dwSize store the length of compressed buffer as CHAR size, not DWORD size!
 
 	//	// create a enough buffer
-	//	char* buffer = new(std::nothrow) char[DestSize];
-	//	if (buffer == nullptr) return false;
+	//	char* buffer = new char[DestSize];
 	//	uLongf destSize = DestSize;
 	//	// uncompress it
 	//	auto err = uncompress(
@@ -350,10 +379,8 @@ namespace LibCmo::CK2 {
 
 	//		delete[] this->m_pData;
 	//		this->m_pData = nullptr;
-	//		this->m_pData = new(std::nothrow) CKDWORD[this->m_DataDwSize];
-	//		if (this->m_pData != nullptr) {
+	//		this->m_pData = new CKDWORD[this->m_DataDwSize];
 	//			std::memcpy(this->m_pData, buffer, this->m_DataDwSize * sizeof(CKDWORD));
-	//		}
 	//	}
 	//	delete[] buffer;
 	//	return true;
@@ -509,8 +536,7 @@ namespace LibCmo::CK2 {
 		if (!this->EnsureReadSpace(subChunkSize)) goto subchunk_defer;
 
 		// create statechunk
-		subchunk = new(std::nothrow) CKStateChunk(this->m_BindFile, this->m_BindContext);
-		if (subchunk == nullptr) goto subchunk_defer;
+		subchunk = new CKStateChunk(this->m_BindFile, this->m_BindContext);
 
 		// start read data
 		// read class id
@@ -528,8 +554,7 @@ namespace LibCmo::CK2 {
 
 			// read data size and create it
 			if (!this->ReadStruct(subchunk->m_DataDwSize)) goto subchunk_defer;
-			subchunk->m_pData = new(std::nothrow) CKDWORD[subchunk->m_DataDwSize];
-			if (subchunk->m_pData == nullptr) goto subchunk_defer;
+			subchunk->m_pData = new CKDWORD[subchunk->m_DataDwSize];
 
 			// has bind file?
 			CKDWORD hasBindFile;
@@ -578,8 +603,7 @@ namespace LibCmo::CK2 {
 
 			// read data size and create it
 			if (!this->ReadStruct(subchunk->m_DataDwSize)) goto subchunk_defer;
-			subchunk->m_pData = new(std::nothrow) CKDWORD[subchunk->m_DataDwSize];
-			if (subchunk->m_pData == nullptr) goto subchunk_defer;
+			subchunk->m_pData = new CKDWORD[subchunk->m_DataDwSize];
 
 			// skip one?
 			// I don't know why
@@ -616,11 +640,7 @@ namespace LibCmo::CK2 {
 		*len_in_byte = bufByteSize;
 
 		// create buffer
-		*buf = new(std::nothrow) char[bufByteSize];
-		if (*buf == nullptr) {
-			*len_in_byte = 0;
-			return false;
-		}
+		*buf = new char[bufByteSize];
 
 		// read data
 		if (!this->ReadByteData(*buf, bufByteSize)) {
@@ -718,7 +738,7 @@ namespace LibCmo::CK2 {
 		CKDWORD count;
 		if (!this->ReadStruct(count)) return false;
 		if (!count) return true;	// 0 size array
-		
+
 		// old file size correction
 		if (this->m_ChunkVersion < CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1) {
 			// skip 4. but I don't know why!!!

@@ -3,7 +3,7 @@
 #include "../../VTUtils.hpp"
 #include "../CKContext.hpp"
 
-namespace LibCmo::CK2 {
+namespace LibCmo::CK2::ObjImpls {
 
 	class CKObject {
 	public:

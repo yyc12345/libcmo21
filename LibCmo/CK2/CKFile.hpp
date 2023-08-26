@@ -104,7 +104,7 @@ namespace LibCmo::CK2 {
 		CK_ID ObjectId; /**< ID of the object being load/saved (as it will be/was saved in the file) */
 		CK_ID CreatedObjectId; /**< ID of the object being created */
 		CK_CLASSID ObjectCid; /**< Class Identifier of the object */
-		CKObject* ObjPtr; /**< A pointer to the object itself (as CreatedObject when loading) */
+		ObjImpls::CKObject* ObjPtr; /**< A pointer to the object itself (as CreatedObject when loading) */
 		TypeHelper::MKString Name; /**< Name of the Object */
 		CKStateChunk* Data; /**< A CKStateChunk that contains object information */
 		//CKINT PostPackSize; /**< When compressed chunk by chunk : size of Data after compression */
@@ -197,7 +197,7 @@ namespace LibCmo::CK2 {
 		LIBCMO_DISABLE_COPY_MOVE(CKFileWriter);
 
 		// ========== Saving Preparing ==========
-		CKBOOL AddSavedObject(CKObject* obj, CKDWORD flags = CK_STATESAVE_ALL);
+		CKBOOL AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags = CK_STATESAVE_ALL);
 		CKBOOL AddSavedObjects(CKObjectArray* objarray, CKDWORD flags = CK_STATESAVE_ALL);
 		CKBOOL AddSavedFile(CKSTRING u8FileName);
 

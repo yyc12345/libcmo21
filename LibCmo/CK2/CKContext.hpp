@@ -37,10 +37,10 @@ namespace LibCmo::CK2 {
 		 * @remark CKObjects must be destroy with the DestroyObject method.
 		 * @see CKObject, DestroyObject
 		*/
-		CKObject* CreateCKObject(CK_CLASSID cls, CKSTRING name, 
+		ObjImpls::CKObject* CreateCKObject(CK_CLASSID cls, CKSTRING name,
 			CK_OBJECTCREATION_OPTIONS options = CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_NONAMECHECK, 
 			CK_CREATIONMODE* res = nullptr);
-		CKObject* GetCKObject(CK_ID id);
+		ObjImpls::CKObject* GetCKObject(CK_ID id);
 		void DestroyCKObject(CK_ID id);
 
 		// ========== Object Access ==========
@@ -77,7 +77,7 @@ namespace LibCmo::CK2 {
 	protected:
 		// ========== Objects Management ==========
 
-		XContainer::XArray<CKObject*> m_ObjectsList;
+		XContainer::XArray<ObjImpls::CKObject*> m_ObjectsList;
 		std::deque<CK_ID> m_ReturnedObjectIds;
 
 		// ========== Encoding utilities ==========

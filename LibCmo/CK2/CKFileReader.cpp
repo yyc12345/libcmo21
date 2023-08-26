@@ -1,6 +1,6 @@
 #include "CKFile.hpp"
 #include "CKStateChunk.hpp"
-#include "CKObjectImplements/CKObject.hpp"
+#include "ObjImpls/CKObject.hpp"
 #include "../VxMath/VxMemoryMappedFile.hpp"
 #include "CKContext.hpp"
 #include <memory>
@@ -190,8 +190,7 @@ namespace LibCmo::CK2 {
 	}
 
 	CKERROR CKFileReader::ReadFileData(CKBufferParser* ParserPtr) {
-		std::unique_ptr<CKBufferParser> parser(new(std::nothrow) CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
-		if (parser == nullptr) return CKERROR::CKERR_OUTOFMEMORY;
+		std::unique_ptr<CKBufferParser> parser(new CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
 		parser->SetCursor(ParserPtr->GetCursor());
 
 		std::string name_conv;
@@ -290,7 +289,7 @@ namespace LibCmo::CK2 {
 		// ========== included file get ==========
 		// before reading, we need switch back to original parser.
 		// and skip data chunk size
-		parser = std::unique_ptr<CKBufferParser>(new(std::nothrow) CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
+		parser = std::unique_ptr<CKBufferParser>(new CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
 		parser->MoveCursor(this->m_FileInfo.DataPackSize);
 
 		// then we can read it.

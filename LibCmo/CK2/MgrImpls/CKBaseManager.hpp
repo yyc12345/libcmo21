@@ -2,7 +2,7 @@
 
 #include "../../VTAll.hpp"
 
-namespace LibCmo::CK2 {
+namespace LibCmo::CK2::MgrImpls {
 
 	/**
 	@brief Base Class for managers.

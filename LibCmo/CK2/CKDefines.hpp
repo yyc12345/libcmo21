@@ -22,8 +22,8 @@ namespace LibCmo::CK2 {
 	// ========== Class registration utilities ==========
 
 	//using CKClassRegisterFct = std::function<void()>;
-	using CKClassCreationFct = std::function<CKObject* (CKContext*, CK_ID, CKSTRING)>;
-	using CKClassReleaseFct = std::function<void(CKContext*, CKObject*)>;
+	using CKClassCreationFct = std::function<ObjImpls::CKObject* (CKContext*, CK_ID, CKSTRING)>;
+	using CKClassReleaseFct = std::function<void(CKContext*, ObjImpls::CKObject*)>;
 	using CKClassNameFct = std::function<CKSTRING()>;
 	//using CKClassDependenciesFct = std::function<CKSTRING(CKINT, CKINT)>;
 	//using CKClassDependenciesCountFct = std::function<CKINT(CKINT)>;
@@ -63,10 +63,7 @@ namespace LibCmo::CK2 {
 			DerivationLevel(0),
 			Parents(), Children()
 		{}
-		CKClassDesc(const CKClassDesc& rhs) = default;
-		CKClassDesc(CKClassDesc&& rhs) = default;
-		CKClassDesc& operator=(const CKClassDesc& rhs) = default;
-		CKClassDesc& operator=(CKClassDesc& rhs) = default;
+		LIBCMO_DEFAULT_COPY_MOVE(CKClassDesc);
 	};
 
 }

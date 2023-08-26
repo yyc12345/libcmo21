@@ -156,9 +156,7 @@ namespace LibCmo::EncodingHelper {
 #if defined(LIBCMO_OS_WIN32)
 
 	ENCODING_TOKEN CreateEncodingToken(const std::string& token_string) {
-		ENCODING_TOKEN token = new(std::nothrow) UINT();
-		if (token == nullptr) return ENCODING_TOKEN_DEFAULT;
-
+		ENCODING_TOKEN token = new UINT();
 		if (!GetWindowsCodePage(token_string.c_str(), token)) {
 			*token = CP_ACP;
 		}
@@ -209,9 +207,7 @@ namespace LibCmo::EncodingHelper {
 	static constexpr const char UTF8_SYMBOL[] = "UTF-8";
 
 	ENCODING_TOKEN CreateEncodingToken(const std::string& token_string) {
-		ENCODING_TOKEN token = new(std::nothrow) IconvPair();
-		if (token == nullptr) return ENCODING_TOKEN_DEFAULT;
-
+		ENCODING_TOKEN token = new IconvPair();
 		if (!CreateIconvDescriptor(UTF8_SYMBOL, token_string.c_str(), token->FromUtf8) ||
 			!CreateIconvDescriptor(token_string.c_str(), UTF8_SYMBOL, token->ToUtf8)) {
 			delete token;

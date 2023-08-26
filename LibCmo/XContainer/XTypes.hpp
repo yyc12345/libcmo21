@@ -55,7 +55,7 @@ namespace LibCmo::XContainer {
 	@todo May independ this class to implement the functions introduced in remarks.
 	@see XObjectArray, CKObjectArray
 	*/
-	using XObjectPointerArray = XArray<CK2::CKObject*>;
+	using XObjectPointerArray = XArray<CK2::ObjImpls::CKObject*>;
 
 	/**
 	@brief Class representation of an Hash Table container.

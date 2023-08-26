@@ -11,7 +11,7 @@ namespace LibCmo::CK2 {
 		CKStateChunk(const CKStateChunk&);
 		CKStateChunk(CKStateChunk&&);
 		CKStateChunk& operator=(const CKStateChunk&);
-		CKStateChunk& operator-(const CKStateChunk&&);
+		CKStateChunk& operator=(CKStateChunk&&);
 		~CKStateChunk();
 
 	private:
@@ -19,6 +19,12 @@ namespace LibCmo::CK2 {
 			IDLE,
 			READ,
 			WRITE
+		};
+		struct ChunkParser {
+			CKStateChunkStatus m_Status;
+			CKDWORD m_CurrentPos;
+			CKDWORD m_DataSize;
+			CKDWORD m_PrevIdentifierPos;
 		};
 
 		CK_CLASSID m_ClassId;
@@ -28,12 +34,7 @@ namespace LibCmo::CK2 {
 		CK_STATECHUNK_DATAVERSION m_DataVersion;
 		CK_STATECHUNK_CHUNKVERSION m_ChunkVersion;
 
-		struct {
-			CKStateChunkStatus m_Status;
-			CKDWORD m_CurrentPos;
-			CKDWORD m_DataSize;
-			CKDWORD m_PrevIdentifierPos;
-		}m_Parser;
+		ChunkParser m_Parser;
 
 		std::vector<CKDWORD> m_ObjectList;
 		std::vector<CKDWORD> m_ChunkList;

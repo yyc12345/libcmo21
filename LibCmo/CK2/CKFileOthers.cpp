@@ -149,7 +149,7 @@ namespace LibCmo::CK2 {
 
 	CKFileWriter::~CKFileWriter() {}
 
-	CKBOOL CKFileWriter::AddSavedObject(CKObject* obj, CKDWORD flags) {
+	CKBOOL CKFileWriter::AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags) {
 		return CKFALSE;
 	}
 

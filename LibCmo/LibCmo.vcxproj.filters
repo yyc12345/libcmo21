@@ -31,16 +31,16 @@
     <Filter Include="Sources\XContainer">
       <UniqueIdentifier>{3dee80b5-d27a-4071-9194-3c817ba38c4c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\CK2\CKManagerImplements">
+    <Filter Include="Headers\CK2\MgrImpls">
       <UniqueIdentifier>{bc2c80b7-8622-41f4-9bef-480a71430eb8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headers\CK2\CKObjectImplements">
+    <Filter Include="Headers\CK2\ObjImpls">
       <UniqueIdentifier>{9bec41df-78db-4753-ab80-86345545227d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\CK2\CKManagerImplements">
+    <Filter Include="Sources\CK2\MgrImpls">
       <UniqueIdentifier>{784282d9-4adb-40ca-bbac-902c74e9a2e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\CK2\CKObjectImplements">
+    <Filter Include="Sources\CK2\ObjImpls">
       <UniqueIdentifier>{a8cd2188-b552-478c-9801-a6286b3d48a0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -48,14 +48,14 @@
     <ClCompile Include="VTEncoding.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="CK2\CKObjectImplements\CKObject.cpp">
-      <Filter>Sources\CK2\CKObjectImplements</Filter>
+    <ClCompile Include="CK2\ObjImpls\CKObject.cpp">
+      <Filter>Sources\CK2\ObjImpls</Filter>
     </ClCompile>
     <ClCompile Include="VTUtils.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="CK2\CKManagerImplements\CKBaseManager.cpp">
-      <Filter>Sources\CK2\CKManagerImplements</Filter>
+    <ClCompile Include="CK2\MgrImpls\CKBaseManager.cpp">
+      <Filter>Sources\CK2\MgrImpls</Filter>
     </ClCompile>
     <ClCompile Include="VxMath\VxMemoryMappedFile.cpp">
       <Filter>Sources\VxMath</Filter>
@@ -122,11 +122,11 @@
     <ClInclude Include="VTAll.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="CK2\CKManagerImplements\CKBaseManager.hpp">
-      <Filter>Headers\CK2\CKObjectImplements</Filter>
+    <ClInclude Include="CK2\MgrImpls\CKBaseManager.hpp">
+      <Filter>Headers\CK2\ObjImpls</Filter>
     </ClInclude>
-    <ClInclude Include="CK2\CKObjectImplements\CKObject.hpp">
-      <Filter>Headers\CK2\CKManagerImplements</Filter>
+    <ClInclude Include="CK2\ObjImpls\CKObject.hpp">
+      <Filter>Headers\CK2\MgrImpls</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
