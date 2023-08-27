@@ -232,13 +232,13 @@ namespace Unvirt::CmdHelper {
 
 		// add into list
 		switch (node->GetNodeType()) {
-			case NodeType::Argument:
+			case NodeType::Literal:
 				m_Literals.emplace_back(node);
 				break;
 			case NodeType::Choice:
 				m_Choices.emplace_back(node);
 				break;
-			case NodeType::Literal:
+			case NodeType::Argument:
 				m_Args.emplace_back(node);
 				break;
 			default:

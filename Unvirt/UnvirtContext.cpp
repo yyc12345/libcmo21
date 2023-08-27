@@ -106,7 +106,7 @@ namespace Unvirt::Context {
 				)
 			)
 		)
-		->Then((new CmdHelper::Literal("temp"))
+		->Then((new CmdHelper::Literal("exit"))
 			->Executes(
 				std::bind(&UnvirtContext::ProcExit, this, std::placeholders::_1),
 				"Exit program."
