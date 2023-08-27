@@ -1,32 +1,4 @@
-#include "AccessibleValue.hpp"
-#include "TerminalHelper.hpp"
-#include "StructFormatter.hpp"
-#include "CmdHelper.hpp"
-
-#include <VTAll.hpp>
-#include <CK2/CKContext.hpp>
-#include <CK2/CKFile.hpp>
-
-#include <cstdio>
-#include <iostream>
-
-namespace Unvirt {
-
-	class UnvirtContext {
-	public:
-		UnvirtContext() {}
-		~UnvirtContext() {}
-
-		void Run() {
-			Unvirt::TerminalHelper::EnsureTerminalColor();
-			Unvirt::TerminalHelper::EnsureTerminalEncoding();
-
-		}
-	private:
-
-	};
-
-}
+#include "UnvirtContext.hpp"
 
 int main(int argc, char* argv[]) {
 

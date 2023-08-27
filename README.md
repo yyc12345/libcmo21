@@ -4,7 +4,7 @@ The Library for CMO File Read/Write. Also the Minimalist Virtools Environment.
 
 ## Status
 
-This is a long time project and I am stucked at the analyze of CKBeObject. I don't know its class layout, And I don't know its complex `CKBeObject::Save()`.  
+This is a long time project.  
 This project welcome everyone's contribution, except the employee of Dassault, which created Virtools.  
 
 ## Introduction
@@ -35,9 +35,8 @@ There are 3 lists which indicate our accept guideline.
 
 These features will be accepted as soon as possible.
 
-* The save steps of Virtools file.
 * The bug fix of Virtools file reader.
-* Class layout, `Save()` and `Load()` functions of following `CKObject` based classes.
+* Class layout, `Load()` functions of following `CKObject` based classes.
   - `CKBeObject`
   - `CKGroup`
   - `CKMaterial`
@@ -46,7 +45,7 @@ These features will be accepted as soon as possible.
   - `CKRenderObject`
   - `CK3dEntity`
   - `CK3dObject`
-* Class layout, `SaveData()` and `LoadData()` functions of following `CKBaseManager` based classes.
+* Class layout, and `LoadData()` functions of following `CKBaseManager` based classes.
   - `CKAttributeManager`
   - `CKBehaviorManager`
 
@@ -55,6 +54,8 @@ These features will be accepted as soon as possible.
 These features are in plan, but not urge to merge.
 
 * The `CK_ID` remap system of Reader & Writer.
+* Any Save functions.
+* The save steps of Virtools file.
 * Other CK classes implementations.
 * Non-Virtools 2.1 implementations.
 
@@ -74,4 +75,5 @@ This project require:
 * zlib
 * iconv (non-Windows system required)
 
-It can be compiled on Windows via sln file, or on Linux platform via CMake file.
+It can be compiled on Windows via sln file, or on Linux platform via CMake file.  
+However CMake may not be updated in time because I develop this project on Windows frequently.

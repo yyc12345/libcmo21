@@ -181,6 +181,7 @@
     <ClCompile Include="TerminalHelper.cpp" />
     <ClCompile Include="StringHelper.cpp" />
     <ClCompile Include="Unvirt.cpp" />
+    <ClCompile Include="UnvirtContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AccessibleValue.hpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="StructFormatter.hpp" />
     <ClInclude Include="TerminalHelper.hpp" />
     <ClInclude Include="StringHelper.hpp" />
+    <ClInclude Include="UnvirtContext.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
