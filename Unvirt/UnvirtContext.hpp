@@ -27,16 +27,16 @@ namespace Unvirt::Context {
 		};
 		void PrintCommonError(const char* u8_fmt, ...);
 
-		void ProcLoad(bool is_deep, const CmdHelper::ArgumentsMap& amap);
-		void ProcUnLoad(const CmdHelper::ArgumentsMap& amap);
-		void ProcInfo(const CmdHelper::ArgumentsMap& amap);
-		void ProcLs(ViewPart parts, const CmdHelper::ArgumentsMap& amap);
-		void ProcData(ViewPart parts, const CmdHelper::ArgumentsMap& amap);
-		void ProcChunk(ViewPart parts, const CmdHelper::ArgumentsMap& amap);
-		void ProcItems(const CmdHelper::ArgumentsMap& amap);
-		void ProcEncoding(const CmdHelper::ArgumentsMap& amap);
-		void ProcTemp(const CmdHelper::ArgumentsMap& amap);
-		void ProcExit(const CmdHelper::ArgumentsMap& amap);
+		void ProcLoad(const CmdHelper::ArgumentsMap* amap);
+		void ProcUnLoad(const CmdHelper::ArgumentsMap* amap);
+		void ProcInfo(const CmdHelper::ArgumentsMap* amap);
+		void ProcLs(const CmdHelper::ArgumentsMap* amap);
+		void ProcData(const CmdHelper::ArgumentsMap* amap);
+		void ProcChunk(const CmdHelper::ArgumentsMap* amap);
+		void ProcItems(const CmdHelper::ArgumentsMap* amap);
+		void ProcEncoding(const CmdHelper::ArgumentsMap* amap);
+		void ProcTemp(const CmdHelper::ArgumentsMap* amap);
+		void ProcExit(const CmdHelper::ArgumentsMap* amap);
 
 	protected:
 		bool HasOpenedFile();

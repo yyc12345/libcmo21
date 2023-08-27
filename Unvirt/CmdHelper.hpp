@@ -45,19 +45,12 @@ namespace Unvirt::CmdHelper {
 
 	class HelpDocument {
 	public:
-		HelpDocument() : m_Stack(), m_Results() {}
-		~HelpDocument() {}
+		HelpDocument();
+		~HelpDocument();
 		LIBCMO_DISABLE_COPY_MOVE(HelpDocument);
 
-		void PushLiteral(const std::string& literal_name) {
-			m_Stack.emplace_back(StackItem(literal_name, ""));
-		}
-		void PushArgument(const std::string& arg_name, const std::string& arg_desc) {
-			m_Stack.emplace_back(StackItem(arg_name, arg_desc));
-		}
-		void Pop() {
-			m_Stack.pop_back();
-		}
+		void Push(const std::string& arg_name, const std::string& arg_desc);
+		void Pop();
 		void Terminate(std::string& command_desc);
 		void Print();
 
@@ -80,210 +73,127 @@ namespace Unvirt::CmdHelper {
 		std::vector<ResultItem> m_Results;
 	};
 
-	class AbstractArgument;
-	class ArgumentsMap {
-	public:
-		ArgumentsMap() : m_Data() {}
-		~ArgumentsMap() {}
-		LIBCMO_DISABLE_COPY_MOVE(ArgumentsMap);
-
-		void Add(const std::string& k, AbstractArgument* v) {
-			m_Data.emplace(std::make_pair(k, v));
-		}
-		void Remove(const std::string& k) {
-			m_Data.erase(k);
-		}
-		AbstractArgument* Get(const char* k) const {
-			auto finder = m_Data.find(k);
-			if (finder == m_Data.end()) throw std::invalid_argument("No such argument name.");
-			return finder->second;
-		}
-
-	protected:
-		std::unordered_map<std::string, AbstractArgument*> m_Data;
+	enum class NodeType {
+		Literal, Choice, Argument
 	};
-
-	class CommandRoot;
-	using ExecutionFct = std::function<void(const ArgumentsMap&)>;
+	class ArgumentsMap;
+	using ExecutionFct = std::function<void(const ArgumentsMap*)>;
 	class AbstractNode {
-		friend class CommandRoot;
 	public:
-		AbstractNode() : m_Execution(nullptr), m_Nodes(), m_Comment() {}
-		virtual ~AbstractNode() {
-			for (auto& ptr : m_Nodes) {
-				delete ptr;
-			}
-		}
+		AbstractNode();
+		virtual ~AbstractNode();
 		LIBCMO_DISABLE_COPY_MOVE(AbstractNode);
 
 		AbstractNode* Then(AbstractNode*);
-		AbstractNode* Executes(ExecutionFct, const char*);
+		AbstractNode* Executes(ExecutionFct, const char* = nullptr);
+		AbstractNode* Comment(const char*);
 
-	protected:
-		void Help(HelpDocument&);
-		bool Consume(std::deque<std::string>&, ArgumentsMap&);
-		virtual bool IsLiteral() = 0;
+	public:
+		void Help(HelpDocument*);
+		bool Consume(std::deque<std::string>&, ArgumentsMap*);
+		virtual NodeType GetNodeType() = 0;
 		virtual bool IsConflictWith(AbstractNode*) = 0;
-		virtual void BeginHelp(HelpDocument&) = 0;
-		virtual void EndHelp(HelpDocument&) = 0;
-		virtual bool BeginAccept(const std::string&, ArgumentsMap&) = 0;
-		virtual void EndAccept(ArgumentsMap&) = 0;
+	protected:
+		virtual std::string GetHelpSymbol() = 0;
+		virtual bool BeginAccept(const std::string&, ArgumentsMap*) = 0;
+		virtual void EndAccept(ArgumentsMap*) = 0;
 
-		std::vector<AbstractNode*> m_Nodes;
+		std::vector<AbstractNode*> m_Literals;
+		std::vector<AbstractNode*> m_Choices;
+		std::vector<AbstractNode*> m_Args;
 		ExecutionFct m_Execution;
+		std::string m_ExecutionDesc;
 		std::string m_Comment;
 	};
 
 	class CommandRoot : public AbstractNode {
 	public:
-		CommandRoot() : AbstractNode() {}
-		virtual ~CommandRoot() {}
+		CommandRoot();
+		virtual ~CommandRoot();
 		LIBCMO_DISABLE_COPY_MOVE(CommandRoot);
 
 		// Root use special consume and help functions.
 		bool RootConsume(std::deque<std::string>&);
 		HelpDocument* RootHelp();
 
-	protected:
-		virtual bool IsLiteral() override { throw std::logic_error("Root can not be called."); }
+	public:
+		virtual NodeType GetNodeType() override { throw std::logic_error("Root can not be called."); }
 		virtual bool IsConflictWith(AbstractNode*) override { throw std::logic_error("Root can not be called."); }
-		virtual void BeginHelp(HelpDocument&)  override { throw std::logic_error("Root can not be called."); }
-		virtual void EndHelp(HelpDocument&) override { throw std::logic_error("Root can not be called."); }
-		virtual bool BeginAccept(const std::string&, ArgumentsMap&) override { throw std::logic_error("Root can not be called."); }
-		virtual void EndAccept(ArgumentsMap&) override { throw std::logic_error("Root can not be called."); }
+	protected:
+		virtual std::string GetHelpSymbol()  override { throw std::logic_error("Root can not be called."); }
+		virtual bool BeginAccept(const std::string&, ArgumentsMap*) override { throw std::logic_error("Root can not be called."); }
+		virtual void EndAccept(ArgumentsMap*) override { throw std::logic_error("Root can not be called."); }
 	};
 
 	class Literal : public AbstractNode {
 		friend class Choice;
+		friend class AbstractArgument;
 	public:
-		Literal(const char* words) : AbstractNode(), m_Literal(words) {
-			if (m_Literal.empty() || words == nullptr) throw std::invalid_argument("Invalid literal.");
-		}
-		virtual ~Literal() {}
+		Literal(const char* words);
+		virtual ~Literal();
 		LIBCMO_DISABLE_COPY_MOVE(Literal);
 
+	public:
+		virtual NodeType GetNodeType() override;
+		virtual bool IsConflictWith(AbstractNode* node) override;
 	protected:
-		virtual bool IsLiteral() override { return true; }
-		virtual bool IsConflictWith(AbstractNode* node) override {
-			Literal* pliteral = dynamic_cast<Literal*>(node);
-			if (pliteral == nullptr) return false;
-			return pliteral->m_Literal == this->m_Literal;
-		}
-		virtual void BeginHelp(HelpDocument& doc) override {
-			doc.PushLiteral(m_Literal);
-		}
-		virtual void EndHelp(HelpDocument& doc) override {
-			doc.Pop();
-		}
-		virtual bool BeginAccept(const std::string& strl, ArgumentsMap&) override { return strl == m_Literal; }
-		virtual void EndAccept(ArgumentsMap&) override {}
+		virtual std::string GetHelpSymbol() override;
+		virtual bool BeginAccept(const std::string&, ArgumentsMap*) override;
+		virtual void EndAccept(ArgumentsMap*) override;
 
 		std::string m_Literal;
 	};
 
 	class Choice : public AbstractNode {
+		friend class Literal;
+		friend class AbstractArgument;
 	public:
-		Choice(const char* argname, const std::initializer_list<std::string>& vocabulary) :
-			AbstractNode(), m_ChoiceName(argname == nullptr ? "" : argname), m_Vocabulary(vocabulary) {
-			if (m_ChoiceName.empty() || argname == nullptr) throw std::invalid_argument("Invalid choice name.");
-			if (m_Vocabulary.size() < 2) throw std::invalid_argument("Too less vocabulary. At least 2 items.");
-		}
-		virtual ~Choice() {}
-		LIBCMO_DISABLE_COPY_MOVE(Choice)
+		using vType = int32_t;
+		Choice(const char* argname, const std::initializer_list<std::string>& vocabulary);
+		virtual ~Choice();
+		LIBCMO_DISABLE_COPY_MOVE(Choice);
 
+		size_t* GetIndex();
+
+	public:
+		virtual NodeType GetNodeType() override;
+		virtual bool IsConflictWith(AbstractNode* node) override;
 	protected:
-		virtual bool IsLiteral() override { return true; }
-		virtual bool IsConflictWith(AbstractNode* node) override {
-			Literal* pliteral = dynamic_cast<Literal*>(node);
-			if (pliteral != nullptr) {
-				for (const auto& word : m_Vocabulary) {
-					if (word == pliteral->m_Literal)
-						return true;
-				}
-				return false;
-			}
-
-			Choice* pchoice = dynamic_cast<Choice*>(node);
-			if (pchoice != nullptr) {
-				for (const auto& thisword : m_Vocabulary) {
-					for (const auto& thatword : pchoice->m_Vocabulary) {
-						if (thisword == thatword)
-							return true;
-					}
-				}
-				return false;
-			}
-
-			return false;
-		}
-		virtual void BeginHelp(HelpDocument& doc) override {
-			std::string switches;
-			for (const auto& item : m_Vocabulary) {
-				if (!switches.empty()) switches += " | ";
-				switches += item;
-			}
-			doc.PushLiteral("[" + switches + "]");
-		}
-		virtual void EndHelp(HelpDocument& doc) override {
-			doc.Pop();
-		}
-		virtual bool BeginAccept(const std::string& strl, ArgumentsMap& amap) override { 
-			for (const auto& item : m_Vocabulary) {
-				if (strl == item) {
-
-				}
-			}
-		}
-		virtual void EndAccept(ArgumentsMap&) override {}
+		virtual std::string GetHelpSymbol() override;
+		virtual bool BeginAccept(const std::string&, ArgumentsMap*) override;
+		virtual void EndAccept(ArgumentsMap*) override;
 
 		std::string m_ChoiceName;
 		std::vector<std::string> m_Vocabulary;
+		bool m_Accepted;
+		size_t m_GottenIndex;
 	};
 
 	class AbstractArgument : public AbstractNode {
+		friend class Literal;
+		friend class Choice;
 	public:
-		AbstractArgument(const char* argname, const char* argdesc) : AbstractNode(), 
-			m_ArgName(argname == nullptr ? "" : argname), m_ArgDesc(argdesc), m_Accepted(false), m_ParsedData(nullptr) {
-			if (m_ArgName.empty() || argname == nullptr) throw std::invalid_argument("Invalid argument name.");
-		}
-		virtual ~AbstractArgument() {}
+		AbstractArgument(const char* argname);
+		virtual ~AbstractArgument();
 		LIBCMO_DISABLE_COPY_MOVE(AbstractArgument);
 
 		template<class T>
-		T* GetData() { return reinterpret_cast<T*>(m_ParsedData); }
+		T GetData() { 
+			return reinterpret_cast<T>(m_ParsedData); 
+		}
 
+	public:
+		virtual NodeType GetNodeType() override;
+		virtual bool IsConflictWith(AbstractNode* node) override;
 	protected:
+		virtual std::string GetHelpSymbol() override;
+		virtual bool BeginAccept(const std::string&, ArgumentsMap*) override;
+		virtual void EndAccept(ArgumentsMap*) override;
+
 		virtual bool BeginParse(const std::string&) = 0;
 		virtual void EndParse() = 0;
 
-		virtual bool IsLiteral() override { return false; }
-		virtual bool IsConflictWith(AbstractNode* node) override {
-			return false;
-		}
-		virtual void BeginHelp(HelpDocument& doc) override {
-			std::string newargname = "<";
-			newargname.append(m_ArgName);
-			newargname.append(">");
-			doc.PushArgument(newargname, m_ArgDesc);
-		}
-		virtual void EndHelp(HelpDocument& doc) override {
-			doc.Pop();
-		}
-		virtual bool BeginAccept(const std::string& strl, ArgumentsMap& amap) override {
-			m_Accepted = BeginParse(strl);
-			if (m_Accepted) amap.Add(m_ArgName, this);
-			return m_Accepted;
-		}
-		virtual void EndAccept(ArgumentsMap& amap) override {
-			if (m_Accepted) {
-				amap.Remove(m_ArgName);
-				EndParse();
-				m_Accepted = false;
-			}
-		}
-
 		std::string m_ArgName;
-		std::string m_ArgDesc;
 		bool m_Accepted;
 		void* m_ParsedData;
 	};
@@ -294,8 +204,9 @@ namespace Unvirt::CmdHelper {
 	using IntLimit = std::function<bool(int32_t)>;
 	class IntArgument : public AbstractArgument {
 	public:
-		IntArgument(const char* argname, const char* argdesc = nullptr, IntLimit limit = nullptr) :
-			AbstractArgument(argname, argdesc), m_IntLimit(limit) {}
+		using vType = int32_t;
+		IntArgument(const char* argname, IntLimit limit = nullptr) :
+			AbstractArgument(argname), m_IntLimit(limit) {}
 		virtual ~IntArgument() {}
 		LIBCMO_DISABLE_COPY_MOVE(IntArgument);
 
@@ -308,7 +219,8 @@ namespace Unvirt::CmdHelper {
 
 	class StringArgument : public AbstractArgument {
 	public:
-		StringArgument(const char* argname, const char* argdesc = nullptr) : AbstractArgument(argname, argdesc) {}
+		using vType = std::string;
+		StringArgument(const char* argname) : AbstractArgument(argname) {}
 		virtual ~StringArgument() {}
 		LIBCMO_DISABLE_COPY_MOVE(StringArgument);
 
@@ -319,7 +231,8 @@ namespace Unvirt::CmdHelper {
 
 	class EncodingArgument : public AbstractArgument {
 	public:
-		EncodingArgument(const char* argname, const char* argdesc = nullptr) : AbstractArgument(argname, argdesc) {}
+		using vType = std::vector<std::string>;
+		EncodingArgument(const char* argname) : AbstractArgument(argname) {}
 		virtual ~EncodingArgument() {}
 		LIBCMO_DISABLE_COPY_MOVE(EncodingArgument);
 
@@ -328,5 +241,36 @@ namespace Unvirt::CmdHelper {
 		virtual void EndParse() override;
 	};
 
+	class ArgumentsMap {
+	public:
+		ArgumentsMap() : m_Data() {}
+		~ArgumentsMap() {}
+		LIBCMO_DISABLE_COPY_MOVE(ArgumentsMap);
+
+		void Add(const std::string& k, AbstractNode* v);
+		void Remove(const std::string& k);
+
+		template<class _Ty>
+		_Ty* Get(const char* k) const {
+			if (k == nullptr) throw std::invalid_argument("Null argument name.");
+			std::string conv(k);
+
+			auto finder = m_Data.find(conv);
+			if (finder == m_Data.end()) throw std::invalid_argument("No such argument name.");
+			AbstractNode* node = finder->second;
+			switch (node->GetNodeType()) {
+				case NodeType::Argument:
+					return dynamic_cast<AbstractArgument*>(node)->GetData<_Ty*>();
+				case NodeType::Choice:
+					return dynamic_cast<Choice*>(node)->GetIndex();
+				case NodeType::Literal:
+				default:
+					throw std::runtime_error("No such argument type.");
+			}
+		}
+
+	protected:
+		std::unordered_map<std::string, AbstractNode*> m_Data;
+	};
 
 }

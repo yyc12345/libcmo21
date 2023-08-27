@@ -6,50 +6,23 @@ namespace Unvirt::Context {
 
 #pragma region Encoding Arg
 
-	// Copy from Gamepiaynmo/BallanceModLoader
-	std::vector<std::string> SplitString(const std::string& str, const std::string& de) {
-		size_t lpos, pos = 0;
-		std::vector<std::string> res;
-
-		lpos = str.find_first_not_of(de, pos);
-		while (lpos != std::string::npos) {
-			pos = str.find_first_of(de, lpos);
-			res.push_back(str.substr(lpos, pos - lpos));
-			if (pos == std::string::npos) break;
-
-			lpos = str.find_first_not_of(de, pos);
-		}
-
-		if (pos != std::string::npos)
-			res.push_back("");
-
-		return res;
-	}
-
-	bool EncodingArgument::BeginParse(const std::string& strl) {
-		// encoding always accept every text
-		m_ParsedData = new std::vector<std::string>(SplitString(strl, ","));
-		return true;
-	}
-
-	void EncodingArgument::EndParse() {
-		delete reinterpret_cast<std::vector<std::string>*>(m_ParsedData);
-		m_ParsedData = nullptr;
-	}
-
 #pragma endregion
 
 #pragma region UnvirtContext Misc
 
 	UnvirtContext::UnvirtContext() :
 		m_Root(), m_Splitter(), m_Help(nullptr),
-		m_PageLen(10u), m_Ctx(nullptr), m_FileReader(nullptr) {
+		m_PageLen(10u), m_OrderExit(false),
+		m_Ctx(nullptr), m_FileReader(nullptr) {
 
 		// create command root
 		CmdHelper::CommandRoot* root = &m_Root;
+
 		root->Then(
-			(new CmdHelper::Literal("deepload"))->Then(
-			(new CmdHelper::StringArgument("filepath", "The path to loading file."))->Executes(
+			(new CmdHelper::Literal("deepload"))
+			->Then((new CmdHelper::StringArgument("filepath"))
+			->Comment("The path to loading file.")
+			->Executes(
 			std::bind(&UnvirtContext::ProcLoad, this, true, std::placeholders::_1),
 			"Load a Virtools composition deeply. Load file to CKObject stage."
 		)
@@ -78,28 +51,28 @@ namespace Unvirt::Context {
 
 
 		root->Then(
-				(new CmdHelper::Literal("foo"))->Then(
-				(new CmdHelper::Literal("bar"))->Executes([](const CmdHelper::ArgumentsMap& amap) -> void {
-					fprintf(stdout, "foobar!\n");
-				}, "simple foobar")
-			)->Then(
-				(new CmdHelper::IntArgument("bar", "the calling target 1"))->Executes([](const CmdHelper::ArgumentsMap& amap) -> void {
-						fprintf(stdout, "foo%" PRIi32 "!\n", *(amap.Get("bar")->GetData<int32_t>()));
-					}, "specialized foo bar")
-			)
+			(new CmdHelper::Literal("foo"))->Then(
+			(new CmdHelper::Literal("bar"))->Executes([](const CmdHelper::ArgumentsMap& amap) -> void {
+				fprintf(stdout, "foobar!\n");
+			}, "simple foobar")
 		)->Then(
+			(new CmdHelper::IntArgument("bar", "the calling target 1"))->Executes([](const CmdHelper::ArgumentsMap& amap) -> void {
+					fprintf(stdout, "foo%" PRIi32 "!\n", *(amap.Get("bar")->GetData<int32_t>()));
+				}, "specialized foo bar")
+		)
+				)->Then(
 			(new CmdHelper::Literal("call"))->Then(
-				(new CmdHelper::IntArgument("bar", "the calling taget 2"))->Executes([](const CmdHelper::ArgumentsMap& amap) -> void {
-					fprintf(stdout, "call%" PRIi32 "!\n", *(amap.Get("bar")->GetData<int32_t>()));
-				}, "calling someone")
-			)
-		);
-		// create help
-		m_Help = root->RootHelp();
+					(new CmdHelper::IntArgument("bar", "the calling taget 2"))->Executes([](const CmdHelper::ArgumentsMap& amap) -> void {
+						fprintf(stdout, "call%" PRIi32 "!\n", *(amap.Get("bar")->GetData<int32_t>()));
+					}, "calling someone")
+				)
+				);
+				// create help
+				m_Help = root->RootHelp();
 
-		// create context
-		m_Ctx = new LibCmo::CK2::CKContext();
-		m_Ctx->SetOutputCallback(std::bind(&UnvirtContext::PrintContextMsg, this, std::placeholders::_1));
+				// create context
+				m_Ctx = new LibCmo::CK2::CKContext();
+				m_Ctx->SetOutputCallback(std::bind(&UnvirtContext::PrintContextMsg, this, std::placeholders::_1));
 	}
 
 	UnvirtContext::~UnvirtContext() {
@@ -165,14 +138,15 @@ namespace Unvirt::Context {
 
 #pragma region Proc Detail
 
-	void UnvirtContext::ProcLoad(bool is_deep, const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::ProcLoad(const CmdHelper::ArgumentsMap* amap) {
 		// check pre-requirement
 		if (HasOpenedFile()) {
 			PrintCommonError("Already have a opened file. Close it before calling \"load\".");
 			return;
 		}
 
-		std::string filepath = *amap.Get("filepath")->GetData<std::string>();
+		std::string filepath = *amap->Get<CmdHelper::StringArgument::vType>("filepath");
+		bool is_deep = *amap->Get<CmdHelper::Choice::vType>("stage") == 0;
 
 		// proc
 		m_FileReader = new LibCmo::CK2::CKFileReader(m_Ctx);
@@ -193,7 +167,7 @@ namespace Unvirt::Context {
 		}
 	}
 
-	void UnvirtContext::ProcUnLoad(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::ProcUnLoad(const CmdHelper::ArgumentsMap* amap) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
 			this->PrintCommonError("No loaded file.");
@@ -204,7 +178,7 @@ namespace Unvirt::Context {
 		ClearDocument();
 	}
 
-	void UnvirtContext::ProcInfo(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::ProcInfo(const CmdHelper::ArgumentsMap* amap) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
 			PrintCommonError("No loaded file.");
@@ -215,7 +189,7 @@ namespace Unvirt::Context {
 		Unvirt::StructFormatter::PrintCKFileInfo(m_FileReader->GetFileInfo());
 	}
 
-	void UnvirtContext::ProcLs(ViewPart parts, const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::ProcLs(const CmdHelper::ArgumentsMap* amap) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
 			this->PrintCommonError("No loaded file.");
@@ -257,15 +231,15 @@ namespace Unvirt::Context {
 		}
 	}
 
-	void UnvirtContext::ProcData(ViewPart parts, const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::ProcData( const CmdHelper::ArgumentsMap* amap) {
 
 	}
 
-	void UnvirtContext::ProcChunk(ViewPart parts, const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::ProcChunk(const CmdHelper::ArgumentsMap* amap) {
 
 	}
 
-	void UnvirtContext::ProcItems(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::ProcItems(const CmdHelper::ArgumentsMap* amap) {
 		// check requirement
 		int32_t count = *amap.Get("count")->GetData<int32_t>();
 		if (count <= 0) {
@@ -277,11 +251,11 @@ namespace Unvirt::Context {
 		m_PageLen = static_cast<size_t>(count);
 	}
 
-	void UnvirtContext::ProcEncoding(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::ProcEncoding(const CmdHelper::ArgumentsMap* amap) {
 
 	}
 
-	void UnvirtContext::ProcTemp(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::ProcTemp(const CmdHelper::ArgumentsMap* amap) {
 		// check requirement
 		std::string temppath = *amap.Get("temppath")->GetData<std::string>();
 
@@ -289,7 +263,7 @@ namespace Unvirt::Context {
 		m_Ctx->SetTempPath(temppath.c_str());
 	}
 
-	void UnvirtContext::ProcExit(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::ProcExit(const CmdHelper::ArgumentsMap* amap) {
 		m_OrderExit = true;
 	}
 
