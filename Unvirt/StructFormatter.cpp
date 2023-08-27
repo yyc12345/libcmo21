@@ -17,7 +17,7 @@ namespace Unvirt::StructFormatter {
 			(fileinfo.CKVersion >> 0) & 0xFFFF
 		);
 
-		LibCmo::CK2::CKDWORD product_series[4]{
+		LibCmo::CK2::CKDWORD product_series[4] {
 			(fileinfo.ProductBuild >> 24) & 0xFF,
 			(fileinfo.ProductBuild >> 16) & 0xFF,
 			(fileinfo.ProductBuild >> 8) & 0xFF,
@@ -125,6 +125,16 @@ namespace Unvirt::StructFormatter {
 		}
 
 		fprintf(fout, "Page %zu of %zu\n", page + 1, fullpage + 1);
+	}
+
+	void PrintCKObject(const LibCmo::CK2::ObjImpls::CKObject*) {
+		fputs(UNVIRT_TERMCOL_MAGENTA(("NO IMPLEMENTS\n")), fout);
+	}
+	void PrintCKBaseManager(const LibCmo::CK2::MgrImpls::CKBaseManager*) {
+		fputs(UNVIRT_TERMCOL_MAGENTA(("NO IMPLEMENTS\n")), fout);
+	}
+	void PrintCKStateChunk(const LibCmo::CK2::CKStateChunk*) {
+		fputs(UNVIRT_TERMCOL_MAGENTA(("NO IMPLEMENTS\n")), fout);
 	}
 
 }

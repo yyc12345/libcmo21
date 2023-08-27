@@ -18,61 +18,107 @@ namespace Unvirt::Context {
 		// create command root
 		CmdHelper::CommandRoot* root = &m_Root;
 
-		root->Then(
-			(new CmdHelper::Literal("deepload"))
-			->Then((new CmdHelper::StringArgument("filepath"))
-			->Comment("The path to loading file.")
-			->Executes(
-			std::bind(&UnvirtContext::ProcLoad, this, true, std::placeholders::_1),
-			"Load a Virtools composition deeply. Load file to CKObject stage."
-		)
-		)
-		);
-		root->Then(
-			(new CmdHelper::Literal("shallowload"))->Then(
-			(new CmdHelper::StringArgument("filepath", "The path to loading file."))->Executes(
-			std::bind(&UnvirtContext::ProcLoad, this, false, std::placeholders::_1),
-			"Load a Virtools composition shallowly. Load file to CKStateChunk stage."
-		)
-		)
-		);
-		root->Then(
-			(new CmdHelper::Literal("unload"))->Executes(
-			std::bind(&UnvirtContext::ProcUnLoad, this, std::placeholders::_1),
-			"Release loaded Virtools composition."
-		)
-		);
-		root->Then(
-			(new CmdHelper::Literal("info"))->Executes(
-			std::bind(&UnvirtContext::ProcInfo, this, std::placeholders::_1),
-			"Show the header info of loaded Virtools composition."
-		)
-		);
-
-
-		root->Then(
-			(new CmdHelper::Literal("foo"))->Then(
-			(new CmdHelper::Literal("bar"))->Executes([](const CmdHelper::ArgumentsMap& amap) -> void {
-				fprintf(stdout, "foobar!\n");
-			}, "simple foobar")
-		)->Then(
-			(new CmdHelper::IntArgument("bar", "the calling target 1"))->Executes([](const CmdHelper::ArgumentsMap& amap) -> void {
-					fprintf(stdout, "foo%" PRIi32 "!\n", *(amap.Get("bar")->GetData<int32_t>()));
-				}, "specialized foo bar")
-		)
-				)->Then(
-			(new CmdHelper::Literal("call"))->Then(
-					(new CmdHelper::IntArgument("bar", "the calling taget 2"))->Executes([](const CmdHelper::ArgumentsMap& amap) -> void {
-						fprintf(stdout, "call%" PRIi32 "!\n", *(amap.Get("bar")->GetData<int32_t>()));
-					}, "calling someone")
+		root
+		->Then((new CmdHelper::Literal("load"))
+			->Then((new CmdHelper::Choice("stage", { "deep", "shallow"}))
+				->Comment("The stage of loading. 'deep' will load to CKObject stage. 'shallow' will load to CKStateChunk stage.")
+				->Then((new CmdHelper::StringArgument("filepath"))
+					->Comment("The path to loading file.")
+					->Executes(
+						std::bind(&UnvirtContext::ProcLoad, this, std::placeholders::_1),
+						"Load a Virtools composition deeply."
+					)
 				)
-				);
-				// create help
-				m_Help = root->RootHelp();
+			)
+		)
+		->Then((new CmdHelper::Literal("unload"))
+			->Executes(
+				std::bind(&UnvirtContext::ProcUnLoad, this, std::placeholders::_1),
+				"Release loaded Virtools composition."
+			)
+		)
+		->Then((new CmdHelper::Literal("info"))
+			->Executes(
+				std::bind(&UnvirtContext::ProcInfo, this, std::placeholders::_1),
+				"Show the header info of loaded Virtools composition."
+			)
+		)
+		->Then((new CmdHelper::Literal("ls"))
+			->Then((new CmdHelper::Choice("part", { "obj", "mgr"}))
+				->Comment("Which list you want to list.")
+				->Then((new CmdHelper::IntArgument("page", [](int32_t v) -> bool { return v > 0; }))
+					->Comment("The page index. Start with 1.")
+					->Executes(
+						std::bind(&UnvirtContext::ProcLs, this, std::placeholders::_1),
+						"List something about loaded Virtools composition."
+					)
+				)
+			)
+		)
+		->Then((new CmdHelper::Literal("data"))
+			->Then((new CmdHelper::Choice("part", { "obj", "mgr"}))
+				->Comment("Which list you want to show data.")
+				->Then((new CmdHelper::IntArgument("index", [](int32_t v) -> bool { return v >= 0; }))
+					->Comment("The index. Start with 0.")
+					->Executes(
+						std::bind(&UnvirtContext::ProcData, this, std::placeholders::_1),
+						"Show the specific CKObject / CKBaseManager data."
+					)
+				)
+			)
+		)
+		->Then((new CmdHelper::Literal("chunk"))
+			->Then((new CmdHelper::Choice("part", { "obj", "mgr"}))
+				->Comment("Which list you want to show chunk.")
+				->Then((new CmdHelper::IntArgument("index", [](int32_t v) -> bool { return v >= 0; }))
+					->Comment("The index. Start with 0.")
+					->Executes(
+						std::bind(&UnvirtContext::ProcChunk, this, std::placeholders::_1),
+						"Show the specific CKStateChunk data."
+					)
+				)
+			)
+		)
+		->Then((new CmdHelper::Literal("items"))
+			->Then((new CmdHelper::IntArgument("count", [](int32_t v) -> bool { return v > 0; }))
+				->Comment("The count of items you want to show in one page.")
+				->Executes(
+					std::bind(&UnvirtContext::ProcItems, this, std::placeholders::_1),
+					"Set up how many items should be listed in one page when using 'ls' command."
+				)
+			)
+		)
+		->Then((new CmdHelper::Literal("encoding"))
+			->Then((new CmdHelper::EncodingArgument("enc"))
+				->Comment("CKContext used encoding splitted by ','. Support mutiple encoding.")
+				->Executes(
+					std::bind(&UnvirtContext::ProcEncoding, this, std::placeholders::_1),
+					"Set the encoding series for CKContext."
+				)
+			)
+		)
+		->Then((new CmdHelper::Literal("temp"))
+			->Then((new CmdHelper::StringArgument("temppath"))
+				->Comment("The path to Temp folder.")
+				->Executes(
+					std::bind(&UnvirtContext::ProcTemp, this, std::placeholders::_1),
+					"Set the Temp path for CKContext."
+				)
+			)
+		)
+		->Then((new CmdHelper::Literal("temp"))
+			->Executes(
+				std::bind(&UnvirtContext::ProcExit, this, std::placeholders::_1),
+				"Exit program."
+			)
+		);
 
-				// create context
-				m_Ctx = new LibCmo::CK2::CKContext();
-				m_Ctx->SetOutputCallback(std::bind(&UnvirtContext::PrintContextMsg, this, std::placeholders::_1));
+		// create help
+		m_Help = root->RootHelp();
+
+		// create context
+		m_Ctx = new LibCmo::CK2::CKContext();
+		m_Ctx->SetOutputCallback(std::bind(&UnvirtContext::PrintContextMsg, this, std::placeholders::_1));
 	}
 
 	UnvirtContext::~UnvirtContext() {
@@ -167,7 +213,7 @@ namespace Unvirt::Context {
 		}
 	}
 
-	void UnvirtContext::ProcUnLoad(const CmdHelper::ArgumentsMap* amap) {
+	void UnvirtContext::ProcUnLoad(const CmdHelper::ArgumentsMap*) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
 			this->PrintCommonError("No loaded file.");
@@ -178,7 +224,7 @@ namespace Unvirt::Context {
 		ClearDocument();
 	}
 
-	void UnvirtContext::ProcInfo(const CmdHelper::ArgumentsMap* amap) {
+	void UnvirtContext::ProcInfo(const CmdHelper::ArgumentsMap*) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
 			PrintCommonError("No loaded file.");
@@ -196,17 +242,12 @@ namespace Unvirt::Context {
 			return;
 		}
 
-		// check requirement
-		int32_t gotten_page = *amap.Get("page")->GetData<int32_t>();
-		if (gotten_page <= 0) {
-			PrintCommonError("Page out of range.");
-			return;
-		}
-		size_t page = static_cast<size_t>(gotten_page) - 1;
+		// get page
+		size_t page = *amap->Get<CmdHelper::IntArgument::vType>("page") - 1;
 
 		// show list
-		switch (parts) {
-			case ViewPart::Objects:
+		switch (*amap->Get<CmdHelper::Choice::vType>("part")) {
+			case 0:
 			{
 				// obj list
 				if (page * m_PageLen >= m_FileReader->GetFileObjects().size()) {
@@ -217,7 +258,7 @@ namespace Unvirt::Context {
 				Unvirt::StructFormatter::PrintObjectList(m_FileReader->GetFileObjects(), page, this->m_PageLen);
 				break;
 			}
-			case ViewPart::Managers:
+			case 1:
 			{
 				// mgr list
 				if (page * m_PageLen >= m_FileReader->GetManagersData().size()) {
@@ -232,38 +273,87 @@ namespace Unvirt::Context {
 	}
 
 	void UnvirtContext::ProcData( const CmdHelper::ArgumentsMap* amap) {
-
-	}
-
-	void UnvirtContext::ProcChunk(const CmdHelper::ArgumentsMap* amap) {
-
-	}
-
-	void UnvirtContext::ProcItems(const CmdHelper::ArgumentsMap* amap) {
-		// check requirement
-		int32_t count = *amap.Get("count")->GetData<int32_t>();
-		if (count <= 0) {
-			PrintCommonError("Value out of range.");
+		// check pre-requirement
+		if (!HasOpenedFile()) {
+			this->PrintCommonError("No loaded file.");
 			return;
 		}
 
+		// get index
+		size_t index = *amap->Get<CmdHelper::IntArgument::vType>("index");
+
+		// show data
+		switch (*amap->Get<CmdHelper::Choice::vType>("part")) {
+			case 0:
+			{
+				if (index >= m_FileReader->GetFileObjects().size()) {
+					PrintCommonError("Index out of range.");
+					return;
+				}
+				Unvirt::StructFormatter::PrintCKObject(m_FileReader->GetFileObjects()[index].ObjPtr);
+				break;
+			}
+			case 1:
+			{
+				if (index >= m_FileReader->GetManagersData().size()) {
+					PrintCommonError("Index out of range.");
+					return;
+				}
+				//Unvirt::StructFormatter::PrintCKBaseManager(m_FileReader->GetManagersData()[index].Data);
+				break;
+			}
+		}
+	}
+
+	void UnvirtContext::ProcChunk(const CmdHelper::ArgumentsMap* amap) {
+		// check pre-requirement
+		if (!HasOpenedFile()) {
+			this->PrintCommonError("No loaded file.");
+			return;
+		}
+
+		// get index
+		size_t index = *amap->Get<CmdHelper::IntArgument::vType>("index");
+
+		// show data
+		switch (*amap->Get<CmdHelper::Choice::vType>("part")) {
+			case 0:
+			{
+				if (index >= m_FileReader->GetFileObjects().size()) {
+					PrintCommonError("Index out of range.");
+					return;
+				}
+				Unvirt::StructFormatter::PrintCKStateChunk(m_FileReader->GetFileObjects()[index].Data);
+				break;
+			}
+			case 1:
+			{
+				if (index >= m_FileReader->GetManagersData().size()) {
+					PrintCommonError("Index out of range.");
+					return;
+				}
+				Unvirt::StructFormatter::PrintCKStateChunk(m_FileReader->GetManagersData()[index].Data);
+				break;
+			}
+		}
+	}
+
+	void UnvirtContext::ProcItems(const CmdHelper::ArgumentsMap* amap) {
 		// assign
-		m_PageLen = static_cast<size_t>(count);
+		m_PageLen = *amap->Get<CmdHelper::IntArgument::vType>("count");
 	}
 
 	void UnvirtContext::ProcEncoding(const CmdHelper::ArgumentsMap* amap) {
-
+		const auto& encodings = *amap->Get<CmdHelper::EncodingArgument::vType>("enc");
+		m_Ctx->SetEncoding(encodings);
 	}
 
 	void UnvirtContext::ProcTemp(const CmdHelper::ArgumentsMap* amap) {
-		// check requirement
-		std::string temppath = *amap.Get("temppath")->GetData<std::string>();
-
 		// assign
-		m_Ctx->SetTempPath(temppath.c_str());
+		m_Ctx->SetTempPath(amap->Get<CmdHelper::StringArgument::vType>("temppath")->c_str());
 	}
 
-	void UnvirtContext::ProcExit(const CmdHelper::ArgumentsMap* amap) {
+	void UnvirtContext::ProcExit(const CmdHelper::ArgumentsMap*) {
 		m_OrderExit = true;
 	}
 

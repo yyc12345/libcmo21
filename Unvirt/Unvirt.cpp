@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 
 	//if (doc)
 	//	Unvirt::StructFormatter::PrintCKFileInfo(doc->m_FileInfo);
-	Unvirt::UnvirtContext ctx;
+	Unvirt::Context::UnvirtContext ctx;
 	ctx.Run();
 
 	return 0;

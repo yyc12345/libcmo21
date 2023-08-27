@@ -148,12 +148,12 @@ namespace Unvirt::CmdHelper {
 		friend class Literal;
 		friend class AbstractArgument;
 	public:
-		using vType = int32_t;
+		using vType = size_t;
 		Choice(const char* argname, const std::initializer_list<std::string>& vocabulary);
 		virtual ~Choice();
 		LIBCMO_DISABLE_COPY_MOVE(Choice);
 
-		size_t* GetIndex();
+		vType* GetIndex();
 
 	public:
 		virtual NodeType GetNodeType() override;
@@ -260,9 +260,9 @@ namespace Unvirt::CmdHelper {
 			AbstractNode* node = finder->second;
 			switch (node->GetNodeType()) {
 				case NodeType::Argument:
-					return dynamic_cast<AbstractArgument*>(node)->GetData<_Ty*>();
+					return reinterpret_cast<_Ty*>(dynamic_cast<AbstractArgument*>(node)->GetData<_Ty*>());
 				case NodeType::Choice:
-					return dynamic_cast<Choice*>(node)->GetIndex();
+					return reinterpret_cast<_Ty*>(dynamic_cast<Choice*>(node)->GetIndex());
 				case NodeType::Literal:
 				default:
 					throw std::runtime_error("No such argument type.");
