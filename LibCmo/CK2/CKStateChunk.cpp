@@ -440,6 +440,39 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
+	XContainer::XArray<IdentifierProfile> CKStateChunk::GetIdentifierProfile() {
+		XContainer::XArray<IdentifierProfile> collection;
+		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return collection;
+
+		CKDWORD pos = 0u;
+		if (this->m_DataDwSize < 2u) return collection;	// impossible to have a identifier
+
+		// iterate identifier
+		while (true) {
+			// add current identifier
+			CKDWORD nextptr = this->m_pData[pos + 1];
+			if (nextptr == 0u) {
+				nextptr = this->m_DataDwSize;	// got tail. no more identifier
+			}
+			collection.emplace_back(IdentifierProfile{
+				this->m_pData[pos],
+				this->m_pData + pos + 2,
+				sizeof(CKDWORD) * (nextptr - pos - 2u)
+			});
+
+			// move to next identifier or exit
+			// got tail. no more identifier
+			if (this->m_pData[pos + 1] == 0u) break;
+
+			pos = this->m_pData[pos + 1];
+
+			// out of buffer
+			if (pos + 1 >= this->m_DataDwSize) break;
+		};
+		return collection;
+
+	}
+
 	/* ========== Basic Data Read Functions ==========*/
 
 	bool CKStateChunk::ReadByteData(void* data_ptr, CKDWORD size_in_byte) {

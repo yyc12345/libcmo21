@@ -2,12 +2,6 @@
 
 namespace Unvirt::Context {
 
-	static FILE* fout = stdout;
-
-#pragma region Encoding Arg
-
-#pragma endregion
-
 #pragma region UnvirtContext Misc
 
 	UnvirtContext::UnvirtContext() :
@@ -106,6 +100,12 @@ namespace Unvirt::Context {
 				)
 			)
 		)
+		->Then((new CmdHelper::Literal("help"))
+			->Executes(
+				std::bind(&UnvirtContext::ProcHelp, this, std::placeholders::_1),
+				"Output this help page."
+			)
+		)
 		->Then((new CmdHelper::Literal("exit"))
 			->Executes(
 				std::bind(&UnvirtContext::ProcExit, this, std::placeholders::_1),
@@ -132,24 +132,27 @@ namespace Unvirt::Context {
 
 	void UnvirtContext::ClearDocument() {
 		if (m_FileReader == nullptr) return;
+		// delete reader
 		delete m_FileReader;
 		m_FileReader = nullptr;
+		// clear context
+		m_Ctx->DestroyAllCKObjects();
 	}
 
 	void UnvirtContext::PrintContextMsg(LibCmo::CK2::CKSTRING msg) {
 		if (msg != nullptr) {
-			fprintf(fout, UNVIRT_TERMCOL_LIGHT_YELLOW(("[CKContext] ")) "%s\n", msg);
+			fprintf(stdout, UNVIRT_TERMCOL_LIGHT_YELLOW(("[CKContext] ")) "%s\n", msg);
 		}
 	}
 
 	void UnvirtContext::PrintCommonError(const char* u8_fmt, ...) {
 		va_list argptr;
 		va_start(argptr, u8_fmt);
-		std::fputs(UNVIRT_TERMCOLHDR_LIGHT_RED, fout);
-		std::vfprintf(fout, u8_fmt, argptr);
-		std::fputs(UNVIRT_TERMCOLTAIL, fout);
+		std::fputs(UNVIRT_TERMCOLHDR_LIGHT_RED, stdout);
+		std::vfprintf(stdout, u8_fmt, argptr);
+		std::fputs(UNVIRT_TERMCOLTAIL, stdout);
 		va_end(argptr);
-		std::fputc('\n', fout);
+		std::fputc('\n', stdout);
 	}
 
 #pragma endregion
@@ -170,8 +173,7 @@ namespace Unvirt::Context {
 
 			// get sub command
 			if (!m_Root.RootConsume(cmds)) {
-				this->PrintCommonError("Command syntax error \"%s\".", u8cmd.c_str());
-				m_Help->Print();
+				this->PrintCommonError("Syntax error \"%s\".\nType 'help' for usage.", u8cmd.c_str());
 			}
 
 			if (m_OrderExit) {
@@ -187,7 +189,7 @@ namespace Unvirt::Context {
 	void UnvirtContext::ProcLoad(const CmdHelper::ArgumentsMap* amap) {
 		// check pre-requirement
 		if (HasOpenedFile()) {
-			PrintCommonError("Already have a opened file. Close it before calling \"load\".");
+			PrintCommonError("Already have a opened file. Close it before calling 'load'.");
 			return;
 		}
 
@@ -238,7 +240,7 @@ namespace Unvirt::Context {
 	void UnvirtContext::ProcLs(const CmdHelper::ArgumentsMap* amap) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
-			this->PrintCommonError("No loaded file.");
+			PrintCommonError("No loaded file.");
 			return;
 		}
 
@@ -254,7 +256,6 @@ namespace Unvirt::Context {
 					PrintCommonError("Page out of range.");
 					return;
 				}
-
 				Unvirt::StructFormatter::PrintObjectList(m_FileReader->GetFileObjects(), page, this->m_PageLen);
 				break;
 			}
@@ -265,7 +266,6 @@ namespace Unvirt::Context {
 					PrintCommonError("Page out of range.");
 					return;
 				}
-
 				Unvirt::StructFormatter::PrintManagerList(m_FileReader->GetManagersData(), page, this->m_PageLen);
 				break;
 			}
@@ -275,7 +275,7 @@ namespace Unvirt::Context {
 	void UnvirtContext::ProcData( const CmdHelper::ArgumentsMap* amap) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
-			this->PrintCommonError("No loaded file.");
+			PrintCommonError("No loaded file.");
 			return;
 		}
 
@@ -299,6 +299,7 @@ namespace Unvirt::Context {
 					PrintCommonError("Index out of range.");
 					return;
 				}
+				PrintCommonError("WIP function.");
 				//Unvirt::StructFormatter::PrintCKBaseManager(m_FileReader->GetManagersData()[index].Data);
 				break;
 			}
@@ -308,7 +309,7 @@ namespace Unvirt::Context {
 	void UnvirtContext::ProcChunk(const CmdHelper::ArgumentsMap* amap) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
-			this->PrintCommonError("No loaded file.");
+			PrintCommonError("No loaded file.");
 			return;
 		}
 
@@ -351,6 +352,10 @@ namespace Unvirt::Context {
 	void UnvirtContext::ProcTemp(const CmdHelper::ArgumentsMap* amap) {
 		// assign
 		m_Ctx->SetTempPath(amap->Get<CmdHelper::StringArgument::vType>("temppath")->c_str());
+	}
+
+	void Unvirt::Context::UnvirtContext::ProcHelp(const CmdHelper::ArgumentsMap* amap) {
+		m_Help->Print();
 	}
 
 	void UnvirtContext::ProcExit(const CmdHelper::ArgumentsMap*) {

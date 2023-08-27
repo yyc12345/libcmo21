@@ -42,6 +42,7 @@ namespace LibCmo::CK2 {
 			CK_CREATIONMODE* res = nullptr);
 		ObjImpls::CKObject* GetCKObject(CK_ID id);
 		void DestroyCKObject(CK_ID id);
+		void DestroyAllCKObjects();
 
 		// ========== Object Access ==========
 

@@ -174,6 +174,7 @@ namespace Unvirt::CmdHelper {
 
 	void HelpDocument::Print() {
 		for (auto& item : m_Results) {
+			fputs("Syntax: ", stdout);
 			for (auto& cmd : item.m_ArgDesc) {
 				fputs(cmd.m_Name.c_str(), stdout);
 				fputc(' ', stdout);
@@ -181,8 +182,7 @@ namespace Unvirt::CmdHelper {
 			fputc('\n', stdout);
 
 			if (!item.m_CmdDesc.empty()) {
-				fputs(item.m_CmdDesc.c_str(), stdout);
-				fputc('\n', stdout);
+				fprintf(stdout, "Description: %s\n", item.m_CmdDesc.c_str());
 			}
 
 			for (auto& cmd : item.m_ArgDesc) {

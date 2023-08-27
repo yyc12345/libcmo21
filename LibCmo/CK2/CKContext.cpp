@@ -78,6 +78,19 @@ namespace LibCmo::CK2 {
 
 	}
 
+	void CKContext::DestroyAllCKObjects() {
+		// free all created objects
+		for (auto& ptr : m_ObjectsList) {
+			if (ptr != nullptr) {
+				InternalDestroy(this, ptr);
+			}
+		}
+		// restore returned object list
+		m_ReturnedObjectIds.clear();
+		// empty object list
+		m_ObjectsList.clear();
+	}
+
 #pragma endregion
 
 #pragma region Ctor Dtor
@@ -96,13 +109,7 @@ namespace LibCmo::CK2 {
 	}
 
 	CKContext::~CKContext() {
-		// free all created objects
-		for (auto& ptr : m_ObjectsList) {
-			if (ptr != nullptr) {
-				InternalDestroy(this, ptr);
-			}
-		}
-
+		DestroyAllCKObjects();
 	}
 
 #pragma endregion

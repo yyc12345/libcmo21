@@ -220,7 +220,8 @@ namespace Unvirt::CmdHelper {
 	class StringArgument : public AbstractArgument {
 	public:
 		using vType = std::string;
-		StringArgument(const char* argname) : AbstractArgument(argname) {}
+		StringArgument(const char* argname) : 
+			AbstractArgument(argname) {}
 		virtual ~StringArgument() {}
 		LIBCMO_DISABLE_COPY_MOVE(StringArgument);
 
@@ -232,7 +233,8 @@ namespace Unvirt::CmdHelper {
 	class EncodingArgument : public AbstractArgument {
 	public:
 		using vType = std::vector<std::string>;
-		EncodingArgument(const char* argname) : AbstractArgument(argname) {}
+		EncodingArgument(const char* argname) : 
+			AbstractArgument(argname) {}
 		virtual ~EncodingArgument() {}
 		LIBCMO_DISABLE_COPY_MOVE(EncodingArgument);
 

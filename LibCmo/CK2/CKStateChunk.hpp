@@ -4,6 +4,12 @@
 
 namespace LibCmo::CK2 {
 
+	struct IdentifierProfile {
+		CKDWORD m_Identifier;
+		void* m_DataPtr;
+		CKDWORD m_AreaSize;
+	};
+
 	class CKStateChunk {
 	public:
 		//CKStateChunk();
@@ -89,6 +95,7 @@ namespace LibCmo::CK2 {
 		inline bool SeekIdentifierAndReturnSize(TEnum enum_v, CKDWORD* out_size) {
 			return SeekIdentifierDwordAndReturnSize(static_cast<CKDWORD>(enum_v), out_size);
 		}
+		XContainer::XArray<IdentifierProfile> GetIdentifierProfile();
 
 		/* ========== Basic Data Read Functions ==========*/
 
