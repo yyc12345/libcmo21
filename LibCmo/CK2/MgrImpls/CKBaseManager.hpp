@@ -69,8 +69,8 @@ namespace LibCmo::CK2::MgrImpls {
 			data for your manager.
 		@see CKStateChunk, LoadData
 		*/
-		virtual CKStateChunk* SaveData(CKFileVisitor* SavedFile) {
-			return nullptr;
+		virtual bool SaveData(CKStateChunk* chunk, CKFileVisitor* SavedFile) {
+			return true;
 		}
 		/**
 		@brief Called to load manager data.

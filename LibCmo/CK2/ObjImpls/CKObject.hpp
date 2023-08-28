@@ -40,7 +40,7 @@ namespace LibCmo::CK2::ObjImpls {
 		}
 
 		virtual void PreSave(CKFileVisitor* file, CKDWORD flags);
-		virtual CKStateChunk* Save(CKFileVisitor* file, CKDWORD flags);
+		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags);
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file);
 		virtual void PostLoad();
 

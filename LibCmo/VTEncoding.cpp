@@ -187,9 +187,15 @@ namespace LibCmo::EncodingHelper {
 			stdpath = u8_path;
 		}
 	}
-
-	FILE* OpenStdPathFile(std::filesystem::path& u8_filepath, bool is_read) {
-		return _wfopen(u8_filepath.wstring().c_str(), is_read ? L"rb" : L"wb");
+	
+	FILE* StdPathFOpen(std::filesystem::path& std_filepath, const char* u8_mode) {
+		std::wstring wmode;
+		if (CharToWchar(u8_mode, wmode, CP_UTF8)) {
+			return _wfopen(std_filepath.wstring().c_str(), wmode.c_str());
+		} else {
+			// fallback
+			return std::fopen(std_filepath.string().c_str(), u8_mode);
+		}
 	}
 
 #else
@@ -237,8 +243,8 @@ namespace LibCmo::EncodingHelper {
 		stdpath = u8_path;
 	}
 
-	FILE* OpenStdPathFile(std::filesystem::path& u8_filepath, bool is_read) {
-		return fopen(u8_filepath.string().c_str(), is_read ? "rb" : "wb");
+	FILE* StdPathFOpen(std::filesystem::path& std_filepath, const char* u8_mode) {
+		return std::fopen(u8_filepath.string().c_str(), u8_mode);
 	}
 
 

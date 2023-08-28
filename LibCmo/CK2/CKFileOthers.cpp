@@ -1,5 +1,6 @@
 #include "CKFile.hpp"
 #include "CKStateChunk.hpp"
+#include "ObjImpls/CKObject.hpp"
 #include <cstdarg>
 
 namespace LibCmo::CK2 {
@@ -13,12 +14,12 @@ namespace LibCmo::CK2 {
 	CKFileObject::CKFileObject() :
 		ObjectId(0u), CreatedObjectId(0u), ObjectCid(CK_CLASSID::CKCID_OBJECT),
 		ObjPtr(nullptr), Name(), Data(nullptr), Options(CK_FO_OPTIONS::CK_FO_DEFAULT),
-		FileIndex(0u), SaveFlags(CK_STATESAVE_ALL) {}
+		FileIndex(0u), SaveFlags(CK_STATESAVE_ALL), PackSize(0u) {}
 
 	CKFileObject::CKFileObject(const CKFileObject& rhs) :
 		ObjectId(rhs.ObjectId), CreatedObjectId(rhs.CreatedObjectId), ObjectCid(rhs.ObjectCid),
 		ObjPtr(rhs.ObjPtr), Name(rhs.Name), Data(rhs.Data), Options(rhs.Options),
-		FileIndex(rhs.FileIndex), SaveFlags(rhs.SaveFlags) {
+		FileIndex(rhs.FileIndex), SaveFlags(rhs.SaveFlags), PackSize(rhs.PackSize) {
 		if (this->Data != nullptr) {
 			this->Data = new CKStateChunk(*(rhs.Data));
 		}
@@ -27,7 +28,7 @@ namespace LibCmo::CK2 {
 	CKFileObject::CKFileObject(CKFileObject&& rhs) :
 		ObjectId(rhs.ObjectId), CreatedObjectId(rhs.CreatedObjectId), ObjectCid(rhs.ObjectCid),
 		ObjPtr(rhs.ObjPtr), Name(rhs.Name), Data(rhs.Data), Options(rhs.Options),
-		FileIndex(rhs.FileIndex), SaveFlags(rhs.SaveFlags) {
+		FileIndex(rhs.FileIndex), SaveFlags(rhs.SaveFlags), PackSize(rhs.PackSize) {
 		rhs.Data = nullptr;
 	}
 
@@ -43,6 +44,7 @@ namespace LibCmo::CK2 {
 			this->Data = new CKStateChunk(*(rhs.Data));
 		}
 
+		this->PackSize = rhs.PackSize;
 		this->Options = rhs.Options;
 		this->FileIndex = rhs.FileIndex;
 		this->SaveFlags = rhs.SaveFlags;
@@ -59,7 +61,8 @@ namespace LibCmo::CK2 {
 
 		this->Data = rhs.Data;
 		rhs.Data = nullptr;
-
+		
+		this->PackSize = rhs.PackSize;
 		this->Options = rhs.Options;
 		this->FileIndex = rhs.FileIndex;
 		this->SaveFlags = rhs.SaveFlags;
@@ -160,16 +163,19 @@ namespace LibCmo::CK2 {
 	CKFileWriter::CKFileWriter(CKContext* ctx) :
 		m_Ctx(ctx), m_Visitor(this),
 		m_Done(false), m_IsCopyFromReader(false),
-		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles(),
-		m_FileInfo()
+		m_SaveIDMax(0),
+		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles()
 	{}
 
 	CKFileWriter::CKFileWriter(CKContext* ctx, CKFileReader* reader) :
 		m_Ctx(ctx), m_Visitor(this),
 		m_Done(false), m_IsCopyFromReader(true),
-		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles(),
-		m_FileInfo()
+		m_SaveIDMax(0),
+		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles()
 	{
+		// sync save id max
+		this->m_SaveIDMax = reader->GetSaveIdMax();
+
 		// copy objects
 		for (const auto& item : reader->GetFileObjects()) {
 			CKFileObject obj;
@@ -182,8 +188,11 @@ namespace LibCmo::CK2 {
 				obj.Data = new CKStateChunk(*item.Data);
 			}
 
-			// copy save flag
+			// copy other data
+			obj.ObjectId = item.ObjectId;
+			obj.ObjectCid = item.ObjectCid;
 			obj.SaveFlags = item.SaveFlags;
+			obj.Name = item.Name;
 
 			// insert
 			m_FileObjects.emplace_back(std::move(obj));

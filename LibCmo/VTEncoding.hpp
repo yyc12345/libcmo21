@@ -72,7 +72,7 @@ namespace LibCmo::EncodingHelper {
 	bool GetNativeVirtoolsName(const std::string& u8_name, std::string& native_name, const ENCODING_TOKEN& token);
 
 	void SetStdPathFromU8Path(std::filesystem::path& stdpath, const char* u8_path);
-	FILE* OpenStdPathFile(std::filesystem::path& u8_filepath, bool is_read);
+	FILE* StdPathFOpen(std::filesystem::path& std_filepath, const char* u8_mode);
 
 #pragma endregion
 

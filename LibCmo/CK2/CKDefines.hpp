@@ -10,13 +10,18 @@
 
 namespace LibCmo::CK2 {
 	/**
+	 * @brief The identifier of Virtools file.
+	*/
+	constexpr const char CKNEMOFI[] = "Nemo Fi";
+	/**
 	 * @brief Current Version of CK Engine (Day/Month/Year)
 	*/
-	constexpr const CKDWORD CKVERSION = 0x05082002u;
+	constexpr const CKDWORD CKVERSION = 0x13022002u;
 	/**
 	 * @brief Current Version of Dev
 	*/
-	constexpr const CKDWORD DEVVERSION = 0x02050000u;
+	constexpr const CKDWORD DEVVERSION = 0x02010001u;
+	constexpr const CKDWORD DEVBUILD = 0u;
 	constexpr const CKGUID VIRTOOLS_GUID = CKGUID(0x56495254u, 0x4f4f4c53u);
 
 	// ========== Class registration utilities ==========

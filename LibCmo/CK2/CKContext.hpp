@@ -60,7 +60,7 @@ namespace LibCmo::CK2 {
 		// ========== Common Managers Functions ==========
 
 		CKINT GetManagerCount();
-		MgrImpls::CKBaseManager* GetManager(int index);
+		MgrImpls::CKBaseManager* GetManager(CKINT index);
 
 		// ========== File Save/Load Options ==========
 		
@@ -79,7 +79,8 @@ namespace LibCmo::CK2 {
 		// ========== Temp IO utilities ==========
 
 		void SetTempPath(CKSTRING u8_temp);
-		FILE* OpenTempFile(CKSTRING u8_filename, CKBOOL is_read);
+		FILE* OpenTempFile(CKSTRING u8_filename, CKSTRING u8_mode);
+		FILE* OpenFile(CKSTRING u8_filename, CKSTRING u8_mode);
 
 		// ========== Print utilities ==========
 

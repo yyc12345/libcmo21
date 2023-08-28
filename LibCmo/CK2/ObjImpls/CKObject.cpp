@@ -6,8 +6,8 @@ namespace LibCmo::CK2::ObjImpls {
 
 	void CKObject::PreSave(CKFileVisitor* file, CKDWORD flags) {}
 
-	CKStateChunk* CKObject::Save(CKFileVisitor* file, CKDWORD flags) {
-		return nullptr;
+	bool CKObject::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
+		return true;
 	}
 
 	bool CKObject::Load(CKStateChunk* chunk, CKFileVisitor* file) {

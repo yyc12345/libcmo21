@@ -16,7 +16,7 @@ namespace LibCmo::CK2 {
 
 	CKERROR CKFileReader::ShallowLoad(CKSTRING u8_filename) {
 		// check document status
-		if (this->m_Done) LIBPANIC("Can not load multiple times for single CKFileReader.")
+		if (this->m_Done) CKERROR::CKERR_CANCELLED;
 
 		// check file and open memory
 		if (u8_filename == nullptr) return CKERROR::CKERR_INVALIDPARAMETER;
@@ -46,7 +46,7 @@ namespace LibCmo::CK2 {
 		// ========== read header ==========
 		// check header size
 		if (parser->GetSize() < sizeof(CKRawFileInfo)) return CKERROR::CKERR_INVALIDFILE;
-		if (std::memcmp(parser->GetPtr(), "Nemo Fi", sizeof(CKRawFileInfo::NeMo))) return CKERROR::CKERR_INVALIDFILE;
+		if (std::memcmp(parser->GetPtr(), CKNEMOFI, sizeof(CKRawFileInfo::NeMo))) return CKERROR::CKERR_INVALIDFILE;
 		// read header
 		CKRawFileInfo rawHeader;
 		parser->Read(&rawHeader, sizeof(CKRawFileInfo));
@@ -168,7 +168,7 @@ namespace LibCmo::CK2 {
 				parser->Read(&includedFileCount, sizeof(CKDWORD));
 				this->m_IncludedFiles.resize(includedFileCount);
 
-				hasIncludedFile -= 4;
+				hasIncludedFile -= sizeof(CKDWORD);
 			}
 
 			// MARK: backward pos
@@ -263,13 +263,12 @@ namespace LibCmo::CK2 {
 		// only works file version >= 4. < 4 section has been removed.
 		if (this->m_FileInfo.ObjectCount != 0) {
 			// new file reader section
-			CKDWORD stateChunkLen = 0u;
 			bool stateChkParseSuccess = false;
 			for (auto& obj : this->m_FileObjects) {
 				// get statechunk len
-				parser->Read(&stateChunkLen, sizeof(CKDWORD));
+				parser->Read(&obj.PackSize, sizeof(CKDWORD));
 				// check state chunk len
-				if (stateChunkLen == 0) {
+				if (obj.PackSize == 0) {
 					obj.Data = nullptr;
 					continue;
 				}
@@ -281,7 +280,7 @@ namespace LibCmo::CK2 {
 					delete obj.Data;
 					obj.Data = nullptr;
 				}
-				parser->MoveCursor(stateChunkLen);
+				parser->MoveCursor(obj.PackSize);
 
 			}
 		}
@@ -311,7 +310,7 @@ namespace LibCmo::CK2 {
 				parser->Read(&filebodylen, sizeof(CKDWORD));
 
 				// read file body
-				FILE* fp = m_Ctx->OpenTempFile(file.c_str(), false);
+				FILE* fp = m_Ctx->OpenTempFile(file.c_str(), "wb");
 				if (fp != nullptr) {
 					StreamHelper::CopyStream(parser->GetPtr(), fp, filebodylen);
 					fclose(fp);
@@ -326,6 +325,9 @@ namespace LibCmo::CK2 {
 	}
 
 	CKERROR CKFileReader::DeepLoad(CKSTRING u8_filename) {
+		// check document status
+		if (this->m_Done) CKERROR::CKERR_CANCELLED;
+
 		// ========== prepare work ==========
 		CKERROR err = CKERROR::CKERR_OK;
 

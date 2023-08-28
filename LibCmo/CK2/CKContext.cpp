@@ -99,7 +99,7 @@ namespace LibCmo::CK2 {
 		return 0;
 	}
 
-	MgrImpls::CKBaseManager* CKContext::GetManager(int index) {
+	MgrImpls::CKBaseManager* CKContext::GetManager(CKINT index) {
 		return nullptr;
 	}
 
@@ -188,12 +188,18 @@ namespace LibCmo::CK2 {
 		EncodingHelper::SetStdPathFromU8Path(this->m_TempFolder, u8_temp);
 	}
 
-	FILE* CKContext::OpenTempFile(CKSTRING u8_filename, CKBOOL is_read) {
+	FILE* CKContext::OpenTempFile(CKSTRING u8_filename, CKSTRING u8_mode) {
 		std::filesystem::path stdfilename;
 		EncodingHelper::SetStdPathFromU8Path(stdfilename, u8_filename);
 
 		auto realfile = this->m_TempFolder / stdfilename;
-		return EncodingHelper::OpenStdPathFile(realfile, is_read);
+		return EncodingHelper::StdPathFOpen(realfile, u8_mode);
+	}
+
+	FILE* CKContext::OpenFile(CKSTRING u8_filename, CKSTRING u8_mode) {
+		std::filesystem::path stdfilename;
+		EncodingHelper::SetStdPathFromU8Path(stdfilename, u8_filename);
+		return EncodingHelper::StdPathFOpen(stdfilename, u8_mode);
 	}
 
 #pragma endregion

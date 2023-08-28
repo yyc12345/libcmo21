@@ -121,6 +121,7 @@ namespace LibCmo::CK2 {
 		ObjImpls::CKObject* ObjPtr; /**< A pointer to the object itself (as CreatedObject when loading) */
 		TypeHelper::MKString Name; /**< Name of the Object */
 		CKStateChunk* Data; /**< A CKStateChunk that contains object information */
+		CKDWORD PackSize;  /**< The CKStateChunk data size */
 		//CKINT PostPackSize; /**< When compressed chunk by chunk : size of Data after compression */
 		//CKINT PrePackSize; /**< When compressed chunk by chunk : size of Data before compression */
 		CK_FO_OPTIONS Options; /**< When loading an object it may be renamed , use to replace another object */
@@ -233,11 +234,14 @@ namespace LibCmo::CK2 {
 		*/
 		CKBOOL m_IsCopyFromReader;
 		
+		CKINT m_SaveIDMax; /**< Maximum CK_ID found when saving or loading objects */
 		XContainer::XArray<CKFileObject> m_FileObjects; /**< List of objects being saved / loaded */
 		XContainer::XArray<CKFileManagerData> m_ManagersData; /**< Manager Data loaded */
 		XContainer::XArray<CKFilePluginDependencies> m_PluginsDep;	/**< Plugins dependencies for this file */
 		XContainer::XArray<XContainer::XString> m_IncludedFiles; /**< List of files that should be inserted in the CMO file. */
-		CKFileInfo m_FileInfo; /**< Headers summary */
+		//CKFileInfo m_FileInfo; /**< Headers summary */
+
+		CKERROR PrepareFile(CKSTRING filename);
 
 		CKContext* m_Ctx;
 		CKFileVisitor m_Visitor;
