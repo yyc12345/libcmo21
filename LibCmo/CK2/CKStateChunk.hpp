@@ -4,6 +4,19 @@
 
 namespace LibCmo::CK2 {
 
+	struct ChunkProfile {
+		CK_CLASSID m_ClassId;
+		CKDWORD m_DataDwSize;
+		CKDWORD* m_pData;
+
+		CK_STATECHUNK_DATAVERSION m_DataVersion;
+		CK_STATECHUNK_CHUNKVERSION m_ChunkVersion;
+
+		size_t m_ObjectListSize, m_ChunkListSize, m_ManagerListSize;
+
+		CKFileVisitor* m_BindFile;
+		CKContext* m_BindContext;
+	};
 	struct IdentifierProfile {
 		CKDWORD m_Identifier;
 		void* m_DataPtr;
@@ -52,7 +65,7 @@ namespace LibCmo::CK2 {
 #pragma region Buffer Related
 
 	public:
-		bool ConvertFromBuffer(const void* buf);
+		CKBOOL ConvertFromBuffer(const void* buf);
 		CKDWORD ConvertToBuffer(void* buf);
 
 #pragma endregion
@@ -65,7 +78,11 @@ namespace LibCmo::CK2 {
 		CKDWORD GetDataSize(void);
 		CK_STATECHUNK_DATAVERSION GetDataVersion();
 		void SetDataVersion(CK_STATECHUNK_DATAVERSION version);
-		void DeleteBuffer(void* buf);
+		/**
+		 * @brief Free the buffer allocated by CKStateChunk reading functions.
+		 * @param buf The buffer need to be free.
+		*/
+		void DeleteBuffer(const void* buf);
 		bool Skip(CKDWORD DwordCount);
 
 	private:

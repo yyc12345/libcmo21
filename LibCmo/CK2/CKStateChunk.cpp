@@ -143,9 +143,9 @@ namespace LibCmo::CK2 {
 		this->m_DataVersion = version;
 	}
 
-	void CKStateChunk::DeleteBuffer(void* buf) {
+	void CKStateChunk::DeleteBuffer(const void* buf) {
 		if (buf == nullptr) return;
-		delete[] reinterpret_cast<char*>(buf);
+		delete[] reinterpret_cast<const char*>(buf);
 	}
 
 	bool CKStateChunk::Skip(CKDWORD DwordCount) {
@@ -230,8 +230,9 @@ namespace LibCmo::CK2 {
 
 #pragma region Buffer Related
 
-	bool CKStateChunk::ConvertFromBuffer(const void* buf) {
-		if (buf == nullptr) return false;
+	CKBOOL CKStateChunk::ConvertFromBuffer(const void* buf) {
+		if (buf == nullptr) return CKFALSE;
+		this->Clear();
 
 		// read chunk ver and data ver first
 		// chunk ver always set in the 3rd BYTE in every format
@@ -269,6 +270,9 @@ namespace LibCmo::CK2 {
 				std::memcpy(this->m_ChunkList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ChunkList.size());
 				bufpos += this->m_ChunkList.size();
 			}
+			
+			// no bind file
+			this->m_BindFile = nullptr;
 
 		} else if (this->m_ChunkVersion == CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION2) {
 			// medium ver file
@@ -299,6 +303,9 @@ namespace LibCmo::CK2 {
 				bufpos += this->m_ManagerList.size();
 			}
 
+			// no bind file
+			this->m_BindFile = nullptr;
+
 		} else if (this->m_ChunkVersion <= CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4) {
 			// the latest file
 
@@ -321,9 +328,9 @@ namespace LibCmo::CK2 {
 				std::memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
 				bufpos += this->m_DataDwSize;
 			}
-			if (EnumsHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE)) {
-				// MARK: set ckfile = nullptr;
-				;
+			if (!EnumsHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE)) {
+				// forced no bind file
+				this->m_BindFile = nullptr;
 			}
 			if (EnumsHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS)) {
 				this->m_ObjectList.resize(dwbuf[bufpos]);
@@ -347,14 +354,72 @@ namespace LibCmo::CK2 {
 
 		} else {
 			// too new. can not read, skip
-			;
+			return CKTRUE;
 		}
 
-		return true;
+		return CKTRUE;
 	}
 
 	CKDWORD CKStateChunk::ConvertToBuffer(void* buf) {
-		return 0u;
+		// calc size and setup options first
+		// size = buffer + buffer_size + header
+		CKDWORD size = (m_DataDwSize * sizeof(CKDWORD)) + sizeof(CKDWORD) + sizeof(CKDWORD);
+		CK_STATECHUNK_CHUNKOPTIONS options = static_cast<CK_STATECHUNK_CHUNKOPTIONS>(0);
+
+		if (!m_ObjectList.empty()) {
+			size += sizeof(CK_ID) * m_ObjectList.size() + sizeof(CKDWORD);
+			EnumsHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS);
+		}
+		if (!m_ChunkList.empty()) {
+			size += sizeof(CK_ID) * m_ChunkList.size() + sizeof(CKDWORD);
+			EnumsHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN);
+		}
+		if (!m_ManagerList.empty()) {
+			size += sizeof(CK_ID) * m_ManagerList.size() + sizeof(CKDWORD);
+			EnumsHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN);
+		}
+
+		if (this->m_BindFile != nullptr) {
+			EnumsHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE);
+		}
+
+		// if buffer provided, write it
+		if (buf != nullptr) {
+			// write header
+			reinterpret_cast<char*>(buf)[0] = static_cast<char>(this->m_DataVersion);
+			reinterpret_cast<char*>(buf)[1] = static_cast<char>(this->m_ClassId);
+			reinterpret_cast<char*>(buf)[2] = static_cast<char>(this->m_ChunkVersion);
+			reinterpret_cast<char*>(buf)[3] = static_cast<char>(options);
+
+			CKDWORD* dwbuf = reinterpret_cast<CKDWORD*>(buf);
+			// write buffer length
+			dwbuf[1] = this->m_DataDwSize;
+			size_t bufpos = 2u;
+			// write buffer
+			std::memcpy(dwbuf + bufpos, this->m_pData, this->m_DataDwSize * sizeof(CKDWORD));
+			bufpos += this->m_DataDwSize;
+
+			// write list
+			if (!m_ObjectList.empty()) {
+				dwbuf[bufpos] = static_cast<CKDWORD>(m_ObjectList.size());
+				std::memcpy(dwbuf + bufpos + 1, m_ObjectList.data(), m_ObjectList.size() * sizeof(CK_ID));
+				bufpos += m_ObjectList.size() + 1;
+			}
+			if (!m_ChunkList.empty()) {
+				dwbuf[bufpos] = static_cast<CKDWORD>(m_ChunkList.size());
+				std::memcpy(dwbuf + bufpos + 1, m_ChunkList.data(), m_ChunkList.size() * sizeof(CK_ID));
+				bufpos += m_ChunkList.size() + 1;
+			}
+			if (!m_ManagerList.empty()) {
+				dwbuf[bufpos] = static_cast<CKDWORD>(m_ManagerList.size());
+				std::memcpy(dwbuf + bufpos + 1, m_ManagerList.data(), m_ManagerList.size() * sizeof(CK_ID));
+				bufpos += m_ManagerList.size() + 1;
+			}
+
+		}
+
+		// return expected size.
+		return size;
 	}
 
 #pragma endregion
