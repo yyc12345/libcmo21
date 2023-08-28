@@ -87,8 +87,13 @@ namespace LibCmo::CK2 {
 		CKDWORD sumDataObjSize = 0,
 			sumHdrObjSize = 0;
 		for (auto& obj : m_FileObjects) {
-			// += 4DWORD(ObjId, ObjCid, FileIndex, NameLen) + Name size
-			sumHdrObjSize += 4 * sizeof(CKDWORD) + obj.Name.size();
+			// += 4DWORD(ObjId, ObjCid, FileIndex, NameLen)
+			sumHdrObjSize += 4 * sizeof(CKDWORD);
+			if (obj.Name.c_str() != nullptr) {
+				// += Name size
+				m_Ctx->GetNativeString(obj.Name.string(), name_conv);
+				sumHdrObjSize += name_conv.size();
+			}
 
 			if (obj.Data == nullptr) {
 				obj.PackSize = 0;

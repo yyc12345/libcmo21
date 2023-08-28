@@ -32,7 +32,7 @@ namespace LibCmo::EncodingHelper {
 		count = WideCharToMultiByte(codepage, 0, src, -1, NULL, 0, NULL, NULL);
 		if (count <= 0) return false;
 
-		dest.resize(count);
+		dest.resize(count - 1);
 		write_result = WideCharToMultiByte(codepage, 0, src, -1, dest.data(), count, NULL, NULL);
 		if (write_result <= 0) return false;
 
@@ -49,7 +49,7 @@ namespace LibCmo::EncodingHelper {
 		wcount = MultiByteToWideChar(codepage, 0, src, -1, NULL, 0);
 		if (wcount <= 0) return false;
 
-		dest.resize(wcount);
+		dest.resize(wcount - 1);
 		write_result = MultiByteToWideChar(codepage, 0, src, -1, dest.data(), wcount);
 		if (write_result <= 0) return false;
 

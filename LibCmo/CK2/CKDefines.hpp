@@ -20,8 +20,8 @@ namespace LibCmo::CK2 {
 	/**
 	 * @brief Current Version of Dev
 	*/
-	constexpr const CKDWORD DEVVERSION = 0x02010001u;
-	constexpr const CKDWORD DEVBUILD = 0u;
+	constexpr const CKDWORD DEVBUILD = 0x02010001u;
+	constexpr const CKDWORD DEVVERSION = 0u;
 	constexpr const CKGUID VIRTOOLS_GUID = CKGUID(0x56495254u, 0x4f4f4c53u);
 
 	// ========== Class registration utilities ==========

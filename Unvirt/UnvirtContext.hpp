@@ -29,6 +29,7 @@ namespace Unvirt::Context {
 
 		void ProcLoad(const CmdHelper::ArgumentsMap* amap);
 		void ProcUnLoad(const CmdHelper::ArgumentsMap* amap);
+		void ProcSave(const CmdHelper::ArgumentsMap* amap);
 		void ProcInfo(const CmdHelper::ArgumentsMap* amap);
 		void ProcLs(const CmdHelper::ArgumentsMap* amap);
 		void ProcData(const CmdHelper::ArgumentsMap* amap);

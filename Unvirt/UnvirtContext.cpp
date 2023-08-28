@@ -31,6 +31,15 @@ namespace Unvirt::Context {
 				"Release loaded Virtools composition."
 			)
 		)
+		->Then((new CmdHelper::Literal("save"))
+			->Then((new CmdHelper::StringArgument("filepath"))
+				->Comment("The path to save file.")
+				->Executes(
+					std::bind(&UnvirtContext::ProcSave, this, std::placeholders::_1),
+					"Save the loaded file into a new file."
+				)
+			)
+		)
 		->Then((new CmdHelper::Literal("info"))
 			->Executes(
 				std::bind(&UnvirtContext::ProcInfo, this, std::placeholders::_1),
@@ -206,7 +215,7 @@ namespace Unvirt::Context {
 		}
 		if (err != LibCmo::CK2::CKERROR::CKERR_OK) {
 			// fail to load. release all.
-			PrintCommonError("Fail to open file. Function return: %s\n\t%s",
+			PrintCommonError("Fail to load file. Function return: %s\n\t%s",
 				Unvirt::AccessibleValue::GetCkErrorName(err).c_str(),
 				Unvirt::AccessibleValue::GetCkErrorDescription(err).c_str()
 			);
@@ -224,6 +233,38 @@ namespace Unvirt::Context {
 
 		// free all
 		ClearDocument();
+	}
+
+	void Unvirt::Context::UnvirtContext::ProcSave(const CmdHelper::ArgumentsMap* amap) {
+		// check pre-requirement
+		if (!HasOpenedFile()) {
+			PrintCommonError("No loaded file.");
+			return;
+		}
+
+		std::string filepath = *amap->Get<CmdHelper::StringArgument::vType>("filepath");
+
+		// construct writer from reader
+		LibCmo::CK2::CKFileWriter writer(m_Ctx, m_FileReader);
+
+		// backup current file write mode
+		// and replace it with reader
+		LibCmo::CK2::CK_FILE_WRITEMODE backup = m_Ctx->GetFileWriteMode();
+		m_Ctx->SetFileWriteMode(m_FileReader->GetFileInfo().FileWriteMode);
+
+		// run writer
+		LibCmo::CK2::CKERROR err = writer.Save(filepath.c_str());
+		if (err != LibCmo::CK2::CKERROR::CKERR_OK) {
+			// fail to load. release all.
+			PrintCommonError("Fail to save file. Function return: %s\n\t%s",
+				Unvirt::AccessibleValue::GetCkErrorName(err).c_str(),
+				Unvirt::AccessibleValue::GetCkErrorDescription(err).c_str()
+			);
+		}
+
+		// restore file write mode
+		m_Ctx->SetFileWriteMode(backup);
+
 	}
 
 	void UnvirtContext::ProcInfo(const CmdHelper::ArgumentsMap*) {
@@ -354,7 +395,7 @@ namespace Unvirt::Context {
 		m_Ctx->SetTempPath(amap->Get<CmdHelper::StringArgument::vType>("temppath")->c_str());
 	}
 
-	void Unvirt::Context::UnvirtContext::ProcHelp(const CmdHelper::ArgumentsMap* amap) {
+	void Unvirt::Context::UnvirtContext::ProcHelp(const CmdHelper::ArgumentsMap*) {
 		m_Help->Print();
 	}
 
