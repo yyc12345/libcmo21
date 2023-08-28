@@ -16,7 +16,7 @@ namespace LibCmo::CK2 {
 
 #pragma region Compression utilities
 
-	void* CKPackData(const void* Data, CKINT size, CKINT& NewSize, CKINT compressionlevel) {
+	void* CKPackData(const void* Data, CKDWORD size, CKDWORD& NewSize, CKINT compressionlevel) {
 		uLong boundary = compressBound(static_cast<uLong>(size));
 		char* DestBuffer = new char[boundary];
 
@@ -30,17 +30,17 @@ namespace LibCmo::CK2 {
 			return nullptr;
 		}
 
-		NewSize = static_cast<CKINT>(_destLen);
+		NewSize = static_cast<CKDWORD>(_destLen);
 		return DestBuffer;
 	}
 
-	void* CKUnPackData(CKINT DestSize, const void* SrcBuffer, CKINT SrcSize) {
+	void* CKUnPackData(CKDWORD DestSize, const void* SrcBuffer, CKDWORD SrcSize) {
 		char* DestBuffer = new char[DestSize];
 
 		uLongf cache = DestSize;
 		if (uncompress(
 			reinterpret_cast<Bytef*>(DestBuffer), &cache,
-			reinterpret_cast<const Bytef*>(SrcBuffer), SrcSize) != Z_OK) {
+			reinterpret_cast<const Bytef*>(SrcBuffer), static_cast<uLong>(SrcSize)) != Z_OK) {
 			delete[] DestBuffer;
 			return nullptr;
 		}

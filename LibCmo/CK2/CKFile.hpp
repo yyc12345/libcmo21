@@ -42,7 +42,8 @@ namespace LibCmo::CK2 {
 		}
 		LIBCMO_DISABLE_COPY_MOVE(CKBufferParser);
 
-		const void* GetPtr(void) { return (this->m_MemBegin + m_MemPos); }
+		const void* GetPtr(ptrdiff_t extraoff = 0) { return (this->m_MemBegin + m_MemPos + extraoff); }
+		void* GetMutablePtr(ptrdiff_t extraoff = 0) { return (this->m_MemBegin + m_MemPos + extraoff); }
 		void Read(void* data, size_t data_size) {
 			std::memcpy(data, (this->m_MemBegin + m_MemPos), data_size);
 			this->m_MemPos += data_size;
@@ -54,7 +55,7 @@ namespace LibCmo::CK2 {
 		void* GetBase(void) { return this->m_MemBegin; }
 		size_t GetSize(void) { return this->m_MemSize; }
 		size_t GetCursor(void) { return this->m_MemPos; }
-		void MoveCursor(size_t off) { this->m_MemPos += off; }
+		void MoveCursor(ptrdiff_t off) { this->m_MemPos += off; }
 		void SetCursor(size_t off) { this->m_MemPos = off; }
 	};
 
@@ -239,7 +240,7 @@ namespace LibCmo::CK2 {
 		XContainer::XArray<CKFileManagerData> m_ManagersData; /**< Manager Data loaded */
 		XContainer::XArray<CKFilePluginDependencies> m_PluginsDep;	/**< Plugins dependencies for this file */
 		XContainer::XArray<XContainer::XString> m_IncludedFiles; /**< List of files that should be inserted in the CMO file. */
-		//CKFileInfo m_FileInfo; /**< Headers summary */
+		CKFileInfo m_FileInfo; /**< Headers summary */
 
 		CKERROR PrepareFile(CKSTRING filename);
 

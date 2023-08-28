@@ -100,9 +100,11 @@ namespace LibCmo::CK2 {
 			parser->SetCursor(sizeof(CKRawFileInfo));
 
 			// compare size to decide wheher use compress feature
-			void* decomp_buffer = CKUnPackData(this->m_FileInfo.Hdr1UnPackSize, parser->GetPtr(), this->m_FileInfo.Hdr1PackSize);
-			if (decomp_buffer != nullptr) {
-				parser = std::unique_ptr<CKBufferParser>(new CKBufferParser(decomp_buffer, this->m_FileInfo.Hdr1UnPackSize, true));
+			if (this->m_FileInfo.Hdr1PackSize != this->m_FileInfo.Hdr1UnPackSize) {
+				void* decomp_buffer = CKUnPackData(this->m_FileInfo.Hdr1UnPackSize, parser->GetPtr(), this->m_FileInfo.Hdr1PackSize);
+				if (decomp_buffer != nullptr) {
+					parser = std::unique_ptr<CKBufferParser>(new CKBufferParser(decomp_buffer, this->m_FileInfo.Hdr1UnPackSize, true));
+				}
 			}
 		}
 
@@ -312,7 +314,7 @@ namespace LibCmo::CK2 {
 				// read file body
 				FILE* fp = m_Ctx->OpenTempFile(file.c_str(), "wb");
 				if (fp != nullptr) {
-					StreamHelper::CopyStream(parser->GetPtr(), fp, filebodylen);
+					fwrite(parser->GetPtr(), sizeof(char), filebodylen, fp);
 					fclose(fp);
 				}
 

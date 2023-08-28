@@ -20,7 +20,7 @@ namespace LibCmo::CK2 {
 	 * NewSize only indicate the size of the part storing useful data in return value.
 	 * @see CKUnPackData, CKComputeDataCRC
 	*/
-	void* CKPackData(const void* Data, CKINT size, CKINT& NewSize, CKINT compressionlevel);
+	void* CKPackData(const void* Data, CKDWORD size, CKDWORD& NewSize, CKINT compressionlevel);
 	/**
 	 * @brief Decompress a buffer
 	 * @param[in] DestSize Expected size of the decompressed buffer.
@@ -31,7 +31,7 @@ namespace LibCmo::CK2 {
 	 * The return pointer should be freed by `delete[]` manually.
 	 * @see CKPackData, CKComputeDataCRC
 	*/
-	void* CKUnPackData(CKINT DestSize, const void* SrcBuffer, CKINT SrcSize);
+	void* CKUnPackData(CKDWORD DestSize, const void* SrcBuffer, CKDWORD SrcSize);
 	/**
 	 * @brief Computes a CRC for a buffer.
 	 * @param[in] data A pointer to the buffer to create a CRC for.

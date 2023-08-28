@@ -164,14 +164,16 @@ namespace LibCmo::CK2 {
 		m_Ctx(ctx), m_Visitor(this),
 		m_Done(false), m_IsCopyFromReader(false),
 		m_SaveIDMax(0),
-		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles()
+		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles(),
+		m_FileInfo()
 	{}
 
 	CKFileWriter::CKFileWriter(CKContext* ctx, CKFileReader* reader) :
 		m_Ctx(ctx), m_Visitor(this),
 		m_Done(false), m_IsCopyFromReader(true),
 		m_SaveIDMax(0),
-		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles()
+		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles(),
+		m_FileInfo()
 	{
 		// sync save id max
 		this->m_SaveIDMax = reader->GetSaveIdMax();

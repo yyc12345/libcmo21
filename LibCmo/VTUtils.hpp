@@ -164,10 +164,10 @@ namespace LibCmo {
 		}
 	}
 
-	namespace StreamHelper {
+	//namespace StreamHelper {
 
-		void CopyStream(const void* src, FILE* dest, size_t len);
-		void CopyStream(FILE* src, void* dest, size_t len);
+	//	void CopyStream(const void* src, FILE* dest, size_t len);
+	//	void CopyStream(FILE* src, void* dest, size_t len);
 
-	}
+	//}
 }

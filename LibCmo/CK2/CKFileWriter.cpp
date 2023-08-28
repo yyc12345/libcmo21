@@ -12,17 +12,20 @@ namespace LibCmo::CK2 {
 		// check document status
 		if (this->m_Done) CKERROR::CKERR_CANCELLED;
 
+		// encoding conv helper
+		std::string name_conv;
+
 		// try detect filename legality
 		CKERROR err = PrepareFile(u8_filename);
 		if (err != CKERROR::CKERR_OK) return err;
-		
+
 		// ========== Prepare Stage ==========
 		// todo: add TOBEDELETED flag for all Referenced objects's m_ObjectFlags
 
 		// MARK: ignore the notification to all CKBehavior based objects.
 
 		// ========== StateChunk convertion ==========
-		
+
 		// iterate all objects and transform it into CKStateChunk
 		// MARK: Drop the support of collecting the sum of InterfaceChunk's size.
 		// because it is useless.
@@ -128,18 +131,20 @@ namespace LibCmo::CK2 {
 			// calc the remains
 			for (size_t i = 1; i < m_FileObjects.size(); ++i) {
 				// prev obj PackSize + prev obj FileIndex + prev obj chunk size
-				m_FileObjects[i].FileIndex = m_FileObjects[i - 1].FileIndex +  m_FileObjects[i - 1].PackSize + sizeof(CKDWORD);
+				m_FileObjects[i].FileIndex = m_FileObjects[i - 1].FileIndex + m_FileObjects[i - 1].PackSize + sizeof(CKDWORD);
 			}
 		}
 
 		// ========== Construct File Header ==========
+		CK_FILE_WRITEMODE fileWriteMode = m_Ctx->GetFileWriteMode();
+
 		CKRawFileInfo rawHeader;
 		std::memcpy(&rawHeader.NeMo, CKNEMOFI, sizeof(CKRawFileInfo::NeMo));
 		rawHeader.Crc = 0;
 		rawHeader.Zero = 0;
 		rawHeader.CKVersion = CKVERSION;
 		rawHeader.FileVersion = 8;
-		rawHeader.FileWriteMode = static_cast<CKDWORD>(m_Ctx->GetFileWriteMode());
+		rawHeader.FileWriteMode = static_cast<CKDWORD>(fileWriteMode);
 		rawHeader.ObjectCount = static_cast<CKDWORD>(m_FileObjects.size());
 		rawHeader.ManagerCount = static_cast<CKDWORD>(m_ManagersData.size());
 		rawHeader.Hdr1UnPackSize = sumHdrSize;
@@ -151,10 +156,7 @@ namespace LibCmo::CK2 {
 		rawHeader.MaxIDSaved = m_SaveIDMax;
 		// crc will filled later
 
-		// create a encoding conversion helper string
-		std::string name_conv;
-
-		// ========== Writing header ==========
+		// ========== Write header ==========
 		// create a buffer
 		std::unique_ptr<CKBufferParser> hdrparser(new CKBufferParser(sumHdrSize));
 
@@ -190,6 +192,142 @@ namespace LibCmo::CK2 {
 			}
 		}
 
+		// write included file
+		{
+			CKDWORD cache = sizeof(CKDWORD);
+			hdrparser->Write(&cache, sizeof(CKDWORD));
+
+			cache = static_cast<CKDWORD>(m_IncludedFiles.size());
+			hdrparser->Write(&cache, sizeof(CKDWORD));
+		}
+
+		// compress header if needed
+		if (EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
+			EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
+
+			CKDWORD comp_buf_size = 0;
+			void* comp_buffer = CKPackData(hdrparser->GetBase(), static_cast<CKDWORD>(hdrparser->GetSize()), comp_buf_size, m_Ctx->GetCompressionLevel());
+			if (comp_buffer != nullptr) {
+				hdrparser = std::unique_ptr<CKBufferParser>(new CKBufferParser(comp_buffer, comp_buf_size, true));
+				rawHeader.Hdr1PackSize = comp_buf_size;
+			} else {
+				// fallback
+				rawHeader.Hdr1PackSize = rawHeader.Hdr1UnPackSize;
+			}
+		}
+
+		// ========== Write data ==========
+		// create a buffer
+		std::unique_ptr<CKBufferParser> datparser(new CKBufferParser(sumDataSize));
+
+		// write manager
+		for (auto& mgr : m_ManagersData) {
+			datparser->Write(&mgr.Manager, sizeof(CKGUID));
+
+			CKDWORD writtenSize = 0;
+			if (mgr.Data != nullptr) {
+				writtenSize = mgr.Data->ConvertToBuffer(datparser->GetMutablePtr(sizeof(CKDWORD)));
+				delete mgr.Data;
+				mgr.Data = nullptr;
+			}
+
+			datparser->Write(&writtenSize, sizeof(CKDWORD));
+			datparser->MoveCursor(writtenSize);
+		}
+
+		// write object
+		for (auto& obj : m_FileObjects) {
+			datparser->Write(&obj.PackSize, sizeof(CKDWORD));
+
+			if (obj.Data != nullptr) {
+				obj.Data->ConvertToBuffer(datparser->GetMutablePtr());
+				delete obj.Data;
+				obj.Data = nullptr;
+			}
+
+			datparser->MoveCursor(obj.PackSize);
+		}
+		
+		// compress header if needed
+		if (EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
+			EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
+
+			CKDWORD comp_buf_size = 0;
+			void* comp_buffer = CKPackData(datparser->GetBase(), static_cast<CKDWORD>(datparser->GetSize()), comp_buf_size, m_Ctx->GetCompressionLevel());
+			if (comp_buffer != nullptr) {
+				datparser = std::unique_ptr<CKBufferParser>(new CKBufferParser(comp_buffer, comp_buf_size, true));
+				rawHeader.DataPackSize = comp_buf_size;
+			} else {
+				// fallback
+				rawHeader.DataPackSize = rawHeader.DataUnPackSize;
+			}
+		}
+
+		// ========== Construct File Info ==========
+		// compute crc
+		CKDWORD computedcrc = CKComputeDataCRC(&rawHeader, sizeof(CKRawFileInfo), 0u);
+		computedcrc = CKComputeDataCRC(hdrparser->GetBase(), hdrparser->GetSize(), computedcrc);
+		computedcrc = CKComputeDataCRC(datparser->GetBase(), datparser->GetSize(), computedcrc);
+
+		// copy to file info
+		this->m_FileInfo.ProductVersion = rawHeader.ProductVersion;
+		this->m_FileInfo.ProductBuild = rawHeader.ProductBuild;
+		this->m_FileInfo.FileWriteMode = static_cast<CK_FILE_WRITEMODE>(rawHeader.FileWriteMode);
+		this->m_FileInfo.CKVersion = rawHeader.CKVersion;
+		this->m_FileInfo.FileVersion = rawHeader.FileVersion;
+		this->m_FileInfo.Hdr1PackSize = rawHeader.Hdr1PackSize;
+		this->m_FileInfo.Hdr1UnPackSize = rawHeader.Hdr1UnPackSize;
+		this->m_FileInfo.DataPackSize = rawHeader.DataPackSize;
+		this->m_FileInfo.DataUnPackSize = rawHeader.DataUnPackSize;
+		this->m_FileInfo.ManagerCount = rawHeader.ManagerCount;
+		this->m_FileInfo.ObjectCount = rawHeader.ObjectCount;
+		this->m_FileInfo.MaxIDSaved = rawHeader.MaxIDSaved;
+		// fill file size and crc
+		this->m_FileInfo.FileSize = sizeof(CKRawFileInfo) + rawHeader.DataPackSize + rawHeader.Hdr1PackSize;
+		this->m_FileInfo.Crc = computedcrc;
+		rawHeader.Crc = computedcrc;
+
+		// ========== Open File & Write Essential Data ==========
+		// open file and test
+		FILE* fs = m_Ctx->OpenFile(u8_filename, "wb");
+		if (fs == nullptr) return CKERROR::CKERR_CANTWRITETOFILE;
+		// write small header + header + data
+		std::fwrite(&rawHeader, sizeof(CKRawFileInfo), 1, fs);
+		std::fwrite(hdrparser->GetBase(), sizeof(char), hdrparser->GetSize(), fs);
+		std::fwrite(datparser->GetBase(), sizeof(char), datparser->GetSize(), fs);
+		// free buffer
+		hdrparser.reset();
+		datparser.reset();
+
+		// ========== Included Files ==========
+		for (auto& fentry : m_IncludedFiles) {
+			// write filename
+			m_Ctx->GetNativeString(fentry, name_conv);
+			CKDWORD filenamelen = static_cast<CKDWORD>(name_conv.size());
+			fwrite(&filenamelen, sizeof(CKDWORD), 1, fs);
+			fwrite(name_conv.data(), sizeof(char), filenamelen, fs);
+			
+			// try mapping file.
+			std::unique_ptr<VxMath::VxMemoryMappedFile> mappedFile(new VxMath::VxMemoryMappedFile(fentry.c_str()));
+			
+			// write file length
+			CKDWORD filebodylen = static_cast<CKDWORD>(mappedFile->IsValid() ? mappedFile->GetFileSize() : 0);
+			fwrite(&filebodylen, sizeof(CKDWORD), 1, fs);
+
+			// write file body
+			if (mappedFile->IsValid()) {
+				fwrite(mappedFile->GetBase(), sizeof(char), filebodylen, fs);
+			}
+
+			// release mapped file
+			mappedFile.reset();
+
+		}
+
+		// close file
+		fclose(fs);
+
+		return CKERROR::CKERR_OK;
 	}
 
 	CKERROR CKFileWriter::PrepareFile(CKSTRING filename) {
