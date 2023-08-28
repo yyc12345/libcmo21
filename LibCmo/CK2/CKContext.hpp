@@ -57,6 +57,19 @@ namespace LibCmo::CK2 {
 		//CKINT GetObjectsCountByClassID(CK_CLASSID cid);
 		//CK_ID* GetObjectsListByClassID(CK_CLASSID cid);
 
+		// ========== Common Managers Functions ==========
+
+		CKINT GetManagerCount();
+		MgrImpls::CKBaseManager* GetManager(int index);
+
+		// ========== File Save/Load Options ==========
+		
+		void SetCompressionLevel(CKINT level);
+		CKINT GetCompressionLevel();
+
+		void SetFileWriteMode(CK_FILE_WRITEMODE mode);
+		CK_FILE_WRITEMODE GetFileWriteMode();
+
 		// ========== Encoding utilities ==========
 
 		void GetUtf8String(const std::string& native_name, std::string& u8_name);
@@ -80,6 +93,10 @@ namespace LibCmo::CK2 {
 
 		XContainer::XArray<ObjImpls::CKObject*> m_ObjectsList;
 		std::deque<CK_ID> m_ReturnedObjectIds;
+
+		// ========== File Save/Load Options ==========
+		CKINT m_CompressionLevel;
+		CK_FILE_WRITEMODE m_FileWriteMode;
 
 		// ========== Encoding utilities ==========
 

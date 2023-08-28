@@ -13,12 +13,12 @@ namespace LibCmo::CK2 {
 	CKFileObject::CKFileObject() :
 		ObjectId(0u), CreatedObjectId(0u), ObjectCid(CK_CLASSID::CKCID_OBJECT),
 		ObjPtr(nullptr), Name(), Data(nullptr), Options(CK_FO_OPTIONS::CK_FO_DEFAULT),
-		FileIndex(0u), SaveFlags(0u) {}
+		FileIndex(0u), SaveFlags(CK_STATESAVE_ALL) {}
 
 	CKFileObject::CKFileObject(const CKFileObject& rhs) :
 		ObjectId(rhs.ObjectId), CreatedObjectId(rhs.CreatedObjectId), ObjectCid(rhs.ObjectCid),
 		ObjPtr(rhs.ObjPtr), Name(rhs.Name), Data(rhs.Data), Options(rhs.Options),
-		FileIndex(rhs.FileIndex), SaveFlags(0u) {
+		FileIndex(rhs.FileIndex), SaveFlags(rhs.SaveFlags) {
 		if (this->Data != nullptr) {
 			this->Data = new CKStateChunk(*(rhs.Data));
 		}
@@ -27,7 +27,7 @@ namespace LibCmo::CK2 {
 	CKFileObject::CKFileObject(CKFileObject&& rhs) :
 		ObjectId(rhs.ObjectId), CreatedObjectId(rhs.CreatedObjectId), ObjectCid(rhs.ObjectCid),
 		ObjPtr(rhs.ObjPtr), Name(rhs.Name), Data(rhs.Data), Options(rhs.Options),
-		FileIndex(rhs.FileIndex), SaveFlags(0u) {
+		FileIndex(rhs.FileIndex), SaveFlags(rhs.SaveFlags) {
 		rhs.Data = nullptr;
 	}
 
@@ -158,22 +158,81 @@ namespace LibCmo::CK2 {
 #pragma region CKFileWriter
 
 	CKFileWriter::CKFileWriter(CKContext* ctx) :
-		m_Ctx(ctx), m_Visitor(this) {}
+		m_Ctx(ctx), m_Visitor(this),
+		m_Done(false), m_IsCopyFromReader(false),
+		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles(),
+		m_FileInfo()
+	{}
 
 	CKFileWriter::CKFileWriter(CKContext* ctx, CKFileReader* reader) :
-		m_Ctx(ctx), m_Visitor(this) {}
+		m_Ctx(ctx), m_Visitor(this),
+		m_Done(false), m_IsCopyFromReader(true),
+		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles(),
+		m_FileInfo()
+	{
+		// copy objects
+		for (const auto& item : reader->GetFileObjects()) {
+			CKFileObject obj;
+			// copy CKObject pointer
+			obj.ObjPtr = item.ObjPtr;
+			// and use ctor to copy CKStateChunk
+			if (item.Data == nullptr) {
+				obj.Data = nullptr;
+			} else {
+				obj.Data = new CKStateChunk(*item.Data);
+			}
+
+			// copy save flag
+			obj.SaveFlags = item.SaveFlags;
+
+			// insert
+			m_FileObjects.emplace_back(std::move(obj));
+		}
+
+		// copy managers
+		for (const auto& item : reader->GetManagersData()) {
+			CKFileManagerData mgr;
+			// copy guid
+			mgr.Manager = item.Manager;
+			// copy chunk
+			if (item.Data == nullptr) {
+				mgr.Data = nullptr;
+			} else {
+				mgr.Data = new CKStateChunk(*item.Data);
+			}
+
+			// insert
+			m_ManagersData.emplace_back(std::move(mgr));
+		}
+
+		// copy plugin dep
+		for (const auto& item : reader->GetPluginsDep()) {
+			// direct copy
+			m_PluginsDep.emplace_back(item);
+		}
+
+		// copy included file
+		for (const auto& item : reader->GetIncludedFiles()) {
+			// direct copy
+			m_IncludedFiles.emplace_back(item);
+		}
+
+	}
 
 	CKFileWriter::~CKFileWriter() {}
 
 	CKBOOL CKFileWriter::AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags) {
+		if (m_Done || m_IsCopyFromReader) return CKFALSE;
 		return CKFALSE;
 	}
 
 	CKBOOL CKFileWriter::AddSavedObjects(CKObjectArray* objarray, CKDWORD flags) {
+		if (m_Done || m_IsCopyFromReader) return CKFALSE;
 		return CKFALSE;
 	}
 
 	CKBOOL CKFileWriter::AddSavedFile(CKSTRING u8FileName) {
+		if (m_Done || m_IsCopyFromReader) return CKFALSE;
 		return CKFALSE;
 	}
 

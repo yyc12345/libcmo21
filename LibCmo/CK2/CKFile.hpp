@@ -17,12 +17,26 @@ namespace LibCmo::CK2 {
 		size_t m_MemSize;
 
 	public:
+		/**
+		 * @brief Create CKBufferParser from a existed buffer.
+		 * @param ptr The start pointer of buffer. This buffer should be allocated by 'new[]', not 'new' or 'malloc()'.
+		 * @param rsize The size of buffer.
+		 * @param need_manual_free True if provided buffer need freed by CKBufferParser automatically.
+		*/
 		CKBufferParser(void* ptr, size_t rsize, bool need_manual_free) :
 			m_MemBegin(static_cast<char*>(ptr)),
 			m_MemPos(0u), m_MemSize(rsize),
-			m_NeedManualFree(need_manual_free) {
-			;
-		}
+			m_NeedManualFree(need_manual_free) 
+		{}
+		/**
+		 * @brief Create CKBufferParser from a new created buffer.
+		 * @param newsize The size of new buffer.
+		*/
+		CKBufferParser(size_t newsize) :
+			m_MemBegin(new char[newsize]),
+			m_MemPos(0u), m_MemSize(newsize),
+			m_NeedManualFree(true)
+		{}
 		~CKBufferParser() {
 			if (this->m_NeedManualFree) delete[](this->m_MemBegin);
 		}
@@ -209,6 +223,22 @@ namespace LibCmo::CK2 {
 		CKERROR Save(CKSTRING u8_filename);
 
 	protected:
+		CKBOOL m_Done;
+		/**
+		 * True if this writer is copy from reader.
+		 * The data copied from reader mean that calling just only do some small modification.
+		 * So we don't need try getting some managers or save file options from CKContext.
+		 * Just apply the data coming from reader.
+		 * Also, Add object functions is not allowed when writer copying from reader. 
+		*/
+		CKBOOL m_IsCopyFromReader;
+		
+		XContainer::XArray<CKFileObject> m_FileObjects; /**< List of objects being saved / loaded */
+		XContainer::XArray<CKFileManagerData> m_ManagersData; /**< Manager Data loaded */
+		XContainer::XArray<CKFilePluginDependencies> m_PluginsDep;	/**< Plugins dependencies for this file */
+		XContainer::XArray<XContainer::XString> m_IncludedFiles; /**< List of files that should be inserted in the CMO file. */
+		CKFileInfo m_FileInfo; /**< Headers summary */
+
 		CKContext* m_Ctx;
 		CKFileVisitor m_Visitor;
 	};

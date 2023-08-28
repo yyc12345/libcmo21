@@ -155,11 +155,12 @@ namespace LibCmo::CK2 {
 
 	CKBOOL CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent) {
 		// get corresponding index first
+		// if we can't find it, return false anyway.
 		auto finder = g_CKClassInfoId2Idx.find(child);
-		if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
+		if (finder == g_CKClassInfoId2Idx.end()) return CKFALSE;
 		size_t child_idx = finder->second;
 		finder = g_CKClassInfoId2Idx.find(parent);
-		if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
+		if (finder == g_CKClassInfoId2Idx.end()) return CKFALSE;
 		size_t parent_idx = finder->second;
 
 		return g_CKClassInfo[child_idx].Parents[parent_idx];

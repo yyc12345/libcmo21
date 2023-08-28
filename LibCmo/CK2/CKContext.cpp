@@ -93,10 +93,47 @@ namespace LibCmo::CK2 {
 
 #pragma endregion
 
+#pragma region Common Manager Functions
+	
+	CKINT CKContext::GetManagerCount() {
+		return 0;
+	}
+
+	MgrImpls::CKBaseManager* CKContext::GetManager(int index) {
+		return nullptr;
+	}
+
+#pragma endregion
+
+#pragma region File Save/Load Options
+
+	void CKContext::SetCompressionLevel(CKINT level) {
+		if (level > 0 && level < 10) {
+			m_CompressionLevel = level;
+		}
+	}
+
+	CKINT CKContext::GetCompressionLevel() {
+		return m_CompressionLevel;
+	}
+
+	void CKContext::SetFileWriteMode(CK_FILE_WRITEMODE mode) {
+		m_FileWriteMode = mode;
+	}
+
+	CK_FILE_WRITEMODE CKContext::GetFileWriteMode() {
+		return m_FileWriteMode;
+	}
+
+
+#pragma endregion
+
+
 #pragma region Ctor Dtor
 
 	CKContext::CKContext() :
 		m_ObjectsList(), m_ReturnedObjectIds(),
+		m_CompressionLevel(5), m_FileWriteMode(CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED),
 		m_NameEncoding(), m_TempFolder(),
 		m_OutputCallback(nullptr)
 	{

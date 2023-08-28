@@ -119,6 +119,11 @@ namespace LibCmo {
 			const char* c_str() const {
 				return m_HasStr ? m_Str.c_str() : nullptr;
 			}
+
+			const size_t size() const {
+				return m_HasStr ? m_Str.size() : 0u;
+			}
+
 		private:
 			bool m_HasStr;
 			std::string m_Str;
