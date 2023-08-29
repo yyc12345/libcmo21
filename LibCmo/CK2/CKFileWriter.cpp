@@ -88,11 +88,11 @@ namespace LibCmo::CK2 {
 			sumHdrObjSize = 0;
 		for (auto& obj : m_FileObjects) {
 			// += 4DWORD(ObjId, ObjCid, FileIndex, NameLen)
-			sumHdrObjSize += 4 * sizeof(CKDWORD);
+			sumHdrObjSize += 4 * CKSizeof(CKDWORD);
 			if (obj.Name.c_str() != nullptr) {
 				// += Name size
 				m_Ctx->GetNativeString(obj.Name.string(), name_conv);
-				sumHdrObjSize += name_conv.size();
+				sumHdrObjSize += static_cast<CKDWORD>(name_conv.size());
 			}
 
 			if (obj.Data == nullptr) {
@@ -101,7 +101,7 @@ namespace LibCmo::CK2 {
 				obj.PackSize = obj.Data->ConvertToBuffer(nullptr);
 			}
 			// += chunk size + chunk
-			sumDataObjSize += obj.PackSize + sizeof(CKDWORD);
+			sumDataObjSize += obj.PackSize + CKSizeof(CKDWORD);
 		}
 
 		CKDWORD sumDataMgrSize = 0;
@@ -113,17 +113,19 @@ namespace LibCmo::CK2 {
 				chunksize = mgr.Data->ConvertToBuffer(nullptr);
 			}
 			// += GUID(2 DWORD) + chunk size + chunk
-			sumDataMgrSize += chunksize + 3 * sizeof(CKDWORD);
+			sumDataMgrSize += chunksize + 3 * CKSizeof(CKDWORD);
 		}
 
 		// += Plugin Dep list size
-		CKDWORD sumHdrPlgSize = sizeof(CKDWORD);
+		CKDWORD sumHdrPlgSize = CKSizeof(CKDWORD);
 		for (auto& plg : m_PluginsDep) {
 			// += GUID list + (dep category + GUID list size)
-			sumHdrPlgSize += sizeof(CKGUID) * plg.m_Guids.size() + 2 * sizeof(CKDWORD);
+			sumHdrPlgSize +=
+				CKSizeof(CKGUID) * static_cast<CKDWORD>(plg.m_Guids.size())
+				+ 2 * CKSizeof(CKDWORD);
 		}
 
-		CKDWORD sumHdrIncludedFiles = sizeof(int32_t) + sizeof(CKDWORD);
+		CKDWORD sumHdrIncludedFiles = CKSizeof(int32_t) + CKSizeof(CKDWORD);
 
 		// calc the whole size
 		CKDWORD sumHdrSize = sumHdrObjSize + sumHdrPlgSize + sumHdrIncludedFiles;
@@ -132,11 +134,11 @@ namespace LibCmo::CK2 {
 		// compute file index for all object
 		if (!m_FileObjects.empty()) {
 			// set base for first one
-			m_FileObjects[0].FileIndex = sumHdrSize + sumDataMgrSize + sizeof(CKRawFileInfo);
+			m_FileObjects[0].FileIndex = sumHdrSize + sumDataMgrSize + CKSizeof(CKRawFileInfo);
 			// calc the remains
 			for (size_t i = 1; i < m_FileObjects.size(); ++i) {
 				// prev obj PackSize + prev obj FileIndex + prev obj chunk size
-				m_FileObjects[i].FileIndex = m_FileObjects[i - 1].FileIndex + m_FileObjects[i - 1].PackSize + sizeof(CKDWORD);
+				m_FileObjects[i].FileIndex = m_FileObjects[i - 1].FileIndex + m_FileObjects[i - 1].PackSize + CKSizeof(CKDWORD);
 			}
 		}
 
@@ -199,7 +201,7 @@ namespace LibCmo::CK2 {
 
 		// write included file
 		{
-			CKDWORD cache = sizeof(CKDWORD);
+			CKDWORD cache = CKSizeof(CKDWORD);
 			hdrparser->Write(&cache, sizeof(CKDWORD));
 
 			cache = static_cast<CKDWORD>(m_IncludedFiles.size());
@@ -252,7 +254,7 @@ namespace LibCmo::CK2 {
 
 			datparser->MoveCursor(obj.PackSize);
 		}
-		
+
 		// compress header if needed
 		if (EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
 			EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
@@ -270,7 +272,7 @@ namespace LibCmo::CK2 {
 
 		// ========== Construct File Info ==========
 		// compute crc
-		CKDWORD computedcrc = CKComputeDataCRC(&rawHeader, sizeof(CKRawFileInfo), 0u);
+		CKDWORD computedcrc = CKComputeDataCRC(&rawHeader, CKSizeof(CKRawFileInfo), 0u);
 		computedcrc = CKComputeDataCRC(hdrparser->GetBase(), hdrparser->GetSize(), computedcrc);
 		computedcrc = CKComputeDataCRC(datparser->GetBase(), datparser->GetSize(), computedcrc);
 
@@ -288,7 +290,7 @@ namespace LibCmo::CK2 {
 		this->m_FileInfo.ObjectCount = rawHeader.ObjectCount;
 		this->m_FileInfo.MaxIDSaved = rawHeader.MaxIDSaved;
 		// fill file size and crc
-		this->m_FileInfo.FileSize = sizeof(CKRawFileInfo) + rawHeader.DataPackSize + rawHeader.Hdr1PackSize;
+		this->m_FileInfo.FileSize = CKSizeof(CKRawFileInfo) + rawHeader.DataPackSize + rawHeader.Hdr1PackSize;
 		this->m_FileInfo.Crc = computedcrc;
 		rawHeader.Crc = computedcrc;
 
@@ -309,19 +311,19 @@ namespace LibCmo::CK2 {
 			// write filename
 			m_Ctx->GetNativeString(fentry, name_conv);
 			CKDWORD filenamelen = static_cast<CKDWORD>(name_conv.size());
-			fwrite(&filenamelen, sizeof(CKDWORD), 1, fs);
-			fwrite(name_conv.data(), sizeof(char), filenamelen, fs);
-			
+			std::fwrite(&filenamelen, sizeof(CKDWORD), 1, fs);
+			std::fwrite(name_conv.data(), sizeof(char), filenamelen, fs);
+
 			// try mapping file.
 			std::unique_ptr<VxMath::VxMemoryMappedFile> mappedFile(new VxMath::VxMemoryMappedFile(fentry.c_str()));
-			
+
 			// write file length
 			CKDWORD filebodylen = static_cast<CKDWORD>(mappedFile->IsValid() ? mappedFile->GetFileSize() : 0);
-			fwrite(&filebodylen, sizeof(CKDWORD), 1, fs);
+			std::fwrite(&filebodylen, sizeof(CKDWORD), 1, fs);
 
 			// write file body
 			if (mappedFile->IsValid()) {
-				fwrite(mappedFile->GetBase(), sizeof(char), filebodylen, fs);
+				std::fwrite(mappedFile->GetBase(), sizeof(char), filebodylen, fs);
 			}
 
 			// release mapped file
@@ -330,7 +332,7 @@ namespace LibCmo::CK2 {
 		}
 
 		// close file
-		fclose(fs);
+		std::fclose(fs);
 
 		return CKERROR::CKERR_OK;
 	}
@@ -338,7 +340,7 @@ namespace LibCmo::CK2 {
 	CKERROR CKFileWriter::PrepareFile(CKSTRING filename) {
 		// check nullptr
 		if (filename == nullptr) return CKERROR::CKERR_INVALIDFILE;
-		
+
 		// try open file to check whether we can write it.
 		CKERROR err;
 		FILE* tryfile = m_Ctx->OpenFile(filename, "ab");

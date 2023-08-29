@@ -23,8 +23,8 @@ namespace LibCmo::CK2 {
 		 * @param rsize The size of buffer.
 		 * @param need_manual_free True if provided buffer need freed by CKBufferParser automatically.
 		*/
-		CKBufferParser(void* ptr, size_t rsize, bool need_manual_free) :
-			m_MemBegin(static_cast<char*>(ptr)),
+		CKBufferParser(const void* ptr, size_t rsize, bool need_manual_free) :
+			m_MemBegin(const_cast<char*>(static_cast<const char*>(ptr))),
 			m_MemPos(0u), m_MemSize(rsize),
 			m_NeedManualFree(need_manual_free) 
 		{}
@@ -53,8 +53,8 @@ namespace LibCmo::CK2 {
 			this->m_MemPos += data_size;
 		}
 		void* GetBase(void) { return this->m_MemBegin; }
-		size_t GetSize(void) { return this->m_MemSize; }
-		size_t GetCursor(void) { return this->m_MemPos; }
+		CKDWORD GetSize(void) { return static_cast<CKDWORD>(this->m_MemSize); }
+		CKDWORD GetCursor(void) { return static_cast<CKDWORD>(this->m_MemPos); }
 		void MoveCursor(ptrdiff_t off) { this->m_MemPos += off; }
 		void SetCursor(size_t off) { this->m_MemPos = off; }
 	};
@@ -166,7 +166,7 @@ namespace LibCmo::CK2 {
 
 		const CKFileObject* GetFileObjectByIndex(size_t index);
 	protected:
-		CKBOOL m_IsReader;
+		bool m_IsReader;
 		CKFileReader* m_Reader;
 		CKFileWriter* m_Writer;
 		CKContext* m_Ctx;
@@ -192,7 +192,7 @@ namespace LibCmo::CK2 {
 		const CKFileInfo GetFileInfo();
 
 	protected:
-		CKBOOL m_Done;
+		bool m_Done;
 		CKINT m_SaveIDMax; /**< Maximum CK_ID found when saving or loading objects */
 		XContainer::XArray<CKFileObject> m_FileObjects; /**< List of objects being saved / loaded */
 		XContainer::XArray<CKFileManagerData> m_ManagersData; /**< Manager Data loaded */
@@ -217,15 +217,15 @@ namespace LibCmo::CK2 {
 		LIBCMO_DISABLE_COPY_MOVE(CKFileWriter);
 
 		// ========== Saving Preparing ==========
-		CKBOOL AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags = CK_STATESAVE_ALL);
-		CKBOOL AddSavedObjects(CKObjectArray* objarray, CKDWORD flags = CK_STATESAVE_ALL);
-		CKBOOL AddSavedFile(CKSTRING u8FileName);
+		bool AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags = CK_STATESAVE_ALL);
+		bool AddSavedObjects(CKObjectArray* objarray, CKDWORD flags = CK_STATESAVE_ALL);
+		bool AddSavedFile(CKSTRING u8FileName);
 
 		// ========== Saving ==========
 		CKERROR Save(CKSTRING u8_filename);
 
 	protected:
-		CKBOOL m_Done;
+		bool m_Done;
 		/**
 		 * True if this writer is copy from reader.
 		 * The data copied from reader mean that calling just only do some small modification.
@@ -233,7 +233,7 @@ namespace LibCmo::CK2 {
 		 * Just apply the data coming from reader.
 		 * Also, Add object functions is not allowed when writer copying from reader. 
 		*/
-		CKBOOL m_IsCopyFromReader;
+		bool m_IsCopyFromReader;
 		
 		CKINT m_SaveIDMax; /**< Maximum CK_ID found when saving or loading objects */
 		XContainer::XArray<CKFileObject> m_FileObjects; /**< List of objects being saved / loaded */

@@ -126,7 +126,7 @@ namespace Unvirt::StructFormatter {
 
 				fprintf(stdout, "0x%08" PRIxCKDWORD " (Rel: 0x%08" PRIxCKDWORD ")\t",
 					obj.FileIndex,
-					obj.FileIndex - sizeof(LibCmo::CK2::CKRawFileInfo) - fileinfo.Hdr1UnPackSize);
+					obj.FileIndex - CKSizeof(LibCmo::CK2::CKRawFileInfo) - fileinfo.Hdr1UnPackSize);
 				fprintf(stdout, "0x%08" PRIxCKDWORD "\t", obj.PackSize);
 
 				fprintf(stdout, "#%" PRIuSIZET "\t", index);
@@ -213,11 +213,11 @@ namespace Unvirt::StructFormatter {
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("Identifiers\n")), stdout);
 		fputs("Identifier\tData Pointer\tData Size\n", stdout);
 		for (const auto& ident : collection) {
-			fprintf(stdout, "0x%08" PRIxCKDWORD "\t", ident.m_AreaSize);
+			fprintf(stdout, "0x%08" PRIxCKDWORD "\t", ident.m_Identifier);
 			PrintPointer(ident.m_DataPtr);
 			fputc('\t', stdout);
 			fprintf(stdout, "%" PRIuCKDWORD " (%" PRIuCKDWORD " DWORD + %" PRIuCKDWORD ")\n",
-				ident.m_AreaSize, ident.m_AreaSize / sizeof(LibCmo::CK2::CKDWORD), ident.m_AreaSize % sizeof(LibCmo::CK2::CKDWORD));
+				ident.m_AreaSize, ident.m_AreaSize / CKSizeof(LibCmo::CK2::CKDWORD), ident.m_AreaSize % CKSizeof(LibCmo::CK2::CKDWORD));
 		}
 	}
 

@@ -48,7 +48,7 @@ namespace LibCmo::CK2 {
 		return DestBuffer;
 	}
 
-	CKDWORD CKComputeDataCRC(const void* data, CKINT size, CKDWORD PreviousCRC) {
+	CKDWORD CKComputeDataCRC(const void* data, CKDWORD size, CKDWORD PreviousCRC) {
 		return static_cast<CKDWORD>(adler32(
 			static_cast<uLong>(PreviousCRC),
 			reinterpret_cast<const Bytef*>(data),
@@ -89,13 +89,13 @@ namespace LibCmo::CK2 {
 		desc.DerivationLevel = parent.DerivationLevel + 1;
 		
 		// set done
-		desc.Done = CKTRUE;
+		desc.Done = true;
 	}
 	static void CKBuildClassHierarchyTable() {
 		// set Done to false and resize all XBitArray
 		size_t classCount = g_CKClassInfo.size();
 		for (auto& item : g_CKClassInfo) {
-			item.Done = CKFALSE;
+			item.Done = false;
 			item.Parents.resize(classCount, false);
 			item.Children.resize(classCount, false);
 		}
@@ -138,7 +138,7 @@ namespace LibCmo::CK2 {
 #pragma region Class Hierarchy Management
 
 	CKINT CKGetClassCount() {
-		return g_CKClassInfo.size();
+		return static_cast<CKINT>(g_CKClassInfo.size());
 	}
 
 	const CKClassDesc* CKGetClassDesc(CK_CLASSID cid) {
@@ -153,14 +153,14 @@ namespace LibCmo::CK2 {
 		return g_CKClassInfo[finder->second].NameFct();
 	}
 
-	CKBOOL CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent) {
+	bool CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent) {
 		// get corresponding index first
 		// if we can't find it, return false anyway.
 		auto finder = g_CKClassInfoId2Idx.find(child);
-		if (finder == g_CKClassInfoId2Idx.end()) return CKFALSE;
+		if (finder == g_CKClassInfoId2Idx.end()) return false;
 		size_t child_idx = finder->second;
 		finder = g_CKClassInfoId2Idx.find(parent);
-		if (finder == g_CKClassInfoId2Idx.end()) return CKFALSE;
+		if (finder == g_CKClassInfoId2Idx.end()) return false;
 		size_t parent_idx = finder->second;
 
 		return g_CKClassInfo[child_idx].Parents[parent_idx];

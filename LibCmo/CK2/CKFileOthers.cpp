@@ -232,19 +232,19 @@ namespace LibCmo::CK2 {
 
 	CKFileWriter::~CKFileWriter() {}
 
-	CKBOOL CKFileWriter::AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags) {
-		if (m_Done || m_IsCopyFromReader) return CKFALSE;
-		return CKFALSE;
+	bool CKFileWriter::AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags) {
+		if (m_Done || m_IsCopyFromReader) return false;
+		return false;
 	}
 
-	CKBOOL CKFileWriter::AddSavedObjects(CKObjectArray* objarray, CKDWORD flags) {
-		if (m_Done || m_IsCopyFromReader) return CKFALSE;
-		return CKFALSE;
+	bool CKFileWriter::AddSavedObjects(CKObjectArray* objarray, CKDWORD flags) {
+		if (m_Done || m_IsCopyFromReader) return false;
+		return false;
 	}
 
-	CKBOOL CKFileWriter::AddSavedFile(CKSTRING u8FileName) {
-		if (m_Done || m_IsCopyFromReader) return CKFALSE;
-		return CKFALSE;
+	bool CKFileWriter::AddSavedFile(CKSTRING u8FileName) {
+		if (m_Done || m_IsCopyFromReader) return false;
+		return false;
 	}
 
 #pragma endregion
@@ -253,7 +253,7 @@ namespace LibCmo::CK2 {
 #pragma region CKFileVisitor
 
 	CKFileVisitor::CKFileVisitor(CKFileReader* reader) :
-		m_IsReader(CKTRUE), m_Reader(reader), m_Writer(nullptr), m_Ctx(reader->m_Ctx) {
+		m_IsReader(true), m_Reader(reader), m_Writer(nullptr), m_Ctx(reader->m_Ctx) {
 		if (reader == nullptr) LIBPANIC("Reader is nullptr.");
 	}
 

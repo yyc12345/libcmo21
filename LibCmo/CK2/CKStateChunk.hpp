@@ -55,9 +55,9 @@ namespace LibCmo::CK2 {
 
 		ChunkParser m_Parser;
 
-		std::vector<CKDWORD> m_ObjectList;
-		std::vector<CKDWORD> m_ChunkList;
-		std::vector<CKDWORD> m_ManagerList;
+		XContainer::XArray<CKDWORD> m_ObjectList;
+		XContainer::XArray<CKDWORD> m_ChunkList;
+		XContainer::XArray<CKDWORD> m_ManagerList;
 
 		CKFileVisitor* m_BindFile;
 		CKContext* m_BindContext;
@@ -65,7 +65,7 @@ namespace LibCmo::CK2 {
 #pragma region Buffer Related
 
 	public:
-		CKBOOL ConvertFromBuffer(const void* buf);
+		bool ConvertFromBuffer(const void* buf);
 		CKDWORD ConvertToBuffer(void* buf);
 
 #pragma endregion
@@ -88,7 +88,7 @@ namespace LibCmo::CK2 {
 		bool Skip(CKDWORD DwordCount);
 
 	private:
-		size_t GetCeilDwordSize(size_t char_size);
+		CKDWORD GetCeilDwordSize(size_t char_size);
 		bool ResizeBuffer(CKDWORD new_dwsize);
 		bool EnsureWriteSpace(CKDWORD dwsize);
 		bool EnsureReadSpace(CKDWORD dword_required);
@@ -140,7 +140,7 @@ namespace LibCmo::CK2 {
 		/// <returns></returns>
 		template<typename T>
 		bool ReadStruct(T* data) {
-			return ReadByteData(data, static_cast<CKDWORD>(sizeof(T)));
+			return ReadByteData(data, CKSizeof(T));
 		}
 		/// <summary>
 		/// Read Struct
@@ -152,7 +152,7 @@ namespace LibCmo::CK2 {
 		/// <returns></returns>
 		template<typename T>
 		inline bool ReadStruct(T& data) {
-			return ReadByteData(&data, static_cast<CKDWORD>(sizeof(T)));
+			return ReadByteData(&data, CKSizeof(T));
 		}
 
 		/// <summary>

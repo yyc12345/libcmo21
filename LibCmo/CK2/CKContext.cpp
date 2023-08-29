@@ -24,7 +24,7 @@ namespace LibCmo::CK2 {
 		CK_ID decided_id;
 		if (this->m_ReturnedObjectIds.empty()) {
 			// create new CK_ID.
-			decided_id = m_ObjectsList.size();
+			decided_id = static_cast<CK_ID>(m_ObjectsList.size());
 			m_ObjectsList.resize(decided_id + 1);
 		} else {
 			// use returned CK_ID.

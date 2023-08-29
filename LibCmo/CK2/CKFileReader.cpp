@@ -45,7 +45,7 @@ namespace LibCmo::CK2 {
 
 		// ========== read header ==========
 		// check header size
-		if (parser->GetSize() < sizeof(CKRawFileInfo)) return CKERROR::CKERR_INVALIDFILE;
+		if (parser->GetSize() < CKSizeof(CKRawFileInfo)) return CKERROR::CKERR_INVALIDFILE;
 		if (std::memcmp(parser->GetPtr(), CKNEMOFI, sizeof(CKRawFileInfo::NeMo))) return CKERROR::CKERR_INVALIDFILE;
 		// read header
 		CKRawFileInfo rawHeader;
@@ -85,7 +85,7 @@ namespace LibCmo::CK2 {
 			rawHeader.Crc = 0u;
 
 			// compute crc
-			CKDWORD gotten_crc = CKComputeDataCRC(&rawHeader, sizeof(CKRawFileInfo), 0u);
+			CKDWORD gotten_crc = CKComputeDataCRC(&rawHeader, CKSizeof(CKRawFileInfo), 0u);
 			parser->SetCursor(sizeof(CKRawFileInfo));
 			gotten_crc = CKComputeDataCRC(parser->GetPtr(), this->m_FileInfo.Hdr1PackSize, gotten_crc);
 			parser->MoveCursor(this->m_FileInfo.Hdr1PackSize);
@@ -170,7 +170,7 @@ namespace LibCmo::CK2 {
 				parser->Read(&includedFileCount, sizeof(CKDWORD));
 				this->m_IncludedFiles.resize(includedFileCount);
 
-				hasIncludedFile -= sizeof(CKDWORD);
+				hasIncludedFile -= static_cast<int32_t>(sizeof(CKDWORD));
 			}
 
 			// MARK: backward pos
@@ -314,8 +314,8 @@ namespace LibCmo::CK2 {
 				// read file body
 				FILE* fp = m_Ctx->OpenTempFile(file.c_str(), "wb");
 				if (fp != nullptr) {
-					fwrite(parser->GetPtr(), sizeof(char), filebodylen, fp);
-					fclose(fp);
+					std::fwrite(parser->GetPtr(), sizeof(char), filebodylen, fp);
+					std::fclose(fp);
 				}
 
 				// move to next

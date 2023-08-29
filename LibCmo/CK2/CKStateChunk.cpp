@@ -152,7 +152,7 @@ namespace LibCmo::CK2 {
 	}
 
 	CKDWORD CKStateChunk::GetDataSize(void) {
-		return sizeof(CKDWORD) * this->m_DataDwSize;
+		return CKSizeof(CKDWORD) * this->m_DataDwSize;
 	}
 
 	CK_STATECHUNK_DATAVERSION CKStateChunk::GetDataVersion() {
@@ -192,8 +192,8 @@ namespace LibCmo::CK2 {
 
 
 
-	size_t CKStateChunk::GetCeilDwordSize(size_t char_size) {
-		return (char_size + 3) >> 2;
+	CKDWORD CKStateChunk::GetCeilDwordSize(size_t char_size) {
+		return static_cast<CKDWORD>((char_size + 3) >> 2);
 	}
 
 	bool CKStateChunk::ResizeBuffer(CKDWORD new_dwsize) {
@@ -250,8 +250,8 @@ namespace LibCmo::CK2 {
 
 #pragma region Buffer Related
 
-	CKBOOL CKStateChunk::ConvertFromBuffer(const void* buf) {
-		if (buf == nullptr) return CKFALSE;
+	bool CKStateChunk::ConvertFromBuffer(const void* buf) {
+		if (buf == nullptr) return false;
 		this->Clear();
 
 		// read chunk ver and data ver first
@@ -374,28 +374,28 @@ namespace LibCmo::CK2 {
 
 		} else {
 			// too new. can not read, skip
-			return CKTRUE;
+			return true;
 		}
 
-		return CKTRUE;
+		return true;
 	}
 
 	CKDWORD CKStateChunk::ConvertToBuffer(void* buf) {
 		// calc size and setup options first
 		// size = buffer + buffer_size + header
-		CKDWORD size = (m_DataDwSize * sizeof(CKDWORD)) + sizeof(CKDWORD) + sizeof(CKDWORD);
+		CKDWORD size = (m_DataDwSize * CKSizeof(CKDWORD)) + CKSizeof(CKDWORD) + CKSizeof(CKDWORD);
 		CK_STATECHUNK_CHUNKOPTIONS options = static_cast<CK_STATECHUNK_CHUNKOPTIONS>(0);
 
 		if (!m_ObjectList.empty()) {
-			size += sizeof(CK_ID) * m_ObjectList.size() + sizeof(CKDWORD);
+			size += CKSizeof(CKDWORD) * static_cast<CKDWORD>(m_ObjectList.size()) + sizeof(CKDWORD);
 			EnumsHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS);
 		}
 		if (!m_ChunkList.empty()) {
-			size += sizeof(CK_ID) * m_ChunkList.size() + sizeof(CKDWORD);
+			size += CKSizeof(CKDWORD) * static_cast<CKDWORD>(m_ChunkList.size()) + sizeof(CKDWORD);
 			EnumsHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN);
 		}
 		if (!m_ManagerList.empty()) {
-			size += sizeof(CK_ID) * m_ManagerList.size() + sizeof(CKDWORD);
+			size += CKSizeof(CKDWORD) * static_cast<CKDWORD>(m_ManagerList.size()) + sizeof(CKDWORD);
 			EnumsHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN);
 		}
 
@@ -422,17 +422,17 @@ namespace LibCmo::CK2 {
 			// write list
 			if (!m_ObjectList.empty()) {
 				dwbuf[bufpos] = static_cast<CKDWORD>(m_ObjectList.size());
-				std::memcpy(dwbuf + bufpos + 1, m_ObjectList.data(), m_ObjectList.size() * sizeof(CK_ID));
+				std::memcpy(dwbuf + bufpos + 1, m_ObjectList.data(), m_ObjectList.size() * sizeof(CKDWORD));
 				bufpos += m_ObjectList.size() + 1;
 			}
 			if (!m_ChunkList.empty()) {
 				dwbuf[bufpos] = static_cast<CKDWORD>(m_ChunkList.size());
-				std::memcpy(dwbuf + bufpos + 1, m_ChunkList.data(), m_ChunkList.size() * sizeof(CK_ID));
+				std::memcpy(dwbuf + bufpos + 1, m_ChunkList.data(), m_ChunkList.size() * sizeof(CKDWORD));
 				bufpos += m_ChunkList.size() + 1;
 			}
 			if (!m_ManagerList.empty()) {
 				dwbuf[bufpos] = static_cast<CKDWORD>(m_ManagerList.size());
-				std::memcpy(dwbuf + bufpos + 1, m_ManagerList.data(), m_ManagerList.size() * sizeof(CK_ID));
+				std::memcpy(dwbuf + bufpos + 1, m_ManagerList.data(), m_ManagerList.size() * sizeof(CKDWORD));
 				bufpos += m_ManagerList.size() + 1;
 			}
 
@@ -460,7 +460,7 @@ namespace LibCmo::CK2 {
 	//	// if no error, assign data
 	//	if (err == Z_OK) {
 	//		// get dw size and copy it to remove useless blank data
-	//		this->m_DataDwSize = static_cast<CKDWORD>(destSize) / sizeof(CKDWORD);
+	//		this->m_DataDwSize = static_cast<CKDWORD>(destSize) / CKSizeof(CKDWORD);
 
 	//		delete[] this->m_pData;
 	//		this->m_pData = nullptr;
@@ -521,7 +521,7 @@ namespace LibCmo::CK2 {
 			// the last identifier, use chunk size instead
 			nextptr = this->m_DataDwSize;
 		}
-		*out_size = sizeof(CKDWORD) * (nextptr - pos - 2u);
+		*out_size = CKSizeof(CKDWORD) * (nextptr - pos - 2u);
 		return true;
 	}
 
@@ -542,7 +542,7 @@ namespace LibCmo::CK2 {
 			collection.emplace_back(IdentifierProfile{
 				this->m_pData[pos],
 				this->m_pData + pos + 2,
-				sizeof(CKDWORD) * (nextptr - pos - 2u)
+				CKSizeof(CKDWORD) * (nextptr - pos - 2u)
 			});
 
 			// move to next identifier or exit
@@ -693,26 +693,26 @@ namespace LibCmo::CK2 {
 
 			// core data
 			if (subchunk->m_DataDwSize != 0) {
-				if (!this->ReadByteData(subchunk->m_pData, subchunk->m_DataDwSize * sizeof(CKDWORD))) goto subchunk_defer;
+				if (!this->ReadByteData(subchunk->m_pData, subchunk->m_DataDwSize * CKSizeof(CKDWORD))) goto subchunk_defer;
 			}
 
 			// 3 list data
 			if (!subchunk->m_ObjectList.empty()) {
 				if (!this->ReadByteData(
 					subchunk->m_ObjectList.data(),
-					subchunk->m_ObjectList.size() * sizeof(CKDWORD)
+					static_cast<CKDWORD>(subchunk->m_ObjectList.size()) * CKSizeof(CKDWORD)
 					)) goto subchunk_defer;
 			}
 			if (!subchunk->m_ChunkList.empty()) {
 				if (!this->ReadByteData(
 					subchunk->m_ChunkList.data(),
-					subchunk->m_ChunkList.size() * sizeof(CKDWORD)
+					static_cast<CKDWORD>(subchunk->m_ChunkList.size()) * CKSizeof(CKDWORD)
 					)) goto subchunk_defer;
 			}
 			if (!subchunk->m_ManagerList.empty()) {
 				if (!this->ReadByteData(
 					subchunk->m_ManagerList.data(),
-					subchunk->m_ManagerList.size() * sizeof(CKDWORD)
+					static_cast<CKDWORD>(subchunk->m_ManagerList.size()) * CKSizeof(CKDWORD)
 					)) goto subchunk_defer;
 			}
 
@@ -728,7 +728,7 @@ namespace LibCmo::CK2 {
 			this->Skip(1u);
 
 			// read core buf
-			if (!this->ReadByteData(subchunk->m_pData, subchunk->m_DataDwSize * sizeof(CKDWORD))) goto subchunk_defer;
+			if (!this->ReadByteData(subchunk->m_pData, subchunk->m_DataDwSize * CKSizeof(CKDWORD))) goto subchunk_defer;
 
 		}
 

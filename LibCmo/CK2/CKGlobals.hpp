@@ -43,7 +43,14 @@ namespace LibCmo::CK2 {
 	 * @return CRC of the buffer.
 	 * @see CKPackData, CKUnPackData
 	*/
-	CKDWORD CKComputeDataCRC(const void* data, CKINT size, CKDWORD PreviousCRC = 0);
+	CKDWORD CKComputeDataCRC(const void* data, CKDWORD size, CKDWORD PreviousCRC = 0);
+
+	// ========== Numberic Utilities ==========
+
+	/*
+	The convenient sizeof which return CKDWORD, not size_t.
+	*/
+#define CKSizeof(_Ty) (static_cast<LibCmo::CK2::CKDWORD>(sizeof(_Ty)))
 
 	// ========== CKClass Registration ==========
 
@@ -56,7 +63,7 @@ namespace LibCmo::CK2 {
 	const CKClassDesc* CKGetClassDesc(CK_CLASSID cid);
 	CKSTRING CKClassIDToString(CK_CLASSID cid);
 
-	CKBOOL CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent);
+	bool CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent);
 	CK_CLASSID CKGetParentClassID(CK_CLASSID child);
 	CK_CLASSID CKGetCommonParent(CK_CLASSID cid1, CK_CLASSID cid2);
 

@@ -34,7 +34,7 @@ namespace LibCmo::CK2 {
 	//using CKClassDependenciesCountFct = std::function<CKINT(CKINT)>;
 
 	struct CKClassDesc {
-		CKBOOL Done;
+		bool Done;
 		// Initialized upon class registration
 		CK_CLASSID Self;
 		CK_CLASSID Parent; // Class Identifier of parent class
@@ -62,7 +62,7 @@ namespace LibCmo::CK2 {
 		//XContainer::XSArray<CK_CLASSID> ToNotify; // List of ClassID to notify when an object of this class is deleted (inverse of ToBeNotify) 					
 
 		CKClassDesc() :
-			Done(CKFALSE),
+			Done(false),
 			Self(CK_CLASSID::CKCID_OBJECT), Parent(CK_CLASSID::CKCID_OBJECT),
 			CreationFct(nullptr), ReleaseFct(nullptr), NameFct(nullptr),
 			DerivationLevel(0),
