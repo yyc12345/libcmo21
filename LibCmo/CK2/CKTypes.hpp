@@ -183,10 +183,20 @@ namespace LibCmo::CK2 {
 	using CKAttributeCategory = int32_t;
 
 	// type print style define
-#define PRIckBYTE PRIu8
-#define PRIckDWORD PRIu32
-#define PRIckWORD PRIu16
-#define PRIckINT PRIi32
+#define PRIuCKID PRIu32
+#define PRIiCKERROR PRIi32
+#define PRIiCLASSID PRIi32
+
+#define PRIuCKBYTE PRIu8
+#define PRIuCKDWORD PRIu32
+#define PRIuCKWORD PRIu16
+#define PRIxCKBYTE PRIx8
+#define PRIxCKDWORD PRIx32
+#define PRIxCKWORD PRIx16
+#define PRIXCKBYTE PRIX8
+#define PRIXCKDWORD PRIX32
+#define PRIXCKWORD PRIX16
+#define PRIiCKINT PRIi32
 
 	// ========== Class List ==========
 	// Objects and derivated classes

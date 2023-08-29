@@ -126,7 +126,7 @@ namespace LibCmo::CK2 {
 		//CKINT PostPackSize; /**< When compressed chunk by chunk : size of Data after compression */
 		//CKINT PrePackSize; /**< When compressed chunk by chunk : size of Data before compression */
 		CK_FO_OPTIONS Options; /**< When loading an object it may be renamed , use to replace another object */
-		CKINT FileIndex; /**< Position of the object data inside uncompressed file buffer */
+		CKDWORD FileIndex; /**< Position of the object data inside uncompressed file buffer */
 		CKDWORD SaveFlags; /**< Flags used when this object was saved. */
 	};
 

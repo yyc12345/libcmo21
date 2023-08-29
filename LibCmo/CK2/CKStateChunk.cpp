@@ -110,6 +110,26 @@ namespace LibCmo::CK2 {
 
 #pragma region Misc Funcs
 
+	const ChunkProfile CKStateChunk::GetStateChunkProfile() {
+		ChunkProfile profile;
+
+		profile.m_ClassId = this->m_ClassId;
+		profile.m_DataDwSize = this->m_DataDwSize;
+		profile.m_pData = this->m_pData;
+
+		profile.m_DataVersion = this->m_DataVersion;
+		profile.m_ChunkVersion = this->m_ChunkVersion;
+
+		profile.m_ObjectListSize = this->m_ObjectList.size();
+		profile.m_ChunkListSize = this->m_ChunkList.size();
+		profile.m_ManagerListSize = this->m_ManagerList.size();
+
+		profile.m_BindFile = this->m_BindFile;
+		profile.m_BindContext = this->m_BindContext;
+
+		return profile;
+	}
+
 	void CKStateChunk::Clear(void) {
 		this->m_ClassId = CK_CLASSID::CKCID_OBJECT;
 		this->m_DataVersion = CK_STATECHUNK_DATAVERSION::CHUNK_DEV_2_1;
@@ -505,7 +525,7 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-	XContainer::XArray<IdentifierProfile> CKStateChunk::GetIdentifierProfile() {
+	const XContainer::XArray<IdentifierProfile> CKStateChunk::GetIdentifierProfile() {
 		XContainer::XArray<IdentifierProfile> collection;
 		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return collection;
 
@@ -550,7 +570,7 @@ namespace LibCmo::CK2 {
 			return true;
 		} else {
 			// failed, report to context
-			m_BindContext->OutputToConsoleEx("CKStateChunk read length error at %" PRIckDWORD ".", this->m_Parser.m_CurrentPos);
+			m_BindContext->OutputToConsoleEx("CKStateChunk read length error at %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
 			return false;
 		}
 	}

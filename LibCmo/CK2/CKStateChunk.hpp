@@ -73,6 +73,8 @@ namespace LibCmo::CK2 {
 #pragma region Misc Functions
 
 	public:
+		const ChunkProfile GetStateChunkProfile();
+
 		//bool UnPack(CKDWORD DestSize);
 		void Clear(void);
 		CKDWORD GetDataSize(void);
@@ -112,7 +114,7 @@ namespace LibCmo::CK2 {
 		inline bool SeekIdentifierAndReturnSize(TEnum enum_v, CKDWORD* out_size) {
 			return SeekIdentifierDwordAndReturnSize(static_cast<CKDWORD>(enum_v), out_size);
 		}
-		XContainer::XArray<IdentifierProfile> GetIdentifierProfile();
+		const XContainer::XArray<IdentifierProfile> GetIdentifierProfile();
 
 		/* ========== Basic Data Read Functions ==========*/
 

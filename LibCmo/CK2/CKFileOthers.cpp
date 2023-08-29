@@ -253,25 +253,26 @@ namespace LibCmo::CK2 {
 #pragma region CKFileVisitor
 
 	CKFileVisitor::CKFileVisitor(CKFileReader* reader) :
-		m_IsReader(CKTRUE), m_Reader(reader), m_Writer(nullptr) {
+		m_IsReader(CKTRUE), m_Reader(reader), m_Writer(nullptr), m_Ctx(reader->m_Ctx) {
 		if (reader == nullptr) LIBPANIC("Reader is nullptr.");
 	}
 
 	CKFileVisitor::CKFileVisitor(CKFileWriter* writer) :
-		m_IsReader(false), m_Reader(nullptr), m_Writer(nullptr) {
+		m_IsReader(false), m_Reader(nullptr), m_Writer(writer), m_Ctx(writer->m_Ctx) {
 		if (writer == nullptr) LIBPANIC("Writer is nullptr.");
 	}
 
 	CKFileVisitor::CKFileVisitor(const CKFileVisitor& rhs) :
-		m_IsReader(rhs.m_IsReader), m_Reader(rhs.m_Reader), m_Writer(rhs.m_Writer) {}
+		m_IsReader(rhs.m_IsReader), m_Reader(rhs.m_Reader), m_Writer(rhs.m_Writer), m_Ctx(rhs.m_Ctx) {}
 
 	CKFileVisitor::CKFileVisitor(CKFileVisitor&& rhs) :
-		m_IsReader(rhs.m_IsReader), m_Reader(rhs.m_Reader), m_Writer(rhs.m_Writer) {}
+		m_IsReader(rhs.m_IsReader), m_Reader(rhs.m_Reader), m_Writer(rhs.m_Writer), m_Ctx(rhs.m_Ctx) {}
 
 	CKFileVisitor& CKFileVisitor::operator=(const CKFileVisitor& rhs) {
 		this->m_IsReader = rhs.m_IsReader;
 		this->m_Reader = rhs.m_Reader;
 		this->m_Writer = rhs.m_Writer;
+		this->m_Ctx = rhs.m_Ctx;
 
 		return *this;
 	}
@@ -280,6 +281,7 @@ namespace LibCmo::CK2 {
 		this->m_IsReader = rhs.m_IsReader;
 		this->m_Reader = rhs.m_Reader;
 		this->m_Writer = rhs.m_Writer;
+		this->m_Ctx = rhs.m_Ctx;
 
 		return *this;
 	}

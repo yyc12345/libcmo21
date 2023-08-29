@@ -297,7 +297,7 @@ namespace Unvirt::Context {
 					PrintCommonError("Page out of range.");
 					return;
 				}
-				Unvirt::StructFormatter::PrintObjectList(m_FileReader->GetFileObjects(), page, this->m_PageLen);
+				Unvirt::StructFormatter::PrintObjectList(m_FileReader->GetFileObjects(), m_FileReader->GetFileInfo(), page, this->m_PageLen);
 				break;
 			}
 			case 1:
