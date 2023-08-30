@@ -213,7 +213,7 @@ namespace LibCmo::CK2 {
 			EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
 
 			CKDWORD comp_buf_size = 0;
-			void* comp_buffer = CKPackData(hdrparser->GetBase(), static_cast<CKDWORD>(hdrparser->GetSize()), comp_buf_size, m_Ctx->GetCompressionLevel());
+			void* comp_buffer = CKPackData(hdrparser->GetBase(), hdrparser->GetSize(), comp_buf_size, m_Ctx->GetCompressionLevel());
 			if (comp_buffer != nullptr) {
 				hdrparser = std::unique_ptr<CKBufferParser>(new CKBufferParser(comp_buffer, comp_buf_size, true));
 				rawHeader.Hdr1PackSize = comp_buf_size;
@@ -260,7 +260,7 @@ namespace LibCmo::CK2 {
 			EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
 
 			CKDWORD comp_buf_size = 0;
-			void* comp_buffer = CKPackData(datparser->GetBase(), static_cast<CKDWORD>(datparser->GetSize()), comp_buf_size, m_Ctx->GetCompressionLevel());
+			void* comp_buffer = CKPackData(datparser->GetBase(), datparser->GetSize(), comp_buf_size, m_Ctx->GetCompressionLevel());
 			if (comp_buffer != nullptr) {
 				datparser = std::unique_ptr<CKBufferParser>(new CKBufferParser(comp_buffer, comp_buf_size, true));
 				rawHeader.DataPackSize = comp_buf_size;
@@ -296,7 +296,7 @@ namespace LibCmo::CK2 {
 
 		// ========== Open File & Write Essential Data ==========
 		// open file and test
-		FILE* fs = m_Ctx->OpenFile(u8_filename, "wb");
+		FILE* fs = EncodingHelper::U8FOpen(u8_filename, "wb");
 		if (fs == nullptr) return CKERROR::CKERR_CANTWRITETOFILE;
 		// write small header + header + data
 		std::fwrite(&rawHeader, sizeof(CKRawFileInfo), 1, fs);
@@ -315,15 +315,22 @@ namespace LibCmo::CK2 {
 			std::fwrite(name_conv.data(), sizeof(char), filenamelen, fs);
 
 			// try mapping file.
-			std::unique_ptr<VxMath::VxMemoryMappedFile> mappedFile(new VxMath::VxMemoryMappedFile(fentry.c_str()));
-
-			// write file length
-			CKDWORD filebodylen = static_cast<CKDWORD>(mappedFile->IsValid() ? mappedFile->GetFileSize() : 0);
-			std::fwrite(&filebodylen, sizeof(CKDWORD), 1, fs);
-
-			// write file body
+			std::string tempfilename = m_Ctx->GetTempFilePath(fentry.c_str());
+			std::unique_ptr<VxMath::VxMemoryMappedFile> mappedFile(new VxMath::VxMemoryMappedFile(tempfilename.c_str()));
 			if (mappedFile->IsValid()) {
+				// write file length
+				CKDWORD filebodylen = mappedFile->GetFileSize();
+				std::fwrite(&filebodylen, sizeof(CKDWORD), 1, fs);
+
+				// write file body
 				std::fwrite(mappedFile->GetBase(), sizeof(char), filebodylen, fs);
+			} else {
+				// write zero file length
+				CKDWORD filebodylen = 0;
+				std::fwrite(&filebodylen, sizeof(CKDWORD), 1, fs);
+
+				// report error
+				m_Ctx->OutputToConsoleEx("Fail to open temp file: %s", tempfilename.c_str());
 			}
 
 			// release mapped file
@@ -343,7 +350,7 @@ namespace LibCmo::CK2 {
 
 		// try open file to check whether we can write it.
 		CKERROR err;
-		FILE* tryfile = m_Ctx->OpenFile(filename, "ab");
+		FILE* tryfile = EncodingHelper::U8FOpen(filename, "ab");
 		if (tryfile == nullptr) {
 			err = CKERROR::CKERR_CANTWRITETOFILE;
 		} else {

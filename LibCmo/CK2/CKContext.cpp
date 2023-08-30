@@ -185,21 +185,17 @@ namespace LibCmo::CK2 {
 #pragma region Temp IO utilities
 
 	void CKContext::SetTempPath(CKSTRING u8_temp) {
-		EncodingHelper::SetStdPathFromU8Path(this->m_TempFolder, u8_temp);
+		EncodingHelper::U8PathToStdPath(this->m_TempFolder, u8_temp);
 	}
 
-	FILE* CKContext::OpenTempFile(CKSTRING u8_filename, CKSTRING u8_mode) {
+	std::string CKContext::GetTempFilePath(CKSTRING u8_filename) {
 		std::filesystem::path stdfilename;
-		EncodingHelper::SetStdPathFromU8Path(stdfilename, u8_filename);
-
+		EncodingHelper::U8PathToStdPath(stdfilename, u8_filename);
 		auto realfile = this->m_TempFolder / stdfilename;
-		return EncodingHelper::StdPathFOpen(realfile, u8_mode);
-	}
 
-	FILE* CKContext::OpenFile(CKSTRING u8_filename, CKSTRING u8_mode) {
-		std::filesystem::path stdfilename;
-		EncodingHelper::SetStdPathFromU8Path(stdfilename, u8_filename);
-		return EncodingHelper::StdPathFOpen(stdfilename, u8_mode);
+		std::string result;
+		EncodingHelper::StdPathToU8Path(result, realfile);
+		return result;
 	}
 
 #pragma endregion

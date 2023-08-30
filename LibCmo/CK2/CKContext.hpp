@@ -79,8 +79,7 @@ namespace LibCmo::CK2 {
 		// ========== Temp IO utilities ==========
 
 		void SetTempPath(CKSTRING u8_temp);
-		FILE* OpenTempFile(CKSTRING u8_filename, CKSTRING u8_mode);
-		FILE* OpenFile(CKSTRING u8_filename, CKSTRING u8_mode);
+		std::string GetTempFilePath(CKSTRING u8_filename);
 
 		// ========== Print utilities ==========
 

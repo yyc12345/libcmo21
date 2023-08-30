@@ -178,7 +178,7 @@ namespace LibCmo::EncodingHelper {
 		return CharToChar(u8_name, native_name, CP_UTF8, *token);
 	}
 
-	void SetStdPathFromU8Path(std::filesystem::path& stdpath, const char* u8_path) {
+	void U8PathToStdPath(std::filesystem::path& stdpath, const char* u8_path) {
 		std::wstring intermediary;
 		if (CharToWchar(u8_path, intermediary, CP_UTF8)) {
 			stdpath = intermediary.c_str();
@@ -187,14 +187,24 @@ namespace LibCmo::EncodingHelper {
 			stdpath = u8_path;
 		}
 	}
+
+	void StdPathToU8Path(std::string& u8path, std::filesystem::path& stdpath) {
+		if (!WcharToChar(stdpath.wstring(), u8path, CP_UTF8)) {
+			// fallback
+			u8path = stdpath.string();
+		}
+	}
 	
-	FILE* StdPathFOpen(std::filesystem::path& std_filepath, const char* u8_mode) {
-		std::wstring wmode;
-		if (CharToWchar(u8_mode, wmode, CP_UTF8)) {
-			return _wfopen(std_filepath.wstring().c_str(), wmode.c_str());
+	FILE* U8FOpen(const char* u8_filepath, const char* u8_mode) {
+		std::wstring wmode, wpath;
+		bool suc = CharToWchar(u8_mode, wmode, CP_UTF8);
+		suc = suc && CharToWchar(u8_filepath, wpath, CP_UTF8);
+
+		if (suc) {
+			return _wfopen(wpath.c_str(), wmode.c_str());
 		} else {
 			// fallback
-			return std::fopen(std_filepath.string().c_str(), u8_mode);
+			return std::fopen(u8_filepath, u8_mode);
 		}
 	}
 
@@ -239,12 +249,16 @@ namespace LibCmo::EncodingHelper {
 		return DoIconv(token->FromUtf8, u8_name, native_name);
 	}
 
-	void SetStdPathFromU8Path(std::filesystem::path& stdpath, const char* u8_path) {
+	void U8PathToStdPath(std::filesystem::path& stdpath, const char* u8_path) {
 		stdpath = u8_path;
 	}
 
-	FILE* StdPathFOpen(std::filesystem::path& std_filepath, const char* u8_mode) {
-		return std::fopen(u8_filepath.string().c_str(), u8_mode);
+	void StdPathToU8Path(std::string& u8path, std::filesystem::path& stdpath) {
+		u8path = stdpath.string();
+	}
+	
+	FILE* U8FOpen(const char* u8_filepath, const char* u8_mode) {
+		return std::fopen(u8_filepath, u8_mode);
 	}
 
 

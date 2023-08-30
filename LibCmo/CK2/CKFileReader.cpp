@@ -68,7 +68,7 @@ namespace LibCmo::CK2 {
 		this->m_FileInfo.FileWriteMode = static_cast<CK_FILE_WRITEMODE>(rawHeader.FileWriteMode);
 		this->m_FileInfo.CKVersion = rawHeader.CKVersion;
 		this->m_FileInfo.FileVersion = rawHeader.FileVersion;
-		this->m_FileInfo.FileSize = static_cast<CKDWORD>(parser->GetSize());
+		this->m_FileInfo.FileSize = parser->GetSize();
 		this->m_FileInfo.ManagerCount = rawHeader.ManagerCount;
 		this->m_FileInfo.ObjectCount = rawHeader.ObjectCount;
 		this->m_FileInfo.MaxIDSaved = rawHeader.MaxIDSaved;
@@ -291,6 +291,7 @@ namespace LibCmo::CK2 {
 		// before reading, we need switch back to original parser.
 		// and skip data chunk size
 		parser = std::unique_ptr<CKBufferParser>(new CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
+		parser->SetCursor(ParserPtr->GetCursor());
 		parser->MoveCursor(this->m_FileInfo.DataPackSize);
 
 		// then we can read it.
@@ -312,10 +313,13 @@ namespace LibCmo::CK2 {
 				parser->Read(&filebodylen, sizeof(CKDWORD));
 
 				// read file body
-				FILE* fp = m_Ctx->OpenTempFile(file.c_str(), "wb");
+				std::string tempfilename = m_Ctx->GetTempFilePath(file.c_str());
+				FILE* fp = EncodingHelper::U8FOpen(tempfilename.c_str(), "wb");
 				if (fp != nullptr) {
 					std::fwrite(parser->GetPtr(), sizeof(char), filebodylen, fp);
 					std::fclose(fp);
+				} else {
+					m_Ctx->OutputToConsoleEx("Fail to open temp file: %s", tempfilename.c_str());
 				}
 
 				// move to next

@@ -16,7 +16,7 @@ namespace LibCmo::VxMath {
 
 		// save file path
 #if defined(LIBCMO_OS_WIN32)
-		EncodingHelper::SetStdPathFromU8Path(m_szFilePath, u8_filepath);
+		EncodingHelper::U8PathToStdPath(m_szFilePath, u8_filepath);
 #else
 		this->m_szFilePath = u8_filepath;
 #endif
