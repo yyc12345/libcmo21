@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CkDefines.hpp"
+#include "CKDefines.hpp"
 
 namespace LibCmo::CK2 {
 

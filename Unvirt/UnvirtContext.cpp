@@ -1,4 +1,5 @@
 #include "UnvirtContext.hpp"
+#include <cstdarg>
 
 namespace Unvirt::Context {
 
