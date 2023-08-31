@@ -11,6 +11,7 @@ set(unvirt_sources
 	StringHelper.cpp
 	StructFormatter.cpp
 	TerminalHelper.cpp
+	UnvirtContext.cpp
 	Unvirt.cpp
 )
 

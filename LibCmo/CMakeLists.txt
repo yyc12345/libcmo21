@@ -9,30 +9,40 @@ find_package(Iconv REQUIRED)
 set(CMAKE_CXX_STANDARD 20)
 
 set(libcmo_headers ".")
-set(libcmo_sources
-	CKGlobals.cpp
-	CKFile.cpp
-	CKFileReader.cpp
-	CKFileWriter.cpp
-	CKMinContext.cpp
-	CKStateChunk.cpp
-	VxMemoryMappedFile.cpp
-	VTEncoding.cpp
+
+set(libcmo_vt_src
 	VTUtils.cpp
+	VTEncoding.cpp
 )
-set(libcmo_managers_sources
-	CKManagerImplements/CKBaseManager.cpp
+set(libcmo_ck2_src
+	CK2/CKContext.cpp
+	CK2/CKFileOthers.cpp
+	CK2/CKFileReader.cpp
+	CK2/CKFileWriter.cpp
+	CK2/CKGlobals.cpp
+	CK2/CKStateChunk.cpp
 )
-set(libcmo_objects_sources
-	CKObjectImplements/CKObject.cpp
+set(libcmo_ck2_mgr_src
+	CK2/MgrImpls/CKBaseManager.cpp
+)
+set(libcmo_ck2_obj_src
+	CK2/ObjImpls/CKObject.cpp
+)
+set(libcmo_vxmath_src
+	VxMath/VxMemoryMappedFile.cpp
+)
+set(libcmo_xcontainer_src
 )
 
 # create static library
 add_library(LibCmo
 STATIC
-	${libcmo_sources}
-	${libcmo_managers_sources}
-	${libcmo_objects_sources}
+	${libcmo_vt_src}
+	${libcmo_ck2_src}
+	${libcmo_ck2_mgr_src}
+	${libcmo_ck2_obj_src}
+	${libcmo_vxmath_src}
+	${libcmo_xcontainer_src}
 )
 target_link_libraries(LibCmo
 PRIVATE
