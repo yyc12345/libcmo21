@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../../VTUtils.hpp"
-#include "../CKContext.hpp"
+#include "../../VTAll.hpp"
 
 namespace LibCmo::CK2::ObjImpls {
 
@@ -38,13 +37,12 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual CK_CLASSID GetClassID(void) { 
 			return CK_CLASSID::CKCID_OBJECT; 
 		}
-
 		virtual void PreSave(CKFileVisitor* file, CKDWORD flags);
 		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags);
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file);
 		virtual void PostLoad();
 
-	private:
+	protected:
 		CK_ID m_ID;
 		TypeHelper::MKString m_Name;
 		CK_OBJECT_FLAGS m_ObjectFlags;

@@ -78,6 +78,15 @@
     <ClCompile Include="CK2\CKStateChunk.cpp">
       <Filter>Sources\CK2</Filter>
     </ClCompile>
+    <ClCompile Include="CK2\ObjImpls\CKSceneObject.cpp">
+      <Filter>Sources\CK2\ObjImpls</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\ObjImpls\CKBeObject.cpp">
+      <Filter>Sources\CK2\ObjImpls</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\ObjImpls\CKGroup.cpp">
+      <Filter>Sources\CK2\ObjImpls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VTUtils.hpp">
@@ -122,11 +131,20 @@
     <ClInclude Include="VTAll.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="CK2\MgrImpls\CKBaseManager.hpp">
+    <ClInclude Include="CK2\ObjImpls\CKObject.hpp">
       <Filter>Headers\CK2\ObjImpls</Filter>
     </ClInclude>
-    <ClInclude Include="CK2\ObjImpls\CKObject.hpp">
+    <ClInclude Include="CK2\MgrImpls\CKBaseManager.hpp">
       <Filter>Headers\CK2\MgrImpls</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\ObjImpls\CKBeObject.hpp">
+      <Filter>Headers\CK2\ObjImpls</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\ObjImpls\CKSceneObject.hpp">
+      <Filter>Headers\CK2\ObjImpls</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\ObjImpls\CKGroup.hpp">
+      <Filter>Headers\CK2\ObjImpls</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

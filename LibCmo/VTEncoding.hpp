@@ -7,6 +7,10 @@
 #if defined(LIBCMO_OS_WIN32)
 #include <Windows.h>
 #include <fileapi.h>
+// disable annoy macro at the same time
+#undef GetObject
+#undef GetClassName
+#undef LoadImage
 #else
 #include <iconv.h>
 #endif
