@@ -348,7 +348,7 @@ namespace LibCmo::CK2 {
 			if (obj.Data == nullptr) continue;
 
 			// create object and assign created obj ckid
-			obj.ObjPtr = m_Ctx->CreateCKObject(obj.ObjectCid, obj.Name.c_str());
+			obj.ObjPtr = m_Ctx->CreateObject(obj.ObjectCid, obj.Name.c_str());
 			if (obj.ObjPtr == nullptr) {
 				obj.CreatedObjectId = 0u;
 			} else {
@@ -378,7 +378,7 @@ namespace LibCmo::CK2 {
 				obj.Data = nullptr;
 			} else {
 				// if failed, delete it
-				m_Ctx->DestroyCKObject(obj.ObjectId);
+				m_Ctx->DestroyObject(obj.ObjectId);
 				obj.ObjPtr = nullptr;
 				obj.CreatedObjectId = 0u;
 			}

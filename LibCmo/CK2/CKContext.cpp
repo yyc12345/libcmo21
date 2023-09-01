@@ -36,7 +36,7 @@ namespace LibCmo::CK2 {
 
 #pragma region Objects Management
 
-	ObjImpls::CKObject* CKContext::CreateCKObject(CK_CLASSID cls, CKSTRING name,
+	ObjImpls::CKObject* CKContext::CreateObject(CK_CLASSID cls, CKSTRING name,
 		CK_OBJECTCREATION_OPTIONS options, CK_CREATIONMODE* res) {
 		// todo: Process paramter options and res
 
@@ -66,13 +66,13 @@ namespace LibCmo::CK2 {
 		return obj;
 	}
 
-	ObjImpls::CKObject* CKContext::GetCKObject(CK_ID id) {
+	ObjImpls::CKObject* CKContext::GetObject(CK_ID id) {
 		if (id >= m_ObjectsList.size()) return nullptr;
 		return m_ObjectsList[id];
 	}
 
 	/**
-	 * @brief The real CKObject destroy worker shared by CKContext::DestroyCKObject and CKContext::~CKContext
+	 * @brief The real CKObject destroy worker shared by CKContext::DestroyObject and CKContext::~CKContext
 	 * @param[in] ctx The CKContext
 	 * @param[in] obj The CKObject need to be free.
 	*/
@@ -88,7 +88,7 @@ namespace LibCmo::CK2 {
 		// free it and return its value
 		desc->ReleaseFct(ctx, obj);
 	}
-	void CKContext::DestroyCKObject(CK_ID id) {
+	void CKContext::DestroyObject(CK_ID id) {
 		if (id >= m_ObjectsList.size()) return;
 
 		// get object and free it

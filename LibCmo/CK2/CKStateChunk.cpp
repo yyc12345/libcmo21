@@ -111,23 +111,21 @@ namespace LibCmo::CK2 {
 #pragma region Misc Funcs
 
 	const ChunkProfile CKStateChunk::GetStateChunkProfile() {
-		ChunkProfile profile;
+		return ChunkProfile {
+			.m_ClassId = this->m_ClassId,
+			.m_DataDwSize = this->m_DataDwSize,
+			.m_pData = this->m_pData,
 
-		profile.m_ClassId = this->m_ClassId;
-		profile.m_DataDwSize = this->m_DataDwSize;
-		profile.m_pData = this->m_pData;
+			.m_DataVersion = this->m_DataVersion,
+			.m_ChunkVersion = this->m_ChunkVersion,
 
-		profile.m_DataVersion = this->m_DataVersion;
-		profile.m_ChunkVersion = this->m_ChunkVersion;
+			.m_ObjectListSize = this->m_ObjectList.size(),
+			.m_ChunkListSize = this->m_ChunkList.size(),
+			.m_ManagerListSize = this->m_ManagerList.size(),
 
-		profile.m_ObjectListSize = this->m_ObjectList.size();
-		profile.m_ChunkListSize = this->m_ChunkList.size();
-		profile.m_ManagerListSize = this->m_ManagerList.size();
-
-		profile.m_BindFile = this->m_BindFile;
-		profile.m_BindContext = this->m_BindContext;
-
-		return profile;
+			.m_BindFile = this->m_BindFile,
+			.m_BindContext = this->m_BindContext,
+		};
 	}
 
 	void CKStateChunk::Clear(void) {
@@ -773,7 +771,7 @@ namespace LibCmo::CK2 {
 
 	/* ========== Sequence Functions ==========*/
 
-	bool CKStateChunk::ReadObjectIDSequence(std::vector<CK_ID>* ls) {
+	bool CKStateChunk::ReadObjectIDSequence(XContainer::XArray<CK_ID>* ls) {
 		if (ls == nullptr) return false;
 		ls->clear();
 
@@ -793,7 +791,7 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-	bool CKStateChunk::ReadManagerIntSequence(CKGUID* guid, std::vector<CKINT>* ls) {
+	bool CKStateChunk::ReadManagerIntSequence(CKGUID* guid, XContainer::XArray<CKINT>* ls) {
 		if (guid == nullptr || ls == nullptr) return false;
 
 		// read count
@@ -815,7 +813,7 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-	bool CKStateChunk::ReadSubChunkSequence(std::vector<CKStateChunk*>* ls) {
+	bool CKStateChunk::ReadSubChunkSequence(XContainer::XArray<CKStateChunk*>* ls) {
 		if (ls == nullptr) return false;
 
 		// clear first
@@ -848,17 +846,18 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-	bool CKStateChunk::ReadObjectArray(std::vector<CK_ID>* ls) {
+	bool CKStateChunk::ReadXObjectArray(XContainer::XObjectArray* ls) {
 		if (ls == nullptr) return false;
 		ls->clear();
 
 		// read count
 		CKDWORD count;
 		if (!this->ReadStruct(count)) return false;
-		if (!count) return true;	// 0 size array
+		if (count == 0) return true;	// 0 size array
 
 		// old file size correction
-		if (this->m_ChunkVersion < CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1) {
+		bool old_file = this->m_ChunkVersion < CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1;
+		if (old_file) {
 			// skip 4. but I don't know why!!!
 			this->Skip(4);
 			if (!this->ReadStruct(count)) return false;
@@ -874,16 +873,31 @@ namespace LibCmo::CK2 {
 				return false;
 			}
 
-			// remap id
-			if (this->m_BindFile != nullptr) {
-				if (cache < 0) {
-					id = 0u;
-				} else {
-					id = this->m_BindFile->GetFileObjectByIndex(cache)->CreatedObjectId;
-				}
-			} else {
+			// in old file or no bind file, the read data directly is CK_ID.
+			// in new file or has bind file, the read data is the index in FileObjects
+			if (old_file || this->m_BindFile == nullptr) {
 				id = static_cast<CK_ID>(cache);
+			} else {
+				if (cache < 0) id = 0;
+				else id = this->m_BindFile->GetFileObjectByIndex(cache)->CreatedObjectId;
 			}
+		}
+
+		return true;
+	}
+
+	bool CKStateChunk::ReadXObjectPointerArray(XContainer::XObjectPointerArray* ls) {
+		if (ls == nullptr) return false;
+
+		// very very similar to ReadXObjectArray
+		// we execute it first.
+		XContainer::XObjectArray idarr;
+		if (!ReadXObjectArray(idarr)) return false;
+
+		// then convert it to pointer list
+		ls->resize(idarr.size());
+		for (size_t i = 0; i < idarr.size(); ++i) {
+			(*ls)[i] = m_BindContext->GetObject(idarr[i]);
 		}
 
 		return true;

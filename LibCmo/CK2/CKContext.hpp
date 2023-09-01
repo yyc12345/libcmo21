@@ -37,11 +37,11 @@ namespace LibCmo::CK2 {
 		 * @remark CKObjects must be destroy with the DestroyObject method.
 		 * @see CKObject, DestroyObject
 		*/
-		ObjImpls::CKObject* CreateCKObject(CK_CLASSID cls, CKSTRING name,
+		ObjImpls::CKObject* CreateObject(CK_CLASSID cls, CKSTRING name,
 			CK_OBJECTCREATION_OPTIONS options = CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_NONAMECHECK, 
 			CK_CREATIONMODE* res = nullptr);
-		ObjImpls::CKObject* GetCKObject(CK_ID id);
-		void DestroyCKObject(CK_ID id);
+		ObjImpls::CKObject* GetObject(CK_ID id);
+		void DestroyObject(CK_ID id);
 
 		CKDWORD AllocateGroupGlobalIndex();
 		CKDWORD AllocateSceneGlobalIndex();

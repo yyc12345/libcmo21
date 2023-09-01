@@ -25,10 +25,35 @@ namespace LibCmo::CK2::ObjImpls {
 		bool suc = CKBeObject::Load(chunk, file);
 		if (!suc) return false;
 
+		// cleat self
+		this->Clear();
+
+		// get grouped objects
+		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_GROUP::CK_STATESAVE_GROUPALL)) {
+			XContainer::XObjectPointerArray ptrs;
+			chunk->ReadXObjectPointerArray(ptrs);
+
+			// filter pointer and check them type
+			for (auto& ptr : ptrs) {
+				// skip bad one
+				if (ptr == nullptr || ptr == this
+					|| !CKIsChildClassOf(ptr->GetClassID(), CK_CLASSID::CKCID_BEOBJECT)) {
+					continue;
+				}
+				CKBeObject* beobj = static_cast<CKBeObject*>(ptr);
+				if (beobj->IsInGroup(this)) continue;
+
+				// add good one
+				beobj->CKGroup_SetGroups(m_GroupIndex, true);
+				m_ObjectArray.emplace_back(beobj);
+			}
+
+		}
+
 		return true;
 	}
 
-	CKDWORD CKGroup::GetGroupIndex() {
+	CKDWORD CKGroup::CKBeObject_GetGroupIndex() {
 		return m_GroupIndex;
 	}
 

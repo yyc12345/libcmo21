@@ -1,6 +1,7 @@
 #include "CKSceneObject.hpp"
 #include "../CKStateChunk.hpp"
 #include "CKBeObject.hpp"
+#include "CKGroup.hpp"
 
 namespace LibCmo::CK2::ObjImpls {
 
@@ -19,7 +20,10 @@ namespace LibCmo::CK2::ObjImpls {
 	}
 
 	bool CKBeObject::IsInGroup(CKGroup* group) {
-		return false;
+		if (group == nullptr) return false;
+		CKDWORD idx = group->CKBeObject_GetGroupIndex();
+		if (idx >= m_Groups.size()) return false;
+		return m_Groups[idx];
 	}
 
 	void CKBeObject::CKGroup_SetGroups(CKDWORD pos, bool val) {

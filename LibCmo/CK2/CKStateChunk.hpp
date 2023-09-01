@@ -119,14 +119,14 @@ namespace LibCmo::CK2 {
 		/* ========== Basic Data Read Functions ==========*/
 
 	private:
-		/// <summary>
-		/// The base read function for all data.
-		/// <para>This function will check all read requirements.</para>
-		/// <para>If you have use this function or functions calling this function. You do not need check any reading requirements anymore</para>
-		/// </summary>
-		/// <param name="data_ptr">the pointer to data. must be allocated first.</param>
-		/// <param name="size_in_byte">the size of data in byte.</param>
-		/// <returns></returns>
+		/**
+		 * @brief The base read function for all data.
+		 * This function will check all read requirements.
+		 * If you have use this function or functions calling this function. You do not need check any reading requirements anymore.
+		 * @param data_ptr[out] the pointer to data. must be allocated first.
+		 * @param size_in_byte[in] the size of data in byte.
+		 * @return True if success.
+		*/
 		bool ReadByteData(void* data_ptr, CKDWORD size_in_byte);
 	public:
 		/// <summary>
@@ -228,8 +228,8 @@ namespace LibCmo::CK2 {
 		/// </summary>
 		/// <param name="ls"></param>
 		/// <returns></returns>
-		bool ReadObjectIDSequence(std::vector<CK_ID>* ls);
-		inline bool ReadObjectIDSequence(std::vector<CK_ID>& ls) {
+		bool ReadObjectIDSequence(XContainer::XArray<CK_ID>* ls);
+		inline bool ReadObjectIDSequence(XContainer::XArray<CK_ID>& ls) {
 			return ReadObjectIDSequence(&ls);
 		}
 
@@ -240,8 +240,8 @@ namespace LibCmo::CK2 {
 		/// <param name="guid"></param>
 		/// <param name="ls"></param>
 		/// <returns></returns>
-		bool ReadManagerIntSequence(CKGUID* guid, std::vector<CKINT>* ls);
-		inline bool ReadManagerIntSequence(CKGUID& guid, std::vector<CKINT>& ls) {
+		bool ReadManagerIntSequence(CKGUID* guid, XContainer::XArray<CKINT>* ls);
+		inline bool ReadManagerIntSequence(CKGUID& guid, XContainer::XArray<CKINT>& ls) {
 			return ReadManagerIntSequence(&guid, &ls);
 		}
 
@@ -252,20 +252,31 @@ namespace LibCmo::CK2 {
 		/// </summary>
 		/// <param name="ls"></param>
 		/// <returns></returns>
-		bool ReadSubChunkSequence(std::vector<CKStateChunk*>* ls);
-		inline bool ReadSubChunkSequence(std::vector<CKStateChunk*>& ls) {
+		bool ReadSubChunkSequence(XContainer::XArray<CKStateChunk*>* ls);
+		inline bool ReadSubChunkSequence(XContainer::XArray<CKStateChunk*>& ls) {
 			return ReadSubChunkSequence(&ls);
 		}
 
-		/// <summary>
-		/// Read Object Array (actually still is CK_ID)
-		/// <para>ReadXObjectArray() and ReadObjectArray() redirect to this.</para>
-		/// </summary>
-		/// <param name="ls"></param>
-		/// <returns></returns>
-		bool ReadObjectArray(std::vector<CK_ID>* ls);
-		inline bool ReadObjectArray(std::vector<CK_ID>& ls) {
-			return ReadObjectArray(&ls);
+		/**
+		 * @brief Read Object Array (actually still is CK_ID)
+		 * @remark ReadObjectArray() and XObjectArray::Load redirect to this.
+		 * @param ls The list
+		 * @return True if success.
+		*/
+		bool ReadXObjectArray(XContainer::XObjectArray* ls);
+		inline bool ReadXObjectArray(XContainer::XObjectArray& ls) {
+			return ReadXObjectArray(&ls);
+		}
+
+		/**
+		 * @brief Read Object Array (actually is CKObject*)
+		 * @remark ReadXObjectArray() and XObjectPointerArray::Load redirect to this.
+		 * @param ls The list
+		 * @return True if success
+		*/
+		bool ReadXObjectPointerArray(XContainer::XObjectPointerArray* ls);
+		inline bool ReadXObjectPointerArray(XContainer::XObjectPointerArray& ls) {
+			return ReadXObjectPointerArray(&ls);
 		}
 
 		//int		ReadInt();

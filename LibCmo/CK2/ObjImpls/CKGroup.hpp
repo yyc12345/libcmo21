@@ -19,7 +19,7 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
 		//virtual void PostLoad() override;
 
-		CKDWORD GetGroupIndex();
+		CKDWORD CKBeObject_GetGroupIndex();
 		
 		// ===== Insert =====
 		CKERROR AddObject(CKBeObject *o);
