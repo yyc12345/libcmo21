@@ -189,6 +189,7 @@
     <ClCompile Include="CK2\CKStateChunk.cpp" />
     <ClCompile Include="VTUtils.cpp" />
     <ClCompile Include="VxMath\VxMemoryMappedFile.cpp" />
+    <ClCompile Include="XContainer\XBitArray.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CK2\CKDefines.hpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="VTUtils.hpp" />
     <ClInclude Include="VxMath\VxMemoryMappedFile.hpp" />
     <ClInclude Include="VxMath\VxTypes.hpp" />
+    <ClInclude Include="XContainer\XBitArray.hpp" />
     <ClInclude Include="XContainer\XTypes.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -22,4 +22,9 @@ namespace LibCmo::CK2::ObjImpls {
 		return false;
 	}
 
+	void CKBeObject::CKGroup_SetGroups(CKDWORD pos, bool val) {
+		if (pos >= m_Groups.size()) m_Groups.resize(pos + 1);
+		m_Groups[pos] = val;
+	}
+
 }

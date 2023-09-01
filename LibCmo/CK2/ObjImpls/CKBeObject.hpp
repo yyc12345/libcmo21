@@ -22,6 +22,7 @@ namespace LibCmo::CK2::ObjImpls {
 		//virtual void PostLoad() override;
 
 		bool IsInGroup(CKGroup* group);
+		void CKGroup_SetGroups(CKDWORD pos, bool val);
 		
 	protected:
 		XContainer::XBitArray m_Groups;

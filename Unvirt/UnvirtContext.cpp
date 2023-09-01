@@ -127,6 +127,7 @@ namespace Unvirt::Context {
 		m_Help = root->RootHelp();
 
 		// create context
+		LibCmo::CK2::CKStartUp();
 		m_Ctx = new LibCmo::CK2::CKContext();
 		m_Ctx->SetOutputCallback(std::bind(&UnvirtContext::PrintContextMsg, this, std::placeholders::_1));
 	}
@@ -134,6 +135,11 @@ namespace Unvirt::Context {
 	UnvirtContext::~UnvirtContext() {
 		if (m_Help != nullptr)
 			delete m_Help;
+
+		// free context
+		ClearDocument();
+		delete m_Ctx;
+		LibCmo::CK2::CKShutdown();
 	}
 
 	bool UnvirtContext::HasOpenedFile() {

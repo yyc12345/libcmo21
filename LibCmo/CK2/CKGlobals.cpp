@@ -11,6 +11,9 @@
 #include <zlib.h>
 
 #include "ObjImpls/CKObject.hpp"
+#include "ObjImpls/CKSceneObject.hpp"
+#include "ObjImpls/CKBeObject.hpp"
+#include "ObjImpls/CKGroup.hpp"
 
 namespace LibCmo::CK2 {
 
@@ -61,17 +64,23 @@ namespace LibCmo::CK2 {
 #pragma region CKClass Registration
 
 	static XContainer::XArray<CKClassDesc> g_CKClassInfo;
-	static std::map<CK_CLASSID, size_t> g_CKClassInfoId2Idx;
-	static CK_CLASSID g_CKClassInfoMaxID = static_cast<CK_CLASSID>(0);
+
+	CK_CLASSID CKClassGetNewIdentifier() {
+		size_t classsize = g_CKClassInfo.size();
+		if (classsize < static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID)) {
+			return CK_CLASSID::CKCID_MAXCLASSID;
+		} else {
+			return static_cast<CK_CLASSID>(classsize);
+		}
+	}
 
 	static void ComputeParentsTable(CKClassDesc& desc) {
 		// if it has done, do not process it again.
 		if (desc.Done) return;
 
 		// find direct parent
-		auto finder = g_CKClassInfoId2Idx.find(desc.Parent);
-		if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
-		CKClassDesc& parent = g_CKClassInfo[finder->second];
+		CKClassDesc& parent = g_CKClassInfo[static_cast<size_t>(desc.Parent)];
+		if (!parent.IsValid) LIBPANIC("No such CK_CLASSID.");
 
 		// if it is not self inheritance, call recursively
 		if (desc.Self != desc.Parent) {
@@ -81,9 +90,7 @@ namespace LibCmo::CK2 {
 		// copy parent's parents
 		desc.Parents = parent.Parents;
 		// and set self as its parent
-		finder = g_CKClassInfoId2Idx.find(desc.Self);
-		if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
-		desc.Parents[finder->second] = true;
+		desc.Parents[static_cast<size_t>(desc.Self)] = true;
 
 		// set derivation level
 		desc.DerivationLevel = parent.DerivationLevel + 1;
@@ -95,26 +102,30 @@ namespace LibCmo::CK2 {
 		// set Done to false and resize all XBitArray
 		size_t classCount = g_CKClassInfo.size();
 		for (auto& item : g_CKClassInfo) {
+			if (!item.IsValid) continue;
+
 			item.Done = false;
 			item.Parents.resize(classCount, false);
 			item.Children.resize(classCount, false);
 		}
 		// compute parents
 		for (auto& item : g_CKClassInfo) {
+			if (!item.IsValid) continue;
+
 			ComputeParentsTable(item);
 		}
 		// compute children by parents table
 		// iterate CKClassDesc::Parents and register it self to gotten parents
 		for (auto& item : g_CKClassInfo) {
-			auto finder = g_CKClassInfoId2Idx.find(item.Self);
-			if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
-			size_t selfidx = finder->second;
+			if (!item.IsValid) continue;
 
 			for (size_t idx = 0; idx < classCount; ++idx) {
+				if (!g_CKClassInfo[idx].IsValid) continue;
+
 				// if this idx is its parent,
 				// add self to parent.
 				if (item.Parents[idx]) {
-					g_CKClassInfo[idx].Children[selfidx] = true;
+					g_CKClassInfo[idx].Children[static_cast<size_t>(item.Self)] = true;
 				}
 			}
 		}
@@ -122,54 +133,60 @@ namespace LibCmo::CK2 {
 	void CKClassRegister(CK_CLASSID cid, CK_CLASSID parentCid,
 		CKClassCreationFct createFct, CKClassReleaseFct relFct, CKClassNameFct nameFct) {
 
+		// resize class desc array
+		size_t intcid = static_cast<size_t>(cid);
+		if (intcid >= g_CKClassInfo.size()) {
+			g_CKClassInfo.resize(intcid + 1);
+		}
+
+		// emplace desc
 		CKClassDesc desc;
+		desc.IsValid = true;
 		desc.Self = cid;
 		desc.Parent = parentCid;
 		desc.CreationFct = createFct;
 		desc.ReleaseFct = relFct;
 		desc.NameFct = nameFct;
-		g_CKClassInfoId2Idx.emplace(cid, g_CKClassInfo.size());
-		g_CKClassInfo.emplace_back(std::move(desc));
-		g_CKClassInfoMaxID = std::max(g_CKClassInfoMaxID, cid);
+		g_CKClassInfo[intcid] = std::move(desc);
 	}
 
 #pragma endregion
 
 #pragma region Class Hierarchy Management
 
-	CKINT CKGetClassCount() {
-		return static_cast<CKINT>(g_CKClassInfo.size());
+	static bool GetClassIdIndex(CK_CLASSID cid, size_t& intcid) {
+		intcid = static_cast<size_t>(cid);
+		if (intcid >= g_CKClassInfo.size()) return false;
+		if (!g_CKClassInfo[intcid].IsValid) return false;
+		return true;
+	}
+
+	CKDWORD CKGetClassCount() {
+		return static_cast<CKDWORD>(g_CKClassInfo.size());
 	}
 
 	const CKClassDesc* CKGetClassDesc(CK_CLASSID cid) {
-		auto finder = g_CKClassInfoId2Idx.find(cid);
-		if (finder == g_CKClassInfoId2Idx.end()) return nullptr;
-		return g_CKClassInfo.data() + finder->second;
+		size_t intcid;
+		if (!GetClassIdIndex(cid, intcid)) return nullptr;
+		return &g_CKClassInfo[intcid];
 	}
 
 	CKSTRING CKClassIDToString(CK_CLASSID cid) {
-		auto finder = g_CKClassInfoId2Idx.find(cid);
-		if (finder == g_CKClassInfoId2Idx.end() || g_CKClassInfo[finder->second].NameFct == nullptr) return "Invalid Class Identifier";
-		return g_CKClassInfo[finder->second].NameFct();
+		const CKClassDesc* desc = CKGetClassDesc(cid);
+		if (desc == nullptr) return "Undefined Type";
+		else return desc->NameFct();
 	}
 
 	bool CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent) {
-		// get corresponding index first
-		// if we can't find it, return false anyway.
-		auto finder = g_CKClassInfoId2Idx.find(child);
-		if (finder == g_CKClassInfoId2Idx.end()) return false;
-		size_t child_idx = finder->second;
-		finder = g_CKClassInfoId2Idx.find(parent);
-		if (finder == g_CKClassInfoId2Idx.end()) return false;
-		size_t parent_idx = finder->second;
-
-		return g_CKClassInfo[child_idx].Parents[parent_idx];
+		size_t intchild, intparent;
+		if (!GetClassIdIndex(child, intchild) || !GetClassIdIndex(parent, intparent)) return false;
+		return g_CKClassInfo[intchild].Parents[intparent];
 	}
 
 	CK_CLASSID CKGetParentClassID(CK_CLASSID child) {
-		auto finder = g_CKClassInfoId2Idx.find(child);
-		if (finder == g_CKClassInfoId2Idx.end()) LIBPANIC("No such CK_CLASSID.");
-		return g_CKClassInfo[finder->second].Parent;
+		const CKClassDesc* desc = CKGetClassDesc(child);
+		if (desc == nullptr) return CK_CLASSID::CKCID_OBJECT;
+		return desc->Parent;
 	}
 
 	CK_CLASSID CKGetCommonParent(CK_CLASSID cid1, CK_CLASSID cid2) {
@@ -190,11 +207,28 @@ namespace LibCmo::CK2 {
 #pragma region Initializations functions
 
 	CKERROR CKStartUp() {
+
+		// reserve class info array.
+		g_CKClassInfo.reserve(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));
+
 		// todo: add class type registrations
-		CKClassRegister(CK_CLASSID::CKCID_OBJECT, CK_CLASSID::CKCID_OBJECT,
-			[](CKContext* ctx, CK_ID id, CKSTRING name) -> ObjImpls::CKObject* { return new ObjImpls::CKObject(ctx, id, name); },
-			[](CKContext* ctx, ObjImpls::CKObject* obj) -> void { delete obj; },
-			[]() -> CKSTRING { return "Basic Object"; });
+#define EasyClassReg(clsname, cid, parentCid, strName) \
+CKClassRegister(cid, parentCid, \
+	[](CKContext* ctx, CK_ID id, CKSTRING name) -> ObjImpls::CKObject* { return new clsname(ctx, id, name); }, \
+	[](CKContext* ctx, ObjImpls::CKObject* obj) -> void { delete obj; }, \
+	[]() -> CKSTRING { return strName; });
+
+		EasyClassReg(ObjImpls::CKObject, CK_CLASSID::CKCID_OBJECT, CK_CLASSID::CKCID_OBJECT, "Basic Object");
+		EasyClassReg(ObjImpls::CKSceneObject, CK_CLASSID::CKCID_SCENEOBJECT, CK_CLASSID::CKCID_OBJECT, "Scene Object");
+		EasyClassReg(ObjImpls::CKBeObject, CK_CLASSID::CKCID_BEOBJECT, CK_CLASSID::CKCID_SCENEOBJECT, "Behavioral Object");
+		EasyClassReg(ObjImpls::CKGroup, CK_CLASSID::CKCID_GROUP, CK_CLASSID::CKCID_BEOBJECT, "Group");
+
+		//CKClassRegister(CK_CLASSID::CKCID_OBJECT, CK_CLASSID::CKCID_OBJECT,
+		//	[](CKContext* ctx, CK_ID id, CKSTRING name) -> ObjImpls::CKObject* { return new ObjImpls::CKObject(ctx, id, name); },
+		//	[](CKContext* ctx, ObjImpls::CKObject* obj) -> void { delete obj; },
+		//	[]() -> CKSTRING { return "Basic Object"; });
+
+#undef EasyClassReg
 
 		/*
 				// register CKObjects
@@ -233,8 +267,6 @@ namespace LibCmo::CK2 {
 	CKERROR CKShutdown() {
 		// free class indo
 		g_CKClassInfo.clear();
-		g_CKClassInfoId2Idx.clear();
-		g_CKClassInfoMaxID = static_cast<CK_CLASSID>(0);
 
 		return CKERROR::CKERR_OK;
 	}

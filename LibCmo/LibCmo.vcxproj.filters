@@ -87,6 +87,9 @@
     <ClCompile Include="CK2\ObjImpls\CKGroup.cpp">
       <Filter>Sources\CK2\ObjImpls</Filter>
     </ClCompile>
+    <ClCompile Include="XContainer\XBitArray.cpp">
+      <Filter>Sources\XContainer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VTUtils.hpp">
@@ -145,6 +148,9 @@
     </ClInclude>
     <ClInclude Include="CK2\ObjImpls\CKGroup.hpp">
       <Filter>Headers\CK2\ObjImpls</Filter>
+    </ClInclude>
+    <ClInclude Include="XContainer\XBitArray.hpp">
+      <Filter>Headers\XContainer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

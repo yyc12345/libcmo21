@@ -42,6 +42,12 @@ namespace LibCmo::CK2 {
 			CK_CREATIONMODE* res = nullptr);
 		ObjImpls::CKObject* GetCKObject(CK_ID id);
 		void DestroyCKObject(CK_ID id);
+
+		CKDWORD AllocateGroupGlobalIndex();
+		CKDWORD AllocateSceneGlobalIndex();
+		void FreeGroupGlobalIndex(CKDWORD id);
+		void FreeSceneGlobalIndex(CKDWORD id);
+
 		void DestroyAllCKObjects();
 
 		// ========== Object Access ==========
@@ -93,6 +99,9 @@ namespace LibCmo::CK2 {
 
 		XContainer::XArray<ObjImpls::CKObject*> m_ObjectsList;
 		std::deque<CK_ID> m_ReturnedObjectIds;
+
+		XContainer::XBitArray m_GroupGlobalIndex;
+		XContainer::XBitArray m_SceneGlobalIndex;
 
 		// ========== File Save/Load Options ==========
 		CKINT m_CompressionLevel;

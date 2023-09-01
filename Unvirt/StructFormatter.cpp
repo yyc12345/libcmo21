@@ -167,14 +167,28 @@ namespace Unvirt::StructFormatter {
 
 	void PrintCKObject(const LibCmo::CK2::ObjImpls::CKObject* obj) {
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKObject\n")), stdout);
+		if (obj == nullptr) {
+			fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+			return;
+		}
+
 		fputs(UNVIRT_TERMCOL_LIGHT_RED(("Not Implemented.\n")), stdout);
 	}
 	void PrintCKBaseManager(const LibCmo::CK2::MgrImpls::CKBaseManager* mgr) {
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKBaseManager\n")), stdout);
+		if (mgr == nullptr) {
+			fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+			return;
+		}
+
 		fputs(UNVIRT_TERMCOL_LIGHT_RED(("Not Implemented.\n")), stdout);
 	}
 	void PrintCKStateChunk(const LibCmo::CK2::CKStateChunk* chunk) {
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKStateChunk\n")), stdout);
+		if (chunk == nullptr) {
+			fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+			return;
+		}
 
 		// hack const state chunk
 		LibCmo::CK2::CKStateChunk* operchunk = const_cast<LibCmo::CK2::CKStateChunk*>(chunk);

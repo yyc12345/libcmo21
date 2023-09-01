@@ -54,12 +54,13 @@ namespace LibCmo::CK2 {
 
 	// ========== CKClass Registration ==========
 
+	CK_CLASSID CKClassGetNewIdentifier();
 	void CKClassRegister(CK_CLASSID cid, CK_CLASSID parentCid,
 		CKClassCreationFct createFct, CKClassReleaseFct relFct, CKClassNameFct nameFct);
 
 	// ========== Class Hierarchy Management ==========
 
-	CKINT CKGetClassCount();
+	CKDWORD CKGetClassCount();
 	const CKClassDesc* CKGetClassDesc(CK_CLASSID cid);
 	CKSTRING CKClassIDToString(CK_CLASSID cid);
 

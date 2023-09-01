@@ -1,5 +1,6 @@
 #include "CKContext.hpp"
 #include "ObjImpls/CKObject.hpp"
+#include "../XContainer/XBitArray.hpp"
 #include <cstdarg>
 
 namespace LibCmo::CK2 {
@@ -9,6 +10,29 @@ namespace LibCmo::CK2 {
 #else
 	static char g_UniqueFolder[] = "LibCmo";
 #endif
+
+#pragma region Ctor Dtor
+
+	CKContext::CKContext() :
+		m_ObjectsList(), m_ReturnedObjectIds(),
+		m_GroupGlobalIndex(), m_SceneGlobalIndex(),
+		m_CompressionLevel(5), m_FileWriteMode(CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED),
+		m_NameEncoding(), m_TempFolder(),
+		m_OutputCallback(nullptr)
+	{
+		// preset for temp folder
+		// todo: add current CKContext pointer as the part of temp path.
+		// thus multiple CKContext can work.
+		m_TempFolder = std::filesystem::temp_directory_path();
+		m_TempFolder /= g_UniqueFolder;
+		std::filesystem::create_directory(m_TempFolder);
+	}
+
+	CKContext::~CKContext() {
+		DestroyAllCKObjects();
+	}
+
+#pragma endregion
 
 #pragma region Objects Management
 
@@ -78,6 +102,45 @@ namespace LibCmo::CK2 {
 
 	}
 
+	CKDWORD CKContext::AllocateGroupGlobalIndex() {
+		// try find first non-true position
+		CKDWORD index;
+		if (!XContainer::XBitArrayPatch::GetSetBitPosition(m_GroupGlobalIndex, 0, index)) {
+			// failed. distribute new one
+			index = static_cast<CKDWORD>(m_GroupGlobalIndex.size());
+			m_GroupGlobalIndex.resize(m_GroupGlobalIndex.size() + 1);
+		}
+		
+		// set to occupy
+		m_GroupGlobalIndex[index] = true;
+		return index;
+	}
+
+	CKDWORD CKContext::AllocateSceneGlobalIndex() {
+		// same as group
+		CKDWORD index;
+		if (!XContainer::XBitArrayPatch::GetSetBitPosition(m_SceneGlobalIndex, 0, index)) {
+			index = static_cast<CKDWORD>(m_SceneGlobalIndex.size());
+			m_SceneGlobalIndex.resize(m_SceneGlobalIndex.size() + 1);
+		}
+		
+		m_SceneGlobalIndex[index] = true;
+		return index;
+	}
+
+	void CKContext::FreeGroupGlobalIndex(CKDWORD id) {
+		// check position
+		if (id >= m_GroupGlobalIndex.size()) return;
+		// set value
+		m_GroupGlobalIndex[id] = false;
+	}
+
+	void CKContext::FreeSceneGlobalIndex(CKDWORD id) {
+		// same as group
+		if (id >= m_SceneGlobalIndex.size()) return;
+		m_SceneGlobalIndex[id] = false;
+	}
+	
 	void CKContext::DestroyAllCKObjects() {
 		// free all created objects
 		for (auto& ptr : m_ObjectsList) {
@@ -89,6 +152,10 @@ namespace LibCmo::CK2 {
 		m_ReturnedObjectIds.clear();
 		// empty object list
 		m_ObjectsList.clear();
+
+		// clear group and scene global index at the same time
+		m_SceneGlobalIndex.clear();
+		m_GroupGlobalIndex.clear();
 	}
 
 #pragma endregion
@@ -125,29 +192,6 @@ namespace LibCmo::CK2 {
 		return m_FileWriteMode;
 	}
 
-
-#pragma endregion
-
-
-#pragma region Ctor Dtor
-
-	CKContext::CKContext() :
-		m_ObjectsList(), m_ReturnedObjectIds(),
-		m_CompressionLevel(5), m_FileWriteMode(CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED),
-		m_NameEncoding(), m_TempFolder(),
-		m_OutputCallback(nullptr)
-	{
-		// preset for temp folder
-		// todo: add current CKContext pointer as the part of temp path.
-		// thus multiple CKContext can work.
-		m_TempFolder = std::filesystem::temp_directory_path();
-		m_TempFolder /= g_UniqueFolder;
-		std::filesystem::create_directory(m_TempFolder);
-	}
-
-	CKContext::~CKContext() {
-		DestroyAllCKObjects();
-	}
 
 #pragma endregion
 

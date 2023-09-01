@@ -7,14 +7,8 @@ namespace LibCmo::CK2::ObjImpls {
 
 	class CKGroup : public CKBeObject {
 	public:
-		CKGroup(CKContext* ctx, CK_ID ckid, CKSTRING name) : 
-			CKBeObject(ctx, ckid, name),
-			m_ObjectArray(),
-			m_GroupIndex()	// todo: allocate group id
-		{}
-		virtual ~CKGroup() {
-			// todo: free allocated group id
-		}
+		CKGroup(CKContext* ctx, CK_ID ckid, CKSTRING name);
+		virtual ~CKGroup();
 		LIBCMO_DISABLE_COPY_MOVE(CKGroup);
 		
 		virtual CK_CLASSID GetClassID(void) override { 
@@ -29,20 +23,14 @@ namespace LibCmo::CK2::ObjImpls {
 		
 		// ===== Insert =====
 		CKERROR AddObject(CKBeObject *o);
-		CKERROR AddObjectFront(CKBeObject *o);
-		CKERROR InsertObjectAt(CKBeObject *o, CKDWORD pos);
 		
 		// ===== Remove =====
 		CKBeObject* RemoveObject(CKDWORD pos);
 		void RemoveObject(CKBeObject *obj);
 		void Clear();
 		
-		// ===== Order =====
-		void MoveObjectUp(CKBeObject *o);
-		void MoveObjectDown(CKBeObject *o);
-		
 		// ===== Access =====
-		CKObject* GetObject(CKDWORD pos);
+		CKBeObject* GetObject(CKDWORD pos);
 		CKDWORD GetObjectCount();
 
 	protected:
