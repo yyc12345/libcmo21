@@ -57,7 +57,7 @@ namespace LibCmo::CK2 {
 		}
 
 		// create one
-		ObjImpls::CKObject* obj = desc->CreationFct(this, decided_id, name);
+		ObjImpls::CKObject* obj = desc->CreationFct(this, decided_id + c_ObjectIdOffset, name);
 
 		// put into slot
 		m_ObjectsList[decided_id] = obj;
@@ -67,6 +67,7 @@ namespace LibCmo::CK2 {
 	}
 
 	ObjImpls::CKObject* CKContext::GetObject(CK_ID id) {
+		id -= c_ObjectIdOffset;
 		if (id >= m_ObjectsList.size()) return nullptr;
 		return m_ObjectsList[id];
 	}
@@ -89,6 +90,7 @@ namespace LibCmo::CK2 {
 		desc->ReleaseFct(ctx, obj);
 	}
 	void CKContext::DestroyObject(CK_ID id) {
+		id -= c_ObjectIdOffset;
 		if (id >= m_ObjectsList.size()) return;
 
 		// get object and free it

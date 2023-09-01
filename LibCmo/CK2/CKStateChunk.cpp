@@ -565,6 +565,7 @@ namespace LibCmo::CK2 {
 		CKDWORD size_in_dword = this->GetCeilDwordSize(size_in_byte);
 		if (this->EnsureReadSpace(size_in_dword)) {
 			std::memcpy(data_ptr, this->m_pData + this->m_Parser.m_CurrentPos, size_in_byte);
+			this->m_Parser.m_CurrentPos += size_in_dword;
 			return true;
 		} else {
 			// failed, report to context

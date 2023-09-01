@@ -90,6 +90,12 @@
     <ClCompile Include="XContainer\XBitArray.cpp">
       <Filter>Sources\XContainer</Filter>
     </ClCompile>
+    <ClCompile Include="CK2\ObjImpls\CKRenderObject.cpp">
+      <Filter>Sources\CK2\ObjImpls</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\ObjImpls\CK3dEntity.cpp">
+      <Filter>Sources\CK2\ObjImpls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VTUtils.hpp">
@@ -151,6 +157,15 @@
     </ClInclude>
     <ClInclude Include="XContainer\XBitArray.hpp">
       <Filter>Headers\XContainer</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\ObjImpls\CKRenderObject.hpp">
+      <Filter>Headers\CK2\ObjImpls</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\ObjImpls\CK3dEntity.hpp">
+      <Filter>Headers\CK2\ObjImpls</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\ObjImpls\CK3dObject.hpp">
+      <Filter>Headers\CK2\ObjImpls</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

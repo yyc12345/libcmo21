@@ -180,9 +180,11 @@
     <ClCompile Include="CK2\CKGlobals.cpp" />
     <ClCompile Include="CK2\MgrImpls\CKBaseManager.cpp" />
     <ClCompile Include="CK2\CKContext.cpp" />
+    <ClCompile Include="CK2\ObjImpls\CK3dEntity.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKBeObject.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKGroup.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKObject.cpp" />
+    <ClCompile Include="CK2\ObjImpls\CKRenderObject.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKSceneObject.cpp" />
     <ClCompile Include="VTEncoding.cpp" />
     <ClCompile Include="CK2\CKFileReader.cpp" />
@@ -201,8 +203,11 @@
     <ClInclude Include="CK2\CKContext.hpp" />
     <ClInclude Include="CK2\CKStateChunk.hpp" />
     <ClInclude Include="CK2\CKTypes.hpp" />
+    <ClInclude Include="CK2\ObjImpls\CK3dEntity.hpp" />
+    <ClInclude Include="CK2\ObjImpls\CK3dObject.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKBeObject.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKGroup.hpp" />
+    <ClInclude Include="CK2\ObjImpls\CKRenderObject.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKSceneObject.hpp" />
     <ClInclude Include="VTAll.hpp" />
     <ClInclude Include="VTEncoding.hpp" />

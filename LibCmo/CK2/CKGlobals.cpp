@@ -14,6 +14,9 @@
 #include "ObjImpls/CKSceneObject.hpp"
 #include "ObjImpls/CKBeObject.hpp"
 #include "ObjImpls/CKGroup.hpp"
+#include "ObjImpls/CKRenderObject.hpp"
+#include "ObjImpls/CK3dEntity.hpp"
+#include "ObjImpls/CK3dObject.hpp"
 
 namespace LibCmo::CK2 {
 
@@ -222,11 +225,9 @@ CKClassRegister(cid, parentCid, \
 		EasyClassReg(ObjImpls::CKSceneObject, CK_CLASSID::CKCID_SCENEOBJECT, CK_CLASSID::CKCID_OBJECT, "Scene Object");
 		EasyClassReg(ObjImpls::CKBeObject, CK_CLASSID::CKCID_BEOBJECT, CK_CLASSID::CKCID_SCENEOBJECT, "Behavioral Object");
 		EasyClassReg(ObjImpls::CKGroup, CK_CLASSID::CKCID_GROUP, CK_CLASSID::CKCID_BEOBJECT, "Group");
-
-		//CKClassRegister(CK_CLASSID::CKCID_OBJECT, CK_CLASSID::CKCID_OBJECT,
-		//	[](CKContext* ctx, CK_ID id, CKSTRING name) -> ObjImpls::CKObject* { return new ObjImpls::CKObject(ctx, id, name); },
-		//	[](CKContext* ctx, ObjImpls::CKObject* obj) -> void { delete obj; },
-		//	[]() -> CKSTRING { return "Basic Object"; });
+		EasyClassReg(ObjImpls::CKRenderObject, CK_CLASSID::CKCID_RENDEROBJECT, CK_CLASSID::CKCID_BEOBJECT, "Render Object");
+		EasyClassReg(ObjImpls::CK3dEntity, CK_CLASSID::CKCID_3DENTITY, CK_CLASSID::CKCID_RENDEROBJECT, "3D Entity");
+		EasyClassReg(ObjImpls::CK3dObject, CK_CLASSID::CKCID_3DOBJECT, CK_CLASSID::CKCID_3DENTITY, "3D Object");
 
 #undef EasyClassReg
 

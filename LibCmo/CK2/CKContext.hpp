@@ -97,6 +97,13 @@ namespace LibCmo::CK2 {
 	protected:
 		// ========== Objects Management ==========
 
+		/**
+		 * The global offset of created CK_ID.
+		 * The value close to zero may cause some issue.
+		 * So we add a static offset to every created CK_ID.
+		*/
+		const CK_ID c_ObjectIdOffset = 61u;
+
 		XContainer::XArray<ObjImpls::CKObject*> m_ObjectsList;
 		std::deque<CK_ID> m_ReturnedObjectIds;
 
