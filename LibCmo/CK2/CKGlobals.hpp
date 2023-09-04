@@ -45,6 +45,10 @@ namespace LibCmo::CK2 {
 	*/
 	CKDWORD CKComputeDataCRC(const void* data, CKDWORD size, CKDWORD PreviousCRC = 0);
 
+	// ========== String Utilities ==========
+
+	bool CKStrEqual(CKSTRING str1, CKSTRING str2);
+
 	// ========== Numberic Utilities ==========
 
 	/*

@@ -96,6 +96,12 @@
     <ClCompile Include="CK2\ObjImpls\CK3dEntity.cpp">
       <Filter>Sources\CK2\ObjImpls</Filter>
     </ClCompile>
+    <ClCompile Include="CK2\MgrImpls\CKObjectManager.cpp">
+      <Filter>Sources\CK2\MgrImpls</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\MgrImpls\CKPathManager.cpp">
+      <Filter>Sources\CK2\MgrImpls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VTUtils.hpp">
@@ -166,6 +172,12 @@
     </ClInclude>
     <ClInclude Include="CK2\ObjImpls\CK3dObject.hpp">
       <Filter>Headers\CK2\ObjImpls</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\MgrImpls\CKObjectManager.hpp">
+      <Filter>Headers\CK2\MgrImpls</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\MgrImpls\CKPathManager.hpp">
+      <Filter>Headers\CK2\MgrImpls</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -21,60 +21,43 @@ namespace LibCmo::CK2 {
 	class CKContext {
 	public:
 		CKContext();
-		CKContext(const CKContext&) = delete;
-		CKContext& operator=(const CKContext&) = delete;
 		~CKContext();
-
-		// ========== Objects Management ==========
+		LIBCMO_DISABLE_COPY_MOVE(CKContext);
 
 		/**
-		 * @brief Creates a CKObject or derived class instance.
-		 * @param[in] cls Class Identifier (CK_CLASSID) of the object to create.
-		 * @param[in] name The name of this object.
-		 * @param[in] options Tell CKContext how to create this object when conflict happended.
-		 * @param[out] res The value indicate the real method how this object created.
-		 * @return A pointer to the newly created object.
-		 * @remark CKObjects must be destroy with the DestroyObject method.
-		 * @see CKObject, DestroyObject
+		 * @brief Simply clear all CKContext to restore its status.
 		*/
-		ObjImpls::CKObject* CreateObject(CK_CLASSID cls, CKSTRING name,
-			CK_OBJECTCREATION_OPTIONS options = CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_NONAMECHECK, 
-			CK_CREATIONMODE* res = nullptr);
-		ObjImpls::CKObject* GetObject(CK_ID id);
-		void DestroyObject(CK_ID id);
+		void ClearAll();
 
-		CKDWORD AllocateGroupGlobalIndex();
-		CKDWORD AllocateSceneGlobalIndex();
-		void FreeGroupGlobalIndex(CKDWORD id);
-		void FreeSceneGlobalIndex(CKDWORD id);
+		// ========== Common Managers ==========
 
-		void DestroyAllCKObjects();
+		MgrImpls::CKObjectManager* GetObjectManager();
+		MgrImpls::CKPathManager* GetPathManager();
 
-		// ========== Object Access ==========
+		CKDWORD GetManagerCount();
+		MgrImpls::CKBaseManager* GetManager(CKDWORD index);
 
-		//CKManagerImplements::CKBaseManager* CreateCKManager(CKGUID guid);
-		//CKManagerImplements::CKBaseManager* GetCKManager(CK_ID guid);
-		//void DestroyCKManager(CKManagerImplements::CKBaseManager* mgr);
-
-		//CKObject* GetObjectByName(CKSTRING name, CKObject* previous = NULL);
-		//CKObject* GetObjectByNameAndClass(CKSTRING name, CK_CLASSID cid, CKObject* previous = NULL);
-		//CKObject* GetObjectByNameAndParentClass(CKSTRING name, CK_CLASSID pcid, CKObject* previous);
-		//const XContainer::XObjectPointerArray GetObjectListByType(CK_CLASSID cid, CKBOOL derived);
-		//CKINT GetObjectsCountByClassID(CK_CLASSID cid);
-		//CK_ID* GetObjectsListByClassID(CK_CLASSID cid);
-
-		// ========== Common Managers Functions ==========
-
-		CKINT GetManagerCount();
-		MgrImpls::CKBaseManager* GetManager(CKINT index);
+		void ExecuteManagersOnPreClearAll();
+		void ExecuteManagersOnPostClearAll();
+		void ExecuteManagersSequenceToBeDeleted();
+		void ExecuteManagersSequenceDeleted();
 
 		// ========== File Save/Load Options ==========
-		
+
 		void SetCompressionLevel(CKINT level);
 		CKINT GetCompressionLevel();
 
 		void SetFileWriteMode(CK_FILE_WRITEMODE mode);
 		CK_FILE_WRITEMODE GetFileWriteMode();
+
+		CK_TEXTURE_SAVEOPTIONS GetGlobalImagesSaveOptions();
+		void SetGlobalImagesSaveOptions(CK_TEXTURE_SAVEOPTIONS Options);
+
+		CKBitmapProperties* GetGlobalImagesSaveFormat();
+		void SetGlobalImagesSaveFormat(CKBitmapProperties* Format);
+
+		CK_SOUND_SAVEOPTIONS GetGlobalSoundsSaveOptions();
+		void SetGlobalSoundsSaveOptions(CK_SOUND_SAVEOPTIONS Options);
 
 		// ========== Encoding utilities ==========
 
@@ -95,24 +78,16 @@ namespace LibCmo::CK2 {
 		void SetOutputCallback(OutputCallback cb);
 
 	protected:
-		// ========== Objects Management ==========
-
-		/**
-		 * The global offset of created CK_ID.
-		 * The value close to zero may cause some issue.
-		 * So we add a static offset to every created CK_ID.
-		*/
-		const CK_ID c_ObjectIdOffset = 61u;
-
-		XContainer::XArray<ObjImpls::CKObject*> m_ObjectsList;
-		std::deque<CK_ID> m_ReturnedObjectIds;
-
-		XContainer::XBitArray m_GroupGlobalIndex;
-		XContainer::XBitArray m_SceneGlobalIndex;
+		// ========== Common Managers ==========
+		void ExecuteManagersGeneral(std::function<void(MgrImpls::CKBaseManager*)> fct);
+		XContainer::XArray<MgrImpls::CKBaseManager*> m_ManagerList;
 
 		// ========== File Save/Load Options ==========
 		CKINT m_CompressionLevel;
 		CK_FILE_WRITEMODE m_FileWriteMode;
+		CK_TEXTURE_SAVEOPTIONS m_GlobalImagesSaveOptions;
+		CK_SOUND_SAVEOPTIONS m_GlobalSoundsSaveOptions;
+		CKBitmapProperties* m_GlobalImagesSaveFormat;
 
 		// ========== Encoding utilities ==========
 

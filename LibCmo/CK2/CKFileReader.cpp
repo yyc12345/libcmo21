@@ -348,7 +348,7 @@ namespace LibCmo::CK2 {
 			if (obj.Data == nullptr) continue;
 
 			// create object and assign created obj ckid
-			obj.ObjPtr = m_Ctx->CreateObject(obj.ObjectCid, obj.Name.c_str());
+			obj.ObjPtr = m_Ctx->CreateObject(obj.ObjectCid, obj.Name.toCKSTRING());
 			if (obj.ObjPtr == nullptr) {
 				obj.CreatedObjectId = 0u;
 			} else {

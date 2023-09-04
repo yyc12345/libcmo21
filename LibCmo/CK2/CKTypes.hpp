@@ -272,6 +272,7 @@ namespace LibCmo::CK2 {
 	//--- Managers
 	namespace MgrImpls {
 		class CKBaseManager;
+		class CKObjectManager;
 		class CKSoundManager;
 		class CKTimeManager;
 		class CKRenderManager;

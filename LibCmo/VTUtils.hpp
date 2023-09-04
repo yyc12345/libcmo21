@@ -94,11 +94,25 @@ namespace LibCmo {
 				m_Str = m_HasStr ? cstr : "";
 				return *this;
 			}
+			bool operator==(const char* rhs) const {
+				if (m_HasStr) {
+					return m_Str == rhs;
+				} else {
+					return rhs == nullptr;
+				}
+			}
 			MKString(const std::string& cstr) : m_HasStr(true), m_Str(cstr) {}
 			MKString& operator=(const std::string& cstr) {
 				m_HasStr = true;
 				m_Str = cstr;
 				return *this;
+			}
+			bool operator==(const std::string& rhs) const {
+				if (m_HasStr) {
+					return m_Str == rhs;
+				} else {
+					return false;
+				}
 			}
 
 			MKString(const MKString& rhs) : m_HasStr(rhs.m_HasStr), m_Str(rhs.m_Str) {}
@@ -116,13 +130,26 @@ namespace LibCmo {
 				rhs.m_HasStr = false;
 				return *this;
 			}
+			bool operator==(const MKString& rhs) const {
+				return (m_HasStr == rhs.m_HasStr && m_Str == rhs.m_Str);
+			}
 
-			const char* c_str() const {
+			const char* toCKSTRING() const {
 				return m_HasStr ? m_Str.c_str() : nullptr;
 			}
-			const std::string& string() const {
+			/**
+			 * @brief Return the std::string format of this string.
+			 * @remark nullptr string will return blank string.
+			 * @return The std::string format of this string.
+			*/
+			const std::string& toString() const {
 				return m_Str;
 			}
+			/**
+			 * @brief The size of this string.
+			 * @remark Both empty string and nullptr will return 0
+			 * @return The size of this string
+			*/
 			const size_t size() const {
 				return m_HasStr ? m_Str.size() : 0u;
 			}

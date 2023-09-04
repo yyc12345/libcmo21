@@ -2,6 +2,28 @@
 
 #include "../../VTAll.hpp"
 
+/**
+CKBaseManager virtual functions implementations help
+All virtual functions is not supported except we implemented.
+
+Read/Write functions:
+- SaveData()
+- LoadData()
+
+Clear functions:
+- PreClearAll()
+- PostClearAll()
+
+Delete functions:
+- SequenceToBeDeleted()
+- SequenceDeleted()
+
+Moved functions
+- OnCKInit(): Implement in ctor
+- OnCKEnd(): Implement in dtor
+
+*/
+
 namespace LibCmo::CK2::MgrImpls {
 
 	/**
@@ -16,8 +38,7 @@ namespace LibCmo::CK2::MgrImpls {
 		CKBaseManager(CKContext* ctx, CKGUID guid, CKSTRING name) :
 			m_ManagerGuid(guid),
 			m_ManagerName(name),
-			m_Context(ctx)
-		{}
+			m_Context(ctx) {}
 		virtual ~CKBaseManager() {}
 		LIBCMO_DISABLE_COPY_MOVE(CKBaseManager);
 
@@ -37,8 +58,8 @@ namespace LibCmo::CK2::MgrImpls {
 			```
 		@see CKContext::RegisterNewManager, GetName
 		*/
-		CKGUID GetGuid() { 
-			return m_ManagerGuid; 
+		CKGUID GetGuid() {
+			return m_ManagerGuid;
 		}
 		/**
 		@brief Acces to Manager name
@@ -55,14 +76,14 @@ namespace LibCmo::CK2::MgrImpls {
 			}
 			```
 		*/
-		CKSTRING GetName() { 
-			return m_ManagerName.c_str();
+		CKSTRING GetName() {
+			return m_ManagerName.toCKSTRING();
 		}
 
 		/**
 		@brief Called to save manager data.
 		@param SavedFile A pointer to the CKFile being saved.
-		@return This function should return a valid CKStateChunk that contain data to save or NULL if there is nothing to save.
+		@return This function should return true or false if there is nothing to save.
 		@remark
 			+ During a save operation, each manager is given the opportunity to save its data in the file.
 			+ The file being saved is given for information only and must not be modified. It can be used to decide whether it is worth saving
@@ -70,20 +91,67 @@ namespace LibCmo::CK2::MgrImpls {
 		@see CKStateChunk, LoadData
 		*/
 		virtual bool SaveData(CKStateChunk* chunk, CKFileVisitor* SavedFile) {
-			return true;
+			return false;	// default value is false to indicate this manager do not need save any data.
 		}
 		/**
 		@brief Called to load manager data.
 		@param chunk A pointer to a CKStateChunk that was saved in the file.
 		@param LoadedFile A pointer to the CKFile being loaded.
-		@return CK_OK if successful or an error code otherwise.
+		@return CKERR_OK if successful or an error code otherwise.
 		@remark
 			+ During a load operation, each manager is automatically called if there was a chunk saved in the file with SaveData.
 		@see CKStateChunk, SaveData
 		*/
 		virtual CKERROR LoadData(CKStateChunk* chunk, CKFileVisitor* LoadedFile) {
-			return CKERROR::CKERR_OK; 
+			return CKERROR::CKERR_OK;
 		}
+
+		/**
+		@brief Called at the beginning of a CKContext::ClearAll operation.
+		@return CK_OK if successful or an error code otherwise.
+		@remark
+			+ You can override this function to add specific processing at the beginning of a CKContext::ClearAll operation.
+			+ You must override GetValidFunctionsMask and return a value including
+			CKMANAGER_FUNC_PreClearAll for this function to get called.
+		@see Main Virtools Events, PostClearAll, CKContext::ClearAll
+		*/
+		virtual CKERROR PreClearAll() { return CKERROR::CKERR_OK; }
+		/**
+		@brief Called at the end of a CKContext::ClearAll operation.
+		@return CKERR_OK if successful or an error code otherwise.
+		@remark
+			+ You can override this function to add specific processing at the end of a CKContext::ClearAll operation.
+			+ You must override GetValidFunctionsMask and return a value including
+			CKMANAGER_FUNC_PostClearAll for this function to get called.
+		@see Main Virtools Events, PreClearAll, CKContext::ClearAll
+		*/
+		virtual CKERROR PostClearAll() { return CKERROR::CKERR_OK; }
+
+		/**
+		@brief Called just before objects are deleted.
+		@return CK_OK if successful or an error code otherwise.
+		@param objids[in] A pointer to a list of CK_ID of the objects being deleted.
+		@param count[in] number of objects in objids list.
+		@remark
+			+ You can override this function if you need to add specific processing before objects are deleted.
+			+ You must override GetValidFunctionsMask and return a value including
+			CKMANAGER_FUNC_OnSequenceToBeDeleted for this function to get called.
+		@see Main Virtools Events, CKContext::DestroyObjects, SequenceDeleted
+		*/
+		virtual CKERROR SequenceToBeDeleted(const CK_ID* objids, CKDWORD count) { return CKERROR::CKERR_OK; }
+		/**
+		@brief Called after objects have been deleted.
+		@return CK_OK if successful or an error code otherwise.
+		@param objids[in] A pointer to a list of CK_ID of the objects being deleted.
+		@param count[in] number of objects in objids list.
+		@remark
+			+ You can override this function if you need to add specific processing after objects have been deleted.
+			+ You must override GetValidFunctionsMask and return a value including
+			CKMANAGER_FUNC_OnSequenceDeleted for this function to get called.
+		@see Main Virtools Events, CKContext::DestroyObjects, SequenceToBeDeleted
+		*/
+		virtual CKERROR SequenceDeleted(const CK_ID* objids, CKDWORD count) { return CKERROR::CKERR_OK; }
+
 
 	protected:
 		CKGUID m_ManagerGuid; ///> Manager GUID

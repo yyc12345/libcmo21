@@ -89,9 +89,9 @@ namespace LibCmo::CK2 {
 		for (auto& obj : m_FileObjects) {
 			// += 4DWORD(ObjId, ObjCid, FileIndex, NameLen)
 			sumHdrObjSize += 4 * CKSizeof(CKDWORD);
-			if (obj.Name.c_str() != nullptr) {
+			if (obj.Name.toCKSTRING() != nullptr) {
 				// += Name size
-				m_Ctx->GetNativeString(obj.Name.string(), name_conv);
+				m_Ctx->GetNativeString(obj.Name.toString(), name_conv);
 				sumHdrObjSize += static_cast<CKDWORD>(name_conv.size());
 			}
 
@@ -176,8 +176,8 @@ namespace LibCmo::CK2 {
 			hdrparser->Write(&obj.ObjectCid, sizeof(CK_CLASSID));
 			hdrparser->Write(&obj.FileIndex, sizeof(CKDWORD));
 
-			if (obj.Name.c_str() != nullptr) {
-				m_Ctx->GetNativeString(obj.Name.string(), name_conv);
+			if (obj.Name.toCKSTRING() != nullptr) {
+				m_Ctx->GetNativeString(obj.Name.toString(), name_conv);
 				CKDWORD namelen = static_cast<CKDWORD>(name_conv.size());
 				hdrparser->Write(&namelen, sizeof(CKDWORD));
 				hdrparser->Write(name_conv.data(), namelen);

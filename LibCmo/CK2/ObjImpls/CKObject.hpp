@@ -2,6 +2,37 @@
 
 #include "../../VTAll.hpp"
 
+/**
+CKObject virtual functions implementations help
+
+Implement as original meaning:
+- PreSave()
+- Save()
+- Load()
+- PostLoad()
+
+- GetClassID()
+
+- Show()
+- IsHiddenByParent()
+- CanBeHide()
+- IsVisible()
+
+No implement because don't care:
+- GetMemoryOccupation()
+- IsObjectUsed()
+- PrepareDependencies()
+- RemapDependencies()
+
+- CheckPreDeletion()
+- CheckPostDeletion()
+
+Implement moved into other location:
+- Copy(): Use CKObject::CKObject(CK_ID newid, const CKObject* obj) ctor and CKClassDesc to implement.
+- PreDelete(): Write in dtor.
+
+*/
+
 namespace LibCmo::CK2::ObjImpls {
 
 	class CKObject {
@@ -19,7 +50,7 @@ namespace LibCmo::CK2::ObjImpls {
 			return m_ID;
 		}
 		CKSTRING GetName(void) {
-			return m_Name.c_str();
+			return m_Name.toCKSTRING();
 		}
 		void SetName(CKSTRING u8_name) {
 			m_Name = u8_name;

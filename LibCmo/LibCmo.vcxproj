@@ -180,6 +180,8 @@
     <ClCompile Include="CK2\CKGlobals.cpp" />
     <ClCompile Include="CK2\MgrImpls\CKBaseManager.cpp" />
     <ClCompile Include="CK2\CKContext.cpp" />
+    <ClCompile Include="CK2\MgrImpls\CKObjectManager.cpp" />
+    <ClCompile Include="CK2\MgrImpls\CKPathManager.cpp" />
     <ClCompile Include="CK2\ObjImpls\CK3dEntity.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKBeObject.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKGroup.cpp" />
@@ -203,6 +205,8 @@
     <ClInclude Include="CK2\CKContext.hpp" />
     <ClInclude Include="CK2\CKStateChunk.hpp" />
     <ClInclude Include="CK2\CKTypes.hpp" />
+    <ClInclude Include="CK2\MgrImpls\CKObjectManager.hpp" />
+    <ClInclude Include="CK2\MgrImpls\CKPathManager.hpp" />
     <ClInclude Include="CK2\ObjImpls\CK3dEntity.hpp" />
     <ClInclude Include="CK2\ObjImpls\CK3dObject.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKBeObject.hpp" />

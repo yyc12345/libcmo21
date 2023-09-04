@@ -14,7 +14,7 @@ namespace LibCmo::CK2 {
 #pragma region Ctor Dtor
 
 	CKContext::CKContext() :
-		m_ObjectsList(), m_ReturnedObjectIds(),
+		m_ObjectsList(), m_ReturnedObjectOffsets(),
 		m_GroupGlobalIndex(), m_SceneGlobalIndex(),
 		m_CompressionLevel(5), m_FileWriteMode(CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED),
 		m_NameEncoding(), m_TempFolder(),
@@ -29,147 +29,28 @@ namespace LibCmo::CK2 {
 	}
 
 	CKContext::~CKContext() {
-		DestroyAllCKObjects();
+		ClearAll();
 	}
 
 #pragma endregion
 
 #pragma region Objects Management
 
-	ObjImpls::CKObject* CKContext::CreateObject(CK_CLASSID cls, CKSTRING name,
-		CK_OBJECTCREATION_OPTIONS options, CK_CREATIONMODE* res) {
-		// todo: Process paramter options and res
+	void CKContext::ClearAll() {
 
-		// get description first
-		const CKClassDesc* desc = CKGetClassDesc(cls);
-		if (desc == nullptr) return nullptr;
-
-		// allocate a CK_ID first
-		CK_ID decided_id;
-		if (this->m_ReturnedObjectIds.empty()) {
-			// create new CK_ID.
-			decided_id = static_cast<CK_ID>(m_ObjectsList.size());
-			m_ObjectsList.resize(decided_id + 1);
-		} else {
-			// use returned CK_ID.
-			decided_id = m_ReturnedObjectIds.back();
-			m_ReturnedObjectIds.pop_back();
-		}
-
-		// create one
-		ObjImpls::CKObject* obj = desc->CreationFct(this, decided_id + c_ObjectIdOffset, name);
-
-		// put into slot
-		m_ObjectsList[decided_id] = obj;
-		
-		// set out variable
-		return obj;
-	}
-
-	ObjImpls::CKObject* CKContext::GetObject(CK_ID id) {
-		id -= c_ObjectIdOffset;
-		if (id >= m_ObjectsList.size()) return nullptr;
-		return m_ObjectsList[id];
-	}
-
-	/**
-	 * @brief The real CKObject destroy worker shared by CKContext::DestroyObject and CKContext::~CKContext
-	 * @param[in] ctx The CKContext
-	 * @param[in] obj The CKObject need to be free.
-	*/
-	static void InternalDestroy(CKContext* ctx, ObjImpls::CKObject* obj) {
-		// find desc by classid
-		// if really we can not find it, we only can delete it directly.
-		const CKClassDesc* desc = CKGetClassDesc(obj->GetClassID());
-		if (desc == nullptr) {
-			delete obj;
-			return;
-		}
-
-		// free it and return its value
-		desc->ReleaseFct(ctx, obj);
-	}
-	void CKContext::DestroyObject(CK_ID id) {
-		id -= c_ObjectIdOffset;
-		if (id >= m_ObjectsList.size()) return;
-
-		// get object and free it
-		ObjImpls::CKObject* obj = m_ObjectsList[id];
-		if (obj == nullptr) return;
-		InternalDestroy(this, obj);
-		
-		// return its allocated id.
-		m_ObjectsList[id] = nullptr;
-		m_ReturnedObjectIds.emplace_back(id);
-
-	}
-
-	CKDWORD CKContext::AllocateGroupGlobalIndex() {
-		// try find first non-true position
-		CKDWORD index;
-		if (!XContainer::XBitArrayPatch::GetSetBitPosition(m_GroupGlobalIndex, 0, index)) {
-			// failed. distribute new one
-			index = static_cast<CKDWORD>(m_GroupGlobalIndex.size());
-			m_GroupGlobalIndex.resize(m_GroupGlobalIndex.size() + 1);
-		}
-		
-		// set to occupy
-		m_GroupGlobalIndex[index] = true;
-		return index;
-	}
-
-	CKDWORD CKContext::AllocateSceneGlobalIndex() {
-		// same as group
-		CKDWORD index;
-		if (!XContainer::XBitArrayPatch::GetSetBitPosition(m_SceneGlobalIndex, 0, index)) {
-			index = static_cast<CKDWORD>(m_SceneGlobalIndex.size());
-			m_SceneGlobalIndex.resize(m_SceneGlobalIndex.size() + 1);
-		}
-		
-		m_SceneGlobalIndex[index] = true;
-		return index;
-	}
-
-	void CKContext::FreeGroupGlobalIndex(CKDWORD id) {
-		// check position
-		if (id >= m_GroupGlobalIndex.size()) return;
-		// set value
-		m_GroupGlobalIndex[id] = false;
-	}
-
-	void CKContext::FreeSceneGlobalIndex(CKDWORD id) {
-		// same as group
-		if (id >= m_SceneGlobalIndex.size()) return;
-		m_SceneGlobalIndex[id] = false;
-	}
-	
-	void CKContext::DestroyAllCKObjects() {
-		// free all created objects
-		for (auto& ptr : m_ObjectsList) {
-			if (ptr != nullptr) {
-				InternalDestroy(this, ptr);
-			}
-		}
-		// restore returned object list
-		m_ReturnedObjectIds.clear();
-		// empty object list
-		m_ObjectsList.clear();
-
-		// clear group and scene global index at the same time
-		m_SceneGlobalIndex.clear();
-		m_GroupGlobalIndex.clear();
 	}
 
 #pragma endregion
 
 #pragma region Common Manager Functions
 	
-	CKINT CKContext::GetManagerCount() {
-		return 0;
+	CKDWORD CKContext::GetManagerCount() {
+		return m_ManagerList.size();
 	}
 
-	MgrImpls::CKBaseManager* CKContext::GetManager(CKINT index) {
-		return nullptr;
+	MgrImpls::CKBaseManager* CKContext::GetManager(CKDWORD index) {
+		if (index >= m_ManagerList.size()) return nullptr;
+		return m_ManagerList[index];
 	}
 
 #pragma endregion

@@ -64,6 +64,22 @@ namespace LibCmo::CK2 {
 
 #pragma endregion
 
+#pragma region String Utilities 
+
+	bool CKStrEqual(CKSTRING str1, CKSTRING str2) {
+		if (str1 == nullptr) {
+			if (str2 == nullptr) return true;
+			else return false;
+		} else {
+			if (str2 == nullptr) return false;
+			else {
+				return std::strcmp(str1, str2) == 0;
+			}
+		}
+	}
+
+#pragma endregion
+
 #pragma region CKClass Registration
 
 	static XContainer::XArray<CKClassDesc> g_CKClassInfo;
