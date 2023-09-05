@@ -179,5 +179,11 @@
     <ClInclude Include="CK2\MgrImpls\CKPathManager.hpp">
       <Filter>Headers\CK2\MgrImpls</Filter>
     </ClInclude>
+    <ClInclude Include="VxMath\VxEnums.hpp">
+      <Filter>Headers\VxMath</Filter>
+    </ClInclude>
+    <ClInclude Include="VxMath\VxMath.hpp">
+      <Filter>Headers\VxMath</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

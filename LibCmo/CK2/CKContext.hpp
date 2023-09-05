@@ -23,14 +23,36 @@ namespace LibCmo::CK2 {
 		CKContext();
 		~CKContext();
 		LIBCMO_DISABLE_COPY_MOVE(CKContext);
-
+		
+		// ========== Engine runtime ==========
+	public:
 		/**
 		 * @brief Simply clear all CKContext to restore its status.
 		*/
 		void ClearAll();
 
-		// ========== Common Managers ==========
+		// ========== Objects Management / Access ==========
+		// These functions is a simply redirect to CKObjectManager
 
+		ObjImpls::CKObject* CreateObject(CK_CLASSID cls, CKSTRING name,
+			CK_OBJECTCREATION_OPTIONS options = CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_NONAMECHECK,
+			CK_CREATIONMODE* res = nullptr);
+
+		ObjImpls::CKObject* GetObject(CK_ID ObjID);
+		CKDWORD GetObjectCount();
+		void DestroyObject(ObjImpls::CKObject *obj);
+		void DestroyObject(CK_ID id);
+		void DestroyObjects(CK_ID* obj_ids, CKDWORD Count);
+
+		ObjImpls::CKObject* GetObjectByName(CKSTRING name, ObjImpls::CKObject *previous = nullptr);
+		ObjImpls::CKObject* GetObjectByNameAndClass(CKSTRING name, CK_CLASSID cid, ObjImpls::CKObject *previous = nullptr);
+		ObjImpls::CKObject* GetObjectByNameAndParentClass(CKSTRING name, CK_CLASSID pcid, ObjImpls::CKObject* previous);
+		const XContainer::XObjectPointerArray GetObjectListByType(CK_CLASSID cid, bool derived);
+		CKDWORD GetObjectsCountByClassID(CK_CLASSID cid);
+		CK_ID* GetObjectsListByClassID(CK_CLASSID cid);
+
+		// ========== Common Managers ==========
+	public:
 		MgrImpls::CKObjectManager* GetObjectManager();
 		MgrImpls::CKPathManager* GetPathManager();
 
@@ -39,11 +61,18 @@ namespace LibCmo::CK2 {
 
 		void ExecuteManagersOnPreClearAll();
 		void ExecuteManagersOnPostClearAll();
-		void ExecuteManagersSequenceToBeDeleted();
-		void ExecuteManagersSequenceDeleted();
+		void ExecuteManagersOnSequenceToBeDeleted(const CK_ID* objids, CKDWORD count);
+		void ExecuteManagersOnSequenceDeleted(const CK_ID* objids, CKDWORD count);
+
+	protected:
+		void ExecuteManagersGeneral(std::function<void(MgrImpls::CKBaseManager*)> fct);
+		XContainer::XArray<MgrImpls::CKBaseManager*> m_ManagerList;
+
+		MgrImpls::CKObjectManager* m_ObjectManager;
+		MgrImpls::CKPathManager* m_PathManager;
 
 		// ========== File Save/Load Options ==========
-
+	public:
 		void SetCompressionLevel(CKINT level);
 		CKINT GetCompressionLevel();
 
@@ -53,36 +82,13 @@ namespace LibCmo::CK2 {
 		CK_TEXTURE_SAVEOPTIONS GetGlobalImagesSaveOptions();
 		void SetGlobalImagesSaveOptions(CK_TEXTURE_SAVEOPTIONS Options);
 
-		CKBitmapProperties* GetGlobalImagesSaveFormat();
-		void SetGlobalImagesSaveFormat(CKBitmapProperties* Format);
+		const CKBitmapProperties* GetGlobalImagesSaveFormat();
+		void SetGlobalImagesSaveFormat(const CKBitmapProperties* Format);
 
 		CK_SOUND_SAVEOPTIONS GetGlobalSoundsSaveOptions();
 		void SetGlobalSoundsSaveOptions(CK_SOUND_SAVEOPTIONS Options);
-
-		// ========== Encoding utilities ==========
-
-		void GetUtf8String(const std::string& native_name, std::string& u8_name);
-		void GetNativeString(const std::string& u8_name, std::string& native_name);
-		void SetEncoding(const std::vector<std::string> encoding_series);
-
-		// ========== Temp IO utilities ==========
-
-		void SetTempPath(CKSTRING u8_temp);
-		std::string GetTempFilePath(CKSTRING u8_filename);
-
-		// ========== Print utilities ==========
-
-		using OutputCallback = std::function<void(CKSTRING)>;
-		void OutputToConsole(CKSTRING str);
-		void OutputToConsoleEx(CKSTRING fmt, ...);
-		void SetOutputCallback(OutputCallback cb);
-
+		
 	protected:
-		// ========== Common Managers ==========
-		void ExecuteManagersGeneral(std::function<void(MgrImpls::CKBaseManager*)> fct);
-		XContainer::XArray<MgrImpls::CKBaseManager*> m_ManagerList;
-
-		// ========== File Save/Load Options ==========
 		CKINT m_CompressionLevel;
 		CK_FILE_WRITEMODE m_FileWriteMode;
 		CK_TEXTURE_SAVEOPTIONS m_GlobalImagesSaveOptions;
@@ -90,15 +96,30 @@ namespace LibCmo::CK2 {
 		CKBitmapProperties* m_GlobalImagesSaveFormat;
 
 		// ========== Encoding utilities ==========
-
+	public:
+		void GetUtf8String(const std::string& native_name, std::string& u8_name);
+		void GetNativeString(const std::string& u8_name, std::string& native_name);
+		void SetEncoding(const std::vector<std::string> encoding_series);
+		
+	protected:
 		std::vector<EncodingHelper::ENCODING_TOKEN> m_NameEncoding;
 
 		// ========== Temp IO utilities ==========
-
+	public:
+		void SetTempPath(CKSTRING u8_temp);
+		std::string GetTempFilePath(CKSTRING u8_filename);
+		
+	protected:
 		std::filesystem::path m_TempFolder;
 
 		// ========== Print utilities ==========
+	public:
+		using OutputCallback = std::function<void(CKSTRING)>;
+		void OutputToConsole(CKSTRING str);
+		void OutputToConsoleEx(CKSTRING fmt, ...);
+		void SetOutputCallback(OutputCallback cb);
 
+	protected:
 		OutputCallback m_OutputCallback;
 	};
 

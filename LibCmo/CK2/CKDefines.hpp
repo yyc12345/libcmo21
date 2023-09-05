@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../VTUtils.hpp"
 #include "CKTypes.hpp"
 #include "../XContainer/XTypes.hpp"
 #include <string>

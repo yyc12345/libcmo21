@@ -217,6 +217,8 @@
     <ClInclude Include="VTEncoding.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKObject.hpp" />
     <ClInclude Include="VTUtils.hpp" />
+    <ClInclude Include="VxMath\VxEnums.hpp" />
+    <ClInclude Include="VxMath\VxMath.hpp" />
     <ClInclude Include="VxMath\VxMemoryMappedFile.hpp" />
     <ClInclude Include="VxMath\VxTypes.hpp" />
     <ClInclude Include="XContainer\XBitArray.hpp" />

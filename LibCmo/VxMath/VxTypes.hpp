@@ -1,10 +1,12 @@
 #pragma once
 
+#include "../VTUtils.hpp"
+#include "../CK2/CKTypes.hpp"
+#include "VxEnums.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
 #include <cinttypes>
-#include "../CK2/CKTypes.hpp"
 
 /**
  * @brief The VxMath part of LibCmo.
@@ -73,36 +75,52 @@ namespace LibCmo::VxMath {
 	 * Colormap, Image pointer and is ready for future enhancements.
 	*/
 	struct VxImageDescEx {
-		CK2::CKINT Size; ///< Size of the structure
-		CK2::CKDWORD Flags; ///< Reserved for special formats (such as compressed ) 0 otherwise
+		VX_PIXELFORMAT Flags; /**< Reserved for special formats (such as compressed ) 0 otherwise */
 
-		CK2::CKINT Width; ///< Width in pixel of the image
-		CK2::CKINT Height; ///< Height in pixel of the image
+		CK2::CKDWORD Width; /**< Width in pixel of the image */
+		CK2::CKDWORD Height; /**< Height in pixel of the image */
 		union {
-			CK2::CKINT BytesPerLine; ///< Pitch (width in bytes) of the image
-			CK2::CKINT TotalImageSize; ///< For compressed image (DXT1...) the total size of the image
+			CK2::CKDWORD BytesPerLine; /**< Pitch (width in bytes) of the image */
+			CK2::CKDWORD TotalImageSize; /**< For compressed image (DXT1...) the total size of the image */
 		};
-		CK2::CKINT BitsPerPixel; ///< Number of bits per pixel
+		CK2::CKINT BitsPerPixel; /**< Number of bits per pixel */
 		union {
-			CK2::CKDWORD RedMask; ///< Mask for Red component
-			CK2::CKDWORD BumpDuMask; ///< Mask for Bump Du component
-		};
-		union {
-			CK2::CKDWORD GreenMask; ///< Mask for Green component	
-			CK2::CKDWORD BumpDvMask; ///< Mask for Bump Dv component
+			CK2::CKDWORD RedMask; /**< Mask for Red component */
+			CK2::CKDWORD BumpDuMask; /**< Mask for Bump Du component */
 		};
 		union {
-			CK2::CKDWORD BlueMask; ///< Mask for Blue component
-			CK2::CKDWORD BumpLumMask; ///< Mask for Luminance component
+			CK2::CKDWORD GreenMask; /**< Mask for Green component */
+			CK2::CKDWORD BumpDvMask; /**< Mask for Bump Dv component */
+		};
+		union {
+			CK2::CKDWORD BlueMask; /**< Mask for Blue component */
+			CK2::CKDWORD BumpLumMask; /**< Mask for Luminance component */
 
 		};
-		CK2::CKDWORD AlphaMask; ///< Mask for Alpha component
+		CK2::CKDWORD AlphaMask; /**< Mask for Alpha component */
 
-		CK2::CKWORD BytesPerColorEntry; ///< ColorMap Stride
-		CK2::CKWORD ColorMapEntries; ///< If other than 0 image is palletized
+		CK2::CKWORD BytesPerColorEntry; /**< ColorMap Stride */
+		CK2::CKWORD ColorMapEntries; /**< If other than 0 image is palletized */
 
-		CK2::CKBYTE* ColorMap; ///< Palette colors
-		CK2::CKBYTE* Image; ///< Image
+		CK2::CKBYTE* ColorMap; /**< Palette colors */
+		CK2::CKBYTE* Image; /**< Image */
+
+		bool HasAlpha() {
+			return (AlphaMask == 0 || Flags >= VX_PIXELFORMAT::_DXT1);
+		}
+
+		bool operator==(const VxImageDescEx& rhs) const {
+			return (
+				Height == rhs.Height && Width == rhs.Width &&
+				BitsPerPixel == rhs.BitsPerPixel && BytesPerLine == rhs.BytesPerLine &&
+				RedMask == rhs.RedMask && GreenMask == rhs.GreenMask && BlueMask == rhs.BlueMask && AlphaMask == rhs.AlphaMask &&
+				BytesPerColorEntry == rhs.BytesPerColorEntry && ColorMapEntries == rhs.ColorMapEntries
+				);
+		}
+		bool operator!=(const VxImageDescEx& rhs) const {
+			return !((*this) == rhs);
+		}
+
 	};
 
 }

@@ -1,5 +1,8 @@
 #include "CKContext.hpp"
 #include "ObjImpls/CKObject.hpp"
+#include "MgrImpls/CKBaseManager.hpp"
+#include "MgrImpls/CKObjectManager.hpp"
+#include "MgrImpls/CKPathManager.hpp"
 #include "../XContainer/XBitArray.hpp"
 #include <cstdarg>
 
@@ -14,9 +17,16 @@ namespace LibCmo::CK2 {
 #pragma region Ctor Dtor
 
 	CKContext::CKContext() :
-		m_ObjectsList(), m_ReturnedObjectOffsets(),
-		m_GroupGlobalIndex(), m_SceneGlobalIndex(),
-		m_CompressionLevel(5), m_FileWriteMode(CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED),
+		// setup manager
+		m_ManagerList(),
+		m_ObjectManager(nullptr), m_PathManager(nullptr),
+		// setup file save/load options
+		m_CompressionLevel(5), 
+		m_FileWriteMode(CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED), 
+		m_GlobalImagesSaveOptions(CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_RAWDATA),
+		m_GlobalSoundsSaveOptions(CK_SOUND_SAVEOPTIONS::CKSOUND_EXTERNAL),
+		m_GlobalImagesSaveFormat(nullptr),	// todo: setup save format
+		// misc init
 		m_NameEncoding(), m_TempFolder(),
 		m_OutputCallback(nullptr)
 	{
@@ -26,24 +36,125 @@ namespace LibCmo::CK2 {
 		m_TempFolder = std::filesystem::temp_directory_path();
 		m_TempFolder /= g_UniqueFolder;
 		std::filesystem::create_directory(m_TempFolder);
+
+		// setup managers
+		m_ObjectManager = new MgrImpls::CKObjectManager(this);
+		m_ManagerList.emplace_back(m_ObjectManager);
+		m_PathManager = new MgrImpls::CKPathManager(this);
+		m_ManagerList.emplace_back(m_PathManager);
 	}
 
 	CKContext::~CKContext() {
+		// reset context
 		ClearAll();
+		// free all manager
+		for (auto& mgrptr : m_ManagerList) {
+			delete mgrptr;
+		}
 	}
 
 #pragma endregion
 
-#pragma region Objects Management
+#pragma region Engine runtime
 
 	void CKContext::ClearAll() {
+		// pre clear all
+		ExecuteManagersOnPreClearAll();
 
+		// order object manager clear all objects
+		m_ObjectManager->DestroyAllObjects();
+
+		// post clear all
+		ExecuteManagersOnPostClearAll();
 	}
 
 #pragma endregion
 
-#pragma region Common Manager Functions
+#pragma region Objects Management / Access
+
+	ObjImpls::CKObject* CKContext::CreateObject(CK_CLASSID cls, CKSTRING name, CK_OBJECTCREATION_OPTIONS options, CK_CREATIONMODE* res) {
+		return m_ObjectManager->CreateObject(cls, name, options, res);
+	}
+
+	ObjImpls::CKObject* CKContext::GetObject(CK_ID ObjID) {
+		return m_ObjectManager->GetObject(ObjID);
+	}
+
+	CKDWORD CKContext::GetObjectCount() {
+		return m_ObjectManager->GetObjectCount();
+	}
+
+	void CKContext::DestroyObject(ObjImpls::CKObject* obj) {
+		CK_ID id = obj->GetID();
+		return m_ObjectManager->DestroyObjects(&id, 1);
+	}
+
+	void CKContext::DestroyObject(CK_ID id) {
+		return m_ObjectManager->DestroyObjects(&id, 1);
+	}
+
+	void CKContext::DestroyObjects(CK_ID* obj_ids, CKDWORD Count) {
+		return m_ObjectManager->DestroyObjects(obj_ids, Count);
+	}
+
+	ObjImpls::CKObject* CKContext::GetObjectByName(CKSTRING name, ObjImpls::CKObject* previous) {
+		if (name == nullptr) return nullptr;
+		auto result = m_ObjectManager->GetObjectByNameAndClass(name, CK_CLASSID::CKCID_OBJECT, true);
+
+		auto finder = std::find(result.begin(), result.end(), previous);
+		if (finder == result.end()) return nullptr;
+		++finder;
+		if (finder == result.end()) return nullptr;
+		return *finder;
+	}
+
+	ObjImpls::CKObject* CKContext::GetObjectByNameAndClass(CKSTRING name, CK_CLASSID cid, ObjImpls::CKObject* previous) {
+		if (name == nullptr) return nullptr;
+		auto result = m_ObjectManager->GetObjectByNameAndClass(name, cid, false);
+
+		auto finder = std::find(result.begin(), result.end(), previous);
+		if (finder == result.end()) return nullptr;
+		++finder;
+		if (finder == result.end()) return nullptr;
+		return *finder;
+	}
+
+	ObjImpls::CKObject* CKContext::GetObjectByNameAndParentClass(CKSTRING name, CK_CLASSID pcid, ObjImpls::CKObject* previous) {
+		if (name == nullptr) return nullptr;
+		auto result = m_ObjectManager->GetObjectByNameAndClass(name, pcid, true);
+
+		auto finder = std::find(result.begin(), result.end(), previous);
+		if (finder == result.end()) return nullptr;
+		++finder;
+		if (finder == result.end()) return nullptr;
+		return *finder;
+	}
+
+	const XContainer::XObjectPointerArray CKContext::GetObjectListByType(CK_CLASSID cid, bool derived) {
+		return m_ObjectManager->GetObjectByNameAndClass(nullptr, cid, derived);
+	}
+
+	CKDWORD CKContext::GetObjectsCountByClassID(CK_CLASSID cid) {
+		auto result = m_ObjectManager->GetObjectByNameAndClass(nullptr, cid, false);
+		return static_cast<CKDWORD>(result.size());
+	}
+
+	CK_ID* CKContext::GetObjectsListByClassID(CK_CLASSID cid) {
+		// todo: impl internal buffer
+	}
+
+#pragma endregion
+
+#pragma region Common Managers
 	
+	MgrImpls::CKObjectManager* CKContext::GetObjectManager() {
+		return m_ObjectManager;
+	}
+
+	MgrImpls::CKPathManager* CKContext::GetPathManager() {
+		return m_PathManager;
+	}
+
 	CKDWORD CKContext::GetManagerCount() {
 		return m_ManagerList.size();
 	}
@@ -51,6 +162,36 @@ namespace LibCmo::CK2 {
 	MgrImpls::CKBaseManager* CKContext::GetManager(CKDWORD index) {
 		if (index >= m_ManagerList.size()) return nullptr;
 		return m_ManagerList[index];
+	}
+
+	void CKContext::ExecuteManagersOnPreClearAll() {
+		ExecuteManagersGeneral([](MgrImpls::CKBaseManager* mgr) -> void {
+			mgr->PreClearAll();
+			});
+	}
+
+	void CKContext::ExecuteManagersOnPostClearAll() {
+		ExecuteManagersGeneral([](MgrImpls::CKBaseManager* mgr) -> void {
+			mgr->PostClearAll();
+			});
+	}
+
+	void CKContext::ExecuteManagersOnSequenceToBeDeleted(const CK_ID* objids, CKDWORD count) {
+		ExecuteManagersGeneral([objids, count](MgrImpls::CKBaseManager* mgr) -> void {
+			mgr->SequenceToBeDeleted(objids, count);
+			});
+	}
+
+	void CKContext::ExecuteManagersOnSequenceDeleted(const CK_ID* objids, CKDWORD count) {
+		ExecuteManagersGeneral([objids, count](MgrImpls::CKBaseManager* mgr) -> void {
+			mgr->SequenceDeleted(objids, count);
+			});
+	}
+
+	void CKContext::ExecuteManagersGeneral(std::function<void(MgrImpls::CKBaseManager*)> fct) {
+		for (auto& mgrptr : m_ManagerList) {
+			fct(mgrptr);
+		}
 	}
 
 #pragma endregion
@@ -73,6 +214,34 @@ namespace LibCmo::CK2 {
 
 	CK_FILE_WRITEMODE CKContext::GetFileWriteMode() {
 		return m_FileWriteMode;
+	}
+
+	CK_TEXTURE_SAVEOPTIONS CKContext::GetGlobalImagesSaveOptions() {
+		return m_GlobalImagesSaveOptions;
+	}
+
+	void CKContext::SetGlobalImagesSaveOptions(CK_TEXTURE_SAVEOPTIONS Options) {
+		if (Options != CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_USEGLOBAL) {
+			m_GlobalImagesSaveOptions = Options;
+		}
+	}
+
+	const CKBitmapProperties* CKContext::GetGlobalImagesSaveFormat() {
+		return m_GlobalImagesSaveFormat;
+	}
+
+	void CKContext::SetGlobalImagesSaveFormat(const CKBitmapProperties* Format) {
+		// todo: copy CKBitmapProperties
+	}
+
+	CK_SOUND_SAVEOPTIONS CKContext::GetGlobalSoundsSaveOptions() {
+		return m_GlobalSoundsSaveOptions;
+	}
+
+	void CKContext::SetGlobalSoundsSaveOptions(CK_SOUND_SAVEOPTIONS Options) {
+		if (Options != CK_SOUND_SAVEOPTIONS::CKSOUND_USEGLOBAL) {
+			m_GlobalSoundsSaveOptions = Options;
+		}
 	}
 
 

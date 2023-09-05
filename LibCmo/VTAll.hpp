@@ -9,7 +9,8 @@ This header only fulfill type requirements. If you want
 some implement based operations, such as calling 
 CKStateChunk or CKContext function. You should include them manually.
 
-This file is used as Pre-compiled header in Visual Studio.
+All header or cpp file should include this file first.
+Except the file listed in there, they should include "VTUtils.hpp" first.
 
 */
 #include "VTUtils.hpp"
@@ -21,6 +22,8 @@ This file is used as Pre-compiled header in Visual Studio.
 #include "CK2/CKIdentifiers.hpp"	// CKStateChunk identifiers.
 #include "CK2/CKGlobals.hpp"	// CK global functions, such as CKUnPack and etc.
 
+#include "VxMath/VxEnums.hpp"
 #include "VxMath/VxTypes.hpp"
+#include "VxMath/VxMath.hpp"
 
 #include "XContainer/XTypes.hpp"

@@ -1,4 +1,5 @@
 #include "CKObjectManager.hpp"
+#include "../CKContext.hpp"
 #include "../ObjImpls/CKObject.hpp"
 
 namespace LibCmo::CK2::MgrImpls {
@@ -67,21 +68,29 @@ namespace LibCmo::CK2::MgrImpls {
 		desc->ReleaseFct(m_Context, obj);
 	}
 
-	void CKObjectManager::DestroyObject(CK_ID id) {
-		CKDWORD off = Id2Offset(id);
-		if (off >= m_ObjectsList.size()) return;
+	void CKObjectManager::DestroyObjects(CK_ID* ids, CKDWORD count) {
+		// notice pre
+		m_Context->ExecuteManagersOnSequenceToBeDeleted(ids, count);
 
-		// get object and free it
-		ObjImpls::CKObject* obj = m_ObjectsList[off];
-		if (obj == nullptr) return;
-		InternalDestroy(obj);
+		for (CKDWORD i = 0; i < count; ++i) {
+			CKDWORD off = Id2Offset(ids[i]);
+			if (off >= m_ObjectsList.size()) continue;
 
-		// return its allocated id.
-		// and dec count
-		m_ObjectsList[off] = nullptr;
-		m_ReturnedObjectOffsets.emplace_back(off);
-		--m_ObjectCount;
+			// get object and free it
+			ObjImpls::CKObject* obj = m_ObjectsList[off];
+			if (obj == nullptr) continue;
+			InternalDestroy(obj);
 
+			// return its allocated id.
+			// and dec count
+			m_ObjectsList[off] = nullptr;
+			m_ReturnedObjectOffsets.emplace_back(off);
+			--m_ObjectCount;
+
+		}
+
+		// notice post
+		m_Context->ExecuteManagersOnSequenceDeleted(ids, count);
 	}
 
 	void CKObjectManager::DestroyAllObjects() {
@@ -110,7 +119,7 @@ namespace LibCmo::CK2::MgrImpls {
 
 	XContainer::XObjectPointerArray CKObjectManager::GetObjectByNameAndClass(CKSTRING name, CK_CLASSID cid, bool derived) {
 		XContainer::XObjectPointerArray result;
-		
+
 		for (size_t i = 0; i < m_ObjectsListByClass.size(); ++i) {
 			// check class id first
 			if (derived) {
@@ -118,7 +127,7 @@ namespace LibCmo::CK2::MgrImpls {
 			} else {
 				if (static_cast<CK_CLASSID>(i) != cid) continue;
 			}
-			
+
 			// iterate all sub object and check name
 			for (const auto& objoff : m_ObjectsListByClass[i]) {
 				ObjImpls::CKObject* obj = m_ObjectsList[objoff];

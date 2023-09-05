@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../VTUtils.hpp"
 #include <string>
 #include <vector>
 #include <cstring>

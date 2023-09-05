@@ -35,7 +35,7 @@ namespace LibCmo::CK2::MgrImpls {
 
 		ObjImpls::CKObject* GetObject(CK_ID id);
 		CKDWORD GetObjectCount();
-		void DestroyObject(CK_ID id);
+		void DestroyObjects(CK_ID* ids, CKDWORD count);
 		void DestroyAllObjects();
 
 		// ========== Objects Access ==========
