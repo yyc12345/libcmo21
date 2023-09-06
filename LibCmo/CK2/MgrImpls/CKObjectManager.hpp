@@ -40,6 +40,13 @@ namespace LibCmo::CK2::MgrImpls {
 
 		// ========== Objects Access ==========
 
+		/**
+		 * @brief General object list query.
+		 * @param name nullptr if no requirement.
+		 * @param cid the class id
+		 * @param derived whether considering derived class
+		 * @return the result pointer list.
+		*/
 		XContainer::XObjectPointerArray GetObjectByNameAndClass(
 			CKSTRING name, CK_CLASSID cid, bool derived);
 

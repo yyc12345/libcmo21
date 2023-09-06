@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../VTAll.hpp"
-#include <filesystem>
 #include <map>
 #include <deque>
 #include <functional>
@@ -46,10 +45,14 @@ namespace LibCmo::CK2 {
 
 		ObjImpls::CKObject* GetObjectByName(CKSTRING name, ObjImpls::CKObject *previous = nullptr);
 		ObjImpls::CKObject* GetObjectByNameAndClass(CKSTRING name, CK_CLASSID cid, ObjImpls::CKObject *previous = nullptr);
-		ObjImpls::CKObject* GetObjectByNameAndParentClass(CKSTRING name, CK_CLASSID pcid, ObjImpls::CKObject* previous);
+		ObjImpls::CKObject* GetObjectByNameAndParentClass(CKSTRING name, CK_CLASSID pcid, ObjImpls::CKObject* previous = nullptr);
 		const XContainer::XObjectPointerArray GetObjectListByType(CK_CLASSID cid, bool derived);
 		CKDWORD GetObjectsCountByClassID(CK_CLASSID cid);
 		CK_ID* GetObjectsListByClassID(CK_CLASSID cid);
+
+	protected:
+		XContainer::XObjectPointerArray m_ObjectPointerCache;
+		XContainer::XObjectArray m_ObjectCache;
 
 		// ========== Common Managers ==========
 	public:
@@ -103,14 +106,6 @@ namespace LibCmo::CK2 {
 		
 	protected:
 		std::vector<EncodingHelper::ENCODING_TOKEN> m_NameEncoding;
-
-		// ========== Temp IO utilities ==========
-	public:
-		void SetTempPath(CKSTRING u8_temp);
-		std::string GetTempFilePath(CKSTRING u8_filename);
-		
-	protected:
-		std::filesystem::path m_TempFolder;
 
 		// ========== Print utilities ==========
 	public:

@@ -143,6 +143,8 @@ namespace LibCmo::CK2::MgrImpls {
 				}
 			}
 		}
+
+		return result;
 	}
 
 	CKDWORD CKObjectManager::AllocateGroupGlobalIndex(ObjImpls::CKObject* group) {

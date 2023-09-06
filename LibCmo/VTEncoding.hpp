@@ -11,6 +11,7 @@
 #undef GetObject
 #undef GetClassName
 #undef LoadImage
+#undef GetTempPath
 #else
 #include <iconv.h>
 #endif

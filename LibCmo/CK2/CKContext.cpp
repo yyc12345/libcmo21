@@ -8,34 +8,23 @@
 
 namespace LibCmo::CK2 {
 
-#if defined(LIBCMO_OS_WIN32)
-	static wchar_t g_UniqueFolder[] = L"LibCmo";
-#else
-	static char g_UniqueFolder[] = "LibCmo";
-#endif
-
 #pragma region Ctor Dtor
 
 	CKContext::CKContext() :
 		// setup manager
 		m_ManagerList(),
 		m_ObjectManager(nullptr), m_PathManager(nullptr),
+		// setup object cache
+		m_ObjectCache(), m_ObjectPointerCache(),
 		// setup file save/load options
-		m_CompressionLevel(5), 
-		m_FileWriteMode(CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED), 
+		m_CompressionLevel(5),
+		m_FileWriteMode(CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED),
 		m_GlobalImagesSaveOptions(CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_RAWDATA),
 		m_GlobalSoundsSaveOptions(CK_SOUND_SAVEOPTIONS::CKSOUND_EXTERNAL),
 		m_GlobalImagesSaveFormat(nullptr),	// todo: setup save format
 		// misc init
-		m_NameEncoding(), m_TempFolder(),
-		m_OutputCallback(nullptr)
-	{
-		// preset for temp folder
-		// todo: add current CKContext pointer as the part of temp path.
-		// thus multiple CKContext can work.
-		m_TempFolder = std::filesystem::temp_directory_path();
-		m_TempFolder /= g_UniqueFolder;
-		std::filesystem::create_directory(m_TempFolder);
+		m_NameEncoding(),
+		m_OutputCallback(nullptr) {
 
 		// setup managers
 		m_ObjectManager = new MgrImpls::CKObjectManager(this);
@@ -97,37 +86,35 @@ namespace LibCmo::CK2 {
 		return m_ObjectManager->DestroyObjects(obj_ids, Count);
 	}
 
+	ObjImpls::CKObject* GeneralPrevFinder(XContainer::XObjectPointerArray& objptrs, ObjImpls::CKObject* previous) {
+		auto finder = std::find(objptrs.begin(), objptrs.end(), previous);
+		if (finder == objptrs.end()) return nullptr;
+		++finder;
+		if (finder == objptrs.end()) return nullptr;
+		return *finder;
+	}
 	ObjImpls::CKObject* CKContext::GetObjectByName(CKSTRING name, ObjImpls::CKObject* previous) {
 		if (name == nullptr) return nullptr;
-		auto result = m_ObjectManager->GetObjectByNameAndClass(name, CK_CLASSID::CKCID_OBJECT, true);
-
-		auto finder = std::find(result.begin(), result.end(), previous);
-		if (finder == result.end()) return nullptr;
-		++finder;
-		if (finder == result.end()) return nullptr;
-		return *finder;
+		if (previous == nullptr) {
+			m_ObjectPointerCache = m_ObjectManager->GetObjectByNameAndClass(name, CK_CLASSID::CKCID_OBJECT, true);
+		}
+		return GeneralPrevFinder(m_ObjectPointerCache, previous);
 	}
 
 	ObjImpls::CKObject* CKContext::GetObjectByNameAndClass(CKSTRING name, CK_CLASSID cid, ObjImpls::CKObject* previous) {
 		if (name == nullptr) return nullptr;
-		auto result = m_ObjectManager->GetObjectByNameAndClass(name, cid, false);
-
-		auto finder = std::find(result.begin(), result.end(), previous);
-		if (finder == result.end()) return nullptr;
-		++finder;
-		if (finder == result.end()) return nullptr;
-		return *finder;
+		if (previous == nullptr) {
+			m_ObjectPointerCache = m_ObjectManager->GetObjectByNameAndClass(name, cid, false);
+		}
+		return GeneralPrevFinder(m_ObjectPointerCache, previous);
 	}
 
 	ObjImpls::CKObject* CKContext::GetObjectByNameAndParentClass(CKSTRING name, CK_CLASSID pcid, ObjImpls::CKObject* previous) {
 		if (name == nullptr) return nullptr;
-		auto result = m_ObjectManager->GetObjectByNameAndClass(name, pcid, true);
-
-		auto finder = std::find(result.begin(), result.end(), previous);
-		if (finder == result.end()) return nullptr;
-		++finder;
-		if (finder == result.end()) return nullptr;
-		return *finder;
+		if (previous == nullptr) {
+			m_ObjectPointerCache = m_ObjectManager->GetObjectByNameAndClass(name, pcid, true);
+		}
+		return GeneralPrevFinder(m_ObjectPointerCache, previous);
 	}
 
 	const XContainer::XObjectPointerArray CKContext::GetObjectListByType(CK_CLASSID cid, bool derived) {
@@ -136,17 +123,23 @@ namespace LibCmo::CK2 {
 
 	CKDWORD CKContext::GetObjectsCountByClassID(CK_CLASSID cid) {
 		auto result = m_ObjectManager->GetObjectByNameAndClass(nullptr, cid, false);
-		return static_cast<CKDWORD>(result.size());
+
+		m_ObjectCache.clear();
+		for (auto& obj : result) {
+			m_ObjectCache.emplace_back(obj->GetID());
+		}
+
+		return static_cast<CKDWORD>(m_ObjectCache.size());
 	}
 
 	CK_ID* CKContext::GetObjectsListByClassID(CK_CLASSID cid) {
-		// todo: impl internal buffer
+		return m_ObjectCache.data();
 	}
 
 #pragma endregion
 
 #pragma region Common Managers
-	
+
 	MgrImpls::CKObjectManager* CKContext::GetObjectManager() {
 		return m_ObjectManager;
 	}
@@ -278,24 +271,6 @@ namespace LibCmo::CK2 {
 
 #pragma endregion
 
-#pragma region Temp IO utilities
-
-	void CKContext::SetTempPath(CKSTRING u8_temp) {
-		EncodingHelper::U8PathToStdPath(this->m_TempFolder, u8_temp);
-	}
-
-	std::string CKContext::GetTempFilePath(CKSTRING u8_filename) {
-		std::filesystem::path stdfilename;
-		EncodingHelper::U8PathToStdPath(stdfilename, u8_filename);
-		auto realfile = this->m_TempFolder / stdfilename;
-
-		std::string result;
-		EncodingHelper::StdPathToU8Path(result, realfile);
-		return result;
-	}
-
-#pragma endregion
-
 #pragma region Encoding utilities
 
 	void CKContext::GetUtf8String(const std::string& native_name, std::string& u8_name) {
@@ -318,7 +293,7 @@ namespace LibCmo::CK2 {
 			success = LibCmo::EncodingHelper::GetNativeVirtoolsName(u8_name, native_name, token);
 			if (success) break;
 		}
-		
+
 		// fallback
 		if (!success) {
 			native_name = u8_name;

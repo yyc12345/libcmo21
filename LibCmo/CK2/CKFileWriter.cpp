@@ -3,6 +3,7 @@
 #include "CKStateChunk.hpp"
 #include "ObjImpls/CKObject.hpp"
 #include "MgrImpls/CKBaseManager.hpp"
+#include "MgrImpls/CKPathManager.hpp"
 #include "../VxMath/VxMemoryMappedFile.hpp"
 #include <memory>
 
@@ -315,7 +316,7 @@ namespace LibCmo::CK2 {
 			std::fwrite(name_conv.data(), sizeof(char), filenamelen, fs);
 
 			// try mapping file.
-			std::string tempfilename = m_Ctx->GetTempFilePath(fentry.c_str());
+			std::string tempfilename = m_Ctx->GetPathManager()->GetTempFilePath(fentry.c_str());
 			std::unique_ptr<VxMath::VxMemoryMappedFile> mappedFile(new VxMath::VxMemoryMappedFile(tempfilename.c_str()));
 			if (mappedFile->IsValid()) {
 				// write file length

@@ -7,10 +7,8 @@ namespace LibCmo::CK2::ObjImpls {
 
 	class CKBeObject : public CKSceneObject {
 	public:
-		CKBeObject(CKContext* ctx, CK_ID ckid, CKSTRING name) : 
-			CKSceneObject(ctx, ckid, name)
-		{}
-		virtual ~CKBeObject() {}
+		CKBeObject(CKContext* ctx, CK_ID ckid, CKSTRING name);
+		virtual ~CKBeObject();
 		LIBCMO_DISABLE_COPY_MOVE(CKBeObject);
 
 		virtual CK_CLASSID GetClassID(void) override { 

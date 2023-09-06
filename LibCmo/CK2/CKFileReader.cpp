@@ -1,6 +1,7 @@
 #include "CKFile.hpp"
 #include "CKStateChunk.hpp"
 #include "ObjImpls/CKObject.hpp"
+#include "MgrImpls/CKPathManager.hpp"
 #include "../VxMath/VxMemoryMappedFile.hpp"
 #include "CKContext.hpp"
 #include <memory>
@@ -313,7 +314,7 @@ namespace LibCmo::CK2 {
 				parser->Read(&filebodylen, sizeof(CKDWORD));
 
 				// read file body
-				std::string tempfilename = m_Ctx->GetTempFilePath(file.c_str());
+				std::string tempfilename = m_Ctx->GetPathManager()->GetTempFilePath(file.c_str());
 				FILE* fp = EncodingHelper::U8FOpen(tempfilename.c_str(), "wb");
 				if (fp != nullptr) {
 					std::fwrite(parser->GetPtr(), sizeof(char), filebodylen, fp);

@@ -1,6 +1,7 @@
 #include "CKGroup.hpp"
 #include "../CKStateChunk.hpp"
 #include "../CKContext.hpp"
+#include "../MgrImpls/CKObjectManager.hpp"
 #include <algorithm>
 
 namespace LibCmo::CK2::ObjImpls {
@@ -8,10 +9,10 @@ namespace LibCmo::CK2::ObjImpls {
 	CKGroup::CKGroup(CKContext* ctx, CK_ID ckid, CKSTRING name) :
 		CKBeObject(ctx, ckid, name),
 		m_ObjectArray(),
-		m_GroupIndex(m_Context->AllocateGroupGlobalIndex()) {}
+		m_GroupIndex(m_Context->GetObjectManager()->AllocateGroupGlobalIndex(this)) {}
 
 	CKGroup::~CKGroup() {
-		m_Context->FreeGroupGlobalIndex(m_GroupIndex);
+		m_Context->GetObjectManager()->FreeGroupGlobalIndex(m_GroupIndex);
 	}
 
 	bool CKGroup::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
