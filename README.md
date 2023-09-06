@@ -73,7 +73,9 @@ This project require:
 * The compiler supporting C++20
 * Littile-endian architecture system.
 * zlib
+* FFmpeg (In Windows, download dev package in [there](https://github.com/yt-dlp/FFmpeg-Builds).)
 * iconv (non-Windows system required)
 
 It can be compiled on Windows via sln file, or on Linux platform via CMake file.  
+You should set up `LibRef.props` when using sln file.  
 However CMake may not be updated in time because I develop this project on Windows frequently.

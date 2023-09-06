@@ -2,23 +2,27 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <SQLITE_HEADER_PATH>D:\CppLib\SQLite\sqlite-amalgamation-3400100</SQLITE_HEADER_PATH>
-    <SQLITE_WIN32_LIB_PATH>D:\CppLib\SQLite\sqlite-dll-win32-x86-3400100</SQLITE_WIN32_LIB_PATH>
-    <SQLITE_WIN64_LIB_PATH>D:\CppLib\SQLite\sqlite-dll-win64-x64-3400100</SQLITE_WIN64_LIB_PATH>
+    <FFMPEG_WIN32_HEADER_PATH>D:\CppLib\FFmpeg\Win32\include</FFMPEG_WIN32_HEADER_PATH>
+    <FFMPEG_WIN64_HEADER_PATH>D:\CppLib\FFmpeg\x64\include</FFMPEG_WIN64_HEADER_PATH>
+    <FFMPEG_WIN32_LIB_PATH>D:\CppLib\FFmpeg\Win32\lib</FFMPEG_WIN32_LIB_PATH>
+    <FFMPEG_WIN64_LIB_PATH>D:\CppLib\FFmpeg\x64\lib</FFMPEG_WIN64_LIB_PATH>
     
     <ZLIB_PATH>D:\zlib</ZLIB_PATH>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup />
   <ItemGroup>
-    <BuildMacro Include="SQLITE_HEADER_PATH">
-        <Value>$(SQLITE_HEADER_PATH)</Value>
+    <BuildMacro Include="FFMPEG_WIN32_HEADER_PATH">
+        <Value>$(FFMPEG_WIN32_HEADER_PATH)</Value>
     </BuildMacro>
-    <BuildMacro Include="SQLITE_WIN32_LIB_PATH">
-        <Value>$(SQLITE_WIN32_LIB_PATH)</Value>
+    <BuildMacro Include="FFMPEG_WIN64_HEADER_PATH">
+        <Value>$(FFMPEG_WIN64_HEADER_PATH)</Value>
     </BuildMacro>
-    <BuildMacro Include="SQLITE_WIN64_LIB_PATH">
-        <Value>$(SQLITE_WIN64_LIB_PATH)</Value>
+    <BuildMacro Include="FFMPEG_WIN32_LIB_PATH">
+        <Value>$(FFMPEG_WIN32_LIB_PATH)</Value>
+    </BuildMacro>
+    <BuildMacro Include="FFMPEG_WIN64_LIB_PATH">
+        <Value>$(FFMPEG_WIN64_LIB_PATH)</Value>
     </BuildMacro>
         
     <BuildMacro Include="ZLIB_PATH">
