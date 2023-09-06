@@ -2,31 +2,17 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <FFMPEG_WIN32_HEADER_PATH>D:\CppLib\FFmpeg\Win32\include</FFMPEG_WIN32_HEADER_PATH>
-    <FFMPEG_WIN64_HEADER_PATH>D:\CppLib\FFmpeg\x64\include</FFMPEG_WIN64_HEADER_PATH>
-    <FFMPEG_WIN32_LIB_PATH>D:\CppLib\FFmpeg\Win32\lib</FFMPEG_WIN32_LIB_PATH>
-    <FFMPEG_WIN64_LIB_PATH>D:\CppLib\FFmpeg\x64\lib</FFMPEG_WIN64_LIB_PATH>
-    
+    <STB_PATH>D:\CppLib\stb</STB_PATH>
     <ZLIB_PATH>D:\zlib</ZLIB_PATH>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup />
   <ItemGroup>
-    <BuildMacro Include="FFMPEG_WIN32_HEADER_PATH">
-        <Value>$(FFMPEG_WIN32_HEADER_PATH)</Value>
-    </BuildMacro>
-    <BuildMacro Include="FFMPEG_WIN64_HEADER_PATH">
-        <Value>$(FFMPEG_WIN64_HEADER_PATH)</Value>
-    </BuildMacro>
-    <BuildMacro Include="FFMPEG_WIN32_LIB_PATH">
-        <Value>$(FFMPEG_WIN32_LIB_PATH)</Value>
-    </BuildMacro>
-    <BuildMacro Include="FFMPEG_WIN64_LIB_PATH">
-        <Value>$(FFMPEG_WIN64_LIB_PATH)</Value>
-    </BuildMacro>
-        
     <BuildMacro Include="ZLIB_PATH">
       <Value>$(ZLIB_PATH)</Value>
+    </BuildMacro>
+    <BuildMacro Include="STB_PATH">
+      <Value>$(STB_PATH)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>
