@@ -70,57 +70,68 @@ namespace LibCmo::VxMath {
 	};
 
 	/**
-	 * @brief Enhanced Image description
-	 * @remark The VxImageDescEx holds basically an VxImageDesc with additionnal support for
-	 * Colormap, Image pointer and is ready for future enhancements.
+	 * VxImageDescEx describe the height, width,
+	 * and etc for image.
+	 * Also it hold a pointer to raw image data.
+	 * The image data must be 32bit format.
+	 * Thus the size of Image must be 4 * Width * Height.
 	*/
-	struct VxImageDescEx {
-		VX_PIXELFORMAT Flags; /**< Reserved for special formats (such as compressed ) 0 otherwise */
+	class VxImageDescEx {
+	public:
+		VxImageDescEx(CK2::CKDWORD height, CK2::CKDWORD width) :
+			m_Width(width), m_Height(height), 
+			//m_RedMask(0), m_GreenMask(0), m_BlueMask(0), m_AlphaMask(0),
+			m_Image(nullptr){
+			m_Image = new CK2::CKBYTE[GetImageSize()];
+		}
+		~VxImageDescEx() {
+			delete[] m_Image;
+		}
+		LIBCMO_DISABLE_COPY_MOVE(VxImageDescEx);
 
-		CK2::CKDWORD Width; /**< Width in pixel of the image */
-		CK2::CKDWORD Height; /**< Height in pixel of the image */
-		union {
-			CK2::CKDWORD BytesPerLine; /**< Pitch (width in bytes) of the image */
-			CK2::CKDWORD TotalImageSize; /**< For compressed image (DXT1...) the total size of the image */
-		};
-		CK2::CKINT BitsPerPixel; /**< Number of bits per pixel */
-		union {
-			CK2::CKDWORD RedMask; /**< Mask for Red component */
-			CK2::CKDWORD BumpDuMask; /**< Mask for Bump Du component */
-		};
-		union {
-			CK2::CKDWORD GreenMask; /**< Mask for Green component */
-			CK2::CKDWORD BumpDvMask; /**< Mask for Bump Dv component */
-		};
-		union {
-			CK2::CKDWORD BlueMask; /**< Mask for Blue component */
-			CK2::CKDWORD BumpLumMask; /**< Mask for Luminance component */
-
-		};
-		CK2::CKDWORD AlphaMask; /**< Mask for Alpha component */
-
-		CK2::CKWORD BytesPerColorEntry; /**< ColorMap Stride */
-		CK2::CKWORD ColorMapEntries; /**< If other than 0 image is palletized */
-
-		CK2::CKBYTE* ColorMap; /**< Palette colors */
-		CK2::CKBYTE* Image; /**< Image */
-
-		bool HasAlpha() {
-			return (AlphaMask == 0 || Flags >= VX_PIXELFORMAT::_DXT1);
+		CK2::CKDWORD GetImageSize() const {
+			return static_cast<CK2::CKDWORD>(sizeof(uint32_t) * m_Width * m_Height);
+		}
+		CK2::CKBYTE* GetImage() {
+			return m_Image;
 		}
 
-		bool operator==(const VxImageDescEx& rhs) const {
-			return (
-				Height == rhs.Height && Width == rhs.Width &&
-				BitsPerPixel == rhs.BitsPerPixel && BytesPerLine == rhs.BytesPerLine &&
-				RedMask == rhs.RedMask && GreenMask == rhs.GreenMask && BlueMask == rhs.BlueMask && AlphaMask == rhs.AlphaMask &&
-				BytesPerColorEntry == rhs.BytesPerColorEntry && ColorMapEntries == rhs.ColorMapEntries
-				);
+		CK2::CKDWORD GetPixelCount() const {
+			return static_cast<CK2::CKDWORD>(m_Width * m_Height);
 		}
-		bool operator!=(const VxImageDescEx& rhs) const {
-			return !((*this) == rhs);
+		CK2::CKDWORD* GetPixels() {
+			return reinterpret_cast<CK2::CKDWORD*>(m_Image);
 		}
 
+		CK2::CKDWORD GetWidth() const {
+			return m_Width;
+		}
+		CK2::CKDWORD GetHeight() const {
+			return m_Height;
+		}
+
+		bool IsHWEqual(const VxImageDescEx& rhs) const {
+			return (m_Width == rhs.m_Width && m_Height == rhs.m_Height);
+		}
+	//	bool IsMaskEqual(const VxImageDescEx& rhs) const {
+	//		return (
+	//			m_RedMask == rhs.m_RedMask &&
+	//			m_GreenMask == rhs.m_GreenMask &&
+	//			m_BlueMask == rhs.m_BlueMask &&
+	//			m_AlphaMask == rhs.m_AlphaMask
+	//			);
+	//	}
+
+	//public:
+	//	CK2::CKDWORD m_RedMask;
+	//	CK2::CKDWORD m_GreenMask;
+	//	CK2::CKDWORD m_BlueMask;
+	//	CK2::CKDWORD m_AlphaMask;
+
+	protected:
+		CK2::CKDWORD m_Width; /**< Width in pixel of the image */
+		CK2::CKDWORD m_Height; /**< Height in pixel of the image */
+		CK2::CKBYTE* m_Image; /**< A pointer point to current processing image */
 	};
 
 }

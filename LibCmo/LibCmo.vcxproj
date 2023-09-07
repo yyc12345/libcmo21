@@ -178,6 +178,7 @@
     <ClCompile Include="CK2\CKFileOthers.cpp" />
     <ClCompile Include="CK2\CKFileWriter.cpp" />
     <ClCompile Include="CK2\CKGlobals.cpp" />
+    <ClCompile Include="CK2\DataHandlers\CKBitmapHandler.cpp" />
     <ClCompile Include="CK2\MgrImpls\CKBaseManager.cpp" />
     <ClCompile Include="CK2\CKContext.cpp" />
     <ClCompile Include="CK2\MgrImpls\CKObjectManager.cpp" />
@@ -191,7 +192,9 @@
     <ClCompile Include="VTEncoding.cpp" />
     <ClCompile Include="CK2\CKFileReader.cpp" />
     <ClCompile Include="CK2\CKStateChunk.cpp" />
+    <ClCompile Include="VTImage.cpp" />
     <ClCompile Include="VTUtils.cpp" />
+    <ClCompile Include="VxMath\VxMath.cpp" />
     <ClCompile Include="VxMath\VxMemoryMappedFile.cpp" />
     <ClCompile Include="XContainer\XBitArray.cpp" />
   </ItemGroup>
@@ -201,6 +204,7 @@
     <ClInclude Include="CK2\CKFile.hpp" />
     <ClInclude Include="CK2\CKGlobals.hpp" />
     <ClInclude Include="CK2\CKIdentifiers.hpp" />
+    <ClInclude Include="CK2\DataHandlers\CKBitmapHandler.hpp" />
     <ClInclude Include="CK2\MgrImpls\CKBaseManager.hpp" />
     <ClInclude Include="CK2\CKContext.hpp" />
     <ClInclude Include="CK2\CKStateChunk.hpp" />

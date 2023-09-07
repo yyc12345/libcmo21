@@ -43,6 +43,12 @@
     <Filter Include="Sources\CK2\ObjImpls">
       <UniqueIdentifier>{a8cd2188-b552-478c-9801-a6286b3d48a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headers\CK2\DataHandlers">
+      <UniqueIdentifier>{d66924c0-b040-4f5d-8a8e-87d6d412af38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\CK2\DataHandlers">
+      <UniqueIdentifier>{cff15b64-e076-47af-9719-74af31d1804d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VTEncoding.cpp">
@@ -101,6 +107,15 @@
     </ClCompile>
     <ClCompile Include="CK2\MgrImpls\CKPathManager.cpp">
       <Filter>Sources\CK2\MgrImpls</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\DataHandlers\CKBitmapHandler.cpp">
+      <Filter>Sources\CK2\DataHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="VTImage.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="VxMath\VxMath.cpp">
+      <Filter>Sources\VxMath</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +199,9 @@
     </ClInclude>
     <ClInclude Include="VxMath\VxMath.hpp">
       <Filter>Headers\VxMath</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\DataHandlers\CKBitmapHandler.hpp">
+      <Filter>Headers\CK2\DataHandlers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -87,11 +87,17 @@ namespace LibCmo::CK2 {
 	}
 
 	ObjImpls::CKObject* GeneralPrevFinder(XContainer::XObjectPointerArray& objptrs, ObjImpls::CKObject* previous) {
-		auto finder = std::find(objptrs.begin(), objptrs.end(), previous);
-		if (finder == objptrs.end()) return nullptr;
-		++finder;
-		if (finder == objptrs.end()) return nullptr;
-		return *finder;
+		if (objptrs.empty()) return nullptr;
+
+		if (previous == nullptr) {
+			return objptrs.front();
+		} else {
+			auto finder = std::find(objptrs.begin(), objptrs.end(), previous);
+			if (finder == objptrs.end()) return nullptr;
+			++finder;
+			if (finder == objptrs.end()) return nullptr;
+			return *finder;
+		}
 	}
 	ObjImpls::CKObject* CKContext::GetObjectByName(CKSTRING name, ObjImpls::CKObject* previous) {
 		if (name == nullptr) return nullptr;

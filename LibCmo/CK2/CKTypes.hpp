@@ -262,12 +262,11 @@ namespace LibCmo::CK2 {
 	//class CKFile;
 	class CKDependencies;
 	class CKDependenciesContext;
-	class CKPluginManager;
 	class CKDebugContext;
 	class CKObjectArray;
 	class CKObjectDeclaration;
 	//class CKContext;
-	struct CKBitmapProperties;
+	//struct CKBitmapProperties;
 	class CKVertexBuffer;
 
 	//--- Managers
@@ -284,6 +283,13 @@ namespace LibCmo::CK2 {
 		class CKPathManager;
 		class CKVariableManager;
 		class CKSceneObjectDesc;
+		class CKPluginManager;
+	}
+
+	namespace DataHandlers {
+		class CKBitmapHandler;
+		class CKMovieHandler;
+		class CKSoundHandler;
 	}
 
 	//--- Important classes
@@ -358,6 +364,42 @@ namespace LibCmo::CK2 {
 		bool operator >=(const CKGUID& rhs) const {
 			return (this->d1 >= rhs.d1);
 		}
+	};
+
+	
+	/**
+	 * The struct describe the bitmap handler's infomation,
+	 * including its GUID and supported file extension.
+	 * This struct also will store some parameters related to bitmap handler,
+	 * such as jpeg compress level and etc. But currently there are no
+	 * such parameters.
+	*/
+	struct CKBitmapProperties {
+		CKBitmapProperties() :
+			m_ReaderGuid(), m_Ext(3, '\0') {}
+		CKBitmapProperties(CKGUID& guid, const char* ext) :
+			m_ReaderGuid(guid), m_Ext(3, '\0') {
+			SetExt(ext);
+		}
+		LIBCMO_DEFAULT_COPY_MOVE(CKBitmapProperties);
+
+		void SetExt(const char* s) {
+			if (s == nullptr) {
+				m_Ext[0] = '\0';
+			} else {
+				if (s[0] == '.') ++s;	// skip dot
+				size_t len = std::strlen(s);
+				if (len > m_Ext.size()) len = m_Ext.size();
+				std::memcpy(m_Ext.data(), s, len);
+			}
+		}
+
+		CKSTRING ExtToCKSTRING() {
+			return m_Ext.c_str();
+		}
+
+		CKGUID m_ReaderGuid; /**< CKGUID that uniquely identifies the reader that created this properties structure */
+		std::string m_Ext; /**< File Extension of the image being described by this structure */
 	};
 
 
