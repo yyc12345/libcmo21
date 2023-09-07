@@ -21,10 +21,13 @@ namespace LibCmo::CK2 {
 		m_FileWriteMode(CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED),
 		m_GlobalImagesSaveOptions(CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_RAWDATA),
 		m_GlobalSoundsSaveOptions(CK_SOUND_SAVEOPTIONS::CKSOUND_EXTERNAL),
-		m_GlobalImagesSaveFormat(nullptr),	// todo: setup save format
+		m_GlobalImagesSaveFormat(),
 		// misc init
 		m_NameEncoding(),
 		m_OutputCallback(nullptr) {
+
+		// setup save format
+		m_GlobalImagesSaveFormat.m_Ext.SetExt("bmp");
 
 		// setup managers
 		m_ObjectManager = new MgrImpls::CKObjectManager(this);
@@ -225,12 +228,12 @@ namespace LibCmo::CK2 {
 		}
 	}
 
-	const CKBitmapProperties* CKContext::GetGlobalImagesSaveFormat() {
+	const CKBitmapProperties& CKContext::GetGlobalImagesSaveFormat() {
 		return m_GlobalImagesSaveFormat;
 	}
 
-	void CKContext::SetGlobalImagesSaveFormat(const CKBitmapProperties* Format) {
-		// todo: copy CKBitmapProperties
+	void CKContext::SetGlobalImagesSaveFormat(const CKBitmapProperties& Format) {
+		m_GlobalImagesSaveFormat = Format;
 	}
 
 	CK_SOUND_SAVEOPTIONS CKContext::GetGlobalSoundsSaveOptions() {

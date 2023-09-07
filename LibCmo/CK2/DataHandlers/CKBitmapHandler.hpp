@@ -16,6 +16,22 @@ namespace LibCmo::CK2::DataHandlers {
 		LIBCMO_DISABLE_COPY_MOVE(CKBitmapHandler);
 
 		/**
+		 * @brief General CKBitmapHandler getter.
+		 * @param ext[in] The file extention help finding corresponding bitmap handler.
+		 * @param guid[in] The GUID of bitmap handler used in fall back finding.
+		 * @remark 
+		 *		+ Returns a reader capable of reading file with the given extension ext
+		 *		+ It may be several plugins that support the same extension, in which case a preferedGUID identifying the reader that should be returned can be given (optionnal).
+		 * @return The pointer to CKBitmapHandler. nullptr if fail to find.
+		*/
+		static CKBitmapHandler* GetBitmapHandler(const CKFileExtension& ext, const CKGUID& guid);
+		/**
+		 * @brief General CKBitmapHandler disposer
+		 * @param handler[in] The handler need to be free.
+		*/
+		static void ReleaseBitmapHandler(CKBitmapHandler* handler);
+
+		/**
 		 * @brief Returns the current default bitmap options.
 		 * @return Current default bitmap options
 		*/
@@ -75,8 +91,6 @@ namespace LibCmo::CK2::DataHandlers {
 		virtual bool SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
 		virtual CKDWORD SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
 
-	protected:
-		CKBitmapProperties c_DefaultProp;
 	};
 	
 	class CKBitmapTGAHandler : public CKBitmapHandler {
@@ -91,8 +105,6 @@ namespace LibCmo::CK2::DataHandlers {
 		virtual bool SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
 		virtual CKDWORD SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
 
-	protected:
-		CKBitmapProperties c_DefaultProp;
 	};
 
 }

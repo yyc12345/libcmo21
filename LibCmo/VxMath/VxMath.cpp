@@ -57,7 +57,7 @@ namespace LibCmo::VxMath {
 	void VxDoAlphaBlit(VxImageDescEx* dst_desc, CK2::CKBYTE AlphaValue) {
 		if (dst_desc == nullptr) return;
 
-		CK2::CKDWORD* pixels = dst_desc->GetPixels();
+		CK2::CKDWORD* pixels = dst_desc->GetMutablePixels();
 		CK2::CKDWORD pixelcount = dst_desc->GetPixelCount();
 
 		for (CK2::CKDWORD i = 0; i < pixelcount; ++i) {
@@ -81,7 +81,7 @@ namespace LibCmo::VxMath {
 	void VxDoAlphaBlit(VxImageDescEx* dst_desc, CK2::CKBYTE* AlphaValues) {
 		if (dst_desc == nullptr) return;
 		
-		CK2::CKDWORD* pixels = dst_desc->GetPixels();
+		CK2::CKDWORD* pixels = dst_desc->GetMutablePixels();
 		CK2::CKDWORD pixelcount = dst_desc->GetPixelCount();
 
 		for (CK2::CKDWORD i = 0; i < pixelcount; ++i) {

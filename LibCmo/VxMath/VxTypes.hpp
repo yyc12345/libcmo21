@@ -92,14 +92,20 @@ namespace LibCmo::VxMath {
 		CK2::CKDWORD GetImageSize() const {
 			return static_cast<CK2::CKDWORD>(sizeof(uint32_t) * m_Width * m_Height);
 		}
-		CK2::CKBYTE* GetImage() {
+		const CK2::CKBYTE* GetImage() const {
+			return m_Image;
+		}
+		CK2::CKBYTE* GetMutableImage() {
 			return m_Image;
 		}
 
 		CK2::CKDWORD GetPixelCount() const {
 			return static_cast<CK2::CKDWORD>(m_Width * m_Height);
 		}
-		CK2::CKDWORD* GetPixels() {
+		const CK2::CKDWORD* GetPixels() const {
+			return reinterpret_cast<CK2::CKDWORD*>(m_Image);
+		}
+		CK2::CKDWORD* GetMutablePixels() {
 			return reinterpret_cast<CK2::CKDWORD*>(m_Image);
 		}
 

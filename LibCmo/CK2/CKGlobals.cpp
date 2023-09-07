@@ -78,6 +78,32 @@ namespace LibCmo::CK2 {
 		}
 	}
 
+	bool CKStrEqualI(CKSTRING str1, CKSTRING str2) {
+		if (str1 == nullptr) {
+			if (str2 == nullptr) return true;
+			else return false;
+		} else {
+			if (str2 == nullptr) return false;
+			else {
+				// do real cmp
+				size_t i = 0;
+				while (str1[i] != '\0' && str2[i] != '\0') {
+					if (std::tolower(str1[i]) != std::tolower(str2[i])) return false;
+					++str1;
+					++str2;
+				}
+
+				// !XOR the result, if both of them is zero, return true(1)
+				return !((str1[i] != '\0') ^ (str2[i] != '\0'));
+			}
+		}
+	}
+
+	bool CKStrEmpty(CKSTRING strl) {
+		if (strl == nullptr) return true;
+		return strl[0] == '\0';
+	}
+
 #pragma endregion
 
 #pragma region CKClass Registration

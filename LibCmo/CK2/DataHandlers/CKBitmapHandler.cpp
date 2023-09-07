@@ -5,6 +5,8 @@
 
 namespace LibCmo::CK2::DataHandlers {
 
+#pragma region Help Functions
+
 	static void RGBAToARGB(CK2::CKDWORD count, const void* _rgba, void* _argb) {
 		const char* rgba = reinterpret_cast<const char*>(_rgba);
 		char* argb = reinterpret_cast<char*>(_argb);
@@ -66,12 +68,12 @@ namespace LibCmo::CK2::DataHandlers {
 				STBIR_COLORSPACE_SRGB, nullptr
 			);
 			// copy data
-			RGBAToARGB(read_image->GetPixelCount(), newdata, read_image->GetImage());
+			RGBAToARGB(read_image->GetPixelCount(), newdata, read_image->GetMutableImage());
 			// free
 			delete[] newdata;
 		} else {
 			// copy data RGBA -> ARGB
-			RGBAToARGB(read_image->GetPixelCount(), data, read_image->GetImage());
+			RGBAToARGB(read_image->GetPixelCount(), data, read_image->GetMutableImage());
 		}
 	}
 	static bool StbReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) {
@@ -145,18 +147,17 @@ namespace LibCmo::CK2::DataHandlers {
 	static bool StbSaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, SaveOperation oper) {
 		if (u8filename == nullptr || write_image == nullptr) return false;
 		FILE* fs = EncodingHelper::U8FOpen(u8filename, "wb");
-		if (fs == nullptr) return;
+		if (fs == nullptr) return false;
 
 		// allocate buffer and convert data from ARGB to RGBA
-		VxMath::VxImageDescEx* wi = const_cast<VxMath::VxImageDescEx*>(write_image);
 		CKBYTE* data = new CKBYTE[write_image->GetImageSize()];
-		ARGBToRGBA(write_image->GetPixelCount(), wi->GetImage(), data);
+		ARGBToRGBA(write_image->GetPixelCount(), write_image->GetImage(), data);
 
 		// write data
 		FileSaveContext* ctx = new FileSaveContext(fs);
 		int ret = oper(
 			&FileWriteFunction, ctx,
-			static_cast<int>(wi->GetWidth()), static_cast<int>(wi->GetHeight()),
+			static_cast<int>(write_image->GetWidth()), static_cast<int>(write_image->GetHeight()),
 			4, data	// 4 == RGBA8888
 		);
 
@@ -171,15 +172,14 @@ namespace LibCmo::CK2::DataHandlers {
 		if (write_image == nullptr) return 0;
 
 		// allocate buffer and convert data from ARGB to RGBA
-		VxMath::VxImageDescEx* wi = const_cast<VxMath::VxImageDescEx*>(write_image);
 		CKBYTE* data = new CKBYTE[write_image->GetImageSize()];
-		ARGBToRGBA(write_image->GetPixelCount(), wi->GetImage(), data);
+		ARGBToRGBA(write_image->GetPixelCount(), write_image->GetImage(), data);
 
 		// write data
 		MemorySaveContext* ctx = new MemorySaveContext(memory);
 		int ret = oper(
 			&FileWriteFunction, ctx,
-			static_cast<int>(wi->GetWidth()), static_cast<int>(wi->GetHeight()),
+			static_cast<int>(write_image->GetWidth()), static_cast<int>(write_image->GetHeight()),
 			4, data	// 4 == RGBA8888
 		);
 
@@ -191,20 +191,20 @@ namespace LibCmo::CK2::DataHandlers {
 		if (ret == 0) return 0;
 		else return expected;
 	}
+	
+#pragma endregion
 
 #pragma region CKBitmapBMPHandler
 
+	static const CKBitmapProperties g_BMPProperties(CKGUID(0xBCA97223u, 0x48578BCAu), "Bmp");
+
 	CKBitmapBMPHandler::CKBitmapBMPHandler() :
-		CKBitmapHandler(), c_DefaultProp() {
-		c_DefaultProp.SetExt("Tga");
-		c_DefaultProp.m_ReaderGuid.d1 = 0xBCA97223u;
-		c_DefaultProp.m_ReaderGuid.d2 = 0x48578BCAu;
-	}
+		CKBitmapHandler() {}
 
 	CKBitmapBMPHandler::~CKBitmapBMPHandler() {}
 
 	const CKBitmapProperties& CKBitmapBMPHandler::GetBitmapDefaultProperties() {
-		return c_DefaultProp;
+		return g_BMPProperties;
 	}
 
 	bool CKBitmapBMPHandler::ReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) {
@@ -232,18 +232,16 @@ namespace LibCmo::CK2::DataHandlers {
 #pragma endregion
 
 #pragma region CKBitmapTGAHandler
+	
+	static const CKBitmapProperties g_TGAProperties(CKGUID(0x585C7216u,  0x33302657u), "Tga");
 
 	CKBitmapTGAHandler::CKBitmapTGAHandler() :
-		CKBitmapHandler(), c_DefaultProp() {
-		c_DefaultProp.SetExt("Tga");
-		c_DefaultProp.m_ReaderGuid.d1 = 0x585C7216u;
-		c_DefaultProp.m_ReaderGuid.d2 = 0x33302657u;
-	}
+		CKBitmapHandler() {}
 
 	CKBitmapTGAHandler::~CKBitmapTGAHandler() {}
 
 	const CKBitmapProperties& CKBitmapTGAHandler::GetBitmapDefaultProperties() {
-		return c_DefaultProp;
+		return g_TGAProperties;
 	}
 
 	bool CKBitmapTGAHandler::ReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) {
@@ -257,18 +255,51 @@ namespace LibCmo::CK2::DataHandlers {
 	bool CKBitmapTGAHandler::SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {
 		return StbSaveFile(u8filename, write_image,
 			[&codec_param](stbi_write_func* func, void* context, int w, int h, int comp, const void* data) -> int {
-				return stbi_write_bmp_to_func(func, context, w, h, comp, data);
+				return stbi_write_tga_to_func(func, context, w, h, comp, data);
 			});
 	}
 
 	CKDWORD CKBitmapTGAHandler::SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {
 		return StbSaveMemory(memory, write_image,
 			[&codec_param](stbi_write_func* func, void* context, int w, int h, int comp, const void* data) -> int {
-				return stbi_write_bmp_to_func(func, context, w, h, comp, data);
+				return stbi_write_tga_to_func(func, context, w, h, comp, data);
 			});
 	}
 
 #pragma endregion
+	
+#pragma region General Getter Freer
 
+	static CKBitmapHandler* FindHandlerByExt(const CKFileExtension& ext) {
+		if (ext == g_BMPProperties.m_Ext) return new CKBitmapBMPHandler();
+		if (ext == g_TGAProperties.m_Ext) return new CKBitmapTGAHandler();
+		return nullptr;
+	}
+
+	static CKBitmapHandler* FindHandlerByGuid(const CKGUID& guid) {
+		if (guid == g_BMPProperties.m_ReaderGuid) return new CKBitmapBMPHandler();
+		if (guid == g_TGAProperties.m_ReaderGuid) return new CKBitmapTGAHandler();
+		return nullptr;
+	}
+
+	CKBitmapHandler* CKBitmapHandler::GetBitmapHandler(const CKFileExtension& ext, const CKGUID& guid) {
+		CKBitmapHandler* handler = nullptr;
+
+		// check ext first
+		handler = FindHandlerByExt(ext);
+		if (handler != nullptr) return handler;
+		
+		// check guid
+		handler = FindHandlerByGuid(guid);
+		if (handler != nullptr) return handler;
+
+		return nullptr;
+	}
+
+	void CKBitmapHandler::ReleaseBitmapHandler(CKBitmapHandler* handler) {
+		if (handler != nullptr) delete handler;
+	}
+
+#pragma endregion
 
 }

@@ -47,7 +47,28 @@ namespace LibCmo::CK2 {
 
 	// ========== String Utilities ==========
 
+	/**
+	 * @brief Check whether 2 string is equal. Case senstive.
+	 * @param str1[in] String 1
+	 * @param str2[in] String 2
+	 * @return True if 2 string is equal.
+	 * @see CKStrIEqual
+	*/
 	bool CKStrEqual(CKSTRING str1, CKSTRING str2);
+	/**
+	 * @brief Check whther 2 string is equal. Case insenstive.
+	 * @param str1 
+	 * @param str2 
+	 * @return True if 2 string is equal.
+	 * @see CKStrEqual
+	*/
+	bool CKStrEqualI(CKSTRING str1, CKSTRING str2);
+	/**
+	 * @brief Check whether string is empty
+	 * @param strl 
+	 * @return True if string is empty.
+	*/
+	bool CKStrEmpty(CKSTRING strl);
 
 	// ========== Numberic Utilities ==========
 

@@ -85,8 +85,8 @@ namespace LibCmo::CK2 {
 		CK_TEXTURE_SAVEOPTIONS GetGlobalImagesSaveOptions();
 		void SetGlobalImagesSaveOptions(CK_TEXTURE_SAVEOPTIONS Options);
 
-		const CKBitmapProperties* GetGlobalImagesSaveFormat();
-		void SetGlobalImagesSaveFormat(const CKBitmapProperties* Format);
+		const CKBitmapProperties& GetGlobalImagesSaveFormat();
+		void SetGlobalImagesSaveFormat(const CKBitmapProperties& Format);
 
 		CK_SOUND_SAVEOPTIONS GetGlobalSoundsSaveOptions();
 		void SetGlobalSoundsSaveOptions(CK_SOUND_SAVEOPTIONS Options);
@@ -96,7 +96,7 @@ namespace LibCmo::CK2 {
 		CK_FILE_WRITEMODE m_FileWriteMode;
 		CK_TEXTURE_SAVEOPTIONS m_GlobalImagesSaveOptions;
 		CK_SOUND_SAVEOPTIONS m_GlobalSoundsSaveOptions;
-		CKBitmapProperties* m_GlobalImagesSaveFormat;
+		CKBitmapProperties m_GlobalImagesSaveFormat;
 
 		// ========== Encoding utilities ==========
 	public:
