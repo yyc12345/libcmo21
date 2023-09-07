@@ -117,6 +117,9 @@
     <ClCompile Include="VxMath\VxMath.cpp">
       <Filter>Sources\VxMath</Filter>
     </ClCompile>
+    <ClCompile Include="CK2\CKBitmapData.cpp">
+      <Filter>Sources\CK2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VTUtils.hpp">
@@ -202,6 +205,12 @@
     </ClInclude>
     <ClInclude Include="CK2\DataHandlers\CKBitmapHandler.hpp">
       <Filter>Headers\CK2\DataHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\CKStructs.hpp">
+      <Filter>Headers\CK2</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\CKBitmapData.hpp">
+      <Filter>Headers\CK2</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -49,7 +49,7 @@ namespace LibCmo::CK2::MgrImpls {
 	}
 
 	bool CKPathManager::AddPath(CKSTRING u8path) {
-		if (u8path == nullptr) return;
+		if (u8path == nullptr) return false;
 		std::filesystem::path newpath;
 		EncodingHelper::U8PathToStdPath(newpath, u8path);
 		if (std::filesystem::is_directory(newpath)) {
@@ -86,7 +86,7 @@ namespace LibCmo::CK2::MgrImpls {
 		// test in temp folder
 		auto tempfile = m_TempFolder / filepath;
 		if (std::filesystem::is_regular_file(tempfile)) {
-			EncodingHelper::StdPathToU8Path(u8_filename, combinedpath);
+			EncodingHelper::StdPathToU8Path(u8_filename, tempfile);
 			return true;
 		}
 

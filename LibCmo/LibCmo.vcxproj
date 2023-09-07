@@ -175,6 +175,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CK2\CKBitmapData.cpp" />
     <ClCompile Include="CK2\CKFileOthers.cpp" />
     <ClCompile Include="CK2\CKFileWriter.cpp" />
     <ClCompile Include="CK2\CKGlobals.cpp" />
@@ -199,11 +200,13 @@
     <ClCompile Include="XContainer\XBitArray.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CK2\CKBitmapData.hpp" />
     <ClInclude Include="CK2\CKDefines.hpp" />
     <ClInclude Include="CK2\CKEnums.hpp" />
     <ClInclude Include="CK2\CKFile.hpp" />
     <ClInclude Include="CK2\CKGlobals.hpp" />
     <ClInclude Include="CK2\CKIdentifiers.hpp" />
+    <ClInclude Include="CK2\CKStructs.hpp" />
     <ClInclude Include="CK2\DataHandlers\CKBitmapHandler.hpp" />
     <ClInclude Include="CK2\MgrImpls\CKBaseManager.hpp" />
     <ClInclude Include="CK2\CKContext.hpp" />

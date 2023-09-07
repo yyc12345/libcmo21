@@ -178,7 +178,7 @@ namespace LibCmo::CK2::DataHandlers {
 		// write data
 		MemorySaveContext* ctx = new MemorySaveContext(memory);
 		int ret = oper(
-			&FileWriteFunction, ctx,
+			&MemoryWriteFunction, ctx,
 			static_cast<int>(write_image->GetWidth()), static_cast<int>(write_image->GetHeight()),
 			4, data	// 4 == RGBA8888
 		);
@@ -208,11 +208,11 @@ namespace LibCmo::CK2::DataHandlers {
 	}
 
 	bool CKBitmapBMPHandler::ReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) {
-		StbReadFile(u8filename, read_image);
+		return StbReadFile(u8filename, read_image);
 	}
 
 	bool CKBitmapBMPHandler::ReadMemory(const void* memory, CKDWORD size, VxMath::VxImageDescEx* read_image) {
-		StbReadMemory(memory, size, read_image);
+		return StbReadMemory(memory, size, read_image);
 	}
 
 	bool CKBitmapBMPHandler::SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {
@@ -245,11 +245,11 @@ namespace LibCmo::CK2::DataHandlers {
 	}
 
 	bool CKBitmapTGAHandler::ReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) {
-		StbReadFile(u8filename, read_image);
+		return StbReadFile(u8filename, read_image);
 	}
 
 	bool CKBitmapTGAHandler::ReadMemory(const void* memory, CKDWORD size, VxMath::VxImageDescEx* read_image) {
-		StbReadMemory(memory, size, read_image);
+		return StbReadMemory(memory, size, read_image);
 	}
 
 	bool CKBitmapTGAHandler::SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {

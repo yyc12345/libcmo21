@@ -21,6 +21,7 @@ Except the file listed in there, they should include "VTUtils.hpp" first.
 #include "CK2/CKEnums.hpp"	// All CK used enums except CKStateChunk identifiers.
 #include "CK2/CKIdentifiers.hpp"	// CKStateChunk identifiers.
 #include "CK2/CKGlobals.hpp"	// CK global functions, such as CKUnPack and etc.
+#include "CK2/CKStructs.hpp"	// Some essential and useful classes + structs.
 
 #include "VxMath/VxEnums.hpp"
 #include "VxMath/VxTypes.hpp"
