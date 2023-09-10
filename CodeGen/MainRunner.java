@@ -119,6 +119,14 @@ public class MainRunner {
 		GeneralWriter.writeAccVal(fs, single, CommonHelper.CKParts.CK2);
 		fs.close();
 		
+		single = organiseDefines("src/CK_BITMAPDATA_FLAGS.txt", "CK_BITMAPDATA_FLAGS");
+		fs = CommonHelper.openOutputFile("dest/CK_BITMAPDATA_FLAGS.hpp");
+		GeneralWriter.writeEnum(fs, single);
+		fs.close();
+		fs = CommonHelper.openOutputFile("dest/CK_BITMAPDATA_FLAGS.AccVal.hpp");
+		GeneralWriter.writeAccVal(fs, single, CommonHelper.CKParts.CK2);
+		fs.close();
+		
 		// print message.
 		System.out.println("DONE!");
 	}

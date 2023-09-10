@@ -78,7 +78,7 @@ namespace LibCmo::VxMath {
 	*/
 	class VxImageDescEx {
 	public:
-		VxImageDescEx(CK2::CKDWORD height, CK2::CKDWORD width) :
+		VxImageDescEx(CK2::CKDWORD width, CK2::CKDWORD height) :
 			m_Width(width), m_Height(height), 
 			//m_RedMask(0), m_GreenMask(0), m_BlueMask(0), m_AlphaMask(0),
 			m_Image(nullptr){

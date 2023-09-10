@@ -346,4 +346,14 @@ namespace LibCmo::CK2 {
 		CKSOUND_USEGLOBAL = 2,	/**< Use Global settings. This flag is only valid for the CKSound::SetSaveOptions method.  */
 	};
 
+	enum class CK_BITMAPDATA_FLAGS : uint32_t {
+		CKBITMAPDATA_INVALID = 1,
+		CKBITMAPDATA_TRANSPARENT = 2,
+		CKBITMAPDATA_FORCERESTORE = 4,
+		CKBITMAPDATA_CLAMPUPTODATE = 8,
+		CKBITMAPDATA_CUBEMAP = 16,
+		CKBITMAPDATA_FREEVIDEOMEMORY = 32,
+		CKBITMAPDATA_DYNAMIC = 64,
+	};
+
 }
