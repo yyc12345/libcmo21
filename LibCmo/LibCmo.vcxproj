@@ -190,6 +190,7 @@
     <ClCompile Include="CK2\ObjImpls\CKObject.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKRenderObject.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKSceneObject.cpp" />
+    <ClCompile Include="CK2\ObjImpls\CKTexture.cpp" />
     <ClCompile Include="VTEncoding.cpp" />
     <ClCompile Include="CK2\CKFileReader.cpp" />
     <ClCompile Include="CK2\CKStateChunk.cpp" />
@@ -220,6 +221,7 @@
     <ClInclude Include="CK2\ObjImpls\CKGroup.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKRenderObject.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKSceneObject.hpp" />
+    <ClInclude Include="CK2\ObjImpls\CKTexture.hpp" />
     <ClInclude Include="VTAll.hpp" />
     <ClInclude Include="VTEncoding.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKObject.hpp" />

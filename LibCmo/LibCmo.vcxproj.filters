@@ -120,6 +120,9 @@
     <ClCompile Include="CK2\CKBitmapData.cpp">
       <Filter>Sources\CK2</Filter>
     </ClCompile>
+    <ClCompile Include="CK2\ObjImpls\CKTexture.cpp">
+      <Filter>Sources\CK2\ObjImpls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VTUtils.hpp">
@@ -211,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="CK2\CKBitmapData.hpp">
       <Filter>Headers\CK2</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\ObjImpls\CKTexture.hpp">
+      <Filter>Headers\CK2\ObjImpls</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

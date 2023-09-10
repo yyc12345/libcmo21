@@ -94,5 +94,13 @@ namespace LibCmo::CK2::MgrImpls {
 		return false;
 	}
 
+	void CKPathManager::GetExtension(std::string& u8path) {
+		std::filesystem::path filepath;
+		EncodingHelper::U8PathToStdPath(filepath, u8path.c_str());
+
+		auto result = filepath.extension();
+		EncodingHelper::StdPathToU8Path(u8path, result);
+	}
+
 }
 

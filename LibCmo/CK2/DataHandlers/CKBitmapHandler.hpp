@@ -79,6 +79,18 @@ namespace LibCmo::CK2::DataHandlers {
 
 	};
 
+	/**
+	 * @brief An assist class which can applied to std::unique_ptr as a custom deleter
+	 * to make sure the CKBitmapHandler* can be free correctly.
+	*/
+	struct CKBitmapHandlerDeleter {
+		CKBitmapHandlerDeleter() = default;
+		CKBitmapHandlerDeleter(const CKBitmapHandlerDeleter&) noexcept {}
+		void operator()(CKBitmapHandler* handler) {
+			CKBitmapHandler::ReleaseBitmapHandler(handler);
+		}
+	};
+
 	class CKBitmapBMPHandler : public CKBitmapHandler {
 	public:
 		CKBitmapBMPHandler();

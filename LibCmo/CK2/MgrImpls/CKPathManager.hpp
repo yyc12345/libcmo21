@@ -53,6 +53,12 @@ namespace LibCmo::CK2::MgrImpls {
 		*/
 		bool ResolveFileName(std::string& u8_filename);
 
+		/**
+		 * @brief Returns the file extension including period (.)
+		 * @param u8path[inout] The given path. overwritten by the gotten extension. set to blank when failed.
+		*/
+		void GetExtension(std::string& u8path);
+
 	protected:
 		std::filesystem::path m_TempFolder;
 		XContainer::XArray<std::filesystem::path> m_ExtraPathes;

@@ -156,7 +156,7 @@ namespace LibCmo::CK2 {
 		}
 
 		/// <summary>
-		/// Read string
+		/// Read string. The content of string will automatically converted into UTF8 format.
 		/// </summary>
 		/// <param name="strl"></param>
 		/// <returns></returns>

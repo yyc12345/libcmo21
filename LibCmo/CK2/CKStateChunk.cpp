@@ -585,11 +585,15 @@ namespace LibCmo::CK2 {
 		}
 
 		// read data
-		strl->resize(strByteSize);
-		if (!this->ReadByteData(strl->data(), strByteSize)) {
+		std::string cache;
+		cache.resize(strByteSize);
+		if (!this->ReadByteData(cache.data(), strByteSize)) {
 			strl->clear();
 			return false;
 		}
+
+		// convert encoding
+		m_BindContext->GetUtf8String(cache, *strl);
 		return true;
 	}
 

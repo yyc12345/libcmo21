@@ -79,10 +79,17 @@ namespace LibCmo::VxMath {
 	class VxImageDescEx {
 	public:
 		VxImageDescEx(CK2::CKDWORD width, CK2::CKDWORD height) :
-			m_Width(width), m_Height(height), 
+			m_Width(width), m_Height(height),
 			//m_RedMask(0), m_GreenMask(0), m_BlueMask(0), m_AlphaMask(0),
-			m_Image(nullptr){
+			m_Image(nullptr) {
 			m_Image = new CK2::CKBYTE[GetImageSize()];
+		}
+		VxImageDescEx(const VxImageDescEx& rhs) :
+			m_Width(rhs.m_Width), m_Height(rhs.m_Height),
+			m_Image(nullptr) {
+			// copy image
+			m_Image = new CK2::CKBYTE[GetImageSize()];
+			std::memcpy(m_Image, rhs.m_Image, GetImageSize());
 		}
 		~VxImageDescEx() {
 			delete[] m_Image;

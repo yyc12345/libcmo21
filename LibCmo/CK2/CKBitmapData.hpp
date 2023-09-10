@@ -28,6 +28,33 @@ namespace LibCmo::CK2 {
 		~CKBitmapSlot() {
 			FreeImage();
 		}
+		CKBitmapSlot(const CKBitmapSlot& rhs) :
+			m_ImageData(nullptr), m_FileName(rhs.m_FileName) {
+			if (rhs.m_ImageData != nullptr) {
+				m_ImageData = new VxMath::VxImageDescEx(*rhs.m_ImageData);
+			}
+		}
+		CKBitmapSlot(CKBitmapSlot&& rhs) :
+			m_ImageData(rhs.m_ImageData), m_FileName(std::move(rhs.m_FileName)) {
+			rhs.m_ImageData = nullptr;
+		}
+		CKBitmapSlot& operator=(const CKBitmapSlot& rhs) {
+			m_FileName = rhs.m_FileName;
+
+			FreeImage();
+			if (rhs.m_ImageData != nullptr) {
+				m_ImageData = new VxMath::VxImageDescEx(*rhs.m_ImageData);
+			}
+
+			return *this;
+		}
+		CKBitmapSlot& operator=(CKBitmapSlot&& rhs) {
+			m_FileName = std::move(rhs.m_FileName);
+			
+			FreeImage();
+			m_ImageData = rhs.m_ImageData;
+			rhs.m_ImageData = nullptr;
+		}
 
 		void CreateImage(CKDWORD Width, CKDWORD Height) {
 			FreeImage();
@@ -50,11 +77,11 @@ namespace LibCmo::CK2 {
 		~CKBitmapData();
 		LIBCMO_DISABLE_COPY_MOVE(CKBitmapData);
 
-		static bool ReadSpecificFormatBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* desc);
-		static bool ReadRawBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* desc);
-		static bool ReadOldRawBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* desc);
-		static void WriteSpecificFormatBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* desc);
-		static void WriteRawBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* desc);
+		static bool ReadSpecificFormatBitmap(CKStateChunk* chk, CKBitmapSlot* slot);
+		static bool ReadRawBitmap(CKStateChunk* chk, CKBitmapSlot* slot);
+		static bool ReadOldRawBitmap(CKStateChunk* chk, CKBitmapSlot* slot);
+		static void WriteSpecificFormatBitmap(CKStateChunk* chk, CKBitmapSlot* slot);
+		static void WriteRawBitmap(CKStateChunk* chk, CKBitmapSlot* slot);
 
 		bool ReadFromChunk(CKStateChunk* chunk, CKFileVisitor* file, const CKBitmapDataReadIdentifiers& identifiers);
 		bool DumpToChunk(CKStateChunk* chunk, CKFileVisitor* file, const CKBitmapDataWriteIdentifiers& identifiers);
@@ -68,17 +95,16 @@ namespace LibCmo::CK2 {
 		bool LoadImage(CKSTRING filename, CKDWORD slot);
 		bool SaveImage(CKSTRING filename, CKDWORD slot);
 		VxMath::VxImageDescEx* GetImageDesc(CKDWORD slot);
+		CKBitmapSlot* GetImageSlot(CKDWORD slot);
 		void ReleaseImage(CKDWORD slot);
 
 		void SetSlotFileName(CKDWORD slot, CKSTRING filename);
 		CKSTRING GetSlotFileName(CKDWORD slot);
 
-		const CKBitmapProperties& GetSaveProperties();
-		void SetSaveProperties(const CKBitmapProperties& props);
+		const CKBitmapProperties& GetSaveFormat();
+		void SetSaveFormat(const CKBitmapProperties& props);
 		CK_TEXTURE_SAVEOPTIONS GetSaveOptions();
 		void SetSaveOptions(CK_TEXTURE_SAVEOPTIONS opts);
-		VxMath::VX_PIXELFORMAT GetDesiredVideoFormat();
-		void SetDesiredVideoFormat(VxMath::VX_PIXELFORMAT fmt);
 
 		/**
 		Summary: Enables or disables the color key transparency.
@@ -106,16 +132,6 @@ namespace LibCmo::CK2 {
 		*/
 		bool IsTransparent();
 		/**
-		Summary: Returns the transparent color.
-		Return Value:
-			Color: A 32 bit ARGB transparent color.
-		Remarks:
-			+ 0x00000000 (black) is the default transparent color.
-
-		See also: SetTranparentColor,SetTransparent
-		*/
-		CKDWORD GetTransparentColor();
-		/**
 		Summary: Sets the transparent color.
 		Arguments:
 			Color: A 32 bit ARGB transparent color.
@@ -128,18 +144,27 @@ namespace LibCmo::CK2 {
 		See also: GetTranparentColor,SetTransparent
 		*/
 		void SetTransparentColor(CKDWORD col);
+		/**
+		Summary: Returns the transparent color.
+		Return Value:
+			Color: A 32 bit ARGB transparent color.
+		Remarks:
+			+ 0x00000000 (black) is the default transparent color.
+
+		See also: SetTranparentColor,SetTransparent
+		*/
+		CKDWORD GetTransparentColor();
 
 	protected:
 		CKContext* m_Context;
 		XContainer::XArray<CKBitmapSlot> m_Slots;
 		CKDWORD m_CurrentSlot;
 		CKINT m_PickThreshold;
-		CKDWORD m_BitmapFlags;
+		CK_BITMAPDATA_FLAGS m_BitmapFlags;
 		CKDWORD m_TransColor;
 
 		CKBitmapProperties m_SaveProperties;
 		CK_TEXTURE_SAVEOPTIONS m_SaveOptions;
-		VxMath::VX_PIXELFORMAT m_DesiredVideoFormat;
 	};
 
 }
