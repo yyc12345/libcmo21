@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../VTAll.hpp"
+#include <memory>
+#include <functional>
 
 namespace LibCmo::CK2 {
 
@@ -80,15 +82,11 @@ namespace LibCmo::CK2 {
 		CKDWORD GetDataSize(void);
 		CK_STATECHUNK_DATAVERSION GetDataVersion();
 		void SetDataVersion(CK_STATECHUNK_DATAVERSION version);
-		/**
-		 * @brief Free the buffer allocated by CKStateChunk reading functions.
-		 * @param buf The buffer need to be free.
-		*/
-		void DeleteBuffer(const void* buf);
 		bool Skip(CKDWORD DwordCount);
 
 	private:
 		CKDWORD GetCeilDwordSize(size_t char_size);
+		void* GetCurrentPointer();
 		bool ResizeBuffer(CKDWORD new_dwsize);
 		bool EnsureWriteSpace(CKDWORD dwsize);
 		bool EnsureReadSpace(CKDWORD dword_required);
@@ -200,6 +198,19 @@ namespace LibCmo::CK2 {
 		ReadAndFillBuffer_LEndian16(void*)		Read Byte based size.		-> ReadBuffer
 		*/
 
+		/**
+		 * @brief The deleter for std::unique_ptr of CKStateChunk created buffer.
+		*/
+		struct BufferDeleter {
+			BufferDeleter() = default;
+			BufferDeleter(const BufferDeleter&) noexcept {}
+			void operator()(void* buf);
+		};
+		/**
+		 * @brief The type of CKStateChunk auto free buffer.
+		*/
+		using TBuffer = std::unique_ptr<void, BufferDeleter>;
+
 		/// <summary>
 		/// Read a buffer with unknow size (order user specific it).
 		/// <para>ReadAndFillBuffer(int, void*), ReadAndFillBuffer_LEndian(int, void*), ReadAndFillBuffer_LEndian16(int, void*) are redirected to this.</para>
@@ -219,6 +230,29 @@ namespace LibCmo::CK2 {
 		/// <param name="len">a pointer to the variable receiving the length of gotten buffer.</param>
 		/// <returns></returns>
 		bool ReadBuffer(void** buf, CKDWORD* len_in_byte);
+		/**
+		 * @brief A auto free wrapper for ReadBuffer
+		 * @param uptr The pointer to unique_ptr receiving data.
+		 * @param len_in_byte The size of gotten buffer.
+		 * @return 
+		*/
+		bool ReadBufferWrapper(TBuffer* uptr, CKDWORD* len_in_byte);
+		/**
+		 * @brief Perform a dry buffer reading.
+		 * This function will only make sure there is enough space for your reading.
+		 * And return the start memory address to you.
+		 * And will not create any extra memory like ReadBuffer.
+		 * @param buf[out] a pointer to the pointer receiving data start address.
+		 * @param ordered_sizepin] your expected length of this buffer.
+		 * @return 
+		*/
+		bool ReadDryBuffer(const void** buf, CKDWORD ordered_size);
+		
+		/**
+		 * @brief Free the buffer allocated by CKStateChunk reading functions.
+		 * @param buf The buffer need to be free.
+		*/
+		void DeleteBuffer(const void* buf);
 
 		/* ========== Sequence Functions ==========*/
 

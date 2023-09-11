@@ -54,7 +54,7 @@ namespace LibCmo::CK2 {
 
 		void CreateImage(CKDWORD Width, CKDWORD Height, CKDWORD Slot);
 		bool LoadImage(CKSTRING filename, CKDWORD slot);
-		bool SaveImage(CKSTRING filename, CKDWORD slot);
+		bool SaveImage(CKSTRING filename, CKDWORD slot, bool isForceThisFmt = false);
 		VxMath::VxImageDescEx* GetImageDesc(CKDWORD slot);
 		void ReleaseImage(CKDWORD slot);
 

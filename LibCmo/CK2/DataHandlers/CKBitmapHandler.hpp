@@ -1,8 +1,21 @@
 #pragma once
 
 #include "../../VTAll.hpp"
+#include <memory>
+#include <functional>
 
 namespace LibCmo::CK2::DataHandlers {
+
+	class CKBitmapHandler;
+	/**
+	 * @brief An assist class which can applied to std::unique_ptr as a custom deleter
+	 * to make sure the CKBitmapHandler* can be free correctly.
+	*/
+	struct CKBitmapHandlerDeleter {
+		CKBitmapHandlerDeleter() = default;
+		CKBitmapHandlerDeleter(const CKBitmapHandlerDeleter&) noexcept {}
+		void operator()(CKBitmapHandler* handler);
+	};
 
 	/**
 	 * The interface about processing bitmap data between raw data and specific data.
@@ -25,6 +38,10 @@ namespace LibCmo::CK2::DataHandlers {
 		 * @return The pointer to CKBitmapHandler. nullptr if fail to find.
 		*/
 		static CKBitmapHandler* GetBitmapHandler(const CKFileExtension& ext, const CKGUID& guid);
+		/**
+		 * @brief A auto free wrapper for GetBitmapHandler
+		*/
+		static std::unique_ptr<CKBitmapHandler, CKBitmapHandlerDeleter> GetBitmapHandlerWrapper(const CKFileExtension& ext, const CKGUID& guid);
 		/**
 		 * @brief General CKBitmapHandler disposer
 		 * @param handler[in] The handler need to be free.
@@ -71,18 +88,6 @@ namespace LibCmo::CK2::DataHandlers {
 		*/
 		virtual CKDWORD SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) = 0;
 
-	};
-
-	/**
-	 * @brief An assist class which can applied to std::unique_ptr as a custom deleter
-	 * to make sure the CKBitmapHandler* can be free correctly.
-	*/
-	struct CKBitmapHandlerDeleter {
-		CKBitmapHandlerDeleter() = default;
-		CKBitmapHandlerDeleter(const CKBitmapHandlerDeleter&) noexcept {}
-		void operator()(CKBitmapHandler* handler) {
-			CKBitmapHandler::ReleaseBitmapHandler(handler);
-		}
 	};
 
 	class CKBitmapBMPHandler : public CKBitmapHandler {

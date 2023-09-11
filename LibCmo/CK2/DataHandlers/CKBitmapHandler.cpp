@@ -129,6 +129,7 @@ namespace LibCmo::CK2::DataHandlers {
 	using SaveOperation = std::function<int(stbi_write_func*, void*, int, int, int, const void*)>;
 	static bool StbSaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, SaveOperation oper) {
 		if (u8filename == nullptr || write_image == nullptr) return false;
+		if (!write_image->IsValid()) return false;
 		FILE* fs = EncodingHelper::U8FOpen(u8filename, "wb");
 		if (fs == nullptr) return false;
 
@@ -153,6 +154,7 @@ namespace LibCmo::CK2::DataHandlers {
 	}
 	static CKDWORD StbSaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, SaveOperation oper) {
 		if (write_image == nullptr) return 0;
+		if (!write_image->IsValid()) return 0;
 
 		// allocate buffer and convert data from ARGB to RGBA
 		CKBYTE* data = new CKBYTE[write_image->GetImageSize()];
@@ -277,6 +279,14 @@ namespace LibCmo::CK2::DataHandlers {
 		if (handler != nullptr) return handler;
 
 		return nullptr;
+	}
+
+	std::unique_ptr<CKBitmapHandler, CKBitmapHandlerDeleter> CKBitmapHandler::GetBitmapHandlerWrapper(const CKFileExtension& ext, const CKGUID& guid) {
+		return std::unique_ptr<CKBitmapHandler, std::function<void(CKBitmapHandler*)>>(GetBitmapHandler(ext, guid));
+	}
+
+	void CKBitmapHandlerDeleter::operator()(CKBitmapHandler* handler) {
+		CKBitmapHandler::ReleaseBitmapHandler(handler);
 	}
 
 	void CKBitmapHandler::ReleaseBitmapHandler(CKBitmapHandler* handler) {

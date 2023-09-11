@@ -161,11 +161,6 @@ namespace LibCmo::CK2 {
 		this->m_DataVersion = version;
 	}
 
-	void CKStateChunk::DeleteBuffer(const void* buf) {
-		if (buf == nullptr) return;
-		delete[] reinterpret_cast<const char*>(buf);
-	}
-
 	bool CKStateChunk::Skip(CKDWORD DwordCount) {
 		bool result;
 		switch (this->m_Parser.m_Status) {
@@ -189,6 +184,17 @@ namespace LibCmo::CK2 {
 	}
 
 
+
+	void* CKStateChunk::GetCurrentPointer() {
+		switch (this->m_Parser.m_Status) {
+			case CKStateChunkStatus::READ:
+			case CKStateChunkStatus::WRITE:
+				return this->m_pData + this->m_Parser.m_CurrentPos;
+			case CKStateChunkStatus::IDLE:
+			default:
+				return nullptr;
+		}
+	}
 
 	CKDWORD CKStateChunk::GetCeilDwordSize(size_t char_size) {
 		return static_cast<CKDWORD>((char_size + 3) >> 2);
@@ -560,11 +566,14 @@ namespace LibCmo::CK2 {
 
 	bool CKStateChunk::ReadByteData(void* data_ptr, CKDWORD size_in_byte) {
 		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return false;
-		if (data_ptr == nullptr) return false;
 
 		CKDWORD size_in_dword = this->GetCeilDwordSize(size_in_byte);
 		if (this->EnsureReadSpace(size_in_dword)) {
-			std::memcpy(data_ptr, this->m_pData + this->m_Parser.m_CurrentPos, size_in_byte);
+			// only copy when data_ptr is not nullptr
+			// do dry run if there are no dest to copy for.
+			if (data_ptr != nullptr) {
+				std::memcpy(data_ptr, this->m_pData + this->m_Parser.m_CurrentPos, size_in_byte);
+			}
 			this->m_Parser.m_CurrentPos += size_in_dword;
 			return true;
 		} else {
@@ -760,6 +769,12 @@ namespace LibCmo::CK2 {
 		}
 		*len_in_byte = bufByteSize;
 
+		// special treat for zero length buffer
+		if (bufByteSize == 0) {
+			*buf = nullptr;
+			return true;
+		}
+
 		// create buffer
 		*buf = new char[bufByteSize];
 
@@ -772,6 +787,38 @@ namespace LibCmo::CK2 {
 		}
 
 		return true;
+	}
+
+	bool CKStateChunk::ReadBufferWrapper(TBuffer* uptr, CKDWORD* len_in_byte) {
+		if (uptr == nullptr || len_in_byte == nullptr) return false;
+
+		void* bufcache = nullptr;
+		bool ret = ReadBuffer(&bufcache, len_in_byte);
+		uptr->reset(bufcache);
+
+		return ret;
+	}
+
+	bool CKStateChunk::ReadDryBuffer(const void** buf, CKDWORD ordered_size) {
+		if (buf == nullptr) return false;
+		
+		// backup current pos
+		*buf = GetCurrentPointer();
+		if (!this->ReadByteData(nullptr, ordered_size)) {
+			*buf = nullptr;
+			return false;
+		}
+		return true;
+	}
+	
+	void CKStateChunk::BufferDeleter::operator()(void* buf) {
+		if (buf == nullptr) return;
+		delete[] reinterpret_cast<const char*>(buf);
+	}
+
+	void CKStateChunk::DeleteBuffer(const void* buf) {
+		if (buf == nullptr) return;
+		delete[] reinterpret_cast<const char*>(buf);
 	}
 
 	/* ========== Sequence Functions ==========*/
@@ -956,6 +1003,5 @@ namespace LibCmo::CK2 {
 	}
 
 #pragma endregion
-
 
 }
