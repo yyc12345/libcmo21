@@ -9,23 +9,23 @@ namespace LibCmo::CK2 {
 
 #pragma region Assist RW Functions
 
-	bool CKBitmapData::ReadSpecificFormatBitmap(CKStateChunk* chk, CKBitmapSlot* slot) {
+	bool CKBitmapData::ReadSpecificFormatBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot) {
 		return false;
 	}
 
-	bool CKBitmapData::ReadRawBitmap(CKStateChunk* chk, CKBitmapSlot* slot) {
+	bool CKBitmapData::ReadRawBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot) {
 		return false;
 	}
 
-	bool CKBitmapData::ReadOldRawBitmap(CKStateChunk* chk, CKBitmapSlot* slot) {
+	bool CKBitmapData::ReadOldRawBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot) {
 		return false;
 	}
 
-	void CKBitmapData::WriteSpecificFormatBitmap(CKStateChunk* chk, CKBitmapSlot* slot) {
+	void CKBitmapData::WriteSpecificFormatBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* slot) {
 
 	}
 
-	void CKBitmapData::WriteRawBitmap(CKStateChunk* chk, CKBitmapSlot* slot) {
+	void CKBitmapData::WriteRawBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* slot) {
 		
 	}
 
@@ -51,7 +51,7 @@ namespace LibCmo::CK2 {
 			if (width > 0 && height > 0) {
 				for (CKDWORD i = 0; i < slotcount; ++i) {
 					CreateImage(width, height, i);
-					if (ReadSpecificFormatBitmap(chunk, GetImageSlot(i))) {
+					if (ReadSpecificFormatBitmap(chunk, GetImageDesc(i))) {
 						notReadSlot[i] = true;
 					} else {
 						ReleaseImage(i);
@@ -68,7 +68,7 @@ namespace LibCmo::CK2 {
 			notReadSlot.resize(slotcount, false);
 
 			for (CKDWORD i = 0; i < slotcount; ++i) {
-				if (ReadRawBitmap(chunk, GetImageSlot(i))) {
+				if (ReadRawBitmap(chunk, GetImageDesc(i))) {
 					notReadSlot[i] = true;
 				} else {
 					ReleaseImage(i);
@@ -84,7 +84,7 @@ namespace LibCmo::CK2 {
 			notReadSlot.resize(slotcount, false);
 
 			for (CKDWORD i = 0; i < slotcount; ++i) {
-				if (ReadOldRawBitmap(chunk, GetImageSlot(i))) {
+				if (ReadOldRawBitmap(chunk, GetImageDesc(i))) {
 					notReadSlot[i] = true;
 				} else {
 					ReleaseImage(i);
@@ -165,7 +165,8 @@ namespace LibCmo::CK2 {
 		if (Slot >= m_Slots.size()) return;
 
 		CKBitmapSlot& slotdata = m_Slots[Slot];
-		slotdata.CreateImage(Width, Height);
+		slotdata.m_ImageData.CreateImage(Width, Height);
+		VxMath::VxDoAlphaBlit(&slotdata.m_ImageData, 0xFFu);
 	}
 
 	bool CKBitmapData::LoadImage(CKSTRING filename, CKDWORD slot) {
@@ -203,17 +204,12 @@ namespace LibCmo::CK2 {
 
 	VxMath::VxImageDescEx* CKBitmapData::GetImageDesc(CKDWORD slot) {
 		if (slot >= m_Slots.size()) return nullptr;
-		return m_Slots[slot].m_ImageData;
-	}
-
-	CKBitmapSlot* CKBitmapData::GetImageSlot(CKDWORD slot) {
-		if (slot >= m_Slots.size()) return nullptr;
-		return &m_Slots[slot];
+		return &m_Slots[slot].m_ImageData;
 	}
 
 	void CKBitmapData::ReleaseImage(CKDWORD slot) {
 		if (slot >= m_Slots.size()) return;
-		m_Slots[slot].FreeImage();
+		m_Slots[slot].m_ImageData.FreeImage();
 	}
 
 	void CKBitmapData::SetSlotFileName(CKDWORD slot, CKSTRING filename) {

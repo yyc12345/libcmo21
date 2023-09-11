@@ -32,16 +32,10 @@ namespace LibCmo::CK2::DataHandlers {
 		static void ReleaseBitmapHandler(CKBitmapHandler* handler);
 
 		/**
-		 * @brief Returns the current default bitmap options.
-		 * @return Current default bitmap options
-		*/
-		virtual const CKBitmapProperties& GetBitmapDefaultProperties() = 0;
-
-		/**
 		@brief Loads a bitmap file.
 		@return Returns true if successful.
 		@param u8filename[in] The file ready to read.
-		@param read_image[out] The pointer point to existed image desc which describe this image HW.
+		@param read_image[out] The pointer point to a blank image desc to receive read image.
 		@see ReadMemory
 		*/
 		virtual bool ReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) = 0;
@@ -50,7 +44,7 @@ namespace LibCmo::CK2::DataHandlers {
 		@return Returns true if successful.
 		@param memory[in] The pointer to memory.
 		@param size[in] The size of memory.
-		@param read_image[out] The pointer point to existed image desc which describe this image HW.
+		@param read_image[out] The pointer point to a blank image desc to receive read image.
 		@see ReadFile
 		*/
 		virtual bool ReadMemory(const void* memory, CKDWORD size, VxMath::VxImageDescEx* read_image) = 0;
@@ -97,7 +91,8 @@ namespace LibCmo::CK2::DataHandlers {
 		virtual ~CKBitmapBMPHandler();
 		LIBCMO_DISABLE_COPY_MOVE(CKBitmapBMPHandler);
 
-		virtual const CKBitmapProperties& GetBitmapDefaultProperties() override;
+		static const CKBitmapProperties& GetBitmapDefaultProperties();
+
 		virtual bool ReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) override;
 		virtual bool ReadMemory(const void* memory, CKDWORD size, VxMath::VxImageDescEx* read_image) override;
 		virtual bool SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
@@ -111,7 +106,8 @@ namespace LibCmo::CK2::DataHandlers {
 		virtual ~CKBitmapTGAHandler();
 		LIBCMO_DISABLE_COPY_MOVE(CKBitmapTGAHandler);
 
-		virtual const CKBitmapProperties& GetBitmapDefaultProperties() override;
+		static const CKBitmapProperties& GetBitmapDefaultProperties();
+
 		virtual bool ReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) override;
 		virtual bool ReadMemory(const void* memory, CKDWORD size, VxMath::VxImageDescEx* read_image) override;
 		virtual bool SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;

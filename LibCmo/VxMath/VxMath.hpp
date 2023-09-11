@@ -29,23 +29,33 @@ namespace LibCmo::VxMath {
 	void VxCopyStructure(CK2::CKDWORD Count, void* Dst, CK2::CKDWORD OutStride, CK2::CKDWORD SizeSrc, const void* Src, CK2::CKDWORD InStride);
 	
 	// ========== Graphic Utilities ==========
-	//
-	///**
-	// * @brief Copy origin image to dest image.
-	// * Supporting for size scaling. If the size is matched, just a direct copy.
-	// * @param dest[out] The dest image.
-	// * @param origin[in] The origin image.
-	//*/
-	//void VxDoBlit(VxImageDescEx* dst, const VxImageDescEx* origin);
+	
+	/**
+	 * @brief Performs a blit between two images. This method can resize (shrink or grow) images.
+	 * @remark The source image must be in a 32 bit ARGB8888 per pixel format.
+	 * @param dest[out] The dest image.
+	 * @param origin[in] The origin image.
+	*/
+	void VxDoBlit(const VxImageDescEx* origin, VxImageDescEx* dst);
+	/**
+	 * @brief Performs a blit between two images. This method can inverts the destination image.
+	 * @remark 
+		+ The source image must be in a 32 bit ARGB8888 per pixel format.
+		+ This function usually used in the covertion between texture coordinate
+		system and UV coordinate system.
+	 * @param dest[out] The dest image.
+	 * @param origin[in] The origin image.
+	*/
+	void VxDoBlitUpsideDown(const VxImageDescEx* origin, VxImageDescEx* dst);
 
-	///**
-	// * @brief Counts number of bits to representing a value in dwMask
-	//*/
-	//CK2::CKDWORD VxGetBitCount(CK2::CKDWORD dwMask);
-	///**
-	// * @brief Counts number of bits to shift to acces a non zero value in dwMask.
-	//*/
-	//CK2::CKDWORD VxGetBitShift(CK2::CKDWORD dwMask);
+	/**
+	 * @brief Counts number of bits to representing a value in dwMask
+	*/
+	CK2::CKDWORD VxGetBitCount(CK2::CKDWORD dwMask);
+	/**
+	 * @brief Counts number of bits to shift to acces a non zero value in dwMask.
+	*/
+	CK2::CKDWORD VxGetBitShift(CK2::CKDWORD dwMask);
 
 	///**
 	// * @brief scale the integer to a new range.
@@ -59,6 +69,7 @@ namespace LibCmo::VxMath {
 
 	/**
 	 * @brief Sets the alpha component of an image.
+	 * @remark The source image must be in a 32 bit ARGB8888 per pixel format.
 	 * @param dst_desc[in] A pointer to a structure describing the destination image format.
 	 * @param AlphaValue[in] A CKBYTE value containing the alpha value to set to the whole image
 	 * @remark If the destination image does not have alpha information the function returns immediatly.
@@ -66,6 +77,7 @@ namespace LibCmo::VxMath {
 	void VxDoAlphaBlit(VxImageDescEx* dst_desc, CK2::CKBYTE AlphaValue);
 	/**
 	 * @brief Sets the alpha component of an image.
+	 * @remark The source image must be in a 32 bit ARGB8888 per pixel format.
 	 * @param dst_desc[in] A pointer to a structure describing the destination image format.
 	 * @param AlphaValues[in] A BYTE array containing the alpha values for each pixel. This array should be allocated to Width*Height bytes.
 	 * @remark If the destination image does not have alpha information the function returns immediatly.

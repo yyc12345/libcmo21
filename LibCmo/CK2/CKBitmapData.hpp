@@ -24,50 +24,11 @@ namespace LibCmo::CK2 {
 	class CKBitmapSlot {
 	public:
 		CKBitmapSlot() :
-			m_ImageData(nullptr), m_FileName() {}
-		~CKBitmapSlot() {
-			FreeImage();
-		}
-		CKBitmapSlot(const CKBitmapSlot& rhs) :
-			m_ImageData(nullptr), m_FileName(rhs.m_FileName) {
-			if (rhs.m_ImageData != nullptr) {
-				m_ImageData = new VxMath::VxImageDescEx(*rhs.m_ImageData);
-			}
-		}
-		CKBitmapSlot(CKBitmapSlot&& rhs) :
-			m_ImageData(rhs.m_ImageData), m_FileName(std::move(rhs.m_FileName)) {
-			rhs.m_ImageData = nullptr;
-		}
-		CKBitmapSlot& operator=(const CKBitmapSlot& rhs) {
-			m_FileName = rhs.m_FileName;
+			m_ImageData(), m_FileName() {}
+		~CKBitmapSlot() {}
+		LIBCMO_DEFAULT_COPY_MOVE(CKBitmapSlot);
 
-			FreeImage();
-			if (rhs.m_ImageData != nullptr) {
-				m_ImageData = new VxMath::VxImageDescEx(*rhs.m_ImageData);
-			}
-
-			return *this;
-		}
-		CKBitmapSlot& operator=(CKBitmapSlot&& rhs) {
-			m_FileName = std::move(rhs.m_FileName);
-			
-			FreeImage();
-			m_ImageData = rhs.m_ImageData;
-			rhs.m_ImageData = nullptr;
-		}
-
-		void CreateImage(CKDWORD Width, CKDWORD Height) {
-			FreeImage();
-			m_ImageData = new VxMath::VxImageDescEx(Width, Height);
-		}
-		void FreeImage() {
-			if (m_ImageData != nullptr) {
-				delete m_ImageData;
-				m_ImageData = nullptr;
-			}
-		}
-
-		VxMath::VxImageDescEx* m_ImageData;
+		VxMath::VxImageDescEx m_ImageData;
 		XContainer::XString m_FileName;
 	};
 
@@ -77,11 +38,11 @@ namespace LibCmo::CK2 {
 		~CKBitmapData();
 		LIBCMO_DISABLE_COPY_MOVE(CKBitmapData);
 
-		static bool ReadSpecificFormatBitmap(CKStateChunk* chk, CKBitmapSlot* slot);
-		static bool ReadRawBitmap(CKStateChunk* chk, CKBitmapSlot* slot);
-		static bool ReadOldRawBitmap(CKStateChunk* chk, CKBitmapSlot* slot);
-		static void WriteSpecificFormatBitmap(CKStateChunk* chk, CKBitmapSlot* slot);
-		static void WriteRawBitmap(CKStateChunk* chk, CKBitmapSlot* slot);
+		static bool ReadSpecificFormatBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot);
+		static bool ReadRawBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot);
+		static bool ReadOldRawBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot);
+		static void WriteSpecificFormatBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* slot);
+		static void WriteRawBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* slot);
 
 		bool ReadFromChunk(CKStateChunk* chunk, CKFileVisitor* file, const CKBitmapDataReadIdentifiers& identifiers);
 		bool DumpToChunk(CKStateChunk* chunk, CKFileVisitor* file, const CKBitmapDataWriteIdentifiers& identifiers);
@@ -95,7 +56,6 @@ namespace LibCmo::CK2 {
 		bool LoadImage(CKSTRING filename, CKDWORD slot);
 		bool SaveImage(CKSTRING filename, CKDWORD slot);
 		VxMath::VxImageDescEx* GetImageDesc(CKDWORD slot);
-		CKBitmapSlot* GetImageSlot(CKDWORD slot);
 		void ReleaseImage(CKDWORD slot);
 
 		void SetSlotFileName(CKDWORD slot, CKSTRING filename);

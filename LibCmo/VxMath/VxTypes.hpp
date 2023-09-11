@@ -73,28 +73,76 @@ namespace LibCmo::VxMath {
 	 * VxImageDescEx describe the height, width,
 	 * and etc for image.
 	 * Also it hold a pointer to raw image data.
-	 * The image data must be 32bit format.
+	 * The image data must be 32bit ARGB8888 format.
 	 * Thus the size of Image must be 4 * Width * Height.
 	*/
 	class VxImageDescEx {
 	public:
+		VxImageDescEx() :
+			m_Width(0), m_Height(0), m_Image(nullptr) {}
 		VxImageDescEx(CK2::CKDWORD width, CK2::CKDWORD height) :
-			m_Width(width), m_Height(height),
-			//m_RedMask(0), m_GreenMask(0), m_BlueMask(0), m_AlphaMask(0),
-			m_Image(nullptr) {
-			m_Image = new CK2::CKBYTE[GetImageSize()];
+			m_Width(width), m_Height(height), m_Image(nullptr) {
+			CreateImage(width, height);
 		}
 		VxImageDescEx(const VxImageDescEx& rhs) :
-			m_Width(rhs.m_Width), m_Height(rhs.m_Height),
-			m_Image(nullptr) {
+			m_Width(rhs.m_Width), m_Height(rhs.m_Height), m_Image(nullptr) {
 			// copy image
-			m_Image = new CK2::CKBYTE[GetImageSize()];
-			std::memcpy(m_Image, rhs.m_Image, GetImageSize());
+			if (rhs.m_Image != nullptr) {
+				CreateImage(rhs.m_Width, rhs.m_Height, rhs.m_Image);
+			}
+		}
+		VxImageDescEx(VxImageDescEx&& rhs) :
+			m_Width(rhs.m_Width), m_Height(rhs.m_Height), m_Image(rhs.m_Image) {
+			// move image
+			rhs.m_Height = 0;
+			rhs.m_Width = 0;
+			rhs.m_Image = nullptr;
+		}
+		VxImageDescEx& operator=(const VxImageDescEx& rhs) {
+			FreeImage();
+
+			m_Width = rhs.m_Width;
+			m_Height = rhs.m_Height;
+			if (rhs.m_Image != nullptr) {
+				CreateImage(rhs.m_Width, rhs.m_Height, rhs.m_Image);
+			}
+
+			return *this;
+		}
+		VxImageDescEx& operator=(VxImageDescEx&& rhs) {
+			FreeImage();
+
+			m_Height = rhs.m_Height;
+			m_Width = rhs.m_Width;
+			m_Image = rhs.m_Image;
+			rhs.m_Height = 0;
+			rhs.m_Width = 0;
+			rhs.m_Image = nullptr;
+
+			return *this;
 		}
 		~VxImageDescEx() {
-			delete[] m_Image;
+			FreeImage();
 		}
-		LIBCMO_DISABLE_COPY_MOVE(VxImageDescEx);
+
+		void CreateImage(CK2::CKDWORD Width, CK2::CKDWORD Height) {
+			FreeImage();
+			m_Width = Width;
+			m_Height = Height;
+			m_Image = new CK2::CKBYTE[GetImageSize()];
+		}
+		void CreateImage(CK2::CKDWORD Width, CK2::CKDWORD Height, void* dataptr) {
+			CreateImage(Width, Height);
+			std::memcpy(m_Image, dataptr, GetImageSize());
+		}
+		void FreeImage() {
+			m_Width = 0;
+			m_Height = 0;
+			if (m_Image != nullptr) {
+				delete[] m_Image;
+				m_Image = nullptr;
+			}
+		}
 
 		CK2::CKDWORD GetImageSize() const {
 			return static_cast<CK2::CKDWORD>(sizeof(uint32_t) * m_Width * m_Height);
@@ -123,10 +171,17 @@ namespace LibCmo::VxMath {
 			return m_Height;
 		}
 
+		bool IsValid() const {
+			return (
+				m_Width != 0u &&
+				m_Height != 0u &&
+				m_Image != nullptr
+			);
+		}
 		bool IsHWEqual(const VxImageDescEx& rhs) const {
 			return (m_Width == rhs.m_Width && m_Height == rhs.m_Height);
 		}
-	//	bool IsMaskEqual(const VxImageDescEx& rhs) const {
+		//	bool IsMaskEqual(const VxImageDescEx& rhs) const {
 	//		return (
 	//			m_RedMask == rhs.m_RedMask &&
 	//			m_GreenMask == rhs.m_GreenMask &&

@@ -1,4 +1,6 @@
 #include "VxMath.hpp"
+#include "stb_image.h"
+#include "stb_image_resize.h"
 
 namespace LibCmo::VxMath {
 
@@ -24,26 +26,68 @@ namespace LibCmo::VxMath {
 
 #pragma region Graphic Utilities
 
-	//CK2::CKDWORD VxGetBitCount(CK2::CKDWORD dwMask) {
-	//	if (dwMask == 0u) return 0;
-	//	dwMask >>= VxGetBitShift(dwMask);
-	//	CK2::CKDWORD count = 0;
-	//	while ((dwMask & 1u) == 0u) {
-	//		dwMask >>= 1u;
-	//		++count;
-	//	}
-	//	return count;
-	//}
+	void VxDoBlit(const VxImageDescEx* origin, VxImageDescEx* dst) {
+		if (dst == nullptr || origin == nullptr) return;
+		if (!dst->IsValid() || !origin->IsValid()) return;
 
-	//CK2::CKDWORD VxGetBitShift(CK2::CKDWORD dwMask) {
-	//	if (dwMask == 0u) return 0;
-	//	CK2::CKDWORD count = 0;
-	//	while ((dwMask & 1u) != 0u) {
-	//		dwMask >>= 1u;
-	//		++count;
-	//	}
-	//	return count;
-	//}
+		// if have same size, directly copy it
+		if (dst->IsHWEqual(*origin)) {
+			std::memcpy(dst->GetMutableImage(), origin->GetImage(), dst->GetImageSize());
+			return;
+		}
+
+		// perform resize by stb
+		stbir_resize(
+			origin->GetImage(), static_cast<int>(origin->GetWidth()), static_cast<int>(origin->GetHeight()), 0,
+			dst->GetMutableImage(), static_cast<int>(dst->GetWidth()), static_cast<int>(dst->GetHeight()), 0,
+			STBIR_TYPE_UINT8, 4, STBIR_ALPHA_CHANNEL_NONE, 0,	// no alpha channel, mean we treat alpha channel as a normal color factor.
+			STBIR_EDGE_CLAMP, STBIR_EDGE_CLAMP,
+			STBIR_FILTER_BOX, STBIR_FILTER_BOX,
+			STBIR_COLORSPACE_SRGB, nullptr
+		);
+	}
+
+	void VxDoBlitUpsideDown(const VxImageDescEx* origin, VxImageDescEx* dst) {
+		if (dst == nullptr || origin == nullptr) return;
+		if (!dst->IsValid() || !origin->IsValid()) return;
+
+		// if size is not matched, return
+		if (!dst->IsHWEqual(*origin)) {
+			return;
+		}
+
+		// copy and swap data by line
+		CK2::CKDWORD height = dst->GetHeight(),
+			rowsize = sizeof(uint32_t) * dst->GetWidth();
+		for (CK2::CKDWORD row = 0; row < height; ++row) {
+			std::memcpy(
+				dst->GetMutableImage() + (row * rowsize),
+				dst->GetImage() + ((height - row - 1) * rowsize),
+				rowsize
+			);
+		}
+	}
+
+	CK2::CKDWORD VxGetBitCount(CK2::CKDWORD dwMask) {
+		if (dwMask == 0u) return 0;
+		dwMask >>= VxGetBitShift(dwMask);
+		CK2::CKDWORD count = 0;
+		while ((dwMask & 1u) == 0u) {
+			dwMask >>= 1u;
+			++count;
+		}
+		return count;
+	}
+
+	CK2::CKDWORD VxGetBitShift(CK2::CKDWORD dwMask) {
+		if (dwMask == 0u) return 0;
+		CK2::CKDWORD count = 0;
+		while ((dwMask & 1u) != 0u) {
+			dwMask >>= 1u;
+			++count;
+		}
+		return count;
+	}
 
 	//CK2::CKDWORD VxScaleFactor(CK2::CKDWORD val, CK2::CKDWORD srcBitCount, CK2::CKDWORD dstBitCount) {
 	//	if (srcBitCount == dstBitCount) return val;

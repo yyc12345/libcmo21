@@ -53,29 +53,6 @@ namespace LibCmo::CK2::DataHandlers {
 		);
 	}
 
-	static void PostRead(stbi_uc* data, int x, int y, VxMath::VxImageDescEx* read_image) {
-		// scale image if need
-		if (x != read_image->GetWidth() || y != read_image->GetHeight()) {
-			// alloc
-			CKBYTE* newdata = new CKBYTE[read_image->GetImageSize()];
-			// resize
-			stbir_resize(
-				data, x, y, 0,
-				newdata, static_cast<int>(read_image->GetWidth()), static_cast<int>(read_image->GetHeight()), 0,
-				STBIR_TYPE_UINT8, 4, STBIR_ALPHA_CHANNEL_NONE, 0,	// no alpha channel, mean we treat alpha channel as a normal color factor.
-				STBIR_EDGE_CLAMP, STBIR_EDGE_CLAMP,
-				STBIR_FILTER_BOX, STBIR_FILTER_BOX,
-				STBIR_COLORSPACE_SRGB, nullptr
-			);
-			// copy data
-			RGBAToARGB(read_image->GetPixelCount(), newdata, read_image->GetMutableImage());
-			// free
-			delete[] newdata;
-		} else {
-			// copy data RGBA -> ARGB
-			RGBAToARGB(read_image->GetPixelCount(), data, read_image->GetMutableImage());
-		}
-	}
 	static bool StbReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) {
 		if (u8filename == nullptr || read_image == nullptr) return false;
 		FILE* fs = EncodingHelper::U8FOpen(u8filename, "rb");
@@ -87,8 +64,11 @@ namespace LibCmo::CK2::DataHandlers {
 		std::fclose(fs);
 		if (data == nullptr) return false;
 
-		// scale image if need
-		PostRead(data, x, y, read_image);
+		// create read image
+		read_image->CreateImage(static_cast<CKDWORD>(x), static_cast<CKDWORD>(y));
+
+		// copy data
+		RGBAToARGB(read_image->GetPixelCount(), data, read_image->GetMutableImage());
 
 		// clear data
 		stbi_image_free(data);
@@ -106,9 +86,12 @@ namespace LibCmo::CK2::DataHandlers {
 			&x, &y, &channels_in_file, 4	// 4 == RGBA8888
 		);
 		if (data == nullptr) return false;
+		
+		// create read image
+		read_image->CreateImage(static_cast<CKDWORD>(x), static_cast<CKDWORD>(y));
 
-		// scale image if need
-		PostRead(data, x, y, read_image);
+		// copy data
+		RGBAToARGB(read_image->GetPixelCount(), data, read_image->GetMutableImage());
 
 		// clear data
 		stbi_image_free(data);
