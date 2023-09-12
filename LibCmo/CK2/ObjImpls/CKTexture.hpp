@@ -25,6 +25,7 @@ namespace LibCmo::CK2::ObjImpls {
 		CKBitmapData m_ImageHost;
 		VxMath::VX_PIXELFORMAT m_VideoFormat;
 		bool m_UseMipMap;
+		XContainer::XArray<VxMath::VxImageDescEx> m_MipmapImages;
 	};
 
 	//class CKRenderObject : public CKBeObject {

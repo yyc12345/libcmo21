@@ -59,16 +59,9 @@ namespace Unvirt {
 
 		namespace EnumDesc {
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE;
-			extern const GeneralReflectionArray<LibCmo::CK2::CK_LOAD_FLAGS> CK_LOAD_FLAGS;
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_FO_OPTIONS> CK_FO_OPTIONS;
-			extern const GeneralReflectionArray<LibCmo::CK2::CK_LOADMODE> CK_LOADMODE;
-			extern const GeneralReflectionArray<LibCmo::CK2::CK_OBJECTCREATION_OPTIONS> CK_OBJECTCREATION_OPTIONS;
-			extern const GeneralReflectionArray<LibCmo::CK2::CK_PLUGIN_TYPE> CK_PLUGIN_TYPE;
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_STATECHUNK_CHUNKOPTIONS> CK_STATECHUNK_CHUNKOPTIONS;
-			extern const GeneralReflectionArray<LibCmo::CK2::CK_OBJECT_FLAGS> CK_OBJECT_FLAGS;
-
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_STATECHUNK_DATAVERSION> CK_STATECHUNK_DATAVERSION;
-
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_STATECHUNK_CHUNKVERSION> CK_STATECHUNK_CHUNKVERSION;
 		}
 

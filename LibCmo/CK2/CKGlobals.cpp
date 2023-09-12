@@ -17,6 +17,7 @@
 #include "ObjImpls/CKRenderObject.hpp"
 #include "ObjImpls/CK3dEntity.hpp"
 #include "ObjImpls/CK3dObject.hpp"
+#include "ObjImpls/CKTexture.hpp"
 
 namespace LibCmo::CK2 {
 
@@ -270,6 +271,7 @@ CKClassRegister(cid, parentCid, \
 		EasyClassReg(ObjImpls::CKRenderObject, CK_CLASSID::CKCID_RENDEROBJECT, CK_CLASSID::CKCID_BEOBJECT, "Render Object");
 		EasyClassReg(ObjImpls::CK3dEntity, CK_CLASSID::CKCID_3DENTITY, CK_CLASSID::CKCID_RENDEROBJECT, "3D Entity");
 		EasyClassReg(ObjImpls::CK3dObject, CK_CLASSID::CKCID_3DOBJECT, CK_CLASSID::CKCID_3DENTITY, "3D Object");
+		EasyClassReg(ObjImpls::CKTexture, CK_CLASSID::CKCID_TEXTURE, CK_CLASSID::CKCID_BEOBJECT, "Texture");
 
 #undef EasyClassReg
 

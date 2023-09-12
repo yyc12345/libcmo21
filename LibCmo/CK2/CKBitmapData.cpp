@@ -137,7 +137,7 @@ namespace LibCmo::CK2 {
 #pragma region Core Read / Write
 
 	bool CKBitmapData::ReadFromChunk(CKStateChunk* chunk, CKFileVisitor* file, const CKBitmapDataReadIdentifiers& identifiers) {
-		XContainer::XBitArray notReadSlot;
+		XContainer::XBitArray hasReadSlot;
 
 		// check 3 types enbedded image
 		// MARK: i think there is a potential vulnerable issue.
@@ -152,7 +152,7 @@ namespace LibCmo::CK2 {
 			chunk->ReadStruct(bpp);
 
 			SetSlotCount(slotcount);
-			notReadSlot.resize(slotcount, false);
+			hasReadSlot.resize(slotcount, false);
 
 			// the height and width is written outside of specific format
 			// so we create image first for it.
@@ -162,7 +162,7 @@ namespace LibCmo::CK2 {
 				for (CKDWORD i = 0; i < slotcount; ++i) {
 					CreateImage(width, height, i);
 					if (ReadSpecificFormatBitmap(chunk, GetImageDesc(i))) {
-						notReadSlot[i] = true;
+						hasReadSlot[i] = true;
 					} else {
 						ReleaseImage(i);
 					}
@@ -175,7 +175,7 @@ namespace LibCmo::CK2 {
 			chunk->ReadStruct(slotcount);
 			
 			SetSlotCount(slotcount);
-			notReadSlot.resize(slotcount, false);
+			hasReadSlot.resize(slotcount, false);
 
 			// the height and width is read by raw data function self.
 			// so we pass a cache variable to reader and do some modification
@@ -183,7 +183,7 @@ namespace LibCmo::CK2 {
 			for (CKDWORD i = 0; i < slotcount; ++i) {
 				VxMath::VxImageDescEx rawcache;
 				if (ReadRawBitmap(chunk, &rawcache)) {
-					notReadSlot[i] = true;
+					hasReadSlot[i] = true;
 
 					// do upside down blit
 					CreateImage(rawcache.GetWidth(), rawcache.GetHeight(), i);
@@ -197,12 +197,12 @@ namespace LibCmo::CK2 {
 			chunk->ReadStruct(slotcount);
 			
 			SetSlotCount(slotcount);
-			notReadSlot.resize(slotcount, false);
+			hasReadSlot.resize(slotcount, false);
 
 			// MARK: a rough implement because we do not support this identifier
 			for (CKDWORD i = 0; i < slotcount; ++i) {
 				if (ReadOldRawBitmap(chunk, GetImageDesc(i))) {
-					notReadSlot[i] = true;
+					hasReadSlot[i] = true;
 				} else {
 					ReleaseImage(i);
 				}
@@ -224,7 +224,7 @@ namespace LibCmo::CK2 {
 				chunk->ReadString(filename);
 				if (filename.empty()) continue;
 				
-				bool isNotLoaded = i >= notReadSlot.size() || notReadSlot[i];
+				bool isNotLoaded = i >= hasReadSlot.size() || (!hasReadSlot[i]);
 				if (isNotLoaded) {
 					// if this image is not loaded.
 					// try resolve its file name and load it.
@@ -398,6 +398,14 @@ namespace LibCmo::CK2 {
 
 	CKDWORD CKBitmapData::GetTransparentColor() {
 		return m_TransColor;
+	}
+
+	void CKBitmapData::SetPickThreshold(CKDWORD threshold) {
+		m_PickThreshold = threshold;
+	}
+
+	CKDWORD CKBitmapData::GetPickThreshold() {
+		return m_PickThreshold;
 	}
 	
 #pragma endregion

@@ -114,12 +114,32 @@ namespace LibCmo::CK2 {
 		See also: SetTranparentColor,SetTransparent
 		*/
 		CKDWORD GetTransparentColor();
+		/**
+		Summary: Sets pick threshold value.
+		Arguments:
+			pt: Pick threshold value to be set.
+		Remarks:
+			+ The pick threshold is used when picking object with 
+			transparent textures.
+			+ It is the minimum value for alpha component
+			below which picking is not valid.So this value is supposed to be in the range 0..255
+			and the default value 0 means the picking is always valid.
+			+ But if a value >0 is used and the texture use transparency (some pixels of the bitmap will have
+			alpha component of 0) an object will not be picked on its transparent part.
+
+		See Also: CKRenderContext::Pick
+		*/
+		void SetPickThreshold(CKDWORD threshold);
+		/**
+		Summary: Gets pick threshold value.
+		*/
+		CKDWORD GetPickThreshold();
 
 	protected:
 		CKContext* m_Context;
 		XContainer::XArray<CKBitmapSlot> m_Slots;
 		CKDWORD m_CurrentSlot;
-		CKINT m_PickThreshold;
+		CKDWORD m_PickThreshold;
 		CK_BITMAPDATA_FLAGS m_BitmapFlags;
 		CKDWORD m_TransColor;
 

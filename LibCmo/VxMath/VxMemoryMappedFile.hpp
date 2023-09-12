@@ -3,6 +3,11 @@
 #include "../VTAll.hpp"
 #if defined(LIBCMO_OS_WIN32)
 #include <Windows.h>
+// disable annoy macro at the same time
+#undef GetObject
+#undef GetClassName
+#undef LoadImage
+#undef GetTempPath
 #else
 #include <sys/mman.h>
 #include <sys/stat.h>

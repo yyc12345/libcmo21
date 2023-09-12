@@ -1,4 +1,5 @@
 #include "UnvirtContext.hpp"
+#include <CK2/MgrImpls/CKPathManager.hpp>
 #include <cstdarg>
 
 namespace Unvirt::Context {
@@ -21,7 +22,7 @@ namespace Unvirt::Context {
 					->Comment("The path to loading file.")
 					->Executes(
 						std::bind(&UnvirtContext::ProcLoad, this, std::placeholders::_1),
-						"Load a Virtools composition deeply."
+						"Load a Virtools composition."
 					)
 				)
 			)
@@ -110,6 +111,23 @@ namespace Unvirt::Context {
 				)
 			)
 		)
+		->Then((new CmdHelper::Literal("rsc"))
+			->Then((new CmdHelper::Literal("clear"))
+				->Executes(
+					std::bind(&UnvirtContext::ProcRsc, this, std::placeholders::_1, true),
+					"Clear all data resources paths."
+				)
+			)
+			->Then((new CmdHelper::Literal("add"))
+				->Then((new CmdHelper::StringArgument("datares"))
+					->Comment("The data resources path .")
+					->Executes(
+						std::bind(&UnvirtContext::ProcRsc, this, std::placeholders::_1, false),
+						"Add a path to let Virtools find resources."
+					)
+				)
+			)
+		)
 		->Then((new CmdHelper::Literal("help"))
 			->Executes(
 				std::bind(&UnvirtContext::ProcHelp, this, std::placeholders::_1),
@@ -152,7 +170,7 @@ namespace Unvirt::Context {
 		delete m_FileReader;
 		m_FileReader = nullptr;
 		// clear context
-		m_Ctx->DestroyAllCKObjects();
+		m_Ctx->ClearAll();
 	}
 
 	void UnvirtContext::PrintContextMsg(LibCmo::CK2::CKSTRING msg) {
@@ -399,7 +417,19 @@ namespace Unvirt::Context {
 
 	void UnvirtContext::ProcTemp(const CmdHelper::ArgumentsMap* amap) {
 		// assign
-		m_Ctx->SetTempPath(amap->Get<CmdHelper::StringArgument::vType>("temppath")->c_str());
+		if (!m_Ctx->GetPathManager()->SetTempFolder(amap->Get<CmdHelper::StringArgument::vType>("temppath")->c_str())) {
+			PrintCommonError("Set temp folder failed. Check your path first.");
+		}
+	}
+
+	void Unvirt::Context::UnvirtContext::ProcRsc(const CmdHelper::ArgumentsMap* amap, bool isClear) {
+		if (isClear) {
+			m_Ctx->GetPathManager()->ClearPath();
+		} else {
+			if (!m_Ctx->GetPathManager()->AddPath(amap->Get<CmdHelper::StringArgument::vType>("datares")->c_str())) {
+				PrintCommonError("Set data resource folder failed. Check your path first.");
+			}
+		}
 	}
 
 	void Unvirt::Context::UnvirtContext::ProcHelp(const CmdHelper::ArgumentsMap*) {

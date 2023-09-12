@@ -136,7 +136,7 @@ namespace Unvirt::StructFormatter {
 				fputc('\t', stdout);
 				PrintPointer(obj.Data);
 				fputc('\t', stdout);
-				PrintCKSTRING(obj.Name.c_str());
+				PrintCKSTRING(obj.Name.toCKSTRING());
 				fputc('\n', stdout);
 			}
 			);
