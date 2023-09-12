@@ -58,11 +58,11 @@ namespace LibCmo::VxMath {
 
 		// copy and swap data by line
 		CK2::CKDWORD height = dst->GetHeight(),
-			rowsize = sizeof(uint32_t) * dst->GetWidth();
+			rowsize = VxImageDescEx::PixelSize * dst->GetWidth();
 		for (CK2::CKDWORD row = 0; row < height; ++row) {
 			std::memcpy(
 				dst->GetMutableImage() + (row * rowsize),
-				dst->GetImage() + ((height - row - 1) * rowsize),
+				origin->GetImage() + ((height - row - 1) * rowsize),
 				rowsize
 			);
 		}
@@ -105,7 +105,7 @@ namespace LibCmo::VxMath {
 		CK2::CKDWORD pixelcount = dst_desc->GetPixelCount();
 
 		for (CK2::CKDWORD i = 0; i < pixelcount; ++i) {
-			*pixels = (*pixels) & 0xFF000000 | AlphaValue;
+			*pixels = (*pixels) & 0x00FFFFFF | (static_cast<CK2::CKDWORD>(AlphaValue) << 24);
 			++pixels;
 		}
 
@@ -129,7 +129,7 @@ namespace LibCmo::VxMath {
 		CK2::CKDWORD pixelcount = dst_desc->GetPixelCount();
 
 		for (CK2::CKDWORD i = 0; i < pixelcount; ++i) {
-			*pixels =  (*pixels) & 0xFF000000 | (*AlphaValues);
+			*pixels =  (*pixels) & 0x00FFFFFF | (static_cast<CK2::CKDWORD>(*AlphaValues) << 24);
 			++pixels;
 			++AlphaValues;
 		}

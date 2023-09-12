@@ -90,9 +90,9 @@ namespace LibCmo::CK2 {
 			// so return false simply
 			return false;
 		} else {
-			chk->ReadBufferWrapper(&redBuffer, &bufsize);
-			chk->ReadBufferWrapper(&greenBuffer, &bufsize);
 			chk->ReadBufferWrapper(&blueBuffer, &bufsize);
+			chk->ReadBufferWrapper(&greenBuffer, &bufsize);
+			chk->ReadBufferWrapper(&redBuffer, &bufsize);
 		}
 		chk->ReadBufferWrapper(&alphaBuffer, &bufsize);
 
@@ -108,11 +108,11 @@ namespace LibCmo::CK2 {
 				* blueSrc = reinterpret_cast<CKBYTE*>(blueBuffer.get()),
 				* alphaSrc = reinterpret_cast<CKBYTE*>(alphaBuffer.get());
 			for (CKDWORD p = 0; p < pixelcount; ++p) {
+				*(dst++) = *(blueSrc++);
+				*(dst++) = *(greenSrc++);
+				*(dst++) = *(redSrc++);
 				// if no alpha data, set to 0xFF
 				*(dst++) = (alphaBuffer != nullptr ? (*(alphaSrc++)) : 0xFFu);
-				*(dst++) = *(redSrc++);
-				*(dst++) = *(greenSrc++);
-				*(dst++) = *(blueSrc++);
 			}
 		}
 
@@ -224,7 +224,7 @@ namespace LibCmo::CK2 {
 				chunk->ReadString(filename);
 				if (filename.empty()) continue;
 				
-				bool isNotLoaded = i >= hasReadSlot.size() || (!hasReadSlot[i]);
+				bool isNotLoaded = (i >= hasReadSlot.size()) || (!hasReadSlot[i]);
 				if (isNotLoaded) {
 					// if this image is not loaded.
 					// try resolve its file name and load it.

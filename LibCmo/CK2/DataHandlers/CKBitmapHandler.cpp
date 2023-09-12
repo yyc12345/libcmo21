@@ -7,49 +7,92 @@ namespace LibCmo::CK2::DataHandlers {
 
 #pragma region Help Functions
 
-	static void RGBAToARGB(CK2::CKDWORD count, const void* _rgba, void* _argb) {
-		const char* rgba = reinterpret_cast<const char*>(_rgba);
+	/*
+	 ABGR8888 is format used by std image.
+	 The data is placed in buffer with RGBA order, so the format is ABGR.
+	 ARGB8888 is Virtools standard.
+	 The data is placed in buffer with BGRA order.
+	*/
+
+	static void ABGRToARGB(CK2::CKDWORD count, const void* _abgr, void* _argb) {
+		const char* abgr = reinterpret_cast<const char*>(_abgr);
 		char* argb = reinterpret_cast<char*>(_argb);
-		// copy RGB
+		// copy R
 		VxMath::VxCopyStructure(
 			count,
-			argb + sizeof(uint8_t),
-			4 * sizeof(uint8_t),
-			3 * sizeof(uint8_t),
-			rgba,
-			4 * sizeof(uint8_t)
+			argb + (2u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize,
+			VxMath::VxImageDescEx::ColorFactorSize,
+			abgr + (0u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize
+		);
+		// copy G
+		VxMath::VxCopyStructure(
+			count,
+			argb + (1u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize,
+			VxMath::VxImageDescEx::ColorFactorSize,
+			abgr + (1u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize
+		);
+		// copy B
+		VxMath::VxCopyStructure(
+			count,
+			argb + (0u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize,
+			VxMath::VxImageDescEx::ColorFactorSize,
+			abgr + (2u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize
 		);
 		// copy A
 		VxMath::VxCopyStructure(
 			count,
-			argb,
-			4 * sizeof(uint8_t),
-			sizeof(uint8_t),
-			rgba + (3 * sizeof(uint8_t)),
-			4 * sizeof(uint8_t)
+			argb + (3u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize,
+			VxMath::VxImageDescEx::ColorFactorSize,
+			abgr + (3u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize
 		);
 	}
 
-	static void ARGBToRGBA(CK2::CKDWORD count, const void* _argb, void* _rgba) {
+	static void ARGBToABGR(CK2::CKDWORD count, const void* _argb, void* _abgr) {
 		const char* argb = reinterpret_cast<const char*>(_argb);
-		char* rgba = reinterpret_cast<char*>(_rgba);
-		// copy RGB
+		char* abgr = reinterpret_cast<char*>(_abgr);
+		// copy R
 		VxMath::VxCopyStructure(
 			count,
-			rgba,
-			4 * sizeof(uint8_t),
-			3 * sizeof(uint8_t),
-			argb + sizeof(uint8_t),
-			4 * sizeof(uint8_t)
+			abgr + (0u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize,
+			VxMath::VxImageDescEx::ColorFactorSize,
+			argb + (2u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize
+		);
+		// copy G
+		VxMath::VxCopyStructure(
+			count,
+			abgr + (1u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize,
+			VxMath::VxImageDescEx::ColorFactorSize,
+			argb + (1u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize
+		);
+		// copy B
+		VxMath::VxCopyStructure(
+			count,
+			abgr + (2u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize,
+			VxMath::VxImageDescEx::ColorFactorSize,
+			argb + (0u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize
 		);
 		// copy A
 		VxMath::VxCopyStructure(
 			count,
-			rgba + (3 * sizeof(uint8_t)),
-			4 * sizeof(uint8_t),
-			sizeof(uint8_t),
-			argb,
-			4 * sizeof(uint8_t)
+			abgr + (3u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize,
+			VxMath::VxImageDescEx::ColorFactorSize,
+			argb + (3u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize
 		);
 	}
 
@@ -68,7 +111,7 @@ namespace LibCmo::CK2::DataHandlers {
 		read_image->CreateImage(static_cast<CKDWORD>(x), static_cast<CKDWORD>(y));
 
 		// copy data
-		RGBAToARGB(read_image->GetPixelCount(), data, read_image->GetMutableImage());
+		ABGRToARGB(read_image->GetPixelCount(), data, read_image->GetMutableImage());
 
 		// clear data
 		stbi_image_free(data);
@@ -91,7 +134,7 @@ namespace LibCmo::CK2::DataHandlers {
 		read_image->CreateImage(static_cast<CKDWORD>(x), static_cast<CKDWORD>(y));
 
 		// copy data
-		RGBAToARGB(read_image->GetPixelCount(), data, read_image->GetMutableImage());
+		ABGRToARGB(read_image->GetPixelCount(), data, read_image->GetMutableImage());
 
 		// clear data
 		stbi_image_free(data);
@@ -135,7 +178,7 @@ namespace LibCmo::CK2::DataHandlers {
 
 		// allocate buffer and convert data from ARGB to RGBA
 		CKBYTE* data = new CKBYTE[write_image->GetImageSize()];
-		ARGBToRGBA(write_image->GetPixelCount(), write_image->GetImage(), data);
+		ARGBToABGR(write_image->GetPixelCount(), write_image->GetImage(), data);
 
 		// write data
 		FileSaveContext* ctx = new FileSaveContext(fs);
@@ -158,7 +201,7 @@ namespace LibCmo::CK2::DataHandlers {
 
 		// allocate buffer and convert data from ARGB to RGBA
 		CKBYTE* data = new CKBYTE[write_image->GetImageSize()];
-		ARGBToRGBA(write_image->GetPixelCount(), write_image->GetImage(), data);
+		ARGBToABGR(write_image->GetPixelCount(), write_image->GetImage(), data);
 
 		// write data
 		MemorySaveContext* ctx = new MemorySaveContext(memory);

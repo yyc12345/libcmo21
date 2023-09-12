@@ -75,8 +75,12 @@ namespace LibCmo::VxMath {
 	 * Also it hold a pointer to raw image data.
 	 * The image data must be 32bit ARGB8888 format.
 	 * Thus the size of Image must be 4 * Width * Height.
+	 * And the image buffer must is in B, G, R, A order because little endian.
 	*/
 	class VxImageDescEx {
+	public:
+		static constexpr CK2::CKDWORD ColorFactorSize = 1u;
+		static constexpr CK2::CKDWORD PixelSize = ColorFactorSize * 4u;
 	public:
 		VxImageDescEx() :
 			m_Width(0), m_Height(0), m_Image(nullptr) {}
@@ -145,7 +149,7 @@ namespace LibCmo::VxMath {
 		}
 
 		CK2::CKDWORD GetImageSize() const {
-			return static_cast<CK2::CKDWORD>(sizeof(uint32_t) * m_Width * m_Height);
+			return static_cast<CK2::CKDWORD>(PixelSize * m_Width * m_Height);
 		}
 		const CK2::CKBYTE* GetImage() const {
 			return m_Image;

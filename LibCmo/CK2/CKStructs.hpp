@@ -53,7 +53,7 @@ namespace LibCmo::CK2 {
 		}
 
 	protected:
-		static const size_t c_DataLen = 4u;
+		static constexpr size_t c_DataLen = 4u;
 		CKCHAR m_Data[c_DataLen];
 	};
 	
