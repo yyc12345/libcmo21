@@ -9,6 +9,9 @@ namespace LibCmo::CK2::ObjImpls {
 	 * Because Virtools directly write a raw struct into file,
 	 * and our defines are different with Virtools.
 	 * So we need create a fake struct.
+	 * @remark
+	 * All pointers should translate to DWORD(32 bit) for platform independent.
+	 * Otherwise this struct may be corrupted in x64 platform because pointer is QWORD in x64.
 	*/
 	struct FakeBitmapProperties {
 		CKINT m_Size;
@@ -50,10 +53,10 @@ namespace LibCmo::CK2::ObjImpls {
 			CK2::CKWORD BytesPerColorEntry; ///< ColorMap Stride
 			CK2::CKWORD ColorMapEntries; ///< If other than 0 image is palletized
 
-			CK2::CKBYTE* ColorMap; ///< Palette colors
-			CK2::CKBYTE* Image; ///< Image
+			/*CK2::CKBYTE**/CK2::CKDWORD ColorMap; ///< Palette colors
+			/*CK2::CKBYTE**/CK2::CKDWORD Image; ///< Image
 		}m_Format;
-		void* m_Data;
+		/*void**/CK2::CKDWORD m_Data;
 	};
 
 	CKTexture::CKTexture(CKContext* ctx, CK_ID ckid, CKSTRING name) :

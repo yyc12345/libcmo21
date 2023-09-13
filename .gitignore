@@ -3,14 +3,14 @@
 *.cmo
 *.nms
 *.vmo
-PyCmoOld/
 out/
 temp/
 .vscode/
 
-CodeGen.old/
-CodeGen/dest/*.hpp
-CodeGen/dest/*.cpp
+CodeGen/*.hpp
+CodeGen/*.cpp
+CodeGen/EnumsMigration/dest/*.hpp
+CodeGen/EnumsMigration/dest/*.cpp
 
 ## CMake Banned
 CMakeLists.txt.user
