@@ -122,6 +122,44 @@ namespace LibCmo::CK2::ObjImpls {
 			}
 		}
 
+		// extra texture data
+		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MATERIAL::CK_STATESAVE_MATDATA2)) {
+			// read 3 extra texture
+			CK_ID objid;
+			CKObject* tex = nullptr;
+
+			for (size_t i = 1; i < 4; ++i) {
+				chunk->ReadObjectID(objid);
+				tex = m_Context->GetObject(objid);
+				if (tex != nullptr && tex->GetClassID() == CK_CLASSID::CKCID_TEXTURE) {
+					m_Textures[i] = static_cast<CKTexture*>(tex);
+				}
+			}
+		}
+
+		// single effect
+		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MATERIAL::CK_STATESAVE_MATDATA3)) {
+			CKDWORD data;
+			chunk->ReadStruct(data);
+			m_Effect = static_cast<VxMath::VX_EFFECT>(data);
+		}
+
+		// effect with parameter
+		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MATERIAL::CK_STATESAVE_MATDATA5)) {
+			// MARK: i do not support CKParameter anymore.
+			// so we downgrade it into single effect type.
+			// hope this convertion will not break anything.
+
+			// drop parameter id.
+			CK_ID paramid;
+			chunk->ReadObjectID(paramid);
+			
+			// read effect self
+			CKDWORD data;
+			chunk->ReadStruct(data);
+			m_Effect = static_cast<VxMath::VX_EFFECT>(data);
+		}
+
 		return true;
 	}
 
