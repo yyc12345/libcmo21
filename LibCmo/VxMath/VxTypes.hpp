@@ -236,13 +236,14 @@ namespace LibCmo::VxMath {
 		float r, g, b, a;
 		VxColor() : r(0.0f), g(0.0f), b(0.0f), a(1.0f) {} // set your custom init.
 		VxColor(float _r, float _g, float _b, float _a) : r(_r), g(_g), b(_b), a(_a) {}
-		VxColor(CK2::CKDWORD argb) {
+		VxColor(CK2::CKDWORD argb) { FromARGB(argb); }
+		LIBCMO_DEFAULT_COPY_MOVE(VxColor);
+		void FromARGB(CK2::CKDWORD argb) {
 			a = ((argb & 0xFF000000) >> 24) / 255.0f;
 			r = ((argb & 0x00FF0000) >> 16) / 255.0f;
 			g = ((argb & 0x0000FF00) >> 8) / 255.0f;
 			b = ((argb & 0x000000FF) >> 0) / 255.0f;
 		}
-		LIBCMO_DEFAULT_COPY_MOVE(VxColor);
 		CK2::CKDWORD ToARGB() const {
 			CK2::CKDWORD argb = 0;
 			argb |= static_cast<CK2::CKDWORD>(a * 255.0f);

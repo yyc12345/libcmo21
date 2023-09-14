@@ -35,22 +35,22 @@ namespace LibCmo::CK2::ObjImpls {
 		VxMath::VXTEXTURE_BLENDMODE m_TextureBlendMode;
 		VxMath::VXTEXTURE_FILTERMODE m_TextureMinMode;
 		VxMath::VXTEXTURE_FILTERMODE m_TextureMagMode;
-		VxMath::VXTEXTURE_ADDRESSMODE m_TextureAddreddMode;
+		VxMath::VXTEXTURE_ADDRESSMODE m_TextureAddressMode;
 
 		VxMath::VXBLEND_MODE m_SourceBlend;
 		VxMath::VXBLEND_MODE m_DestBlend;
 		VxMath::VXFILL_MODE m_FillMode;
 		VxMath::VXSHADE_MODE m_ShadeMode;
 
+		bool m_EnableAlphaTest;
+		bool m_EnableAlphaBlend;
+		bool m_EnablePerspectiveCorrection;
 		bool m_EnableZWrite;
-		VxMath::VXCMPFUNC m_ZFunc;
-
 		bool m_EnableTwoSided;
 
-		bool m_EnableAlphaTest;
-		VxMath::VXCMPFUNC m_AlphaTestFunc;
 		CKBYTE m_AlphaRef;
-
+		VxMath::VXCMPFUNC m_AlphaFunc;
+		VxMath::VXCMPFUNC m_ZFunc;
 		VxMath::VX_EFFECT m_Effect;
 	};
 
