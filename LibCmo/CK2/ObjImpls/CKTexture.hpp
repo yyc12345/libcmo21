@@ -15,7 +15,7 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual CK_CLASSID GetClassID(void) override { 
 			return CK_CLASSID::CKCID_TEXTURE; 
 		}
-		// CKRenderObject do not implement any load/save functions
+		
 		//virtual void PreSave(CKFileVisitor* file, CKDWORD flags) override;
 		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) override;
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
@@ -27,25 +27,5 @@ namespace LibCmo::CK2::ObjImpls {
 		bool m_UseMipMap;
 		XContainer::XArray<VxMath::VxImageDescEx> m_MipmapImages;
 	};
-
-	//class CKRenderObject : public CKBeObject {
-	//public:
-	//	CKRenderObject(CKContext* ctx, CK_ID ckid, CKSTRING name) : 
-	//		CKBeObject(ctx, ckid, name)
-	//	{}
-	//	virtual ~CKRenderObject() {}
-	//	LIBCMO_DISABLE_COPY_MOVE(CKRenderObject);
-
-	//	virtual CK_CLASSID GetClassID(void) override { 
-	//		return CK_CLASSID::CKCID_RENDEROBJECT; 
-	//	}
-	//	// CKRenderObject do not implement any load/save functions
-	//	//virtual void PreSave(CKFileVisitor* file, CKDWORD flags) override;
-	//	//virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) override;
-	//	//virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
-	//	//virtual void PostLoad() override;
-	//protected:
-
-	//};
 
 }

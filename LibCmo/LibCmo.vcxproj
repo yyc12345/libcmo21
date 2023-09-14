@@ -187,6 +187,7 @@
     <ClCompile Include="CK2\ObjImpls\CK3dEntity.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKBeObject.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKGroup.cpp" />
+    <ClCompile Include="CK2\ObjImpls\CKMaterial.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKObject.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKRenderObject.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKSceneObject.cpp" />
@@ -219,6 +220,7 @@
     <ClInclude Include="CK2\ObjImpls\CK3dObject.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKBeObject.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKGroup.hpp" />
+    <ClInclude Include="CK2\ObjImpls\CKMaterial.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKRenderObject.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKSceneObject.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKTexture.hpp" />

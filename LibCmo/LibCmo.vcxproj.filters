@@ -123,6 +123,9 @@
     <ClCompile Include="CK2\ObjImpls\CKTexture.cpp">
       <Filter>Sources\CK2\ObjImpls</Filter>
     </ClCompile>
+    <ClCompile Include="CK2\ObjImpls\CKMaterial.cpp">
+      <Filter>Sources\CK2\ObjImpls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VTUtils.hpp">
@@ -216,6 +219,9 @@
       <Filter>Headers\CK2</Filter>
     </ClInclude>
     <ClInclude Include="CK2\ObjImpls\CKTexture.hpp">
+      <Filter>Headers\CK2\ObjImpls</Filter>
+    </ClInclude>
+    <ClInclude Include="CK2\ObjImpls\CKMaterial.hpp">
       <Filter>Headers\CK2\ObjImpls</Filter>
     </ClInclude>
   </ItemGroup>

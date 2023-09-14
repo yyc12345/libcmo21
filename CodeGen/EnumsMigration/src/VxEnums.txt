@@ -41,3 +41,192 @@ typedef enum VX_PIXELFORMAT {
 	_4_ARGB8888_CLUT  = 31		// 4 bits indexed CLUT (ARGB)
 } VX_PIXELFORMAT;
 
+/*****************************************************************
+{filename:VXTEXTURE_BLENDMODE}
+  Summary: Blend Mode Flags
+
+Remarks:
++ The VXTEXTURE_BLENDMODE is used by CKMaterial::SetTextureBlendMode() to specify how
+texture is applied on primitives.
++ Also used as value for CKRST_TSS_TEXTUREMAPBLEND texture stage state. 
+See Also: Using Materials,CKMaterial,CKTexture,CKMaterial::SetTextureBlendMode,CKRST_TSS_TEXTUREMAPBLEND.
+******************************************************************/
+typedef enum VXTEXTURE_BLENDMODE
+{
+	VXTEXTUREBLEND_DECAL			= 1UL,	// Texture replace any material information
+    VXTEXTUREBLEND_MODULATE			= 2UL,	// Texture and material are combine. Alpha information of the texture replace material alpha component.
+    VXTEXTUREBLEND_DECALALPHA		= 3UL,	// Alpha information in the texture specify how material and texture are combined. Alpha information of the texture replace material alpha component. 
+    VXTEXTUREBLEND_MODULATEALPHA	= 4UL,    // Alpha information in the texture specify how material and texture are combined
+    VXTEXTUREBLEND_DECALMASK		= 5UL, 
+    VXTEXTUREBLEND_MODULATEMASK		= 6UL, 
+    VXTEXTUREBLEND_COPY				= 7UL,	// Equivalent to DECAL
+    VXTEXTUREBLEND_ADD				= 8UL,		
+	VXTEXTUREBLEND_DOTPRODUCT3		= 9UL,	// Perform a Dot Product 3 between texture (normal map)
+											// and a referential vector given in VXRENDERSTATE_TEXTUREFACTOR.
+	VXTEXTUREBLEND_MAX				= 10UL,
+	VXTEXTUREBLEND_MASK				= 0xFUL
+} VXTEXTURE_BLENDMODE; 
+
+
+/******************************************************************
+{filename:VXTEXTURE_FILTERMODE}
+  Summary: Filter Mode Options
+
+Remarks:
++ The VXTEXTURE_FILTERMODE is used by CKMaterial::SetTextureMagMode and CKMaterial::SetTextureMinMode to specify how
+texture is filtered when magnified.
++ Also used as value for CKRST_TSS_MAGFILTER and CKRST_TSS_MINFILTER texture stage state. 
+See Also: Using Materials,CKMaterial,CKTexture,CKMaterial::SetTextureMagMode,CKMaterial::SetTextureMinMode,,CKRenderContext::SetTextureStageState
+******************************************************************/
+typedef enum VXTEXTURE_FILTERMODE
+{
+	VXTEXTUREFILTER_NEAREST          = 1UL,		// No Filter 	
+    VXTEXTUREFILTER_LINEAR           = 2UL,		// Bilinear Interpolation
+    VXTEXTUREFILTER_MIPNEAREST       = 3UL,		// Mip mapping 
+    VXTEXTUREFILTER_MIPLINEAR        = 4UL,		// Mip Mapping with Bilinear interpolation
+    VXTEXTUREFILTER_LINEARMIPNEAREST = 5UL,		// Mip Mapping with Bilinear interpolation between mipmap levels.
+    VXTEXTUREFILTER_LINEARMIPLINEAR  = 6UL,		// Trilinear Filtering
+	VXTEXTUREFILTER_ANISOTROPIC		 = 7UL,		// Anisotropic filtering 
+	VXTEXTUREFILTER_MASK			 = 0xFUL
+} VXTEXTURE_FILTERMODE; 
+
+/******************************************************************
+{filename:VXBLEND_MODE}
+Summary: Blending Mode options
+
+Remarks:
+	+ The VXBLEND_MODE is used by CKMaterial::SetSourceBlend() and SetDestBlend() to specify the blend 
+factors that are used when blending is enabled. (Rs,Gs,Bs,As) are color components of the source pixel (being drawn) and
+(Rd,Gd,Bd,Ad) are color components of the destination pixel (current pixel on screen).
+When blending is enabled the final pixel will be equal to : 
+		
+		  SrcBlendFactor * SrcPixel + DstBlendFactor * CurrentPixelOnScreen
+
+	+ Also used as value for VXRENDERSTATE_SRCBLEND and VXRENDERSTATE_DESTBLEND render state. 
+
+See Also: CKMaterial,CKTexture,CKMaterial::SetSourceBlend,CKMaterial::SetDestBlend,CKRenderContext::SetState,CKSprite::SetBlending,VXRENDERSTATE_SRCBLEND,VXRENDERSTATE_DESTBLEND
+******************************************************************/
+typedef enum VXBLEND_MODE
+{
+	VXBLEND_ZERO            = 1UL,		//Blend factor is (0, 0, 0, 0).
+    VXBLEND_ONE             = 2UL,		//Blend factor is (1, 1, 1, 1).
+    VXBLEND_SRCCOLOR        = 3UL,		//Blend factor is (Rs, Gs, Bs, As).
+    VXBLEND_INVSRCCOLOR     = 4UL,		//Blend factor is (1-Rs, 1-Gs, 1-Bs, 1-As).
+    VXBLEND_SRCALPHA        = 5UL,		//Blend factor is (As, As, As, As).
+    VXBLEND_INVSRCALPHA     = 6UL,		//Blend factor is (1-As, 1-As, 1-As, 1-As).
+    VXBLEND_DESTALPHA       = 7UL,		//Blend factor is (Ad, Ad, Ad, Ad).
+    VXBLEND_INVDESTALPHA    = 8UL,		//Blend factor is (1-Ad, 1-Ad, 1-Ad, 1-Ad).
+    VXBLEND_DESTCOLOR       = 9UL,		//Blend factor is (Rd, Gd, Bd, Ad).
+    VXBLEND_INVDESTCOLOR    = 10UL,		//Blend factor is (1-Rd, 1-Gd, 1-Bd, 1-Ad).
+    VXBLEND_SRCALPHASAT     = 11UL,		//Blend factor is (f, f, f, 1); f = min(As, 1-Ad).
+    VXBLEND_BOTHSRCALPHA    = 12UL,		//Source blend factor is (As, As, As, As) and destination blend factor is (1-As, 1-As, 1-As, 1-As)
+	VXBLEND_BOTHINVSRCALPHA = 13UL,		//Source blend factor is (1-As, 1-As, 1-As, 1-As) and destination blend factor is (As, As, As, As)
+	VXBLEND_MASK			= 0xFUL		//Source blend factor is (1-As, 1-As, 1-As, 1-As) and destination blend factor is (As, As, As, As)
+} VXBLEND_MODE;
+
+
+/******************************************************************
+{filename:VXTEXTURE_ADDRESSMODE}
+  Summary: Texture addressing modes.
+
+Remarks:
++ The VXTEXTURE_ADDRESSMODE is used by CKMaterial::SetTextureAddresMode to specify texture coordinate are 
+taken into account when they are outside the range [0.0 , 1.0].
++ Also used as value for CKRST_TSS_ADDRESS texture stage state. 
+See Also: CKMaterial,CKTexture,CKRST_TSS_ADDRESS,CKRenderContext::SetTextureStageState
+******************************************************************/
+typedef enum VXTEXTURE_ADDRESSMODE
+{
+	VXTEXTURE_ADDRESSWRAP         = 1UL,	// Default mesh wrap mode is used (see CKMesh::SetWrapMode)
+    VXTEXTURE_ADDRESSMIRROR       = 2UL,	// Texture coordinates outside the range [0..1] are flipped evenly.
+    VXTEXTURE_ADDRESSCLAMP        = 3UL,	// Texture coordinates greater than 1.0 are set to 1.0, and values less than 0.0 are set to 0.0.
+    VXTEXTURE_ADDRESSBORDER       = 4UL,	// When texture coordinates are greater than 1.0 or less than 0.0  texture is set to a color defined in CKMaterial::SetTextureBorderColor.		
+	VXTEXTURE_ADDRESSMIRRORONCE   = 5UL,	// 
+	VXTEXTURE_ADDRESSMASK         = 0x7UL	// mask for all values
+} VXTEXTURE_ADDRESSMODE;
+
+
+/******************************************************************
+{filename:VXFILL_MODE}
+  Summary:  Fill Mode Options
+  
+Remarks:
+	+ The VXFILL_MODE is used by CKMaterial::SetFillMode to specify how faces are drawn.
+	+ Also used as value for VXRENDERSTATE_FILLMODE render state. 
+See Also: CKMaterial::SetFillMode,VXRENDERSTATE_FILLMODE
+******************************************************************/
+typedef enum VXFILL_MODE
+{
+	VXFILL_POINT			= 1UL,		// Vertices rendering	
+    VXFILL_WIREFRAME		= 2UL,		// Edges rendering
+	VXFILL_SOLID			= 3UL,		// Face rendering
+	VXFILL_MASK				= 3UL
+}VXFILL_MODE; 
+
+
+/******************************************************************
+{filename:VXSHADE_MODE}
+Summary: Shade Mode Options
+
+Remarks:
+	+ The VXSHADE_MODE is used by CKMaterial::SetShadeMode to specify how color 
+	interpolation is perform on faces when they are drawn.
+	+ Also used as value for VXRENDERSTATE_SHADEMODE render state. 
+See Also: CKMaterial::SetShadeMode,VXRENDERSTATE_SHADEMODE
+******************************************************************/
+typedef enum VXSHADE_MODE
+{
+	VXSHADE_FLAT			= 1UL,	// Flat Shading
+	VXSHADE_GOURAUD			= 2UL,	// Gouraud Shading
+	VXSHADE_PHONG			= 3UL,	// Phong Shading (Not yet supported by most implementation)
+	VXSHADE_MASK			= 3UL	
+} VXSHADE_MODE; 
+
+
+/******************************************************************
+{filename:VXCMPFUNC}
+Summary:  Comparison Function
+
+Remarks:
++ Used by CKRenderContext::SetState with VXRENDERSTATE_ZFUNC, VXRENDERSTATE_ALPHAFUNC or VXRENDERSTATE_STENCILFUNC
+to specify the type of Z or Alpha comparison function. 
++ The comparison function is used to compare the stencil,alpha or z reference value to a stencil,z or alpha entry.
+See also: CKRenderContext::SetState,VXRENDERSTATETYPE,VXRENDERSTATE_ZFUNC,VXRENDERSTATE_ALPHAFUNC,
+******************************************************************/
+typedef enum VXCMPFUNC
+{
+    VXCMP_NEVER               = 1UL,	// Always fail the test.
+    VXCMP_LESS                = 2UL,	// Accept if value if less than current value.
+    VXCMP_EQUAL               = 3UL,	// Accept if value if equal than current value.
+    VXCMP_LESSEQUAL           = 4UL,	// Accept if value if less or equal than current value.
+    VXCMP_GREATER             = 5UL,	// Accept if value if greater than current value.
+    VXCMP_NOTEQUAL            = 6UL,	// Accept if value if different than current value.
+    VXCMP_GREATEREQUAL        = 7UL,	// Accept if value if greater or equal current value.
+    VXCMP_ALWAYS              = 8UL,	// Always accept the test.
+	VXCMP_MASK	              = 0xFUL	// Mask for all possible values.
+} VXCMPFUNC;
+
+/******************************************************************
+{filename:VX_EFFECT}
+Summary:  Material special effects
+
+Remarks:
+o Effects provide additionnal functionnalities to take advantage of graphic features such as bump mapping,cube maps etc... 
+o When an effect is enabled on a material (CKMaterial::SetEffect) it may override the default settings of mesh channels or material blend options
+o New effects can be created by providing a callback function (see CKRenderManager::AddEffect)
+o This enumeration provides the list of hardcoded existing effects.
+o Most of this effect are heavily hardware and device (DX8,DX7,etc..) dependant 
+See also: CKMaterial::SetEffect,CKMaterial::GetEffect,CKRenderManager::AddEffect
+******************************************************************/
+typedef enum VX_EFFECT
+{
+    VXEFFECT_NONE			= 0UL,	// No Effect
+	VXEFFECT_TEXGEN			= 1UL,	// Texture coordinate generation using current viewpoint as referential
+	VXEFFECT_TEXGENREF		= 2UL,	// texture generation generation with an optionnal referential
+	VXEFFECT_BUMPENV		= 3UL,	// Environment Bump Mapping
+	VXEFFECT_DP3			= 4UL,	// Dot Product 3 bump mapping   
+	VXEFFECT_2TEXTURES		= 5UL,	// Blend 2 Textures
+	VXEFFECT_3TEXTURES		= 6UL,	// Blend 3 Textures
+	VXEFFECT_MASK			= 0xFUL	// Mask for all possible values.
+} VX_EFFECT;
+
