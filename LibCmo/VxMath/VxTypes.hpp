@@ -304,6 +304,24 @@ namespace LibCmo::VxMath {
 		}
 	};
 
+	template<class _Ty, std::enable_if_t<std::is_pointer_v<_Ty>, int> = 0>
+	class VxStridedData {
+	public:
+		VxStridedData(_Ty ptr, CK2::CKDWORD stride) :
+			m_Ptr(reinterpret_cast<CK2::CKBYTE*>(m_Ptr)),
+			m_Stride(stride)
+		{}
+		~VxStridedData() {}
+
+		_Ty operator[](size_t idx) {
+			return reinterpret_cast<_Ty>(m_Ptr + (m_Stride * idx));
+		}
+
+	private:
+		CK2::CKBYTE* m_Ptr;
+		CK2::CKDWORD m_Stride;
+	};
+
 	/**
 	 * VxImageDescEx describe the height, width,
 	 * and etc for image.
