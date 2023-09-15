@@ -250,78 +250,13 @@ namespace LibCmo::CK2 {
 		CK_3DENTITY_CHARACTERDOPROCESS = 0x80000000,	/**< Special flag for Characters : Automatic process of animation  */
 	};
 	/**
-	@brief 3dEntity additionnal flags Options
-	@remark
-		+ The VX_MOVEABLE_FLAGS is used by CK3dEntity::SetMoveableFlags to specify different hints to the render engine about the entity.
-		+ The (Engine) flags are set by the render engine and should not be modified by user. They can be checked with the CK3dEntity::GetMoveableFlags method.
-		+ The (User) flags are to be set by the user or can be set by a specific method of CK3dEntity.
-	@see CK3dEntity::SetMoveableFlags
-	 */
-	enum class VX_MOVEABLE_FLAGS : uint32_t {
-		VX_MOVEABLE_PICKABLE = 0x00000001,	/**< (User)If not set this entity cannot be returned by CKRenderContext::Pick() or CKRenderContext::RectPict() functions.  */
-		VX_MOVEABLE_VISIBLE = 0x00000002,	/**< (Engine) See CKObject::Show,CK3dEntity::IsVisible  */
-		VX_MOVEABLE_UPTODATE = 0x00000004,	/**< (Engine) Used to Notify change in the data of the entity.  */
-		VX_MOVEABLE_RENDERCHANNELS = 0x00000008,	/**< (User) If not set, additional material channels on the mesh used by this entity won't be rendered (CK3dEntity::SetRenderChannels)  */
-		VX_MOVEABLE_USERBOX = 0x00000010,	/**< (Engine) When CK3dEntity::SetBoundingBox is called with a user box, this flag is set.  */
-		VX_MOVEABLE_EXTENTSUPTODATE = 0x00000020,	/**< (Engine) Indicate that object 2D extents are up to date  */
-		VX_MOVEABLE_BOXVALID = 0x00004000,	/**< (Engine) If not set the moveable has no mesh associated so its bounding box is irrelevant (a point).  */
-		VX_MOVEABLE_RENDERLAST = 0x00010000,	/**< (User) If set the moveable will be rendered with the transparent objects (i.e in last) (CK3dEntity::SetRenderAsTransparent)  */
-		VX_MOVEABLE_HASMOVED = 0x00020000,	/**< (Engine) Set when its position or orientation has changed. (Reset every frame when rendering starts)  */
-		VX_MOVEABLE_WORLDALIGNED = 0x00040000,	/**< (User) Hint for render engine : this object is aligned with world position and orientation.  */
-		VX_MOVEABLE_NOZBUFFERWRITE = 0x00080000,	/**< (User) Set by the user to warn Render Engine that this object must not write information to Z buffer  */
-		VX_MOVEABLE_RENDERFIRST = 0x00100000,	/**< (User) If set the moveable will be rendered within the firsts objects  */
-		VX_MOVEABLE_NOZBUFFERTEST = 0x00200000,	/**< (User) Set by the user to warn Render Engine that this object must not test against Z buffer (This override settings of all materials used by this Entity)  */
-		VX_MOVEABLE_INVERSEWORLDMATVALID = 0x00400000,	/**< (Engine) Inverse world matrix is not up to date and should be recomputed  */
-		VX_MOVEABLE_DONTUPDATEFROMPARENT = 0x00800000,	/**< (User) This object will not be updated by parent (neither World nor Local matrix wil be updated) . This flags can be used by physic engine for example in which hierarchy is not relevant for physicalised objects  */
-		VX_MOVEABLE_INDIRECTMATRIX = 0x01000000,	/**< (User/Engine) Set by the engine at load time  : The object matrix is in left hand referential, culling needs to be inverted  */
-		VX_MOVEABLE_ZBUFONLY = 0x02000000,	/**< (User) The object will only be rendered in depth buffer  */
-		VX_MOVEABLE_STENCILONLY = 0x04000000,	/**< (User) The object will only be rendered in stencil buffer  */
-		VX_MOVEABLE_HIERARCHICALHIDE = 0x10000000,	/**< (Engine) If Object has this flags and is hidden its children won't be rendered  */
-		VX_MOVEABLE_CHARACTERRENDERED = 0x20000000,	/**< (Engine) Set if a character was rendered last frame...  */
-		VX_MOVEABLE_RESERVED2 = 0x40000000,	/**< (Engine)  */
-	};
-	/**
-	****************************************************************
-	@briefMesh Flags Options
-	@remark
-		+ The VXMESH_FLAGS is used by CKMesh::SetFlags to specify different hints to the render engine about the mesh.
-		+ Most of this flags can be set or asked using the appropriate method of CKMesh (given between () in the members documentation).
-	@see CKMesh,CKMesh::SetFlags
-	*************************************************************** 
-	 */
-	enum class VXMESH_FLAGS : uint32_t {
-		VXMESH_BOUNDINGUPTODATE = 0x00000001,	/**< If set the bounding box is up to date (internal).  */
-		VXMESH_VISIBLE = 0x00000002,	/**< If not set the mesh will not be rendered (CKMesh::Show)  */
-		VXMESH_OPTIMIZED = 0x00000004,	/**< Set by the render engine if the mesh is optimized for rendering. Unset it to force to recreate optimized structures (when changing materials or face organization ) (CKMesh::VertexMove)  */
-		VXMESH_RENDERCHANNELS = 0x00000008,	/**< If not set  Additional material channels won't be rendered.  */
-		VXMESH_HASTRANSPARENCY = 0x00000010,	/**< If set indicates that one or more of the faces of this mesh use a transparent material (internal)  */
-		VXMESH_PRELITMODE = 0x00000080,	/**< If set, no lightning should occur for this mesh, vertex color should be used instead (CKMesh::SetLitMode)  */
-		VXMESH_WRAPU = 0x00000100,	/**< Texture coordinates wrapping among u texture coordinates. (CKMesh::SetWrapMode)  */
-		VXMESH_WRAPV = 0x00000200,	/**< Texture coordinates wrapping among v texture coordinates. (CKMesh::SetWrapMode)  */
-		VXMESH_FORCETRANSPARENCY = 0x00001000,	/**< Forces this mesh to be considered as transparent even if no material is tranparent. (CKMesh::SetTransparent)  */
-		VXMESH_TRANSPARENCYUPTODATE = 0x00002000,	/**< If set, the flags VXMESH_HASTRANSPARENCY is up to date. (internal)  */
-		VXMESH_UV_CHANGED = 0x00004000,	/**< Must be set if texture coordinates changed to enable the render engine to reconstruct potential display lists or vertex buffers. (CKMesh::UVChanged)  */
-		VXMESH_NORMAL_CHANGED = 0x00008000,	/**< Must be set if normal coordinates changed to enable the render engine to reconstruct potential display lists or vertex buffers. (CKMesh::NormalChanged)  */
-		VXMESH_COLOR_CHANGED = 0x00010000,	/**< Must be set if colors changed to enable the render engine to reconstruct potential display lists or vertex buffers.	(CKMesh::ColorChanged)  */
-		VXMESH_POS_CHANGED = 0x00020000,	/**< Must be set if vertex position changed to enable the render engine to reconstruct potential display lists or vertex buffers. (CKMesh::VertexMove)  */
-		VXMESH_HINTDYNAMIC = 0x00040000,	/**< Hint for render engine : Mesh geometry is updated frequently  */
-		VXMESH_GENNORMALS = 0x00080000,	/**< Hint : Normals were generated by BuildNormals : Do not save	(internal)  */
-		VXMESH_PROCEDURALUV = 0x00100000,	/**< Hint : UVs are generated : Do not save (internal)  */
-		VXMESH_PROCEDURALPOS = 0x00200000,	/**< Hint : Vertices postions are generated : Do not save (internal)  */
-		VXMESH_STRIPIFY = 0x00400000,	/**< If set the mesh will be stripified.  */
-		VXMESH_MONOMATERIAL = 0x00800000,	/**< Set by the render engine if the mesh use only one material.  */
-		VXMESH_PM_BUILDNORM = 0x01000000,	/**< Build normals when performing progressive meshing : Do not save (internal)  */
-		VXMESH_BWEIGHTS_CHANGED = 0x02000000,	/**< Must be set if vertex blend weights have changed to enable the render engine to reconstruct potential display lists or vertex buffers. (CKMesh::VertexMove)  */
-		VXMESH_ALLFLAGS = 0x007FF39F,
-	};
-	/**
-	************************************************
-	@brief Specify the way textures or sprites will be saved
-	@remark
+	{filename:CK_TEXTURE_SAVEOPTIONS}
+	Summary: Specify the way textures or sprites will be saved
+
+	Remarks : 
 		+ Textures can be stored inside Virtools files or kept as references to external files.
 		+ These options can be used for a specific texture (or sprite) or as a global setting.
-	@see CKBitmapData::SetSaveOptions,CKSprite::SetSaveOptions,CKContext::SetGlobalImagesSaveOptions
-	********************************************** 
+	See also: CKBitmapData::SetSaveOptions,CKSprite::SetSaveOptions,CKContext::SetGlobalImagesSaveOptions 
 	 */
 	enum class CK_TEXTURE_SAVEOPTIONS : uint32_t {
 		CKTEXTURE_RAWDATA = 0,	/**< Save raw data inside file. The bitmap is saved in a raw 32 bit per pixel format.  */
@@ -331,14 +266,14 @@ namespace LibCmo::CK2 {
 		CKTEXTURE_INCLUDEORIGINALFILE = 4,	/**< Insert original image file inside CMO file. The bitmap file that was used originally for the texture or sprite will be append to the composition file and extracted when the file is loaded.  */
 	};
 	/**
-	************************************************
-	@brief Specify the way sounds will be saved
-	@remark
+	{filename:CK_SOUND_SAVEOPTIONS}
+	Summary: Specify the way sounds will be saved
+
+	Remarks : 
 		+ Sounds can kept as references to external files or the original sound file can
 		be appended to the composition file.
 		+ These options can be used for a specific sound or as a global setting.
-	@see CKSound::SetSaveOptions,CKContext::SetGlobalSoundSaveOptions
-	********************************************** 
+	See also: CKSound::SetSaveOptions,CKContext::SetGlobalSoundSaveOptions 
 	 */
 	enum class CK_SOUND_SAVEOPTIONS : uint32_t {
 		CKSOUND_EXTERNAL = 0,	/**< Store only the file name for the sound. The sound file must be present in one of the sound paths when the composition is loaded.  */

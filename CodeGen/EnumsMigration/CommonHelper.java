@@ -45,11 +45,11 @@ public class CommonHelper {
 
 		switch (comment.getType()) {
 		case CKGeneralLexer.CKGENERAL_LINE_COMMENT: {
-			return comment.getText().substring(2);
+			return removeStars(comment.getText().substring(2));
 		}
 		case CKGeneralLexer.CKGENERAL_BLOCK_COMMENT: {
 			String cache = comment.getText();
-			return cache.substring(2, cache.length() - 4);
+			return removeStars(cache.substring(2, cache.length() - 4));
 		}
 		default:
 			return comment.getText();
@@ -75,7 +75,7 @@ public class CommonHelper {
 			return text + " ";
 		}).collect(Collectors.joining(""));
 	}
-
+	
 	// =========== Number Operations ===========
 
 	/**
@@ -176,6 +176,16 @@ public class CommonHelper {
 	 */
 	public static String removeEol(String strl) {
 		return strl.replace("\n", "").replace("\r", "");
+	}
+
+	/**
+	 * Remove redundent star '*' (at least 5 continuous star chars)
+	 * @param cmt The string provided.
+	 * @return The string processed.
+	 */
+	public static String removeStars(String cmt) {
+		// only remove at least 5 continuous star chars.
+		return cmt.replaceAll("\\*{5,}", "");
 	}
 
 }

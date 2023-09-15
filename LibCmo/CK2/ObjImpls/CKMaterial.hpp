@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../VTAll.hpp"
-#include "../CKBitmapData.hpp"
 #include "CKBeObject.hpp"
 #include <array>
 
