@@ -21,8 +21,73 @@ namespace LibCmo::CK2::ObjImpls {
 		bool suc = CKBeObject::Load(chunk, file);
 		if (!suc) return false;
 
-		// clear 
+		// clear all data
+		CleanMesh();
 
+		// check data version.
+		// MARK: too low data is not supported.
+		// because my work are not related to them
+		if (chunk->GetDataVersion() < CK_STATECHUNK_DATAVERSION::CHUNK_MESHCHANGE_VERSION) {
+			return false;
+		}
+
+		// read flag
+		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHFLAGS)) {
+			CKDWORD flags;
+			chunk->ReadStruct(flags);
+
+			m_Flags = static_cast<VxMath::VXMESH_FLAGS>(flags);
+			EnumsHelper::Mask(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_ALLFLAGS);
+
+			// I don't know why, just interpter the IDA code.
+			EnumsHelper::Rm(m_Flags, EnumsHelper::Merge({
+				VxMath::VXMESH_FLAGS::VXMESH_BOUNDINGUPTODATE,
+				VxMath::VXMESH_FLAGS::VXMESH_OPTIMIZED
+				}));
+		}
+
+		// read material slots
+		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHMATERIALS)) {
+			// get and set material count
+			CKDWORD mtlCount;
+			chunk->ReadStruct(mtlCount);
+			SetMaterialSlotCount(mtlCount);
+
+			// read slot
+			CK_ID mtlId;
+			CKDWORD ph;
+			CKObject* objptr;
+			for (auto& mtlSlot : m_MaterialSlot) {
+				// read id
+				chunk->ReadObjectID(mtlId);
+				// and read a place holder idk what the fuck it is.
+				chunk->ReadStruct(ph);
+
+				// try getting object pointer and assign
+				objptr = m_Context->GetObject(mtlId);
+				if (objptr != nullptr && objptr->GetClassID() == CK_CLASSID::CKCID_MATERIAL) {
+					mtlSlot = static_cast<CKMaterial*>(objptr);
+				} else {
+					mtlSlot = nullptr;
+				}
+			}
+		}
+
+		// read vertex data
+		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHVERTICES)) {
+			// read and set vertex count
+			CKDWORD vertexCount;
+			chunk->ReadStruct(vertexCount);
+
+			if (vertexCount != 0) {
+				VertexSaveFlags saveflags;
+				chunk->ReadStruct(saveflags);
+
+
+
+
+			}
+		}
 
 		return true;
 	}

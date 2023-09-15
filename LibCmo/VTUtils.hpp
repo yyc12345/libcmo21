@@ -180,6 +180,11 @@ namespace LibCmo {
 		inline void Rm(TEnum& e1, TEnum e2) {
 			e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) & static_cast<std::underlying_type_t<TEnum>>(Inv(e2)));
 		}
+		
+		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+		inline void Mask(TEnum& e1, TEnum e2) {
+			e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) & static_cast<std::underlying_type_t<TEnum>>(e2));
+		}
 
 		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
 		inline void Add(TEnum& e1, TEnum e2) {
