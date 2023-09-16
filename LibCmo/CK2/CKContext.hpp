@@ -105,7 +105,7 @@ namespace LibCmo::CK2 {
 		void SetEncoding(const XContainer::XArray<XContainer::XString> encoding_series);
 		
 	protected:
-		std::vector<EncodingHelper::ENCODING_TOKEN> m_NameEncoding;
+		XContainer::XArray<EncodingHelper::ENCODING_TOKEN> m_NameEncoding;
 
 		// ========== Print utilities ==========
 	public:

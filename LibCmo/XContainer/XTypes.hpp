@@ -22,7 +22,6 @@ namespace LibCmo::XContainer {
 	@brief Set of bit flags.
 	@remark
 	+ This class now use specialized std::vector<bool>.
-	+ Do not use CKBOOL, because we want make sure it enable specialized std::vector<bool>.
 	*/
 	using XBitArray = std::vector<bool>;
 

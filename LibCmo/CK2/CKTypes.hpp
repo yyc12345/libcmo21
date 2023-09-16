@@ -74,20 +74,6 @@ namespace LibCmo {
 	using CKDOUBLE = double;
 
 	/**
-	 * @brief The bool type used by LibCmo.
-	 * Generally it is just C++ bool.
-	*/
-	using CKBOOL = bool;
-	/**
-	 * @brief The True value of CKBOOL.
-	*/
-	constexpr CKBOOL CKTRUE = true;
-	/**
-	 * @brief The False value of CKBOOL.
-	*/
-	constexpr CKBOOL CKFALSE = false;
-
-	/**
 	 * @brief Represent a x86 Platform Pointer.
 	 * @remark
 	 * + This type only can be used when replacing pointer in old Virtools struct / class.
