@@ -41,6 +41,9 @@ namespace LibCmo::CK2::MgrImpls {
 		m_ObjectsList[decided_off] = obj;
 		++m_ObjectCount;
 
+		// add into classid indexed object list
+		m_ObjectsListByClass[static_cast<size_t>(cls)].push_back(Offset2Id(decided_off));
+
 		// set out variable
 		return obj;
 	}
@@ -76,9 +79,12 @@ namespace LibCmo::CK2::MgrImpls {
 			CKDWORD off = Id2Offset(ids[i]);
 			if (off >= m_ObjectsList.size()) continue;
 
-			// get object and free it
+			// get object and its classid for future use
 			ObjImpls::CKObject* obj = m_ObjectsList[off];
 			if (obj == nullptr) continue;
+			CK_CLASSID cls = obj->GetClassID();
+
+			// free it
 			InternalDestroy(obj);
 
 			// return its allocated id.
@@ -87,6 +93,9 @@ namespace LibCmo::CK2::MgrImpls {
 			m_ReturnedObjectOffsets.emplace_back(off);
 			--m_ObjectCount;
 
+			// remove from classid indexed list
+			std::erase(m_ObjectsListByClass[static_cast<size_t>(cls)], ids[i]);
+			
 		}
 
 		// notice post
@@ -147,61 +156,59 @@ namespace LibCmo::CK2::MgrImpls {
 		return result;
 	}
 
-	CKDWORD CKObjectManager::AllocateGroupGlobalIndex(ObjImpls::CKObject* group) {
-		// try find first nullptr position
-		CKDWORD index = 0;
-		for (const auto& ptr : m_GroupGlobalIndex) {
-			if (ptr == nullptr) break;
-			++index;
+	bool CKObjectManager::IsObjectSafe(CK_ID objid) {
+		CKDWORD off = Id2Offset(objid);
+		if (off >= m_ObjectsList.size()) return false;
+		return m_ObjectsList[off] != nullptr;
+	}
+
+	bool CKObjectManager::IsObjectPointerSafe(const ObjImpls::CKObject* objptr) {
+		if (objptr == nullptr) return false;
+
+		// iterate all object list to check
+		for (const auto& ptr : m_ObjectsList) {
+			if (ptr == objptr) return true;
 		}
-		// resize array for new position
-		if (index == m_GroupGlobalIndex.size()) {
+		return false;
+	}
+
+	CKDWORD CKObjectManager::AllocateGroupGlobalIndex() {
+		// try find first non-true position
+		CKDWORD index;
+		if (!XContainer::NSXBitArray::GetUnsetBitPosition(m_GroupGlobalIndex, 0, index)) {
+			// failed. distribute new one
+			index = static_cast<CKDWORD>(m_GroupGlobalIndex.size());
 			m_GroupGlobalIndex.resize(m_GroupGlobalIndex.size() + 1);
 		}
-
+		
 		// set to occupy
-		m_GroupGlobalIndex[index] = group;
+		m_GroupGlobalIndex[index] = true;
 		return index;
 	}
 
-	CKDWORD CKObjectManager::AllocateSceneGlobalIndex(ObjImpls::CKObject* scene) {
+	CKDWORD CKObjectManager::AllocateSceneGlobalIndex() {
 		// same as group
-		CKDWORD index = 0;
-		for (const auto& ptr : m_SceneGlobalIndex) {
-			if (ptr == nullptr) break;
-			++index;
-		}
-		// resize array for new position
-		if (index == m_SceneGlobalIndex.size()) {
+		CKDWORD index;
+		if (!XContainer::NSXBitArray::GetUnsetBitPosition(m_SceneGlobalIndex, 0, index)) {
+			index = static_cast<CKDWORD>(m_SceneGlobalIndex.size());
 			m_SceneGlobalIndex.resize(m_SceneGlobalIndex.size() + 1);
 		}
-
-		// set to occupy
-		m_SceneGlobalIndex[index] = scene;
+		
+		m_SceneGlobalIndex[index] = true;
 		return index;
-	}
-
-	ObjImpls::CKObject* CKObjectManager::GetGroupByGlobalIndex(CKDWORD index) {
-		if (index >= m_GroupGlobalIndex.size()) return nullptr;
-		else return m_GroupGlobalIndex[index];
-	}
-
-	ObjImpls::CKObject* CKObjectManager::GetSceneByGlobalIndex(CKDWORD index) {
-		if (index >= m_SceneGlobalIndex.size()) return nullptr;
-		else return m_SceneGlobalIndex[index];
 	}
 
 	void CKObjectManager::FreeGroupGlobalIndex(CKDWORD id) {
 		// check position
 		if (id >= m_GroupGlobalIndex.size()) return;
 		// set value
-		m_GroupGlobalIndex[id] = nullptr;
+		m_GroupGlobalIndex[id] = false;
 	}
 
 	void CKObjectManager::FreeSceneGlobalIndex(CKDWORD id) {
 		// same as group
 		if (id >= m_SceneGlobalIndex.size()) return;
-		m_SceneGlobalIndex[id] = nullptr;
+		m_SceneGlobalIndex[id] = false;
 	}
 
 }

@@ -8,16 +8,16 @@
 namespace LibCmo::CK2::ObjImpls {
 
 	CKBeObject::CKBeObject(CKContext* ctx, CK_ID ckid, CKSTRING name) :
-		CKSceneObject(ctx, ckid, name) {}
+		CKSceneObject(ctx, ckid, name), m_Groups() {}
 
 	CKBeObject::~CKBeObject() {
 		// remove self from all group
-		for (size_t i = 0; i < m_Groups.size(); ++i) {
-			if (m_Groups[i]) {
-				CKGroup* group = static_cast<CKGroup*>(m_Context->GetObjectManager()->GetGroupByGlobalIndex(static_cast<CKDWORD>(i)));
-				group->RemoveObject(this);
-			}
-		}
+		//for (size_t i = 0; i < m_Groups.size(); ++i) {
+		//	if (m_Groups[i]) {
+		//		CKGroup* group = static_cast<CKGroup*>(m_Context->GetObjectManager()->GetGroupByGlobalIndex(static_cast<CKDWORD>(i)));
+		//		group->RemoveObject(this);
+		//	}
+		//}
 	}
 
 	bool CKBeObject::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
@@ -36,12 +36,12 @@ namespace LibCmo::CK2::ObjImpls {
 
 	bool CKBeObject::IsInGroup(CKGroup* group) {
 		if (group == nullptr) return false;
-		CKDWORD idx = group->CKBeObject_GetGroupIndex();
+		CKDWORD idx = group->GetGroupIndex();
 		if (idx >= m_Groups.size()) return false;
 		return m_Groups[idx];
 	}
 
-	void CKBeObject::CKGroup_SetGroups(CKDWORD pos, bool val) {
+	void CKBeObject::ExplicitSetGroup(CKDWORD pos, bool val) {
 		if (pos >= m_Groups.size()) m_Groups.resize(pos + 1);
 		m_Groups[pos] = val;
 	}

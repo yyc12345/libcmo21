@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <list>
 
 /**
  * @brief The X container part of LibCmo.
@@ -34,6 +35,13 @@ namespace LibCmo::XContainer {
 	*/
 	template<typename T>
 	using XArray = std::vector<T>;
+	
+	/**
+	 * @brief Double-linked list.
+	 * @tparam T Element Type.
+	*/
+	template<typename T>
+	using XList = std::list<T>;
 
 	/**
 	@brief Container class for CKObject Id's.
@@ -102,6 +110,55 @@ namespace LibCmo::XContainer {
 		 * @param s The CKSTRING need to be copied. Pass nullptr will clear string dest.
 		*/
 		void FromCKSTRING(XString& strl, CKSTRING s);
+
+	}
+
+	namespace NSXObjectArray {
+
+		/**
+		 * @brief Check Object ID validation and remove invalid IDs before deletion.
+		 * @param objarray 
+		 * @param ctx 
+		*/
+		void PreDeletedCheck(XObjectArray& objarray, CK2::CKContext* ctx);
+		/**
+		 * @brief Check Object ID validation and remove invalid IDs after deletion.
+		 * @param objarray 
+		 * @param ctx 
+		*/
+		void PostDeletedCheck(XObjectArray& objarray, CK2::CKContext* ctx);
+
+	}
+	
+	namespace NSXObjectPointerArray {
+
+		/**
+		 * @brief Check Object pointer validation and remove invalid pointers before deletion.
+		 * @param objarray 
+		 * @param ctx 
+		*/
+		void PreDeletedCheck(XObjectPointerArray& objarray, CK2::CKContext* ctx);
+		/**
+		 * @brief Check Object pointer validation and remove invalid pointers after deletion.
+		 * @param objarray 
+		 * @param ctx 
+		 * @remark The performance of this function is extremely low. Use it carefully.
+		*/
+		void PostDeletedCheck(XObjectPointerArray& objarray, CK2::CKContext* ctx);
+
+		/**
+		 * @brief Check Object pointer validation and remove invalid pointers before deletion.
+		 * @param objarray 
+		 * @param ctx 
+		*/
+		void PreDeletedCheck(XList<CK2::ObjImpls::CKObject*>& objarray, CK2::CKContext* ctx);
+		/**
+		 * @brief Check Object pointer validation and remove invalid pointers after deletion.
+		 * @param objarray 
+		 * @param ctx 
+		 * @remark The performance of this function is extremely low. Use it carefully.
+		*/
+		void PostDeletedCheck(XList<CK2::ObjImpls::CKObject*>& objarray, CK2::CKContext* ctx);
 
 	}
 

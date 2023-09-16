@@ -9,7 +9,7 @@ namespace LibCmo::CK2::ObjImpls {
 	CKGroup::CKGroup(CKContext* ctx, CK_ID ckid, CKSTRING name) :
 		CKBeObject(ctx, ckid, name),
 		m_ObjectArray(),
-		m_GroupIndex(m_Context->GetObjectManager()->AllocateGroupGlobalIndex(this)) {}
+		m_GroupIndex(m_Context->GetObjectManager()->AllocateGroupGlobalIndex()) {}
 
 	CKGroup::~CKGroup() {
 		m_Context->GetObjectManager()->FreeGroupGlobalIndex(m_GroupIndex);
@@ -45,7 +45,7 @@ namespace LibCmo::CK2::ObjImpls {
 				if (beobj->IsInGroup(this)) continue;
 
 				// add good one
-				beobj->CKGroup_SetGroups(m_GroupIndex, true);
+				beobj->ExplicitSetGroup(m_GroupIndex, true);
 				m_ObjectArray.emplace_back(beobj);
 			}
 
@@ -54,7 +54,7 @@ namespace LibCmo::CK2::ObjImpls {
 		return true;
 	}
 
-	CKDWORD CKGroup::CKBeObject_GetGroupIndex() {
+	CKDWORD CKGroup::GetGroupIndex() {
 		return m_GroupIndex;
 	}
 
@@ -67,7 +67,7 @@ namespace LibCmo::CK2::ObjImpls {
 		}
 
 		// set object
-		o->CKGroup_SetGroups(m_GroupIndex, true);
+		o->ExplicitSetGroup(m_GroupIndex, true);
 		// set self
 		m_ObjectArray.emplace_back(o);
 		return CKERROR::CKERR_OK;
@@ -80,7 +80,7 @@ namespace LibCmo::CK2::ObjImpls {
 		auto it = m_ObjectArray.begin() + pos;
 		CKBeObject* obj = static_cast<CKBeObject*>(*it);
 		// set object
-		obj->CKGroup_SetGroups(m_GroupIndex, false);
+		obj->ExplicitSetGroup(m_GroupIndex, false);
 		// remove self
 		m_ObjectArray.erase(it);
 		return obj;
@@ -91,7 +91,7 @@ namespace LibCmo::CK2::ObjImpls {
 		auto finder = std::find(m_ObjectArray.begin(), m_ObjectArray.end(), static_cast<CKObject*>(obj));
 		if (finder != m_ObjectArray.end()) {
 			// set object
-			static_cast<CKBeObject*>(*finder)->CKGroup_SetGroups(m_GroupIndex, false);
+			static_cast<CKBeObject*>(*finder)->ExplicitSetGroup(m_GroupIndex, false);
 			// remove self
 			m_ObjectArray.erase(finder);
 		}
@@ -100,7 +100,7 @@ namespace LibCmo::CK2::ObjImpls {
 	void CKGroup::Clear() {
 		for (auto& beobj : m_ObjectArray) {
 			// set object
-			static_cast<CKBeObject*>(beobj)->CKGroup_SetGroups(m_GroupIndex, false);
+			static_cast<CKBeObject*>(beobj)->ExplicitSetGroup(m_GroupIndex, false);
 		}
 
 		m_ObjectArray.clear();

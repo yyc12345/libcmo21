@@ -50,12 +50,14 @@ namespace LibCmo::CK2::MgrImpls {
 		XContainer::XObjectPointerArray GetObjectByNameAndClass(
 			CKSTRING name, CK_CLASSID cid, bool derived);
 
+		// ========== Object Check ==========
+		bool IsObjectSafe(CK_ID objid);
+		bool IsObjectPointerSafe(const ObjImpls::CKObject* objptr);
+
 		// ========== Special Functions ==========
 
-		CKDWORD AllocateGroupGlobalIndex(ObjImpls::CKObject* group);
-		CKDWORD AllocateSceneGlobalIndex(ObjImpls::CKObject* scene);
-		ObjImpls::CKObject* GetGroupByGlobalIndex(CKDWORD index);
-		ObjImpls::CKObject* GetSceneByGlobalIndex(CKDWORD index);
+		CKDWORD AllocateGroupGlobalIndex();
+		CKDWORD AllocateSceneGlobalIndex();
 		void FreeGroupGlobalIndex(CKDWORD id);
 		void FreeSceneGlobalIndex(CKDWORD id);
 
@@ -77,11 +79,11 @@ namespace LibCmo::CK2::MgrImpls {
 
 		CKDWORD m_ObjectCount;
 		XContainer::XObjectPointerArray m_ObjectsList;
-		XContainer::XArray<XContainer::XArray<CKDWORD>> m_ObjectsListByClass;
+		XContainer::XArray<XContainer::XList<CKDWORD>> m_ObjectsListByClass;
 		std::deque<CKDWORD> m_ReturnedObjectOffsets;
 
-		XContainer::XObjectPointerArray m_GroupGlobalIndex;
-		XContainer::XObjectPointerArray m_SceneGlobalIndex;
+		XContainer::XBitArray m_GroupGlobalIndex;
+		XContainer::XBitArray m_SceneGlobalIndex;
 
 	};
 

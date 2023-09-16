@@ -20,7 +20,13 @@ namespace LibCmo::CK2::ObjImpls {
 		//virtual void PostLoad() override;
 
 		bool IsInGroup(CKGroup* group);
-		void CKGroup_SetGroups(CKDWORD pos, bool val);
+		/**
+		 * @brief Directly set group data.
+		 * @param pos 
+		 * @param val 
+		 * @warning This function only should be called by CKGroup. Any other classes should not call this.
+		*/
+		void ExplicitSetGroup(CKDWORD pos, bool val);
 		
 	protected:
 		XContainer::XBitArray m_Groups;
