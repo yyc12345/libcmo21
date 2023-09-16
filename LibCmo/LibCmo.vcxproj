@@ -200,7 +200,7 @@
     <ClCompile Include="VTUtils.cpp" />
     <ClCompile Include="VxMath\VxMath.cpp" />
     <ClCompile Include="VxMath\VxMemoryMappedFile.cpp" />
-    <ClCompile Include="XContainer\XBitArray.cpp" />
+    <ClCompile Include="XContainer\XTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CK2\CKBitmapData.hpp" />
@@ -209,7 +209,6 @@
     <ClInclude Include="CK2\CKFile.hpp" />
     <ClInclude Include="CK2\CKGlobals.hpp" />
     <ClInclude Include="CK2\CKIdentifiers.hpp" />
-    <ClInclude Include="CK2\CKStructs.hpp" />
     <ClInclude Include="CK2\DataHandlers\CKBitmapHandler.hpp" />
     <ClInclude Include="CK2\MgrImpls\CKBaseManager.hpp" />
     <ClInclude Include="CK2\CKContext.hpp" />
@@ -229,12 +228,12 @@
     <ClInclude Include="VTAll.hpp" />
     <ClInclude Include="VTEncoding.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKObject.hpp" />
+    <ClInclude Include="VTImage.hpp" />
     <ClInclude Include="VTUtils.hpp" />
     <ClInclude Include="VxMath\VxEnums.hpp" />
     <ClInclude Include="VxMath\VxMath.hpp" />
     <ClInclude Include="VxMath\VxMemoryMappedFile.hpp" />
     <ClInclude Include="VxMath\VxTypes.hpp" />
-    <ClInclude Include="XContainer\XBitArray.hpp" />
     <ClInclude Include="XContainer\XTypes.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

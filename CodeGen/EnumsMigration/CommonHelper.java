@@ -105,7 +105,7 @@ public class CommonHelper {
 	 * @return The string form of its underlying type.
 	 */
 	public static String getEnumUnderlyingType(boolean canUnsigned) {
-		return canUnsigned ? "uint32_t" : "int32_t";
+		return canUnsigned ? "CKDWORD" : "CKINT";
 	}
 
 	// =========== Parts ===========

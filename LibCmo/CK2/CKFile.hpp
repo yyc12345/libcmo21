@@ -3,8 +3,8 @@
 #include "../VTAll.hpp"
 
 namespace LibCmo::XContainer {
-	using XIntArray = XArray<CK2::CKINT>;
-	using XFileObjectsTable = XHashTable<CK2::CK_ID, CK2::CKINT>;
+	using XIntArray = XArray<CKINT>;
+	using XFileObjectsTable = XHashTable<CK2::CK_ID, CKINT>;
 }
 
 namespace LibCmo::CK2 {
@@ -120,7 +120,7 @@ namespace LibCmo::CK2 {
 		CK_ID CreatedObjectId; /**< ID of the object being created */
 		CK_CLASSID ObjectCid; /**< Class Identifier of the object */
 		ObjImpls::CKObject* ObjPtr; /**< A pointer to the object itself (as CreatedObject when loading) */
-		TypeHelper::MKString Name; /**< Name of the Object */
+		XContainer::XString Name; /**< Name of the Object */
 		CKStateChunk* Data; /**< A CKStateChunk that contains object information */
 		CKDWORD PackSize;  /**< The CKStateChunk data size */
 		//CKINT PostPackSize; /**< When compressed chunk by chunk : size of Data after compression */

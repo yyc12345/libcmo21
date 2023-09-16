@@ -15,7 +15,7 @@ namespace LibCmo::CK2 {
 	/**
 	Object
 	 */
-	enum class CK_STATESAVEFLAGS_OBJECT : uint32_t {
+	enum class CK_STATESAVEFLAGS_OBJECT : CKDWORD {
 		CK_STATESAVE_NAME = 0x00000001,	/**< Obsolete  */
 		CK_STATESAVE_ID = 0x00000002,	/**< Obsolete  */
 		CK_STATESAVE_OBJECTHIDDEN = 0x00000004,	/**< The object is hidden  */
@@ -25,7 +25,7 @@ namespace LibCmo::CK2 {
 	/**
 	Be Object
 	 */
-	enum class CK_STATESAVEFLAGS_BEOBJECT : uint32_t {
+	enum class CK_STATESAVEFLAGS_BEOBJECT : CKDWORD {
 		CK_STATESAVE_ATTRIBUTES = 0x00000010,	/**< Obsolete  */
 		CK_STATESAVE_NEWATTRIBUTES = 0x00000011,	/**< Save Attributes  */
 		CK_STATESAVE_GROUPS = 0x00000020,	/**< Obsolete  */
@@ -41,7 +41,7 @@ namespace LibCmo::CK2 {
 	/**
 	3dEntity
 	 */
-	enum class CK_STATESAVEFLAGS_3DENTITY : uint32_t {
+	enum class CK_STATESAVEFLAGS_3DENTITY : CKDWORD {
 		CK_STATESAVE_3DENTITYSKINDATANORMALS = 0x00001000,	/**< Save Skin normals  */
 		CK_STATESAVE_ANIMATION = 0x00002000,	/**< Obsolete  */
 		CK_STATESAVE_MESHS = 0x00004000,	/**< Save List of mesh  */
@@ -58,7 +58,7 @@ namespace LibCmo::CK2 {
 	/**
 	Light
 	 */
-	enum class CK_STATESAVEFLAGS_LIGHT : uint32_t {
+	enum class CK_STATESAVEFLAGS_LIGHT : CKDWORD {
 		CK_STATESAVE_LIGHTDATA = 0x00400000,	/**< Save Color,Type,Attenuation,Range and cone  */
 		CK_STATESAVE_LIGHTDATA2 = 0x00800000,	/**< Reserved for future use  */
 		CK_STATESAVE_LIGHTRESERVED1 = 0x01000000,	/**< Reserved for future use  */
@@ -77,7 +77,7 @@ namespace LibCmo::CK2 {
 	/**
 	Camera
 	 */
-	enum class CK_STATESAVEFLAGS_CAMERA : uint32_t {
+	enum class CK_STATESAVEFLAGS_CAMERA : CKDWORD {
 		CK_STATESAVE_CAMERAFOV = 0x00400000,	/**< Save Camera Field of View  */
 		CK_STATESAVE_CAMERAPROJTYPE = 0x00800000,	/**< Save Camera projection type  */
 		CK_STATESAVE_CAMERAOTHOZOOM = 0x01000000,	/**< Save Camera orhographic zoom  */
@@ -95,7 +95,7 @@ namespace LibCmo::CK2 {
 	/**
 	Sprite3D
 	 */
-	enum class CK_STATESAVEFLAGS_SPRITE3D : uint32_t {
+	enum class CK_STATESAVEFLAGS_SPRITE3D : CKDWORD {
 		CK_STATESAVE_SPRITE3DDATA = 0x00400000,	/**< Save offset,mapping,size and material  */
 		CK_STATESAVE_SPRITE3DRESERVED0 = 0x00800000,	/**< Reserved for future use  */
 		CK_STATESAVE_SPRITE3DRESERVED1 = 0x01000000,	/**< Reserved for future use  */
@@ -108,7 +108,7 @@ namespace LibCmo::CK2 {
 	/**
 	Object 3D
 	 */
-	enum class CK_STATESAVEFLAGS_3DOBJECT : uint32_t {
+	enum class CK_STATESAVEFLAGS_3DOBJECT : CKDWORD {
 		CK_STATESAVE_3DOBJECTATTRIBUTES = 0x00400000,	/**< Obsolete  */
 		CK_STATESAVE_3DOBJECTRESERVED = 0x00800000,	/**< Reserved for future use  */
 		CK_STATESAVE_3DOBJECTRONLY = 0x00C00000,	/**< Save only 3dObject specific datas  */
@@ -117,7 +117,7 @@ namespace LibCmo::CK2 {
 	/**
 	BodyPart
 	 */
-	enum class CK_STATESAVEFLAGS_BODYPART : uint32_t {
+	enum class CK_STATESAVEFLAGS_BODYPART : CKDWORD {
 		CK_STATESAVE_BODYPARTROTJOINT = 0x01000000,	/**< Save rotation joint data  */
 		CK_STATESAVE_BODYPARTPOSJOINT = 0x02000000,	/**< Save position joint data  */
 		CK_STATESAVE_BODYPARTCHARACTER = 0x04000000,	/**< Save character owning this bodypart  */
@@ -131,7 +131,7 @@ namespace LibCmo::CK2 {
 	/**
 	Character
 	 */
-	enum class CK_STATESAVEFLAGS_CHARACTER : uint32_t {
+	enum class CK_STATESAVEFLAGS_CHARACTER : CKDWORD {
 		CK_STATESAVE_CHARACTERBODYPARTS = 0x00400000,	/**< Obsolete  */
 		CK_STATESAVE_CHARACTERKINECHAINS = 0x00800000,	/**< Obsolete  */
 		CK_STATESAVE_CHARACTERANIMATIONS = 0x01000000,	/**< Obsolete  */
@@ -148,7 +148,7 @@ namespace LibCmo::CK2 {
 	/**
 	CURVE && Curve Point
 	 */
-	enum class CK_STATESAVEFLAGS_CURVE : uint32_t {
+	enum class CK_STATESAVEFLAGS_CURVE : CKDWORD {
 		CK_STATESAVE_CURVEFITCOEFF = 0x00400000,	/**< Save fitting coef  */
 		CK_STATESAVE_CURVECONTROLPOINT = 0x00800000,	/**< Save list of control points  */
 		CK_STATESAVE_CURVESTEPS = 0x01000000,	/**< Save number of step setting  */
@@ -166,7 +166,7 @@ namespace LibCmo::CK2 {
 	/**
 	2dEntity
 	 */
-	enum class CK_STATESAVEFLAGS_2DENTITY : uint32_t {
+	enum class CK_STATESAVEFLAGS_2DENTITY : CKDWORD {
 		CK_STATESAVE_2DENTITYSRCSIZE = 0x00001000,	/**< Save source size  */
 		CK_STATESAVE_2DENTITYSIZE = 0x00002000,	/**< Save size  */
 		CK_STATESAVE_2DENTITYFLAGS = 0x00004000,	/**< Save Flags  */
@@ -180,7 +180,7 @@ namespace LibCmo::CK2 {
 	/**
 	Sprite
 	 */
-	enum class CK_STATESAVEFLAGS_SPRITE : uint32_t {
+	enum class CK_STATESAVEFLAGS_SPRITE : CKDWORD {
 		CK_STATESAVE_SPRITECURRENTIMAGE = 0x00010000,	/**< Save current image  */
 		CK_STATESAVE_SPRITETRANSPARENT = 0x00020000,	/**< Save transparency settings  */
 		CK_STATESAVE_SPRITEBITMAPS = 0x00040000,	/**< Obsolete  */
@@ -200,7 +200,7 @@ namespace LibCmo::CK2 {
 	/**
 	Sprite Text
 	 */
-	enum class CK_STATESAVEFLAGS_SPRITETEXT : uint32_t {
+	enum class CK_STATESAVEFLAGS_SPRITETEXT : CKDWORD {
 		CK_STATESAVE_SPRITETEXT = 0x01000000,	/**< Save text  */
 		CK_STATESAVE_SPRITEFONT = 0x02000000,	/**< Save font settings  */
 		CK_STATESAVE_SPRITETEXTCOLOR = 0x04000000,	/**< Save text color  */
@@ -213,7 +213,7 @@ namespace LibCmo::CK2 {
 	/**
 	Sound
 	 */
-	enum class CK_STATESAVEFLAGS_SOUND : uint32_t {
+	enum class CK_STATESAVEFLAGS_SOUND : CKDWORD {
 		CK_STATESAVE_SOUNDFILENAME = 0x00001000,	/**< Reserved for future use  */
 		CK_STATESAVE_SOUNDRESERVED1 = 0x00002000,	/**< Reserved for future use  */
 		CK_STATESAVE_SOUNDRESERVED2 = 0x00004000,	/**< Reserved for future use  */
@@ -228,7 +228,7 @@ namespace LibCmo::CK2 {
 	/**
 	Wave Sound
 	 */
-	enum class CK_STATESAVEFLAGS_WAVSOUND : uint32_t {
+	enum class CK_STATESAVEFLAGS_WAVSOUND : CKDWORD {
 		CK_STATESAVE_WAVSOUNDFILE = 0x00100000,	/**< Save sound filename  */
 		CK_STATESAVE_WAVSOUNDDATA = 0x00200000,	/**< Obsolete  */
 		CK_STATESAVE_WAVSOUNDDATA2 = 0x00400000,	/**< Save sound properties (3D/2D,pitch,gain,streaming,loop,etc..)  */
@@ -243,7 +243,7 @@ namespace LibCmo::CK2 {
 	/**
 	Wave Sound
 	 */
-	enum class CK_STATESAVEFLAGS_MIDISOUND : uint32_t {
+	enum class CK_STATESAVEFLAGS_MIDISOUND : CKDWORD {
 		CK_STATESAVE_MIDISOUNDFILE = 0x00100000,	/**< Save sound filename  */
 		CK_STATESAVE_MIDISOUNDDATA = 0x00200000,	/**< Save midi data  */
 		CK_STATESAVE_MIDISOUNDRESERVED2 = 0x00400000,	/**< Reserved for future use  */
@@ -258,7 +258,7 @@ namespace LibCmo::CK2 {
 	/**
 	Place
 	 */
-	enum class CK_STATESAVEFLAGS_PLACE : uint32_t {
+	enum class CK_STATESAVEFLAGS_PLACE : CKDWORD {
 		CK_STATESAVE_PLACEPORTALS = 0x00001000,	/**< Save level using the place  */
 		CK_STATESAVE_PLACECAMERA = 0x00002000,	/**< Save attached camera  */
 		CK_STATESAVE_PLACEREFERENCES = 0x00004000,	/**< Save list of objects in the place  */
@@ -268,7 +268,7 @@ namespace LibCmo::CK2 {
 	/**
 	Level CKSaveObjectState will not save any data
 	 */
-	enum class CK_STATESAVEFLAGS_LEVEL : uint32_t {
+	enum class CK_STATESAVEFLAGS_LEVEL : CKDWORD {
 		CK_STATESAVE_LEVELRESERVED0 = 0x00001000,	/**< Reserved for future use  */
 		CK_STATESAVE_LEVELINACTIVEMAN = 0x00002000,	/**< Reserved for future use  */
 		CK_STATESAVE_LEVELDUPLICATEMAN = 0x00004000,	/**< Reserved for future use  */
@@ -279,7 +279,7 @@ namespace LibCmo::CK2 {
 	/**
 	GROUP
 	 */
-	enum class CK_STATESAVEFLAGS_GROUP : uint32_t {
+	enum class CK_STATESAVEFLAGS_GROUP : CKDWORD {
 		CK_STATESAVE_GROUPDATA = 0x00001000,	/**< Save list of objects in the group  */
 		CK_STATESAVE_GROUPRESERVED1 = 0x00002000,	/**< Reserved for future use  */
 		CK_STATESAVE_GROUPRESERVED2 = 0x00004000,	/**< Reserved for future use  */
@@ -293,7 +293,7 @@ namespace LibCmo::CK2 {
 	/**
 	MESH CKSaveOjectSave will save all data and does not take flags into account
 	 */
-	enum class CK_STATESAVEFLAGS_MESH : uint32_t {
+	enum class CK_STATESAVEFLAGS_MESH : CKDWORD {
 		CK_STATESAVE_MESHRESERVED0 = 0x00001000,	/**< Reserved for future use  */
 		CK_STATESAVE_MESHFLAGS = 0x00002000,	/**< Save flags  */
 		CK_STATESAVE_MESHCHANNELS = 0x00004000,	/**< Save Channels  */
@@ -312,7 +312,7 @@ namespace LibCmo::CK2 {
 	/**
 	PATCH MESH CKSaveOjectSave will save all data and does not take flags into account
 	 */
-	enum class CK_STATESAVEFLAGS_PATCHMESH : uint32_t {
+	enum class CK_STATESAVEFLAGS_PATCHMESH : CKDWORD {
 		CK_STATESAVE_PATCHMESHDATA = 0x00800000,	/**< Obsolete  */
 		CK_STATESAVE_PATCHMESHDATA2 = 0x01000000,	/**< Obsolete  */
 		CK_STATESAVE_PATCHMESHSMOOTH = 0x02000000,	/**< Obsolete  */
@@ -324,7 +324,7 @@ namespace LibCmo::CK2 {
 	/**
 	Material
 	 */
-	enum class CK_STATESAVEFLAGS_MATERIAL : uint32_t {
+	enum class CK_STATESAVEFLAGS_MATERIAL : CKDWORD {
 		CK_STATESAVE_MATDATA = 0x00001000,	/**< Save colors,blending modes,shade modes,fill modes etc...  */
 		CK_STATESAVE_MATDATA2 = 0x00002000,	/**< Additional texture objects...  */
 		CK_STATESAVE_MATDATA3 = 0x00004000,	/**< Effect Alone  */
@@ -339,7 +339,7 @@ namespace LibCmo::CK2 {
 	/**
 	Texture CKSaveOjectSave will save all relevant data and does not take flags into account
 	 */
-	enum class CK_STATESAVEFLAGS_TEXTURE : uint32_t {
+	enum class CK_STATESAVEFLAGS_TEXTURE : CKDWORD {
 		CK_STATESAVE_TEXAVIFILENAME = 0x00001000,	/**< Save movie file name  */
 		CK_STATESAVE_TEXCURRENTIMAGE = 0x00002000,	/**< Save current slot  */
 		CK_STATESAVE_TEXBITMAPS = 0x00004000,	/**< Obsolete  */
@@ -359,7 +359,7 @@ namespace LibCmo::CK2 {
 	/**
 	2d CURVE && 2d Curve Point
 	 */
-	enum class CK_STATESAVEFLAGS_2DCURVE : uint32_t {
+	enum class CK_STATESAVEFLAGS_2DCURVE : CKDWORD {
 		CK_STATESAVE_2DCURVERESERVED0 = 0x00000010,	/**< Reserved for future use  */
 		CK_STATESAVE_2DCURVERESERVED4 = 0x00000020,	/**< Reserved for future use  */
 		CK_STATESAVE_2DCURVEFITCOEFF = 0x00000040,	/**< Obsolete  */
@@ -380,7 +380,7 @@ namespace LibCmo::CK2 {
 	/**
 	Kinematic Chain
 	 */
-	enum class CK_STATESAVEFLAGS_KINEMATICCHAIN : uint32_t {
+	enum class CK_STATESAVEFLAGS_KINEMATICCHAIN : CKDWORD {
 		CK_STATESAVE_KINEMATICCHAINDATA = 0x00000010,	/**< Save chain data  */
 		CK_STATESAVE_KINEMATICCHAINRESERVED1 = 0x00000020,	/**< Reserved for future use  */
 		CK_STATESAVE_KINEMATICCHAINRESERVED2 = 0x00000040,	/**< Reserved for future use  */
@@ -390,7 +390,7 @@ namespace LibCmo::CK2 {
 	/**
 	Animation
 	 */
-	enum class CK_STATESAVEFLAGS_ANIMATION : uint32_t {
+	enum class CK_STATESAVEFLAGS_ANIMATION : CKDWORD {
 		CK_STATESAVE_ANIMATIONDATA = 0x00000010,	/**< Save Flags & Framerate data  */
 		CK_STATESAVE_ANIMATIONRESERVED1 = 0x00000020,	/**< Reserved for future use  */
 		CK_STATESAVE_ANIMATIONLENGTH = 0x00000040,	/**< Save animation Length  */
@@ -404,7 +404,7 @@ namespace LibCmo::CK2 {
 	/**
 	Keyed Anim
 	 */
-	enum class CK_STATESAVEFLAGS_KEYEDANIMATION : uint32_t {
+	enum class CK_STATESAVEFLAGS_KEYEDANIMATION : CKDWORD {
 		CK_STATESAVE_KEYEDANIMANIMLIST = 0x00001000,	/**< Save list of object animations  */
 		CK_STATESAVE_KEYEDANIMLENGTH = 0x00002000,	/**< Obsolete  */
 		CK_STATESAVE_KEYEDANIMPOSKEYS = 0x00004000,	/**< Obsolete  */
@@ -423,7 +423,7 @@ namespace LibCmo::CK2 {
 	/**
 	Object Animation CKSaveOjectSave will save all relevant data and does not take flags into account
 	 */
-	enum class CK_STATESAVEFLAGS_OBJECTANIMATION : uint32_t {
+	enum class CK_STATESAVEFLAGS_OBJECTANIMATION : CKDWORD {
 		CK_STATESAVE_OBJANIMNEWDATA = 0x00001000,	/**< Save all relevant data  */
 		CK_STATESAVE_OBJANIMLENGTH = 0x00002000,	/**< Not used  */
 		CK_STATESAVE_OBJANIMPOSKEYS = 0x00004000,	/**< Not used  */
@@ -447,7 +447,7 @@ namespace LibCmo::CK2 {
 	/**
 	IK Animation
 	 */
-	enum class CK_STATESAVEFLAGS_IKANIMATION : uint32_t {
+	enum class CK_STATESAVEFLAGS_IKANIMATION : CKDWORD {
 		CK_STATESAVE_IKANIMATIONDATA = 0x00001000,	/**< Save IK data  */
 		CK_STATESAVE_IKANIMATIONRESERVED2 = 0x00002000,	/**< Reserved for future use  */
 		CK_STATESAVE_IKANIMATIONRESERVED3 = 0x00004000,	/**< Reserved for future use  */
@@ -462,7 +462,7 @@ namespace LibCmo::CK2 {
 	/**
 	BehaviorLink
 	 */
-	enum class CK_STATESAVEFLAGS_BEHAV_LINK : uint32_t {
+	enum class CK_STATESAVEFLAGS_BEHAV_LINK : CKDWORD {
 		CK_STATESAVE_BEHAV_LINK_CURDELAY = 0x00000004,	/**< Obsolete  */
 		CK_STATESAVE_BEHAV_LINK_IOS = 0x00000008,	/**< Obsolete  */
 		CK_STATESAVE_BEHAV_LINK_DELAY = 0x00000010,	/**< Obsolete  */
@@ -475,7 +475,7 @@ namespace LibCmo::CK2 {
 	/**
 	BehaviorIO
 	 */
-	enum class CK_STATESAVEFLAGS_BEHAV_IO : uint32_t {
+	enum class CK_STATESAVEFLAGS_BEHAV_IO : CKDWORD {
 		CK_STATESAVE_BEHAV_IOFLAGS = 0x00000008,	/**< Save IO flags  */
 		CK_STATESAVE_BEHAV_IORESERVED3 = 0x00000010,	/**< Reserved for future use  */
 		CK_STATESAVE_BEHAV_IORESERVED4 = 0x00000020,	/**< Reserved for future use  */
@@ -487,7 +487,7 @@ namespace LibCmo::CK2 {
 	/**
 	BehaviorPrototype
 	 */
-	enum class CK_STATESAVEFLAGS_PROTOTYPE : uint32_t {
+	enum class CK_STATESAVEFLAGS_PROTOTYPE : CKDWORD {
 		CK_STATESAVE_PROTORESERVED0 = 0x00000010,	/**< Reserved for future use  */
 		CK_STATESAVE_PROTORESERVED1 = 0x00000020,	/**< Reserved for future use  */
 		CK_STATESAVE_PROTOFLAGS = 0x00000040,	/**< Save Flags  */
@@ -509,7 +509,7 @@ namespace LibCmo::CK2 {
 	/**
 	Behavior
 	 */
-	enum class CK_STATESAVEFLAGS_BEHAVIOR : uint32_t {
+	enum class CK_STATESAVEFLAGS_BEHAVIOR : CKDWORD {
 		CK_STATESAVE_BEHAVIORRESERVED0 = 0x00000010,	/**< Reserved for internal use  */
 		CK_STATESAVE_BEHAVIORNEWDATA = 0x00000020,	/**< not used  */
 		CK_STATESAVE_BEHAVIORFLAGS = 0x00000040,	/**< not used  */
@@ -537,7 +537,7 @@ namespace LibCmo::CK2 {
 	/**
 	SCENE CKSaveOjectSave will save all relevant data and does not take flags into account
 	 */
-	enum class CK_STATESAVEFLAGS_SCENE : uint32_t {
+	enum class CK_STATESAVEFLAGS_SCENE : CKDWORD {
 		CK_STATESAVE_SCENERESERVED0 = 0x00001000,	/**< Reserved for future use  */
 		CK_STATESAVE_SCENERESERVED8 = 0x00002000,	/**< Reserved for future use  */
 		CK_STATESAVE_SCENEFLAGS = 0x00004000,
@@ -559,7 +559,7 @@ namespace LibCmo::CK2 {
 	/**
 	ParameterIn
 	 */
-	enum class CK_STATESAVEFLAGS_PARAMETERIN : uint32_t {
+	enum class CK_STATESAVEFLAGS_PARAMETERIN : CKDWORD {
 		CK_STATESAVE_PARAMETERIN_RESERVED4 = 0x00000010,	/**< Reserved for future use  */
 		CK_STATESAVE_PARAMETERIN_RESERVED0 = 0x00000020,	/**< Reserved for future use  */
 		CK_STATESAVE_PARAMETERIN_RESERVED1 = 0x00000040,	/**< Reserved for future use  */
@@ -575,7 +575,7 @@ namespace LibCmo::CK2 {
 	/**
 	ParameterLocal et ParameterOut
 	 */
-	enum class CK_STATESAVEFLAGS_PARAMETEROUT : uint32_t {
+	enum class CK_STATESAVEFLAGS_PARAMETEROUT : CKDWORD {
 		CK_STATESAVE_PARAMETEROUT_RESERVED0 = 0x00000010,	/**< Reserved for future use  */
 		CK_STATESAVE_PARAMETEROUT_DESTINATIONS = 0x00000020,	/**< Save destinations  */
 		CK_STATESAVE_PARAMETEROUT_VAL = 0x00000040,	/**< Save value  */
@@ -587,7 +587,7 @@ namespace LibCmo::CK2 {
 	/**
 	Parameter Operation
 	 */
-	enum class CK_STATESAVEFLAGS_OPERATION : uint32_t {
+	enum class CK_STATESAVEFLAGS_OPERATION : CKDWORD {
 		CK_STATESAVE_OPERATIONRESERVED0 = 0x00000010,	/**< Reserved for future use  */
 		CK_STATESAVE_OPERATIONRESERVED1 = 0x00000020,	/**< Reserved for future use  */
 		CK_STATESAVE_OPERATIONINPUTS = 0x00000040,
@@ -600,7 +600,7 @@ namespace LibCmo::CK2 {
 	/**
 	Synchro Object CKSaveOjectSave will save all relevant data and does not take flags into account
 	 */
-	enum class CK_STATESAVEFLAGS_SYNCHRO : uint32_t {
+	enum class CK_STATESAVEFLAGS_SYNCHRO : CKDWORD {
 		CK_STATESAVE_SYNCHRODATA = 0x00000010,	/**< Save data  */
 		CK_STATESAVE_SYNCHRORESERVED0 = 0x00000040,	/**< Reserved for future use  */
 		CK_STATESAVE_SYNCHRORESERVED1 = 0x00000080,	/**< Reserved for future use  */
@@ -611,7 +611,7 @@ namespace LibCmo::CK2 {
 	/**
 	Grid
 	 */
-	enum class CK_STATESAVEFLAGS_GRID : uint32_t {
+	enum class CK_STATESAVEFLAGS_GRID : CKDWORD {
 		CK_STATESAVE_GRIDDATA = 0x00400000,	/**< Save Grid Data  */
 		CK_STATESAVE_GRIDRESERVED0 = 0x00800000,	/**< Reserved for future use  */
 		CK_STATESAVE_GRIDRESERVED1 = 0x01000000,	/**< Reserved for future use  */
@@ -624,7 +624,7 @@ namespace LibCmo::CK2 {
 	/**
 	Layer (For Grids)
 	 */
-	enum class CK_STATESAVEFLAGS_LAYER : uint32_t {
+	enum class CK_STATESAVEFLAGS_LAYER : CKDWORD {
 		CK_STATESAVE_LAYERDATA = 0x00000010,	/**< Save Layer Data  */
 		CK_STATESAVE_LAYERRESERVED0 = 0x00800020,	/**< Reserved for future use  */
 		CK_STATESAVE_LAYERRESERVED1 = 0x00000040,	/**< Reserved for future use  */
@@ -637,7 +637,7 @@ namespace LibCmo::CK2 {
 	/**
 	DataArray CKSaveOjectSave will save all relevant data and does not take flags into account
 	 */
-	enum class CK_STATESAVEFLAGS_DATAARRAY : uint32_t {
+	enum class CK_STATESAVEFLAGS_DATAARRAY : CKDWORD {
 		CK_STATESAVE_DATAARRAYFORMAT = 0x00001000,	/**< Save format  */
 		CK_STATESAVE_DATAARRAYDATA = 0x00002000,	/**< Save array data  */
 		CK_STATESAVE_DATAARRAYMEMBERS = 0x00004000,	/**< Save members  */
@@ -646,7 +646,7 @@ namespace LibCmo::CK2 {
 	/**
 	SceneObjectDesc
 	 */
-	enum class CK_STATESAVEFLAGS_SCENEOBJECTDESC : uint32_t {
+	enum class CK_STATESAVEFLAGS_SCENEOBJECTDESC : CKDWORD {
 		CK_STATESAVE_SCENEOBJECTDESC = 0x00000010,
 		CK_STATESAVE_SCENEOBJECTRES1 = 0x00000020,	/**< Reserved for future use  */
 		CK_STATESAVE_SCENEOBJECTRES2 = 0x00000040,	/**< Reserved for future use  */

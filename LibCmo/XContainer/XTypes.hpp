@@ -1,11 +1,9 @@
 #pragma once
 
+#include "../CK2/CKTypes.hpp"
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <cstring>
-#include <cinttypes>
-#include "../CK2/CKTypes.hpp"
 
 /**
  * @brief The X container part of LibCmo.
@@ -21,7 +19,9 @@ namespace LibCmo::XContainer {
 
 	/**
 	@brief Set of bit flags.
-	@remark This class now use specialized std::vector<bool>.
+	@remark
+	+ This class now use specialized std::vector<bool>.
+	+ Do not use CKBOOL, because we want make sure it enable specialized std::vector<bool>.
 	*/
 	using XBitArray = std::vector<bool>;
 
@@ -69,6 +69,41 @@ namespace LibCmo::XContainer {
 	*/
 	template<class K, class T, class H = std::hash<K>, class Eq = std::equal_to<K>>
 	using XHashTable = std::unordered_map<K, T, H, Eq>;
+
+	// ========== Patch Section ==========
+
+	namespace NSXBitArray {
+
+		/**
+			* @brief Returns the position of the n-th set(1) bit
+			* @return false if not found.
+		*/
+		bool GetSetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got);
+		/**
+			* @brief Returns the position of the n-th unset(0) bit
+			* @return false if not found.
+		*/
+		bool GetUnsetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got);
+
+	}
+
+	namespace NSXString {
+
+		/**
+		 * @brief Return CKSTRING statement of XString.
+		 * @param strl The XString need to be output.
+		 * @return Return the CKSTRING format of XString. if XString is blank, return nullptr.
+		*/
+		CKSTRING ToCKSTRING(const XString& strl);
+
+		/**
+		 * @brief Copy CKSTRING to XString.
+		 * @param strl The string dest.
+		 * @param s The CKSTRING need to be copied. Pass nullptr will clear string dest.
+		*/
+		void FromCKSTRING(XString& strl, CKSTRING s);
+
+	}
 
 
 }

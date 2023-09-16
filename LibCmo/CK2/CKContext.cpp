@@ -3,7 +3,6 @@
 #include "MgrImpls/CKBaseManager.hpp"
 #include "MgrImpls/CKObjectManager.hpp"
 #include "MgrImpls/CKPathManager.hpp"
-#include "../XContainer/XBitArray.hpp"
 #include <cstdarg>
 
 namespace LibCmo::CK2 {
@@ -262,7 +261,7 @@ namespace LibCmo::CK2 {
 		va_list argptr;
 		va_start(argptr, fmt);
 
-		std::string result;
+		XContainer::XString result;
 		int count = std::vsnprintf(nullptr, 0, fmt, argptr);
 		result.resize(count);
 		int write_result = std::vsnprintf(result.data(), count, fmt, argptr);
@@ -282,7 +281,7 @@ namespace LibCmo::CK2 {
 
 #pragma region Encoding utilities
 
-	void CKContext::GetUtf8String(const std::string& native_name, std::string& u8_name) {
+	void CKContext::GetUtf8String(const XContainer::XString& native_name, XContainer::XString& u8_name) {
 		bool success = false;
 		for (const auto& token : this->m_NameEncoding) {
 			success = LibCmo::EncodingHelper::GetUtf8VirtoolsName(native_name, u8_name, token);
@@ -296,7 +295,7 @@ namespace LibCmo::CK2 {
 		}
 	}
 
-	void CKContext::GetNativeString(const std::string& u8_name, std::string& native_name) {
+	void CKContext::GetNativeString(const XContainer::XString& u8_name, XContainer::XString& native_name) {
 		bool success = false;
 		for (const auto& token : this->m_NameEncoding) {
 			success = LibCmo::EncodingHelper::GetNativeVirtoolsName(u8_name, native_name, token);
@@ -310,7 +309,7 @@ namespace LibCmo::CK2 {
 		}
 	}
 
-	void CKContext::SetEncoding(const std::vector<std::string> encoding_series) {
+	void CKContext::SetEncoding(const XContainer::XArray<XContainer::XString> encoding_series) {
 		// free all current series
 		for (const auto& encoding : this->m_NameEncoding) {
 			LibCmo::EncodingHelper::DestroyEncodingToken(encoding);

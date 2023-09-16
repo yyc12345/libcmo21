@@ -1,7 +1,4 @@
 #include "CKBitmapHandler.hpp"
-#include "stb_image.h"
-#include "stb_image_write.h"
-#include "stb_image_resize.h"
 
 namespace LibCmo::CK2::DataHandlers {
 
@@ -14,7 +11,7 @@ namespace LibCmo::CK2::DataHandlers {
 	 The data is placed in buffer with BGRA order.
 	*/
 
-	static void ABGRToARGB(CK2::CKDWORD count, const void* _abgr, void* _argb) {
+	static void ABGRToARGB(CKDWORD count, const void* _abgr, void* _argb) {
 		const char* abgr = reinterpret_cast<const char*>(_abgr);
 		char* argb = reinterpret_cast<char*>(_argb);
 		// copy R
@@ -55,7 +52,7 @@ namespace LibCmo::CK2::DataHandlers {
 		);
 	}
 
-	static void ARGBToABGR(CK2::CKDWORD count, const void* _argb, void* _abgr) {
+	static void ARGBToABGR(CKDWORD count, const void* _argb, void* _abgr) {
 		const char* argb = reinterpret_cast<const char*>(_argb);
 		char* abgr = reinterpret_cast<char*>(_abgr);
 		// copy R

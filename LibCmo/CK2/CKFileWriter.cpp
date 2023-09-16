@@ -14,7 +14,7 @@ namespace LibCmo::CK2 {
 		if (this->m_Done) CKERROR::CKERR_CANCELLED;
 
 		// encoding conv helper
-		std::string name_conv;
+		XContainer::XString name_conv;
 
 		// try detect filename legality
 		CKERROR err = PrepareFile(u8_filename);
@@ -90,9 +90,9 @@ namespace LibCmo::CK2 {
 		for (auto& obj : m_FileObjects) {
 			// += 4DWORD(ObjId, ObjCid, FileIndex, NameLen)
 			sumHdrObjSize += 4 * CKSizeof(CKDWORD);
-			if (obj.Name.toCKSTRING() != nullptr) {
+			if (XContainer::NSXString::ToCKSTRING(obj.Name) != nullptr) {
 				// += Name size
-				m_Ctx->GetNativeString(obj.Name.toString(), name_conv);
+				m_Ctx->GetNativeString(obj.Name, name_conv);
 				sumHdrObjSize += static_cast<CKDWORD>(name_conv.size());
 			}
 
@@ -177,8 +177,8 @@ namespace LibCmo::CK2 {
 			hdrparser->Write(&obj.ObjectCid, sizeof(CK_CLASSID));
 			hdrparser->Write(&obj.FileIndex, sizeof(CKDWORD));
 
-			if (obj.Name.toCKSTRING() != nullptr) {
-				m_Ctx->GetNativeString(obj.Name.toString(), name_conv);
+			if (XContainer::NSXString::ToCKSTRING(obj.Name) != nullptr) {
+				m_Ctx->GetNativeString(obj.Name, name_conv);
 				CKDWORD namelen = static_cast<CKDWORD>(name_conv.size());
 				hdrparser->Write(&namelen, sizeof(CKDWORD));
 				hdrparser->Write(name_conv.data(), namelen);
@@ -316,7 +316,7 @@ namespace LibCmo::CK2 {
 			std::fwrite(name_conv.data(), sizeof(char), filenamelen, fs);
 
 			// try mapping file.
-			std::string tempfilename = m_Ctx->GetPathManager()->GetTempFilePath(fentry.c_str());
+			XContainer::XString tempfilename = m_Ctx->GetPathManager()->GetTempFilePath(fentry.c_str());
 			std::unique_ptr<VxMath::VxMemoryMappedFile> mappedFile(new VxMath::VxMemoryMappedFile(tempfilename.c_str()));
 			if (mappedFile->IsValid()) {
 				// write file length

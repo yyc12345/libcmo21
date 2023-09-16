@@ -5,11 +5,133 @@
 #include <vector>
 #include <cstring>
 #include <cinttypes>
+#include <compare>
 
-/**
- * @brief The CK2 part of LibCmo.
- * These classes are prefixed with CK in original Virtools SDK.
-*/
+// ========== Basic Types Section ==========
+
+namespace LibCmo {
+	
+	// Types.
+	// These types is general types used in every module.
+	// So we declare them in LibCmo, not LibCmo::CK2 to make sure every module can use it.
+
+	/**
+	 * @brief General Const String Type. Encoding Unrelated.
+	*/
+	using CKSTRING = const char*;
+	/**
+	 * @brief Changeble CKSTRING.
+	 * @see CKSTRING
+	*/
+	using CKMUTSTRING = char*;
+	/**
+	 * @brief The Representation of Single Character (1 byte). Encoding Unrelated.
+	 * @remark
+	 * + Only used with string process.
+	 * + For memory representation and moving, use CKBYTE instead.
+	 * @see CKBYTE
+	*/
+	using CKCHAR = char;
+
+	/**
+	 * @brief Always Represent a Byte (1 byte, unsigned). Platform Independent.
+	 * @remark
+	 * + This type should only be used when representing memory data or position.
+	 * + If you want to represent a char, or a sequence of chars, use CKCHAR instead.
+	 * @see CKCHAR
+	*/
+	using CKBYTE = uint8_t;
+	/**
+	 * @brief Always Represent a WORD (2 byte, unsigned). Platform Independent.
+	*/
+	using CKWORD = uint16_t;
+	/**
+	 * @brief Always Represent a DWORD (4 byte, unsigned). Platform Independent.
+	 * @see CKINT
+	*/
+	using CKDWORD = uint32_t;
+	/**
+	 * @brief Always Represent a QWORD (8 byte, unsigned). Platform Independent.
+	*/
+	using CKQWORD = uint64_t;
+
+	/**
+	 * @brief The Int type used in LibCmo.
+	 * @remark
+	 * + All 'int' type in original Virtools SDK should be replaced with CKINT in this project if needed.
+	 * + This type also can be seen as the equvalent of signed CKDWORD.
+	 * @see CKDWORD
+	*/
+	using CKINT = int32_t;
+
+	/**
+	 * @brief Always Represent a float (32 bit). Platform Independent.
+	*/
+	using CKFLOAT = float;
+	/**
+	 * @brief Always Represent a double (64 bit). Platform Independent.
+	*/
+	using CKDOUBLE = double;
+
+	/**
+	 * @brief The bool type used by LibCmo.
+	 * Generally it is just C++ bool.
+	*/
+	using CKBOOL = bool;
+	/**
+	 * @brief The True value of CKBOOL.
+	*/
+	constexpr CKBOOL CKTRUE = true;
+	/**
+	 * @brief The False value of CKBOOL.
+	*/
+	constexpr CKBOOL CKFALSE = false;
+
+	/**
+	 * @brief Represent a x86 Platform Pointer.
+	 * @remark
+	 * + This type only can be used when replacing pointer in old Virtools struct / class.
+	 * + Due to Virtools shitty design, in some cases we need read data with x86 memory layout from file.
+	 * So we use this type to replace native pointer in struct existed in Virtools SDK to make sure this 
+	 * program can run perfectly on x64 and more architectures.
+	 * + A example can be found in CKTexture::Load().
+	*/
+	using CKPTR = uint32_t;
+	
+	// Format constants for the std::fprintf family of functions
+
+#define PRI_CKSTRING "s"
+#define PRI_CKCHAR "c"
+
+#define PRIuCKBYTE PRIu8
+#define PRIuCKWORD PRIu16
+#define PRIuCKDWORD PRIu32
+#define PRIuCKQWORD PRIu64
+
+#define PRIxCKBYTE PRIx8
+#define PRIxCKWORD PRIx16
+#define PRIxCKDWORD PRIx32
+#define PRIxCKQWORD PRIx64
+
+#define PRIXCKBYTE PRIX8
+#define PRIXCKWORD PRIX16
+#define PRIXCKDWORD PRIX32
+#define PRIXCKQWORD PRIX64
+
+#define PRIiCKINT PRIi32
+
+#define PRIxCKPTR PRIx32
+#define PRIXCKPTR PRIX32
+
+	/*
+	The convenient sizeof which return CKDWORD, not size_t.
+	*/
+#define CKSizeof(_Ty) (static_cast<LibCmo::CKDWORD>(sizeof(_Ty)))
+
+}
+
+// ========== CK2 Section ==========
+
 namespace LibCmo::CK2 {
 
 	/**
@@ -25,9 +147,9 @@ namespace LibCmo::CK2 {
 	is no garanty that this ID will be the same when a level is saved and loaded back again.
 	@see CKObject::GetID, CKContext::GetObject
 	*/
-	using CK_ID = uint32_t;
+	using CK_ID = CKDWORD;
 
-	enum class CKERROR : int32_t {
+	enum class CKERROR : CKINT {
 		CKERR_OK = 0,	/**< Operation successful  */
 		CKERR_INVALIDPARAMETER = -1,	/**< One of the parameter passed to the function was invalid  */
 		CKERR_INVALIDPARAMETERTYPE = -2,	/**< One of the parameter passed to the function was invalid  */
@@ -91,7 +213,7 @@ namespace LibCmo::CK2 {
 	objects, etc..
 	@see CKObject::GetClassID, CKIsChildClassOf, Class Identifiers
 	*/
-	enum class CK_CLASSID : int32_t {
+	enum class CK_CLASSID : CKINT {
 		CKCID_OBJECT = 1,
 		CKCID_PARAMETERIN = 2,
 		CKCID_PARAMETEROPERATION = 4,
@@ -164,37 +286,16 @@ namespace LibCmo::CK2 {
 	// ========== Type Definition ==========
 	// type define
 
-	using CKMUTSTRING = char*;
-	using CKSTRING = const char*;
-
-	using CKCHAR = char;
-	using CKBYTE = uint8_t;
-	using CKDWORD = uint32_t;
-	using CKWORD = uint16_t;
-
-	using CKINT = int32_t;
-
-	using CKParameterType = int32_t;
-	using CKOperationType = int32_t;
-	using CKMessageType = int32_t;
-	using CKAttributeType = int32_t;
-	using CKAttributeCategory = int32_t;
-
-	// type print style define
-#define PRIuCKID PRIu32
-#define PRIiCKERROR PRIi32
-#define PRIiCLASSID PRIi32
-
-#define PRIuCKBYTE PRIu8
-#define PRIuCKDWORD PRIu32
-#define PRIuCKWORD PRIu16
-#define PRIxCKBYTE PRIx8
-#define PRIxCKDWORD PRIx32
-#define PRIxCKWORD PRIx16
-#define PRIXCKBYTE PRIX8
-#define PRIXCKDWORD PRIX32
-#define PRIXCKWORD PRIX16
-#define PRIiCKINT PRIi32
+	using CKParameterType = CKINT;
+	using CKOperationType = CKINT;
+	using CKMessageType = CKINT;
+	using CKAttributeType = CKINT;
+	using CKAttributeCategory = CKINT;
+	
+	// format constant
+#define PRIuCKID PRIuCKDWORD
+#define PRIiCKERROR PRIiCKINT
+#define PRIiCLASSID PRIiCKINT
 
 	// ========== Class List ==========
 	// Objects and derivated classes
@@ -300,7 +401,6 @@ namespace LibCmo::CK2 {
 	class CKFileWriter;
 	class CKFileVisitor;
 
-
 	/**
 	@brief Global Unique Identifier Struture.
 	@remark
@@ -331,39 +431,14 @@ namespace LibCmo::CK2 {
 			return *this;
 		}
 
-		bool operator ==(const CKGUID& rhs) const {
+		auto operator<=>(const CKGUID& rhs) const {
+			auto cmp = this->d1 <=> rhs.d1;
+			if (cmp != 0)
+				return cmp;
+			return this->d2 <=> rhs.d2;
+		}
+		bool operator==(const CKGUID& rhs) const {
 			return ((this->d1 == rhs.d1) && (this->d2 == rhs.d2));
-		}
-		bool operator !=(const CKGUID& rhs) const {
-			return ((this->d1 != rhs.d1) || (this->d2 != rhs.d2));
-		}
-		bool operator <(const CKGUID& rhs) const {
-			if (this->d1 < rhs.d1) {
-				return true;
-			}
-
-			if (this->d1 == rhs.d1) {
-				return (this->d2 < rhs.d2);
-			}
-
-			return false;
-		}
-		bool operator <=(const CKGUID& rhs) const {
-			return (this->d1 <= rhs.d1);
-		}
-		bool operator >(const CKGUID& rhs) const {
-			if (this->d1 > rhs.d1) {
-				return true;
-			}
-
-			if (this->d1 == rhs.d1) {
-				return (this->d2 > rhs.d2);
-			}
-
-			return false;
-		}
-		bool operator >=(const CKGUID& rhs) const {
-			return (this->d1 >= rhs.d1);
 		}
 	};
 

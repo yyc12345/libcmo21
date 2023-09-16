@@ -3,12 +3,11 @@
 #define ZLIB_WINAPI
 #endif
 #include <zconf.h>
-
-#include "../VTEncoding.hpp"
-#include "CKGlobals.hpp"
-#include <map>
-#include <algorithm>
 #include <zlib.h>
+
+#include "CKGlobals.hpp"
+
+#include <algorithm>
 
 #include "ObjImpls/CKObject.hpp"
 #include "ObjImpls/CKSceneObject.hpp"
@@ -276,35 +275,6 @@ CKClassRegister(cid, parentCid, \
 		EasyClassReg(ObjImpls::CKMaterial, CK_CLASSID::CKCID_MATERIAL, CK_CLASSID::CKCID_BEOBJECT, "Material");
 
 #undef EasyClassReg
-
-		/*
-				// register CKObjects
-		m_ObjectsCreationMap{
-			{CK_CLASSID::CKCID_OBJECT, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKObject(ctx, id, name); })},
-			{CK_CLASSID::CKCID_SCENEOBJECT, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKSceneObject(ctx, id, name); })},
-			{CK_CLASSID::CKCID_BEOBJECT, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBeObject(ctx, id, name); })},
-
-			{CK_CLASSID::CKCID_GROUP, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKGroup(ctx, id, name); })},
-			{CK_CLASSID::CKCID_MESH, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKMesh(ctx, id, name); })},
-			{CK_CLASSID::CKCID_TEXTURE, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKTexture(ctx, id, name); })},
-			{CK_CLASSID::CKCID_MATERIAL, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKMaterial(ctx, id, name); })},
-			{CK_CLASSID::CKCID_RENDEROBJECT, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKRenderObject(ctx, id, name); })},
-			{CK_CLASSID::CKCID_3DENTITY, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CK3dEntity(ctx, id, name); })},
-
-			{CK_CLASSID::CKCID_PARAMETERIN, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterIn(ctx, id, name); })},
-			{CK_CLASSID::CKCID_PARAMETER, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameter(ctx, id, name); })},
-			{CK_CLASSID::CKCID_PARAMETEROUT, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterOut(ctx, id, name); })},
-			{CK_CLASSID::CKCID_PARAMETERLOCAL, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterLocal(ctx, id, name); })},
-			{CK_CLASSID::CKCID_PARAMETEROPERATION, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKParameterOperation(ctx, id, name); })},
-			{CK_CLASSID::CKCID_BEHAVIORLINK, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBehaviorLink(ctx, id, name); })},
-			{CK_CLASSID::CKCID_BEHAVIORIO, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBehaviorLink(ctx, id, name); })},
-			{CK_CLASSID::CKCID_BEHAVIOR, ([](CKContext* ctx, CK_ID id, CKSTRING name) ->CKObjectImplements::CKObject* { return new(std::nothrow) CKObjectImplements::CKBehavior(ctx, id, name); })}
-	},
-		// register CKBaseManagers
-		m_ManagersCreationMap{
-			{ATTRIBUTE_MANAGER_GUID, ([](CKContext* ctx, CK_ID id) ->CKManagerImplements::CKBaseManager* { return new(std::nothrow) CKManagerImplements::CKAttributeManager(ctx, id); })},
-	}
-		*/
 
 		CKBuildClassHierarchyTable();
 

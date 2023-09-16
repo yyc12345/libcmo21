@@ -1,12 +1,12 @@
 
 def GetTmplDecl(svars: tuple[str]) -> str:
-    return f'float {", ".join(svars)};'
+    return f'CKFLOAT {", ".join(svars)};'
 
 def GetTmplCtor1(sname: str, svars: tuple[str]) -> str:
     return f'{sname}() : {", ".join(map(lambda x: f"{x}(0.0f)", svars))} {{}}'
 
 def GetTmplCtor2(sname: str, svars: tuple[str]) -> str:
-    return f'{sname}({", ".join(map(lambda x: f"float _{x}", svars))}) : {", ".join(map(lambda x: f"{x}(_{x})", svars))} {{}}'
+    return f'{sname}({", ".join(map(lambda x: f"CKFLOAT _{x}", svars))}) : {", ".join(map(lambda x: f"{x}(_{x})", svars))} {{}}'
 
 def GetTmplCopyCtor(sname: str, svars: tuple[str]) -> str:
     return f'{sname}(const {sname}& rhs) : {", ".join(map(lambda x: f"{x}(rhs.{x})", svars))} {{}}'
@@ -30,7 +30,7 @@ def GetTmplOperAssignMove(sname: str, svars: tuple[str]) -> str:
 
 def GetTmplOperOffset(sname: str, svars: tuple[str]) -> str:
     sp: str = '\n\t\t\t'
-    return f"""\tfloat& operator[](size_t i) {{
+    return f"""\tCKFLOAT& operator[](size_t i) {{
 \t\tswitch (i) {{
 \t\t\t{sp.join(map(lambda x: f'case {x}: return {svars[x]};', range(len(svars))))}
 \t\t\tdefault: return {svars[0]};
@@ -49,25 +49,25 @@ def GetTmplOperAddMinus(sname: str, svars: tuple[str], oper: str) -> str:
 
 def GetTmplOperMul(sname: str, svars: tuple[str]) -> str:
     sp: str = '\n\t\t'
-    return f"""\t{sname}& operator*=(float rhs) {{
+    return f"""\t{sname}& operator*=(CKFLOAT rhs) {{
 \t\t{sp.join(map(lambda x: f'{x} *= rhs;', svars))}
 \t\treturn *this;
 \t}}
-\tfriend {sname} operator*(const {sname}& lhs, float rhs) {{
+\tfriend {sname} operator*(const {sname}& lhs, CKFLOAT rhs) {{
 \t\treturn {sname}({', '.join(map(lambda x: f'lhs.{x} * rhs', svars))});
 \t}}
-\tfriend {sname} operator*(float lhs, const {sname}& rhs) {{
+\tfriend {sname} operator*(CKFLOAT lhs, const {sname}& rhs) {{
 \t\treturn {sname}({', '.join(map(lambda x: f'lhs * rhs.{x}', svars))});
 \t}}"""
 
 def GetTmplOperDiv(sname: str, svars: tuple[str]) -> str:
     sp: str = '\n\t\t'
-    return f"""\t{sname}& operator/=(float rhs) {{
+    return f"""\t{sname}& operator/=(CKFLOAT rhs) {{
 \t\tif (rhs == 0.0f) return *this;
 \t\t{sp.join(map(lambda x: f'{x} /= rhs;', svars))}
 \t\treturn *this;
 \t}}
-\tfriend {sname} operator/(const {sname}& lhs, float rhs) {{
+\tfriend {sname} operator/(const {sname}& lhs, CKFLOAT rhs) {{
 \t\tif (rhs == 0.0f) return {sname}({', '.join(map(lambda x: '0.0f', range(len(svars))))});
 \t\treturn {sname}({', '.join(map(lambda x: f'lhs.{x} / rhs', svars))});
 \t}}"""

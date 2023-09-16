@@ -72,95 +72,6 @@ namespace LibCmo {
 	[[noreturn]] void LibPanic(int line, const char* file, const char* errmsg);
 #define LIBPANIC(msg) LibCmo::LibPanic(__LINE__, __FILE__, msg);
 
-	namespace TypeHelper {
-
-		/**
-		 * @brief MKString is a compatible type.
-		 * In some original Virtools case, we need CKSTRING to hold string.
-		 * But CKSTRING is just a pointer and it is very cause memory leak.
-		 * So I invent this. It like CKSTRING but will free memory automatically.
-		 * And it is safe in CKSTRING copying.
-		 * It operate like std::string. Have a function called c_str() to create usable CKSTRING.
-		 * We call it as MKString. (memory-safe CKSTRING.) :pu: =.=
-		*/
-		class MKString {
-		public:
-			MKString() : m_HasStr(false), m_Str() {}
-			~MKString() {}
-
-			MKString(const char* cstr) : m_HasStr(cstr != nullptr), m_Str(m_HasStr ? cstr : "") {}
-			MKString& operator=(const char* cstr) {
-				m_HasStr = cstr != nullptr;
-				m_Str = m_HasStr ? cstr : "";
-				return *this;
-			}
-			bool operator==(const char* rhs) const {
-				if (m_HasStr) {
-					return m_Str == rhs;
-				} else {
-					return rhs == nullptr;
-				}
-			}
-			MKString(const std::string& cstr) : m_HasStr(true), m_Str(cstr) {}
-			MKString& operator=(const std::string& cstr) {
-				m_HasStr = true;
-				m_Str = cstr;
-				return *this;
-			}
-			bool operator==(const std::string& rhs) const {
-				if (m_HasStr) {
-					return m_Str == rhs;
-				} else {
-					return false;
-				}
-			}
-
-			MKString(const MKString& rhs) : m_HasStr(rhs.m_HasStr), m_Str(rhs.m_Str) {}
-			MKString(MKString&& rhs) noexcept : m_HasStr(rhs.m_HasStr), m_Str(std::move(rhs.m_Str)) {
-				rhs.m_HasStr = false;
-			}
-			MKString& operator=(const MKString& rhs) {
-				m_HasStr = rhs.m_HasStr;
-				m_Str = rhs.m_Str;
-				return *this;
-			}
-			MKString& operator=(MKString&& rhs) noexcept {
-				m_HasStr = rhs.m_HasStr;
-				m_Str = std::move(rhs.m_Str);
-				rhs.m_HasStr = false;
-				return *this;
-			}
-			bool operator==(const MKString& rhs) const {
-				return (m_HasStr == rhs.m_HasStr && m_Str == rhs.m_Str);
-			}
-
-			const char* toCKSTRING() const {
-				return m_HasStr ? m_Str.c_str() : nullptr;
-			}
-			/**
-			 * @brief Return the std::string format of this string.
-			 * @remark nullptr string will return blank string.
-			 * @return The std::string format of this string.
-			*/
-			const std::string& toString() const {
-				return m_Str;
-			}
-			/**
-			 * @brief The size of this string.
-			 * @remark Both empty string and nullptr will return 0
-			 * @return The size of this string
-			*/
-			const size_t size() const {
-				return m_HasStr ? m_Str.size() : 0u;
-			}
-
-		private:
-			bool m_HasStr;
-			std::string m_Str;
-		};
-
-	}
-
 	namespace EnumsHelper {
 		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
 		inline TEnum Merge(std::initializer_list<TEnum> il) {
@@ -197,10 +108,4 @@ namespace LibCmo {
 		}
 	}
 
-	//namespace StreamHelper {
-
-	//	void CopyStream(const void* src, FILE* dest, size_t len);
-	//	void CopyStream(FILE* src, void* dest, size_t len);
-
-	//}
 }

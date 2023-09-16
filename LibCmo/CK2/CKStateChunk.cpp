@@ -583,7 +583,7 @@ namespace LibCmo::CK2 {
 		}
 	}
 
-	bool CKStateChunk::ReadString(std::string* strl) {
+	bool CKStateChunk::ReadString(XContainer::XString* strl) {
 		if (strl == nullptr) return false;
 
 		// get byte based size
@@ -594,7 +594,7 @@ namespace LibCmo::CK2 {
 		}
 
 		// read data
-		std::string cache;
+		XContainer::XString cache;
 		cache.resize(strByteSize);
 		if (!this->ReadByteData(cache.data(), strByteSize)) {
 			strl->clear();

@@ -25,11 +25,11 @@ namespace LibCmo::VxMath {
 	//---- Misc
 	
 	struct VxVector2 {
-		float x, y;
+		CKFLOAT x, y;
 		VxVector2() : x(0.0f), y(0.0f) {}
-		VxVector2(float _x, float _y) : x(_x), y(_y) {}
+		VxVector2(CKFLOAT _x, CKFLOAT _y) : x(_x), y(_y) {}
 		LIBCMO_DEFAULT_COPY_MOVE(VxVector2);
-		float& operator[](size_t i) {
+		CKFLOAT& operator[](size_t i) {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
@@ -52,24 +52,24 @@ namespace LibCmo::VxMath {
 		friend VxVector2 operator-(const VxVector2& lhs, const VxVector2& rhs) {
 			return VxVector2(lhs.x - rhs.x, lhs.y - rhs.y);
 		}
-		VxVector2& operator*=(float rhs) {
+		VxVector2& operator*=(CKFLOAT rhs) {
 			x *= rhs;
 			y *= rhs;
 			return *this;
 		}
-		friend VxVector2 operator*(const VxVector2& lhs, float rhs) {
+		friend VxVector2 operator*(const VxVector2& lhs, CKFLOAT rhs) {
 			return VxVector2(lhs.x * rhs, lhs.y * rhs);
 		}
-		friend VxVector2 operator*(float lhs, const VxVector2& rhs) {
+		friend VxVector2 operator*(CKFLOAT lhs, const VxVector2& rhs) {
 			return VxVector2(lhs * rhs.x, lhs * rhs.y);
 		}
-		VxVector2& operator/=(float rhs) {
+		VxVector2& operator/=(CKFLOAT rhs) {
 			if (rhs == 0.0f) return *this;
 			x /= rhs;
 			y /= rhs;
 			return *this;
 		}
-		friend VxVector2 operator/(const VxVector2& lhs, float rhs) {
+		friend VxVector2 operator/(const VxVector2& lhs, CKFLOAT rhs) {
 			if (rhs == 0.0f) return VxVector2(0.0f, 0.0f);
 			return VxVector2(lhs.x / rhs, lhs.y / rhs);
 		}
@@ -82,11 +82,11 @@ namespace LibCmo::VxMath {
 	};
 
 	struct VxVector3 {
-		float x, y, z;
+		CKFLOAT x, y, z;
 		VxVector3() : x(0.0f), y(0.0f), z(0.0f) {}
-		VxVector3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+		VxVector3(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z) : x(_x), y(_y), z(_z) {}
 		LIBCMO_DEFAULT_COPY_MOVE(VxVector3);
-		float& operator[](size_t i) {
+		CKFLOAT& operator[](size_t i) {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
@@ -112,26 +112,26 @@ namespace LibCmo::VxMath {
 		friend VxVector3 operator-(const VxVector3& lhs, const VxVector3& rhs) {
 			return VxVector3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
 		}
-		VxVector3& operator*=(float rhs) {
+		VxVector3& operator*=(CKFLOAT rhs) {
 			x *= rhs;
 			y *= rhs;
 			z *= rhs;
 			return *this;
 		}
-		friend VxVector3 operator*(const VxVector3& lhs, float rhs) {
+		friend VxVector3 operator*(const VxVector3& lhs, CKFLOAT rhs) {
 			return VxVector3(lhs.x * rhs, lhs.y * rhs, lhs.z * rhs);
 		}
-		friend VxVector3 operator*(float lhs, const VxVector3& rhs) {
+		friend VxVector3 operator*(CKFLOAT lhs, const VxVector3& rhs) {
 			return VxVector3(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
 		}
-		VxVector3& operator/=(float rhs) {
+		VxVector3& operator/=(CKFLOAT rhs) {
 			if (rhs == 0.0f) return *this;
 			x /= rhs;
 			y /= rhs;
 			z /= rhs;
 			return *this;
 		}
-		friend VxVector3 operator/(const VxVector3& lhs, float rhs) {
+		friend VxVector3 operator/(const VxVector3& lhs, CKFLOAT rhs) {
 			if (rhs == 0.0f) return VxVector3(0.0f, 0.0f, 0.0f);
 			return VxVector3(lhs.x / rhs, lhs.y / rhs, lhs.z / rhs);
 		}
@@ -144,11 +144,11 @@ namespace LibCmo::VxMath {
 	};
 
 	struct VxVector4 {
-		float x, y, z, w;
+		CKFLOAT x, y, z, w;
 		VxVector4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
-		VxVector4(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
+		VxVector4(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z, CKFLOAT _w) : x(_x), y(_y), z(_z), w(_w) {}
 		LIBCMO_DEFAULT_COPY_MOVE(VxVector4);
-		float& operator[](size_t i) {
+		CKFLOAT& operator[](size_t i) {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
@@ -177,20 +177,20 @@ namespace LibCmo::VxMath {
 		friend VxVector4 operator-(const VxVector4& lhs, const VxVector4& rhs) {
 			return VxVector4(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w);
 		}
-		VxVector4& operator*=(float rhs) {
+		VxVector4& operator*=(CKFLOAT rhs) {
 			x *= rhs;
 			y *= rhs;
 			z *= rhs;
 			w *= rhs;
 			return *this;
 		}
-		friend VxVector4 operator*(const VxVector4& lhs, float rhs) {
+		friend VxVector4 operator*(const VxVector4& lhs, CKFLOAT rhs) {
 			return VxVector4(lhs.x * rhs, lhs.y * rhs, lhs.z * rhs, lhs.w * rhs);
 		}
-		friend VxVector4 operator*(float lhs, const VxVector4& rhs) {
+		friend VxVector4 operator*(CKFLOAT lhs, const VxVector4& rhs) {
 			return VxVector4(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z, lhs * rhs.w);
 		}
-		VxVector4& operator/=(float rhs) {
+		VxVector4& operator/=(CKFLOAT rhs) {
 			if (rhs == 0.0f) return *this;
 			x /= rhs;
 			y /= rhs;
@@ -198,7 +198,7 @@ namespace LibCmo::VxMath {
 			w /= rhs;
 			return *this;
 		}
-		friend VxVector4 operator/(const VxVector4& lhs, float rhs) {
+		friend VxVector4 operator/(const VxVector4& lhs, CKFLOAT rhs) {
 			if (rhs == 0.0f) return VxVector4(0.0f, 0.0f, 0.0f, 0.0f);
 			return VxVector4(lhs.x / rhs, lhs.y / rhs, lhs.z / rhs, lhs.w / rhs);
 		}
@@ -211,11 +211,11 @@ namespace LibCmo::VxMath {
 	};
 
 	struct VxQuaternion {
-		float x, y, z, w;
+		CKFLOAT x, y, z, w;
 		VxQuaternion() : x(0.0f), y(0.0f), z(0.0f), w(1.0f) {} // set your custom init.
-		VxQuaternion(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
+		VxQuaternion(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z, CKFLOAT _w) : x(_x), y(_y), z(_z), w(_w) {}
 		LIBCMO_DEFAULT_COPY_MOVE(VxQuaternion);
-		float& operator[](size_t i) {
+		CKFLOAT& operator[](size_t i) {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
@@ -233,26 +233,26 @@ namespace LibCmo::VxMath {
 	};
 
 	struct VxColor {
-		float r, g, b, a;
+		CKFLOAT r, g, b, a;
 		VxColor() : r(0.0f), g(0.0f), b(0.0f), a(1.0f) {} // set your custom init.
-		VxColor(float _r, float _g, float _b, float _a) : r(_r), g(_g), b(_b), a(_a) {}
-		VxColor(CK2::CKDWORD argb) { FromARGB(argb); }
+		VxColor(CKFLOAT _r, CKFLOAT _g, CKFLOAT _b, CKFLOAT _a) : r(_r), g(_g), b(_b), a(_a) {}
+		VxColor(CKDWORD argb) { FromARGB(argb); }
 		LIBCMO_DEFAULT_COPY_MOVE(VxColor);
-		void FromARGB(CK2::CKDWORD argb) {
+		void FromARGB(CKDWORD argb) {
 			a = ((argb & 0xFF000000) >> 24) / 255.0f;
 			r = ((argb & 0x00FF0000) >> 16) / 255.0f;
 			g = ((argb & 0x0000FF00) >> 8) / 255.0f;
 			b = ((argb & 0x000000FF) >> 0) / 255.0f;
 		}
-		CK2::CKDWORD ToARGB() const {
-			CK2::CKDWORD argb = 0;
-			argb |= static_cast<CK2::CKDWORD>(a * 255.0f);
+		CKDWORD ToARGB() const {
+			CKDWORD argb = 0;
+			argb |= static_cast<CKDWORD>(a * 255.0f);
 			argb <<= 8;
-			argb |= static_cast<CK2::CKDWORD>(r * 255.0f);
+			argb |= static_cast<CKDWORD>(r * 255.0f);
 			argb <<= 8;
-			argb |= static_cast<CK2::CKDWORD>(g * 255.0f);
+			argb |= static_cast<CKDWORD>(g * 255.0f);
 			argb <<= 8;
-			argb |= static_cast<CK2::CKDWORD>(b * 255.0f);
+			argb |= static_cast<CKDWORD>(b * 255.0f);
 			return argb;
 		}
 		void Regulate() {
@@ -265,7 +265,7 @@ namespace LibCmo::VxMath {
 			if (a > 1.0f) a = 1.0f;
 			else if (a < 0.0f) a = 0.0f;
 		}
-		float& operator[](size_t i) {
+		CKFLOAT& operator[](size_t i) {
 			switch (i) {
 				case 0: return r;
 				case 1: return g;
@@ -283,13 +283,13 @@ namespace LibCmo::VxMath {
 	};
 
 	struct VxMatrix {
-		float m_Data[4][4];
+		CKFLOAT m_Data[4][4];
 
 		VxMatrix() : m_Data() {
 			std::memset(m_Data, 0, sizeof(m_Data));
 			m_Data[0][0] = m_Data[1][1] = m_Data[2][2] = m_Data[3][3] = 1.0f;
 		}
-		VxMatrix(float m[4][4]) : m_Data() { std::memcpy(m_Data, m, sizeof(m_Data)); }
+		VxMatrix(CKFLOAT m[4][4]) : m_Data() { std::memcpy(m_Data, m, sizeof(m_Data)); }
 		LIBCMO_DEFAULT_COPY_MOVE(VxMatrix);
 
 		VxVector4& operator[](size_t i) {
@@ -307,8 +307,8 @@ namespace LibCmo::VxMath {
 	template<class _Ty, std::enable_if_t<std::is_pointer_v<_Ty>, int> = 0>
 	class VxStridedData {
 	public:
-		VxStridedData(_Ty ptr, CK2::CKDWORD stride) :
-			m_Ptr(reinterpret_cast<CK2::CKBYTE*>(m_Ptr)),
+		VxStridedData(_Ty ptr, CKDWORD stride) :
+			m_Ptr(reinterpret_cast<CKBYTE*>(m_Ptr)),
 			m_Stride(stride)
 		{}
 		~VxStridedData() {}
@@ -318,8 +318,8 @@ namespace LibCmo::VxMath {
 		}
 
 	private:
-		CK2::CKBYTE* m_Ptr;
-		CK2::CKDWORD m_Stride;
+		CKBYTE* m_Ptr;
+		CKDWORD m_Stride;
 	};
 
 	/**
@@ -332,12 +332,12 @@ namespace LibCmo::VxMath {
 	*/
 	class VxImageDescEx {
 	public:
-		static constexpr CK2::CKDWORD ColorFactorSize = 1u;
-		static constexpr CK2::CKDWORD PixelSize = ColorFactorSize * 4u;
+		static constexpr CKDWORD ColorFactorSize = 1u;
+		static constexpr CKDWORD PixelSize = ColorFactorSize * 4u;
 	public:
 		VxImageDescEx() :
 			m_Width(0), m_Height(0), m_Image(nullptr) {}
-		VxImageDescEx(CK2::CKDWORD width, CK2::CKDWORD height) :
+		VxImageDescEx(CKDWORD width, CKDWORD height) :
 			m_Width(width), m_Height(height), m_Image(nullptr) {
 			CreateImage(width, height);
 		}
@@ -382,13 +382,13 @@ namespace LibCmo::VxMath {
 			FreeImage();
 		}
 
-		void CreateImage(CK2::CKDWORD Width, CK2::CKDWORD Height) {
+		void CreateImage(CKDWORD Width, CKDWORD Height) {
 			FreeImage();
 			m_Width = Width;
 			m_Height = Height;
-			m_Image = new CK2::CKBYTE[GetImageSize()];
+			m_Image = new CKBYTE[GetImageSize()];
 		}
-		void CreateImage(CK2::CKDWORD Width, CK2::CKDWORD Height, void* dataptr) {
+		void CreateImage(CKDWORD Width, CKDWORD Height, void* dataptr) {
 			CreateImage(Width, Height);
 			std::memcpy(m_Image, dataptr, GetImageSize());
 		}
@@ -401,30 +401,30 @@ namespace LibCmo::VxMath {
 			}
 		}
 
-		CK2::CKDWORD GetImageSize() const {
-			return static_cast<CK2::CKDWORD>(PixelSize * m_Width * m_Height);
+		CKDWORD GetImageSize() const {
+			return static_cast<CKDWORD>(PixelSize * m_Width * m_Height);
 		}
-		const CK2::CKBYTE* GetImage() const {
+		const CKBYTE* GetImage() const {
 			return m_Image;
 		}
-		CK2::CKBYTE* GetMutableImage() {
+		CKBYTE* GetMutableImage() {
 			return m_Image;
 		}
 
-		CK2::CKDWORD GetPixelCount() const {
-			return static_cast<CK2::CKDWORD>(m_Width * m_Height);
+		CKDWORD GetPixelCount() const {
+			return static_cast<CKDWORD>(m_Width * m_Height);
 		}
-		const CK2::CKDWORD* GetPixels() const {
-			return reinterpret_cast<CK2::CKDWORD*>(m_Image);
+		const CKDWORD* GetPixels() const {
+			return reinterpret_cast<CKDWORD*>(m_Image);
 		}
-		CK2::CKDWORD* GetMutablePixels() {
-			return reinterpret_cast<CK2::CKDWORD*>(m_Image);
+		CKDWORD* GetMutablePixels() {
+			return reinterpret_cast<CKDWORD*>(m_Image);
 		}
 
-		CK2::CKDWORD GetWidth() const {
+		CKDWORD GetWidth() const {
 			return m_Width;
 		}
-		CK2::CKDWORD GetHeight() const {
+		CKDWORD GetHeight() const {
 			return m_Height;
 		}
 
@@ -448,15 +448,15 @@ namespace LibCmo::VxMath {
 	//	}
 
 	//public:
-	//	CK2::CKDWORD m_RedMask;
-	//	CK2::CKDWORD m_GreenMask;
-	//	CK2::CKDWORD m_BlueMask;
-	//	CK2::CKDWORD m_AlphaMask;
+	//	CKDWORD m_RedMask;
+	//	CKDWORD m_GreenMask;
+	//	CKDWORD m_BlueMask;
+	//	CKDWORD m_AlphaMask;
 
 	protected:
-		CK2::CKDWORD m_Width; /**< Width in pixel of the image */
-		CK2::CKDWORD m_Height; /**< Height in pixel of the image */
-		CK2::CKBYTE* m_Image; /**< A pointer point to current processing image */
+		CKDWORD m_Width; /**< Width in pixel of the image */
+		CKDWORD m_Height; /**< Height in pixel of the image */
+		CKBYTE* m_Image; /**< A pointer point to current processing image */
 	};
 
 }

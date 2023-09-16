@@ -1,4 +1,3 @@
-#include "../VTUtils.hpp"
 #include "../CK2/CKTypes.hpp"
 #include "VxTypes.hpp"
 
@@ -15,7 +14,7 @@ namespace LibCmo::VxMath {
 	 * @param Src[in] Source buffer
 	 * @remark This function can be used to initialized an array of structure when only some members should be modified.
 	*/
-	void VxFillStructure(CK2::CKDWORD Count, void* Dst, CK2::CKDWORD Stride, CK2::CKDWORD SizeSrc, const void* Src); 
+	void VxFillStructure(CKDWORD Count, void* Dst, CKDWORD Stride, CKDWORD SizeSrc, const void* Src); 
 	/**
 	 * @brief copies an array of elements between two memory buffers.
 	 * @param Count[in] Number of element to copy in the destination buffer
@@ -26,7 +25,7 @@ namespace LibCmo::VxMath {
 	 * @param InStride[in] Amount in bytes between each element in the source buffer
 	 * @remark This function can be used to initialized an array of structure when only some members should be modified.
 	*/
-	void VxCopyStructure(CK2::CKDWORD Count, void* Dst, CK2::CKDWORD OutStride, CK2::CKDWORD SizeSrc, const void* Src, CK2::CKDWORD InStride);
+	void VxCopyStructure(CKDWORD Count, void* Dst, CKDWORD OutStride, CKDWORD SizeSrc, const void* Src, CKDWORD InStride);
 	
 	// ========== Graphic Utilities ==========
 	
@@ -51,11 +50,11 @@ namespace LibCmo::VxMath {
 	/**
 	 * @brief Counts number of bits to representing a value in dwMask
 	*/
-	CK2::CKDWORD VxGetBitCount(CK2::CKDWORD dwMask);
+	CKDWORD VxGetBitCount(CKDWORD dwMask);
 	/**
 	 * @brief Counts number of bits to shift to acces a non zero value in dwMask.
 	*/
-	CK2::CKDWORD VxGetBitShift(CK2::CKDWORD dwMask);
+	CKDWORD VxGetBitShift(CKDWORD dwMask);
 
 	///**
 	// * @brief scale the integer to a new range.
@@ -65,7 +64,7 @@ namespace LibCmo::VxMath {
 	// * @remark This function usually used in image color factor assign with mask.
 	// * @return The result integer.
 	//*/
-	//CK2::CKDWORD VxScaleFactor(CK2::CKDWORD val, CK2::CKDWORD srcBitCount, CK2::CKDWORD dstBitCount);
+	//CKDWORD VxScaleFactor(CKDWORD val, CKDWORD srcBitCount, CKDWORD dstBitCount);
 
 	/**
 	 * @brief Sets the alpha component of an image.
@@ -74,7 +73,7 @@ namespace LibCmo::VxMath {
 	 * @param AlphaValue[in] A CKBYTE value containing the alpha value to set to the whole image
 	 * @remark If the destination image does not have alpha information the function returns immediatly.
 	*/
-	void VxDoAlphaBlit(VxImageDescEx* dst_desc, CK2::CKBYTE AlphaValue);
+	void VxDoAlphaBlit(VxImageDescEx* dst_desc, CKBYTE AlphaValue);
 	/**
 	 * @brief Sets the alpha component of an image.
 	 * @remark The source image must be in a 32 bit ARGB8888 per pixel format.
@@ -82,7 +81,7 @@ namespace LibCmo::VxMath {
 	 * @param AlphaValues[in] A BYTE array containing the alpha values for each pixel. This array should be allocated to Width*Height bytes.
 	 * @remark If the destination image does not have alpha information the function returns immediatly.
 	*/
-	void VxDoAlphaBlit(VxImageDescEx* dst_desc, CK2::CKBYTE* AlphaValues);
+	void VxDoAlphaBlit(VxImageDescEx* dst_desc, CKBYTE* AlphaValues);
 
 }
 

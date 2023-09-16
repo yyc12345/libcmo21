@@ -158,8 +158,8 @@ namespace LibCmo::CK2 {
 		/// </summary>
 		/// <param name="strl"></param>
 		/// <returns></returns>
-		bool ReadString(std::string* strl);
-		inline bool ReadString(std::string& strl) {
+		bool ReadString(XContainer::XString* strl);
+		inline bool ReadString(XContainer::XString& strl) {
 			return ReadString(&strl);
 		}
 

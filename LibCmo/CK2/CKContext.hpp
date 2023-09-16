@@ -100,9 +100,9 @@ namespace LibCmo::CK2 {
 
 		// ========== Encoding utilities ==========
 	public:
-		void GetUtf8String(const std::string& native_name, std::string& u8_name);
-		void GetNativeString(const std::string& u8_name, std::string& native_name);
-		void SetEncoding(const std::vector<std::string> encoding_series);
+		void GetUtf8String(const XContainer::XString& native_name, XContainer::XString& u8_name);
+		void GetNativeString(const XContainer::XString& u8_name, XContainer::XString& native_name);
+		void SetEncoding(const XContainer::XArray<XContainer::XString> encoding_series);
 		
 	protected:
 		std::vector<EncodingHelper::ENCODING_TOKEN> m_NameEncoding;

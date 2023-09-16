@@ -10,7 +10,7 @@ namespace LibCmo::VxMath {
 	@brief Pixel format types. 
 	@see VxImageDesc2PixelFormat, VxPixelFormat2ImageDesc
 	 */
-	enum class VX_PIXELFORMAT : uint32_t {
+	enum class VX_PIXELFORMAT : CKDWORD {
 		UNKNOWN_PF = 0,	/**< Unknown pixel format  */
 		_32_ARGB8888 = 1,	/**< 32-bit ARGB pixel format with alpha  */
 		_32_RGB888 = 2,	/**< 32-bit RGB pixel format without alpha  */
@@ -53,7 +53,7 @@ namespace LibCmo::VxMath {
 		+ Also used as value for CKRST_TSS_TEXTUREMAPBLEND texture stage state. 
 	See Also: Using Materials,CKMaterial,CKTexture,CKMaterial::SetTextureBlendMode,CKRST_TSS_TEXTUREMAPBLEND.
 	 */
-	enum class VXTEXTURE_BLENDMODE : uint32_t {
+	enum class VXTEXTURE_BLENDMODE : CKDWORD {
 		VXTEXTUREBLEND_DECAL = 1UL,	/**< Texture replace any material information  */
 		VXTEXTUREBLEND_MODULATE = 2UL,	/**< Texture and material are combine. Alpha information of the texture replace material alpha component.  */
 		VXTEXTUREBLEND_DECALALPHA = 3UL,	/**< Alpha information in the texture specify how material and texture are combined. Alpha information of the texture replace material alpha component.  */
@@ -75,7 +75,7 @@ namespace LibCmo::VxMath {
 		+ Also used as value for CKRST_TSS_MAGFILTER and CKRST_TSS_MINFILTER texture stage state. 
 	See Also: Using Materials,CKMaterial,CKTexture,CKMaterial::SetTextureMagMode,CKMaterial::SetTextureMinMode,,CKRenderContext::SetTextureStageState
 	 */
-	enum class VXTEXTURE_FILTERMODE : uint32_t {
+	enum class VXTEXTURE_FILTERMODE : CKDWORD {
 		VXTEXTUREFILTER_NEAREST = 1UL,	/**< No Filter  */
 		VXTEXTUREFILTER_LINEAR = 2UL,	/**< Bilinear Interpolation  */
 		VXTEXTUREFILTER_MIPNEAREST = 3UL,	/**< Mip mapping  */
@@ -100,7 +100,7 @@ namespace LibCmo::VxMath {
 
 	See Also: CKMaterial,CKTexture,CKMaterial::SetSourceBlend,CKMaterial::SetDestBlend,CKRenderContext::SetState,CKSprite::SetBlending,VXRENDERSTATE_SRCBLEND,VXRENDERSTATE_DESTBLEND
 	 */
-	enum class VXBLEND_MODE : uint32_t {
+	enum class VXBLEND_MODE : CKDWORD {
 		VXBLEND_ZERO = 1UL,	/**< Blend factor is (0, 0, 0, 0).  */
 		VXBLEND_ONE = 2UL,	/**< Blend factor is (1, 1, 1, 1).  */
 		VXBLEND_SRCCOLOR = 3UL,	/**< Blend factor is (Rs, Gs, Bs, As).  */
@@ -125,7 +125,7 @@ namespace LibCmo::VxMath {
 		+ Also used as value for CKRST_TSS_ADDRESS texture stage state. 
 	See Also: CKMaterial,CKTexture,CKRST_TSS_ADDRESS,CKRenderContext::SetTextureStageState
 	 */
-	enum class VXTEXTURE_ADDRESSMODE : uint32_t {
+	enum class VXTEXTURE_ADDRESSMODE : CKDWORD {
 		VXTEXTURE_ADDRESSWRAP = 1UL,	/**< Default mesh wrap mode is used (see CKMesh::SetWrapMode)  */
 		VXTEXTURE_ADDRESSMIRROR = 2UL,	/**< Texture coordinates outside the range [0..1] are flipped evenly.  */
 		VXTEXTURE_ADDRESSCLAMP = 3UL,	/**< Texture coordinates greater than 1.0 are set to 1.0, and values less than 0.0 are set to 0.0.  */
@@ -140,7 +140,7 @@ namespace LibCmo::VxMath {
 		+ Also used as value for VXRENDERSTATE_FILLMODE render state. 
 	See Also: CKMaterial::SetFillMode,VXRENDERSTATE_FILLMODE
 	 */
-	enum class VXFILL_MODE : uint32_t {
+	enum class VXFILL_MODE : CKDWORD {
 		VXFILL_POINT = 1UL,	/**< Vertices rendering  */
 		VXFILL_WIREFRAME = 2UL,	/**< Edges rendering  */
 		VXFILL_SOLID = 3UL,	/**< Face rendering  */
@@ -154,7 +154,7 @@ namespace LibCmo::VxMath {
 		+ Also used as value for VXRENDERSTATE_SHADEMODE render state. 
 	See Also: CKMaterial::SetShadeMode,VXRENDERSTATE_SHADEMODE
 	 */
-	enum class VXSHADE_MODE : uint32_t {
+	enum class VXSHADE_MODE : CKDWORD {
 		VXSHADE_FLAT = 1UL,	/**< Flat Shading  */
 		VXSHADE_GOURAUD = 2UL,	/**< Gouraud Shading  */
 		VXSHADE_PHONG = 3UL,	/**< Phong Shading (Not yet supported by most implementation)  */
@@ -168,7 +168,7 @@ namespace LibCmo::VxMath {
 		+ The comparison function is used to compare the stencil,alpha or z reference value to a stencil,z or alpha entry.
 	See also: CKRenderContext::SetState,VXRENDERSTATETYPE,VXRENDERSTATE_ZFUNC,VXRENDERSTATE_ALPHAFUNC
 	 */
-	enum class VXCMPFUNC : uint32_t {
+	enum class VXCMPFUNC : CKDWORD {
 		VXCMP_NEVER = 1UL,	/**< Always fail the test.  */
 		VXCMP_LESS = 2UL,	/**< Accept if value if less than current value.  */
 		VXCMP_EQUAL = 3UL,	/**< Accept if value if equal than current value.  */
@@ -190,7 +190,7 @@ namespace LibCmo::VxMath {
 		o Most of this effect are heavily hardware and device (DX8,DX7,etc..) dependant 
 	See also: CKMaterial::SetEffect,CKMaterial::GetEffect,CKRenderManager::AddEffect
 	 */
-	enum class VX_EFFECT : uint32_t {
+	enum class VX_EFFECT : CKDWORD {
 		VXEFFECT_NONE = 0UL,	/**< No Effect  */
 		VXEFFECT_TEXGEN = 1UL,	/**< Texture coordinate generation using current viewpoint as referential  */
 		VXEFFECT_TEXGENREF = 2UL,	/**< texture generation generation with an optionnal referential  */
@@ -212,7 +212,7 @@ namespace LibCmo::VxMath {
 
 	See Also: CK3dEntity::SetMoveableFlags 
 	 */
-	enum class VX_MOVEABLE_FLAGS : uint32_t {
+	enum class VX_MOVEABLE_FLAGS : CKDWORD {
 		VX_MOVEABLE_PICKABLE = 0x00000001,	/**< (User)If not set this entity cannot be returned by CKRenderContext::Pick() or CKRenderContext::RectPict() functions.  */
 		VX_MOVEABLE_VISIBLE = 0x00000002,	/**< (Engine) See CKObject::Show,CK3dEntity::IsVisible  */
 		VX_MOVEABLE_UPTODATE = 0x00000004,	/**< (Engine) Used to Notify change in the data of the entity.  */
@@ -244,7 +244,7 @@ namespace LibCmo::VxMath {
 		+ Most of this flags can be set or asked using the appropriate method of CKMesh (given between () in the members documentation).
 	See Also: CKMesh,CKMesh::SetFlags 
 	 */
-	enum class VXMESH_FLAGS : uint32_t {
+	enum class VXMESH_FLAGS : CKDWORD {
 		VXMESH_BOUNDINGUPTODATE = 0x00000001,	/**< If set the bounding box is up to date (internal).  */
 		VXMESH_VISIBLE = 0x00000002,	/**< If not set the mesh will not be rendered (CKMesh::Show)  */
 		VXMESH_OPTIMIZED = 0x00000004,	/**< Set by the render engine if the mesh is optimized for rendering. Unset it to force to recreate optimized structures (when changing materials or face organization ) (CKMesh::VertexMove)  */
@@ -277,7 +277,7 @@ namespace LibCmo::VxMath {
 	  + The VXMESH_LITMODE is used by CKMesh::SetLitMode to specify how lighting is done.
 	See Also: CKMaterial,CKMesh 
 	 */
-	enum class VXMESH_LITMODE : uint32_t {
+	enum class VXMESH_LITMODE : CKDWORD {
 		VX_PRELITMESH = 0,	/**< Lighting use color information store with vertices  */
 		VX_LITMESH = 1,	/**< Lighting is done by renderer using normals and face material information.  */
 	};
@@ -290,7 +290,7 @@ namespace LibCmo::VxMath {
 		an additional material channel.
 	See Also: CKMesh,CKMesh::AddChannel,CKMesh::IsChannelLit,CKMesh::IsChannelActive 
 	 */
-	enum class VXCHANNEL_FLAGS : uint32_t {
+	enum class VXCHANNEL_FLAGS : CKDWORD {
 		VXCHANNEL_ACTIVE = 0x00000001,	/**< This channel is active  */
 		VXCHANNEL_SAMEUV = 0x00800000,	/**< This channel should use the texture coordinates of the base mesh.  */
 		VXCHANNEL_NOTLIT = 0x01000000,	/**< Additionnal Material Channel should not be lit (some channels may not be rendered in one pass with this option)  */
@@ -307,7 +307,7 @@ namespace LibCmo::VxMath {
 		texture coordinates are interpolated.
 	See Also: Using Materials,CKMaterial,CKMesh::SetWrapMode. 
 	 */
-	enum class VXTEXTURE_WRAPMODE : uint32_t {
+	enum class VXTEXTURE_WRAPMODE : CKDWORD {
 		VXTEXTUREWRAP_NONE = 0x00000000,	/**< Flat texture addressing  */
 		VXTEXTUREWRAP_U = 0x00000001,	/**< Vertical	cylinder mapping  */
 		VXTEXTUREWRAP_V = 0x00000002,	/**< Horizontal cylinder mapping  */

@@ -36,9 +36,9 @@ namespace LibCmo::CK2::MgrImpls {
 	class CKBaseManager {
 	public:
 		CKBaseManager(CKContext* ctx, CKGUID guid, CKSTRING name) :
-			m_ManagerGuid(guid),
-			m_ManagerName(name),
-			m_Context(ctx) {}
+			m_ManagerGuid(guid), m_ManagerName(), m_Context(ctx) {
+			XContainer::NSXString::FromCKSTRING(m_ManagerName, name);
+		}
 		virtual ~CKBaseManager() {}
 		LIBCMO_DISABLE_COPY_MOVE(CKBaseManager);
 
@@ -77,7 +77,7 @@ namespace LibCmo::CK2::MgrImpls {
 			```
 		*/
 		CKSTRING GetName() {
-			return m_ManagerName.toCKSTRING();
+			return XContainer::NSXString::ToCKSTRING(m_ManagerName);
 		}
 
 		/**
@@ -155,7 +155,7 @@ namespace LibCmo::CK2::MgrImpls {
 
 	protected:
 		CKGUID m_ManagerGuid; ///> Manager GUID
-		TypeHelper::MKString m_ManagerName; ///> Manager Name
+		XContainer::XString m_ManagerName; ///> Manager Name
 		CKContext* m_Context; ///> A pointer to the CKContext on which this manager is valid.
 
 	};

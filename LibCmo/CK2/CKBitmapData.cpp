@@ -220,7 +220,7 @@ namespace LibCmo::CK2 {
 			// read string in detail
 			// and try load not loaded image.
 			for (CKDWORD i = 0; i < slotcount; ++i) {
-				std::string filename;
+				XContainer::XString filename;
 				chunk->ReadString(filename);
 				if (filename.empty()) continue;
 				
@@ -298,7 +298,7 @@ namespace LibCmo::CK2 {
 		if (slot >= m_Slots.size()) return false;
 
 		// get extension of file. then get corresponding reader
-		std::string ext(filename);
+		XContainer::XString ext(filename);
 		m_Context->GetPathManager()->GetExtension(ext);
 		auto reader = DataHandlers::CKBitmapHandler::GetBitmapHandlerWrapper(CKFileExtension(ext.c_str()), CKGUID());
 		if (reader == nullptr) return false;
@@ -320,7 +320,7 @@ namespace LibCmo::CK2 {
 		if (isForceThisFmt) {
 			savefmt = this->m_SaveProperties;
 		} else {
-			std::string ext(filename);
+			XContainer::XString ext(filename);
 			m_Context->GetPathManager()->GetExtension(ext);
 			if (ext.empty()) {
 				// fallback to this fmt

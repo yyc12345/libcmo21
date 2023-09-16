@@ -141,7 +141,7 @@ namespace LibCmo::CK2::ObjImpls {
 		return m_VertexSpecularColor.data();
 	}
 
-	float* CKMesh::GetVertexWeights() {
+	CKFLOAT* CKMesh::GetVertexWeights() {
 		return m_VertexWeight.data();
 	}
 

@@ -7,46 +7,6 @@
 
 namespace LibCmo::CK2 {
 
-#pragma region Preregistred Managers
-
-	// Virtools Managers GUID second data is 0
-
-	constexpr const CKDWORD OBJECT_MANAGER_GUID1 = 0x7cbb3b91;
-	constexpr const CKDWORD ATTRIBUTE_MANAGER_GUID1 = 0x3d242466;
-	constexpr const CKDWORD MESSAGE_MANAGER_GUID1 = 0x466a0fac;
-	constexpr const CKDWORD FLOOR_MANAGER_GUID1 = 0x420936f9;
-	constexpr const CKDWORD COLLISION_MANAGER_GUID1 = 0x38244712;
-	constexpr const CKDWORD GRID_MANAGER_GUID1 = 0x7f004791;
-	constexpr const CKDWORD TIME_MANAGER_GUID1 = 0x89ce7b32;
-	constexpr const CKDWORD BEHAVIOR_MANAGER_GUID1 = 0x58d621ae;
-	constexpr const CKDWORD INPUT_MANAGER_GUID1 = 0xf787c904;
-	constexpr const CKDWORD SOUND_MANAGER_GUID1 = 0xdce135f6;
-	constexpr const CKDWORD MIDI_MANAGER_GUID1 = 0x594154a6;
-	constexpr const CKDWORD INTERFACE_MANAGER_GUID1 = 0x9a4b8e3d;
-	constexpr const CKDWORD RENDER_MANAGER_GUID1 = 0xa213c8d5;
-	constexpr const CKDWORD PARAMETER_MANAGER_GUID1 = 0x9ce57ab6;
-	constexpr const CKDWORD PATH_MANAGER_GUID1 = 0x15fd54b9;
-	constexpr const CKDWORD VARIABLE_MANAGER_GUID1 = 0x98cc3cc9;
-
-	constexpr const CKGUID OBJECT_MANAGER_GUID{ OBJECT_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID ATTRIBUTE_MANAGER_GUID{ ATTRIBUTE_MANAGER_GUID1, 0 };
-	constexpr const CKGUID MESSAGE_MANAGER_GUID{ MESSAGE_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID TIME_MANAGER_GUID{ TIME_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID SOUND_MANAGER_GUID{ SOUND_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID MIDI_MANAGER_GUID{ MIDI_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID INPUT_MANAGER_GUID{ INPUT_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID BEHAVIOR_MANAGER_GUID{ BEHAVIOR_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID FLOOR_MANAGER_GUID{ FLOOR_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID COLLISION_MANAGER_GUID{ COLLISION_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID GRID_MANAGER_GUID{ GRID_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID INTERFACE_MANAGER_GUID{ INTERFACE_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID RENDER_MANAGER_GUID{ RENDER_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID PARAMETER_MANAGER_GUID{ PARAMETER_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID PATH_MANAGER_GUID{ PATH_MANAGER_GUID1 ,0 };
-	constexpr const CKGUID VARIABLE_MANAGER_GUID{ VARIABLE_MANAGER_GUID1 ,0 };
-
-#pragma endregion
-
 	/**
 	Specify the way files are saved to disk (compression)
 	@remark
@@ -57,7 +17,7 @@ namespace LibCmo::CK2 {
 	@see CKContext::SetFileWriteMode, CKContext::GetFileWriteMode, CKContext::SetCompressionLevel,
 	CKContext::SetGlobalImagesSaveOptions, CKContext::SetGlobalSoundsSaveOptions
 	 */
-	enum class CK_FILE_WRITEMODE : uint32_t {
+	enum class CK_FILE_WRITEMODE : CKDWORD {
 		CKFILE_UNCOMPRESSED = 0,	/**< Save data uncompressed  */
 		CKFILE_CHUNKCOMPRESSED_OLD = 1,	/**< Obsolete  */
 		CKFILE_EXTERNALTEXTURES_OLD = 2,	/**< Obsolete : use CKContext::SetGlobalImagesSaveOptions instead.  */
@@ -75,7 +35,7 @@ namespace LibCmo::CK2 {
 		created CKObjects should be created as dynamic (See also Dynamic Objects)
 	See also : CKContext::Load, CKContext::CKSave
 	 */
-	enum class CK_LOAD_FLAGS : uint32_t {
+	enum class CK_LOAD_FLAGS : CKDWORD {
 		CK_LOAD_ANIMATION = 1 << 0,	/**< Load animations  */
 		CK_LOAD_GEOMETRY = 1 << 1,	/**< Load geometry.  */
 		CK_LOAD_DEFAULT = CK_LOAD_GEOMETRY | CK_LOAD_ANIMATION,	/**< Load animations & geometry  */
@@ -90,7 +50,7 @@ namespace LibCmo::CK2 {
 	/**
 	Options that will be used to create this object...
 	 */
-	enum class CK_FO_OPTIONS : uint32_t {
+	enum class CK_FO_OPTIONS : CKDWORD {
 		CK_FO_DEFAULT = 0,	/**< Default behavior : a new object will be created with the name stored in CKFileObject  */
 		CK_FO_RENAMEOBJECT,	/**< Renaming : a new object will be created with the name stored in CKFileObject + a integer value XXX to ensure its uniqueness  */
 		CK_FO_REPLACEOBJECT,	/**< Do not create a new object, instead use an existing one which CK_ID is given by CreatedObject to load the chunk on  */
@@ -99,7 +59,7 @@ namespace LibCmo::CK2 {
 	/**
 	@brief Specify the way an object just loaded should be handled when it already exists in the level.
 	 */
-	enum class CK_LOADMODE : int32_t {
+	enum class CK_LOADMODE : CKINT {
 		CKLOAD_INVALID = -1, /**< Use the existing object instead of loading   */
 		CKLOAD_OK = 0, /**< Ignore ( Name unicity is broken )  */
 		CKLOAD_REPLACE = 1, /**< Replace the existing object (Not yet implemented)  */
@@ -115,7 +75,7 @@ namespace LibCmo::CK2 {
 		dynamic.
 	@see CKContext::CreateObject
 	 */
-	enum class CK_OBJECTCREATION_OPTIONS : uint32_t {
+	enum class CK_OBJECTCREATION_OPTIONS : CKDWORD {
 		CK_OBJECTCREATION_NONAMECHECK = 0, /**< Do not test for name unicity (may be overriden in special case)  */
 		CK_OBJECTCREATION_REPLACE = 1, /**< Replace the current object by the object being loaded  */
 		CK_OBJECTCREATION_RENAME = 2, /**< Rename the created object to ensure its uniqueness  */
@@ -135,7 +95,7 @@ namespace LibCmo::CK2 {
 
 	@see CKPluginManager
 	 */
-	enum class CK_PLUGIN_TYPE : uint32_t {
+	enum class CK_PLUGIN_TYPE : CKDWORD {
 		CKPLUGIN_BITMAP_READER = 0,	/**< The plugin is bitmap (textures,sprites) loader  */
 		CKPLUGIN_SOUND_READER = 1,	/**< Sound Reader Plugin  */
 		CKPLUGIN_MODEL_READER = 2,	/**< 3D Model Reader  */
@@ -148,7 +108,7 @@ namespace LibCmo::CK2 {
 	/**
 	@remark CHUNK_OPTIONS in original Virtools header.
 	 */
-	enum class CK_STATECHUNK_CHUNKOPTIONS : uint32_t {
+	enum class CK_STATECHUNK_CHUNKOPTIONS : CKDWORD {
 		CHNK_OPTION_IDS = 0x01,	/**< IDS are stored inside chunk  */
 		CHNK_OPTION_MAN = 0x02,	/**< Managers ints are store inside chunk  */
 		CHNK_OPTION_CHN = 0x04,	/**< Sub chunk are stored	inside chunk  */
@@ -158,14 +118,14 @@ namespace LibCmo::CK2 {
 		CHNK_DONTDELETE_PTR = 0x40,	/**< Data buffer stored in m_Buffer is not owned by CKStateChunk , it must not be deleted...  */
 		CHNK_DONTDELETE_PARSER = 0x80,	/**< m_Parser Ptr is not owned by CKStateChunk , it must not be deleted...  */
 	};
-	enum class CK_STATECHUNK_CHUNKVERSION : uint32_t {
+	enum class CK_STATECHUNK_CHUNKVERSION : CKDWORD {
 		CHUNK_VERSIONBASE = 0,
 		CHUNK_VERSION1 = 4,	/**< equal to file version : WriteObjectID => table  */
 		CHUNK_VERSION2 = 5,	/**< add Manager Data  */
 		CHUNK_VERSION3 = 6,	/**< New ConvertToBuffer / ReadFromBuffer (file system changed to reflect this )  */
 		CHUNK_VERSION4 = 7,	/**< New WriteObjectID when saving to a file  */
 	};
-	enum class CK_STATECHUNK_DATAVERSION : uint32_t {
+	enum class CK_STATECHUNK_DATAVERSION : CKDWORD {
 		CHUNKDATA_OLDVERSION = 0,	/**< Before any version was saved  */
 		CHUNKDATA_BASEVERSION = 1,	/**< First version  */
 		CHUNK_WAVESOUND_VERSION2 = 2,	/**< Changes in wavesound format  */
@@ -188,7 +148,7 @@ namespace LibCmo::CK2 {
 		you should always use the specific acces function (given between ()) which may need to perform additionnal operations.
 	@see CKObject, CKObject::GetObjectFlags, CKObject::ModifyObjectFlags
 	 */
-	enum class CK_OBJECT_FLAGS : uint32_t {
+	enum class CK_OBJECT_FLAGS : CKDWORD {
 		CK_OBJECT_INTERFACEOBJ = 0x00000001,	/**< Reserved for Inteface Use  */
 		CK_OBJECT_PRIVATE = 0x00000002,	/**< The object must not be displayed in interface (Lists,Level view,etc...),nor should it be saved. (CKObject::IsPrivate()  */
 		CK_OBJECT_INTERFACEMARK = 0x00000004,
@@ -230,7 +190,7 @@ namespace LibCmo::CK2 {
 		+ Flags give user and engine more information about the 3dEntity.
 	@see CK3dEntity::SetFlags,CK3dEntity::GetFlags
 	 */
-	enum class CK_3DENTITY_FLAGS : uint32_t {
+	enum class CK_3DENTITY_FLAGS : CKDWORD {
 		CK_3DENTITY_DUMMY = 0x00000001,	/**< Entity is a dummy used to represent a position  */
 		CK_3DENTITY_FRAME = 0x00000002,	/**< Entity is a frame used to represent an orientation  */
 		CK_3DENTITY_RESERVED0 = 0x00000020,	/**< Obsolete Flag  */
@@ -258,7 +218,7 @@ namespace LibCmo::CK2 {
 		+ These options can be used for a specific texture (or sprite) or as a global setting.
 	See also: CKBitmapData::SetSaveOptions,CKSprite::SetSaveOptions,CKContext::SetGlobalImagesSaveOptions 
 	 */
-	enum class CK_TEXTURE_SAVEOPTIONS : uint32_t {
+	enum class CK_TEXTURE_SAVEOPTIONS : CKDWORD {
 		CKTEXTURE_RAWDATA = 0,	/**< Save raw data inside file. The bitmap is saved in a raw 32 bit per pixel format.  */
 		CKTEXTURE_EXTERNAL = 1,	/**< Store only the file name for the texture. The bitmap file must be present in the bitmap paths when loading the composition.  */
 		CKTEXTURE_IMAGEFORMAT = 2,	/**< Save using format specified. The bitmap data will be converted to the specified format by the correspondant bitmap plugin and saved inside file.  */
@@ -275,13 +235,13 @@ namespace LibCmo::CK2 {
 		+ These options can be used for a specific sound or as a global setting.
 	See also: CKSound::SetSaveOptions,CKContext::SetGlobalSoundSaveOptions 
 	 */
-	enum class CK_SOUND_SAVEOPTIONS : uint32_t {
+	enum class CK_SOUND_SAVEOPTIONS : CKDWORD {
 		CKSOUND_EXTERNAL = 0,	/**< Store only the file name for the sound. The sound file must be present in one of the sound paths when the composition is loaded.  */
 		CKSOUND_INCLUDEORIGINALFILE = 1,	/**< Insert original sound file inside the CMO file. The sound file that was used originally will be append to  the composition file and extracted when the file is loaded.  */
 		CKSOUND_USEGLOBAL = 2,	/**< Use Global settings. This flag is only valid for the CKSound::SetSaveOptions method.  */
 	};
 
-	enum class CK_BITMAPDATA_FLAGS : uint32_t {
+	enum class CK_BITMAPDATA_FLAGS : CKDWORD {
 		CKBITMAPDATA_INVALID = 1,
 		CKBITMAPDATA_TRANSPARENT = 2,
 		CKBITMAPDATA_FORCERESTORE = 4,

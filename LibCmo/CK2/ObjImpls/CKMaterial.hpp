@@ -26,7 +26,7 @@ namespace LibCmo::CK2::ObjImpls {
 		VxMath::VxColor m_Ambient;
 		VxMath::VxColor m_Specular;
 		VxMath::VxColor m_Emissive;
-		float m_SpecularPower;
+		CKFLOAT m_SpecularPower;
 
 		std::array<CKTexture*, 4> m_Textures;
 		CKDWORD m_TextureBorderColor;

@@ -50,10 +50,10 @@ namespace LibCmo::CK2::ObjImpls {
 			return m_ID;
 		}
 		CKSTRING GetName(void) {
-			return m_Name.toCKSTRING();
+			return XContainer::NSXString::ToCKSTRING(m_Name);
 		}
 		void SetName(CKSTRING u8_name) {
-			m_Name = u8_name;
+			XContainer::NSXString::FromCKSTRING(m_Name, u8_name);
 		}
 		CK_OBJECT_FLAGS GetObjectFlags(void) {
 			return m_ObjectFlags;
@@ -75,7 +75,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 	protected:
 		CK_ID m_ID;
-		TypeHelper::MKString m_Name;
+		XContainer::XString m_Name;
 		CK_OBJECT_FLAGS m_ObjectFlags;
 		CKContext* m_Context;
 	};

@@ -46,7 +46,7 @@ namespace LibCmo::VxMath {
 		~VxMemoryMappedFile(void);
 
 		void* GetBase(void) { return this->m_pMemoryMappedFileBase; }
-		CK2::CKDWORD GetFileSize(void) { return static_cast<CK2::CKDWORD>(this->m_cbFile); }
+		CKDWORD GetFileSize(void) { return static_cast<CKDWORD>(this->m_cbFile); }
 		bool IsValid(void) { return this->m_bIsValid; }
 	};
 

@@ -42,7 +42,7 @@ namespace LibCmo::CK2 {
 		std::unique_ptr<CKBufferParser> parser(new CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
 		parser->SetCursor(ParserPtr->GetCursor());
 
-		std::string name_conv, name_dest;
+		XContainer::XString name_conv;
 
 		// ========== read header ==========
 		// check header size
@@ -129,8 +129,9 @@ namespace LibCmo::CK2 {
 				if (namelen != 0) {
 					name_conv.resize(namelen);
 					parser->Read(name_conv.data(), namelen);
-					m_Ctx->GetUtf8String(name_conv, name_dest);
-					fileobj.Name = name_dest;
+					m_Ctx->GetUtf8String(name_conv, fileobj.Name);
+				} else {
+					fileobj.Name.clear();
 				}
 			}
 		}
@@ -196,7 +197,7 @@ namespace LibCmo::CK2 {
 		std::unique_ptr<CKBufferParser> parser(new CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
 		parser->SetCursor(ParserPtr->GetCursor());
 
-		std::string name_conv;
+		XContainer::XString name_conv;
 
 		// ========== compress feature process ==========
 		if (EnumsHelper::Has(this->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
@@ -314,7 +315,7 @@ namespace LibCmo::CK2 {
 				parser->Read(&filebodylen, sizeof(CKDWORD));
 
 				// read file body
-				std::string tempfilename = m_Ctx->GetPathManager()->GetTempFilePath(file.c_str());
+				XContainer::XString tempfilename = m_Ctx->GetPathManager()->GetTempFilePath(file.c_str());
 				FILE* fp = EncodingHelper::U8FOpen(tempfilename.c_str(), "wb");
 				if (fp != nullptr) {
 					std::fwrite(parser->GetPtr(), sizeof(char), filebodylen, fp);
@@ -349,7 +350,7 @@ namespace LibCmo::CK2 {
 			if (obj.Data == nullptr) continue;
 
 			// create object and assign created obj ckid
-			obj.ObjPtr = m_Ctx->CreateObject(obj.ObjectCid, obj.Name.toCKSTRING());
+			obj.ObjPtr = m_Ctx->CreateObject(obj.ObjectCid, XContainer::NSXString::ToCKSTRING(obj.Name));
 			if (obj.ObjPtr == nullptr) {
 				obj.CreatedObjectId = 0u;
 			} else {

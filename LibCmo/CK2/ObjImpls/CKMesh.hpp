@@ -36,7 +36,7 @@ namespace LibCmo::CK2::ObjImpls {
 		VxMath::VxVector2* GetVertexUVs();
 		CKDWORD* GetVertexColors();
 		CKDWORD* GetVertexSpecularColors();
-		float* GetVertexWeights();
+		CKFLOAT* GetVertexWeights();
 	
 		// ===== Material Slot Section =====
 	public:
@@ -77,10 +77,10 @@ namespace LibCmo::CK2::ObjImpls {
 
 	protected:
 		enum class VertexSaveFlags : CKDWORD {
-			SingleColor = 0x1u,	/**< if not set, the VertexColor is a list£¬ otherwise a single global CKDWORD.*/
-			SingleSpecularColor = 0x2u,	/**< if not set, the VertexSpecularColor is a list£¬ otherwise a single global CKDWORD. */
+			SingleColor = 0x1u,	/**< if not set, the VertexColor is a list, otherwise a single global CKDWORD.*/
+			SingleSpecularColor = 0x2u,	/**< if not set, the VertexSpecularColor is a list, otherwise a single global CKDWORD. */
 			NoNormal = 0x4u,	/**< if set, there are no normal data for vertex. */
-			SingleUV = 0x8u,	/**< if not set, the VertexUV is a list£¬ otherwise a single global VxVertex2. */
+			SingleUV = 0x8u,	/**< if not set, the VertexUV is a list, otherwise a single global VxVertex2. */
 			NoPos = 0x10u,	/**< if set, there are no position data for vertex. */
 		};
 		struct FaceData_t {
@@ -118,7 +118,7 @@ namespace LibCmo::CK2::ObjImpls {
 		XContainer::XArray<VxMath::VxVector2> m_VertexUV;
 		XContainer::XArray<CKDWORD> m_VertexColor;
 		XContainer::XArray<CKDWORD> m_VertexSpecularColor;
-		XContainer::XArray<float> m_VertexWeight;
+		XContainer::XArray<CKFLOAT> m_VertexWeight;
 
 		XContainer::XArray<CKMaterial*> m_MaterialSlot;
 

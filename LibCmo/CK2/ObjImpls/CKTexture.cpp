@@ -25,38 +25,38 @@ namespace LibCmo::CK2::ObjImpls {
 		}m_Ext;
 		struct {
 			// fake VxImageDescEx
-			CK2::CKINT Size; ///< Size of the structure
-			CK2::CKDWORD Flags; ///< Reserved for special formats (such as compressed ) 0 otherwise
+			CKINT Size; ///< Size of the structure
+			CKDWORD Flags; ///< Reserved for special formats (such as compressed ) 0 otherwise
 
-			CK2::CKINT Width; ///< Width in pixel of the image
-			CK2::CKINT Height; ///< Height in pixel of the image
+			CKINT Width; ///< Width in pixel of the image
+			CKINT Height; ///< Height in pixel of the image
 			union {
-				CK2::CKINT BytesPerLine; ///< Pitch (width in bytes) of the image
-				CK2::CKINT TotalImageSize; ///< For compressed image (DXT1...) the total size of the image
+				CKINT BytesPerLine; ///< Pitch (width in bytes) of the image
+				CKINT TotalImageSize; ///< For compressed image (DXT1...) the total size of the image
 			};
-			CK2::CKINT BitsPerPixel; ///< Number of bits per pixel
+			CKINT BitsPerPixel; ///< Number of bits per pixel
 			union {
-				CK2::CKDWORD RedMask; ///< Mask for Red component
-				CK2::CKDWORD BumpDuMask; ///< Mask for Bump Du component
-			};
-			union {
-				CK2::CKDWORD GreenMask; ///< Mask for Green component	
-				CK2::CKDWORD BumpDvMask; ///< Mask for Bump Dv component
+				CKDWORD RedMask; ///< Mask for Red component
+				CKDWORD BumpDuMask; ///< Mask for Bump Du component
 			};
 			union {
-				CK2::CKDWORD BlueMask; ///< Mask for Blue component
-				CK2::CKDWORD BumpLumMask; ///< Mask for Luminance component
+				CKDWORD GreenMask; ///< Mask for Green component	
+				CKDWORD BumpDvMask; ///< Mask for Bump Dv component
+			};
+			union {
+				CKDWORD BlueMask; ///< Mask for Blue component
+				CKDWORD BumpLumMask; ///< Mask for Luminance component
 
 			};
-			CK2::CKDWORD AlphaMask; ///< Mask for Alpha component
+			CKDWORD AlphaMask; ///< Mask for Alpha component
 
-			CK2::CKWORD BytesPerColorEntry; ///< ColorMap Stride
-			CK2::CKWORD ColorMapEntries; ///< If other than 0 image is palletized
+			CKWORD BytesPerColorEntry; ///< ColorMap Stride
+			CKWORD ColorMapEntries; ///< If other than 0 image is palletized
 
-			/*CK2::CKBYTE**/CK2::CKDWORD ColorMap; ///< Palette colors
-			/*CK2::CKBYTE**/CK2::CKDWORD Image; ///< Image
+			/*CKBYTE**/CKPTR ColorMap; ///< Palette colors
+			/*CKBYTE**/CKPTR Image; ///< Image
 		}m_Format;
-		/*void**/CK2::CKDWORD m_Data;
+		/*void**/CKPTR m_Data;
 	};
 
 	CKTexture::CKTexture(CKContext* ctx, CK_ID ckid, CKSTRING name) :

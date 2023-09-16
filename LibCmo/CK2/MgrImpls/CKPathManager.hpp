@@ -22,13 +22,13 @@ namespace LibCmo::CK2::MgrImpls {
 		 * @brief Get current temp folder.
 		 * @return 
 		*/
-		std::string GetTempFolder();
+		XContainer::XString GetTempFolder();
 		/**
 		 * @brief Get the path of temp file.
 		 * @param u8_filename The relative path of file.
 		 * @return The path of given path based on temp folder.
 		*/
-		std::string GetTempFilePath(CKSTRING u8_filename);
+		XContainer::XString GetTempFilePath(CKSTRING u8_filename);
 		
 		/**
 		 * @brief Add extra path for ResolveFileName
@@ -51,13 +51,13 @@ namespace LibCmo::CK2::MgrImpls {
 		 *		+ Virtools temp folder.
 		 * @return true if success
 		*/
-		bool ResolveFileName(std::string& u8_filename);
+		bool ResolveFileName(XContainer::XString& u8_filename);
 
 		/**
 		 * @brief Returns the file extension including period (.)
 		 * @param u8path[inout] The given path. overwritten by the gotten extension. set to blank when failed.
 		*/
-		void GetExtension(std::string& u8path);
+		void GetExtension(XContainer::XString& u8path);
 
 	protected:
 		std::filesystem::path m_TempFolder;
