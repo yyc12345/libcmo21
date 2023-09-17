@@ -228,31 +228,35 @@ namespace LibCmo::CK2 {
 
 	/*
 	A small hint for ToBeNotify, CommonToBeNotify and ToNotify
-	Assume that A need notification from B, we can see it as A want buy something from B.
+	Assume that A need notification from B, we can see it as that A want buy something from B.
 	This relation is represented in ToBeNotify, a pure relation without any inhertance hierarchy.
 
 	Ok, now we assume A have children AA, B also have children BB.
-	It's okey to order AA to buy something from B, becase AA is the children of A.
-	This relation is represneted in CommonToBeNotify.
+	Because B is a businessman, so his children BB also is a bussinessman.
+	B and BB have the same goods so A can buy his stuff from both of B and BB.
+	This is the first step executed by ComputeParentsNotifyTable().
+	In this step, the function expand existing business relations to all possible business relations (expand to businessman's children)
+	
+	Image there is a candy store, C. Because AA still is a kids.
+	So AA want to buy something from C. Now C is in his ToBeNotify.
+	Additionally, A, the parent of AA, force AA to buy something from B, just for A himself.
 	For AA, he does not need want to buy something from B, but his parent A order he to do.
-	So AA's ToBeNotify do not have B, but his CommonToBeNotify have B.
+	This is the second step executed by ComputeParentsNotifyTable().
+	For AA, his parent's relations also need to be merged after he processed his relations with C like I introduced previously.
+	
+	Now, AA have a full business list writing all trades he can do.
+	This is represented as CommonToBeNotify.
+	In this time, AA's ToBeNotify only have C, but his CommonToBeNotify have B, BB and C.
 
 	So now, let we change the view from A to B.
-	B now can sell something to A or AA. This represent in B's ToNotify.
-
-	Because B is a bussiness man, as the children of B, let we assume BB also have capability to sell something.
-	He initially do not have any bussiness relation, because no one need to buy something from him.
-	But he is smart, he want to use his parent bussiness relation. He copied his parent relation, B's ToNotify.
-	Now BB can trade with A and AA, this represent in his ToNotify.
-
-	Now A and AA know that BB is children of B and B is their bussiness friend.
-	So they also can buy something from BB. This result in that BB is added into their CommonToBeNotify.
-
+	B want to know whom I can sell something to.
+	Because a full trades list are created from A side.
+	The better solution is just ask the guest: do you want to buy something from me?
+	This operation will fill ToNotify and is implemented at ComputeHierarchyTable().
+	
 	At the end of this story,
 	All bussiness man can use ToNofity to see whom they want to sell something to.
-	ToNofity list have A and all of his children.
 	And all buyer can use CommonToBeNofity to check who they can buy something from.
-	CommonToBeNotify have B and all of this children.
 	ToBeNotify is just a list to indicate the initial bussiness relation and will never used anymore after real relation established.
 	*/
 
@@ -308,33 +312,6 @@ namespace LibCmo::CK2 {
 		// set done
 		desc.Done = true;
 	}
-	//static void ComputeParentsNotifyTable(CKClassDesc& desc) {
-	//	// if it has done, do not process it again.
-	//	if (desc.Done) return;
-	//	
-	//	// find direct parent
-	//	CKClassDesc& parent = g_CKClassInfo[static_cast<size_t>(desc.Parent)];
-	//	if (!parent.IsValid) LIBPANIC("No such CK_CLASSID.");
-
-	//	// if it is not self inheritance, call recursively
-	//	if (desc.Self != desc.Parent) {
-	//		ComputeParentsNotifyTable(parent);
-	//	}
-	//	
-	//	// copy parent ToNotify list
-	//	desc.ToNotify = parent.ToNotify;
-	//	// iterate all desc to know which id need beNotify me
-	//	// and add them
-	//	for (const auto& checking : g_CKClassInfo) {
-	//		if (!checking.IsValid) continue;
-	//		if (XContainer::NSXBitArray::IsSet(checking.CommonToBeNotify, static_cast<CKDWORD>(desc.Self))) {
-	//			XContainer::NSXBitArray::Set(desc.ToNotify, static_cast<CKDWORD>(checking.Self));
-	//		}
-	//	}
-
-	//	// set done
-	//	desc.Done = true;
-	//}
 	static void CKBuildClassHierarchyTable() {
 		size_t classCount = g_CKClassInfo.size();
 

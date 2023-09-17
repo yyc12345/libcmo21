@@ -6,25 +6,6 @@
 
 namespace LibCmo::CK2 {
 
-	struct ChunkProfile {
-		CK_CLASSID m_ClassId;
-		CKDWORD m_DataDwSize;
-		CKDWORD* m_pData;
-
-		CK_STATECHUNK_DATAVERSION m_DataVersion;
-		CK_STATECHUNK_CHUNKVERSION m_ChunkVersion;
-
-		size_t m_ObjectListSize, m_ChunkListSize, m_ManagerListSize;
-
-		CKFileVisitor* m_BindFile;
-		CKContext* m_BindContext;
-	};
-	struct IdentifierProfile {
-		CKDWORD m_Identifier;
-		void* m_DataPtr;
-		CKDWORD m_AreaSize;
-	};
-
 	class CKStateChunk {
 	public:
 		//CKStateChunk();
@@ -34,6 +15,91 @@ namespace LibCmo::CK2 {
 		CKStateChunk& operator=(const CKStateChunk&);
 		CKStateChunk& operator=(CKStateChunk&&);
 		~CKStateChunk();
+
+#pragma region Self Used Data Struct
+
+	public:
+		struct ProfileStateChunk_t {
+			CK_CLASSID m_ClassId;
+			CKDWORD m_DataDwSize;
+			CKDWORD* m_pData;
+
+			CK_STATECHUNK_DATAVERSION m_DataVersion;
+			CK_STATECHUNK_CHUNKVERSION m_ChunkVersion;
+
+			size_t m_ObjectListSize, m_ChunkListSize, m_ManagerListSize;
+
+			CKFileVisitor* m_BindFile;
+			CKContext* m_BindContext;
+		};
+		struct ProfileIdentifier_t {
+			CKDWORD m_Identifier;
+			void* m_DataPtr;
+			CKDWORD m_AreaSize;
+		};
+		template<bool _TCanWrite>
+		class LockedBuffer_t {
+		public:
+			/**
+			 * @brief The type of free function called by this class.
+			 * It must have 2 argument, first one is buffer need to be free, second is consumed size.
+			*/
+			using FreeFct = std::function<void(const void*,CKDWORD)>;
+
+			LockedBuffer_t() : m_Ptr(nullptr), m_ConsumedByteSize(0), m_FreeFct(nullptr) {}
+			LockedBuffer_t(const void* ptr, CKDWORD expectedByteSize, FreeFct fct) :
+				m_Ptr(const_cast<CKBYTE*>(static_cast<const CKBYTE*>(ptr))), m_ConsumedByteSize(expectedByteSize), m_FreeFct(fct) {}
+			LockedBuffer_t(const LockedBuffer_t&) = delete;
+			LockedBuffer_t& operator=(const LockedBuffer_t&) = delete;
+			LockedBuffer_t(LockedBuffer_t&& rhs) :
+				m_Ptr(rhs.m_Ptr), m_ConsumedByteSize(rhs.m_ConsumedByteSize), m_FreeFct(rhs.m_FreeFct) {
+				rhs.m_Ptr = nullptr;
+				rhs.m_ConsumedByteSize = 0;
+				rhs.m_FreeFct = nullptr;
+			}
+			LockedBuffer_t& operator=(LockedBuffer_t&& rhs) {
+				// reset self
+				Reset();
+				// copy data
+				m_Ptr = rhs.m_Ptr;
+				m_ConsumedByteSize = rhs.m_ConsumedByteSize;
+				m_FreeFct = rhs.m_FreeFct;
+				// remove rhs data.
+				rhs.m_Ptr = nullptr;
+				rhs.m_ConsumedByteSize = 0;
+				rhs.m_FreeFct = nullptr;
+			}
+			~LockedBuffer_t() {
+				Reset();
+			}
+
+			const void* GetPtr() const {
+				return m_Ptr;
+			}
+			// References:
+			// https://stackoverflow.com/questions/43051882/how-to-disable-a-class-member-function-for-certain-template-types
+			// https://stackoverflow.com/questions/13964447/why-compile-error-with-enable-if
+			template<bool _UCanWrite = _TCanWrite, std::enable_if_t<sizeof(_UCanWrite) && _TCanWrite, int> = 0>
+			void* GetMutablePtr() {
+				return m_Ptr;
+			}
+			void SetRealConsumedSize(CKDWORD sizeInByte) {
+				m_ConsumedByteSize = sizeInByte;
+			}
+			void Reset() {
+				if (m_Ptr == nullptr) return;
+				if (m_FreeFct == nullptr) return;
+				m_FreeFct(m_Ptr, m_ConsumedByteSize);
+				
+				m_Ptr = nullptr;
+				m_ConsumedByteSize = 0;
+				m_FreeFct = nullptr;
+			}
+		private:
+			CKBYTE* m_Ptr;
+			CKDWORD m_ConsumedByteSize;
+			FreeFct m_FreeFct;
+		};
 
 	private:
 		enum class CKStateChunkStatus : CKDWORD {
@@ -47,6 +113,10 @@ namespace LibCmo::CK2 {
 			CKDWORD m_DataSize;
 			CKDWORD m_PrevIdentifierPos;
 		};
+
+#pragma endregion
+
+#pragma region Member Decl
 
 		CK_CLASSID m_ClassId;
 		CKDWORD m_DataDwSize;
@@ -64,6 +134,8 @@ namespace LibCmo::CK2 {
 		CKFileVisitor* m_BindFile;
 		CKContext* m_BindContext;
 
+#pragma endregion
+
 #pragma region Buffer Related
 
 	public:
@@ -75,24 +147,65 @@ namespace LibCmo::CK2 {
 #pragma region Misc Functions
 
 	public:
-		const ChunkProfile GetStateChunkProfile();
+		// ===== 2 Profiles Getter used by Unvirt =====
 
-		//bool UnPack(CKDWORD DestSize);
-		void Clear(void);
-		CKDWORD GetDataSize(void);
-		CK_STATECHUNK_DATAVERSION GetDataVersion();
+		/**
+		 * @brief Get basic info of this CKStateChunk.
+		 * @return The struct describing this CKStateChunk.
+		*/
+		const ProfileStateChunk_t GetStateChunkProfile();
+		/**
+		 * @brief Get all indentifier infos of this CKStateChunk, 
+		 * including identifier self, data area size and address.
+		 * @return A arrary, each item describe a single identifier's info.
+		 * @remark The detail of implement can be seen in SeekIdentifierAndReturnSize()
+		 * @see SeekIdentifierAndReturnSize
+		*/
+		const XContainer::XArray<ProfileIdentifier_t> GetIdentifiersProfile();
+
+		/**
+		 * @brief Clear this CKStateChunk, restore it to original status for other using.
+		*/
+		void Clear();
+		/**
+		 * @brief Get the size of data buffer in this CKStateChunk.
+		 * @return The data buffer's size in CKBYTE.
+		*/
+		CKDWORD GetDataSize() const;
+		/**
+		 * @brief Get data version in this CKStateChunk.
+		 * @remark Data version is frequently used by calling of CKStateChunk to distinguish different data layout due to compatibility reason.
+		 * @return The data version.
+		*/
+		CK_STATECHUNK_DATAVERSION GetDataVersion() const;
+		/**
+		 * @brief Set data version of this CKStateChunk.
+		 * @param version The set data version
+		 * @remark Frequently used when saving someing in CKStateChunk.
+		*/
 		void SetDataVersion(CK_STATECHUNK_DATAVERSION version);
+		/**
+		 * @brief Get associated CK_CLASSID of this CKStateChunk
+		 * @return Associated CK_CLASSID
+		*/
+		CK_CLASSID GetClassId() const;
+		/**
+		 * @brief Set associated CK_CLASSID of this CKStateChunk.
+		 * @param cid The set CK_CLASSID
+		 * @remark Frequently used at the end of CKObject::Save() override.
+		*/
+		void SetClassId(CK_CLASSID cid);
+
+
 		bool Skip(CKDWORD DwordCount);
 
 	private:
 		CKDWORD GetCeilDwordSize(size_t char_size);
-		void* GetCurrentPointer();
 		bool ResizeBuffer(CKDWORD new_dwsize);
 		bool EnsureWriteSpace(CKDWORD dwsize);
 		bool EnsureReadSpace(CKDWORD dword_required);
 
 #pragma endregion
-
 
 #pragma region Read Function
 
@@ -112,11 +225,14 @@ namespace LibCmo::CK2 {
 		inline bool SeekIdentifierAndReturnSize(TEnum enum_v, CKDWORD* out_size) {
 			return SeekIdentifierDwordAndReturnSize(static_cast<CKDWORD>(enum_v), out_size);
 		}
-		const XContainer::XArray<IdentifierProfile> GetIdentifierProfile();
 
 		/* ========== Basic Data Read Functions ==========*/
 
 	private:
+
+		bool LockReadBuffer(void** ppData, CKDWORD expectedByteSize);
+		bool UnLockReadBuffer(CKDWORD realConsumedByteSize);
+
 		/**
 		 * @brief The base read function for all data.
 		 * This function will check all read requirements.

@@ -6,15 +6,6 @@ namespace LibCmo::CK2 {
 
 #pragma region Ctor Dtor
 
-	//CKStateChunk::CKStateChunk() :
-	//	m_ClassId(CK_CLASSID::CKCID_OBJECT), m_DataDwSize(0u), m_pData(nullptr),
-	//	m_DataVersion(CK_STATECHUNK_DATAVERSION::CHUNKDATA_CURRENTVERSION), m_ChunkVersion(CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4),
-	//	m_Parser{ CKStateChunkStatus::IDLE, 0u, 0u, 0u },
-	//	m_ObjectList(), m_ChunkList(), m_ManagerList(),
-	//	m_BindDoc(nullptr), m_BindContext(nullptr)
-	//{
-	//	;
-	//}
 	CKStateChunk::CKStateChunk(CKFileVisitor* visitor, CKContext* ctx) :
 		m_ClassId(CK_CLASSID::CKCID_OBJECT), m_DataDwSize(0u), m_pData(nullptr),
 		m_DataVersion(CK_STATECHUNK_DATAVERSION::CHUNKDATA_CURRENTVERSION), m_ChunkVersion(CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4),
@@ -110,8 +101,10 @@ namespace LibCmo::CK2 {
 
 #pragma region Misc Funcs
 
-	const ChunkProfile CKStateChunk::GetStateChunkProfile() {
-		return ChunkProfile {
+	// ========== Public Funcs ==========
+
+	const CKStateChunk::ProfileStateChunk_t CKStateChunk::GetStateChunkProfile() {
+		return CKStateChunk::ProfileStateChunk_t {
 			.m_ClassId = this->m_ClassId,
 			.m_DataDwSize = this->m_DataDwSize,
 			.m_pData = this->m_pData,
@@ -127,8 +120,41 @@ namespace LibCmo::CK2 {
 			.m_BindContext = this->m_BindContext,
 		};
 	}
+	
+	const XContainer::XArray<CKStateChunk::ProfileIdentifier_t> CKStateChunk::GetIdentifiersProfile() {
+		XContainer::XArray<CKStateChunk::ProfileIdentifier_t> collection;
+		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return collection;
 
-	void CKStateChunk::Clear(void) {
+		CKDWORD pos = 0u;
+		if (this->m_DataDwSize < 2u) return collection;	// impossible to have a identifier
+
+		// iterate identifier
+		while (true) {
+			// add current identifier
+			CKDWORD nextptr = this->m_pData[pos + 1];
+			if (nextptr == 0u) {
+				nextptr = this->m_DataDwSize;	// got tail. no more identifier
+			}
+			collection.emplace_back(CKStateChunk::ProfileIdentifier_t{
+				this->m_pData[pos],
+				this->m_pData + pos + 2,
+				CKSizeof(CKDWORD) * (nextptr - pos - 2u)
+			});
+
+			// move to next identifier or exit
+			// got tail. no more identifier
+			if (this->m_pData[pos + 1] == 0u) break;
+
+			pos = this->m_pData[pos + 1];
+
+			// out of buffer
+			if (pos + 1 >= this->m_DataDwSize) break;
+		};
+		return collection;
+
+	}
+
+	void CKStateChunk::Clear() {
 		this->m_ClassId = CK_CLASSID::CKCID_OBJECT;
 		this->m_DataVersion = CK_STATECHUNK_DATAVERSION::CHUNK_DEV_2_1;
 		this->m_ChunkVersion = CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4;
@@ -149,16 +175,24 @@ namespace LibCmo::CK2 {
 		this->m_ChunkList.clear();
 	}
 
-	CKDWORD CKStateChunk::GetDataSize(void) {
+	CKDWORD CKStateChunk::GetDataSize() const {
 		return CKSizeof(CKDWORD) * this->m_DataDwSize;
 	}
 
-	CK_STATECHUNK_DATAVERSION CKStateChunk::GetDataVersion() {
+	CK_STATECHUNK_DATAVERSION CKStateChunk::GetDataVersion() const {
 		return this->m_DataVersion;
 	}
 
 	void CKStateChunk::SetDataVersion(CK_STATECHUNK_DATAVERSION version) {
 		this->m_DataVersion = version;
+	}
+
+	CK_CLASSID CKStateChunk::GetClassId() const {
+		return this->m_ClassId;
+	}
+
+	void CKStateChunk::SetClassId(CK_CLASSID cid) {
+		this->m_ClassId = cid;
 	}
 
 	bool CKStateChunk::Skip(CKDWORD DwordCount) {
@@ -183,18 +217,7 @@ namespace LibCmo::CK2 {
 		return result;
 	}
 
-
-
-	void* CKStateChunk::GetCurrentPointer() {
-		switch (this->m_Parser.m_Status) {
-			case CKStateChunkStatus::READ:
-			case CKStateChunkStatus::WRITE:
-				return this->m_pData + this->m_Parser.m_CurrentPos;
-			case CKStateChunkStatus::IDLE:
-			default:
-				return nullptr;
-		}
-	}
+	// ========== Private Funcs ==========
 
 	CKDWORD CKStateChunk::GetCeilDwordSize(size_t char_size) {
 		return static_cast<CKDWORD>((char_size + 3) >> 2);
@@ -448,33 +471,6 @@ namespace LibCmo::CK2 {
 
 #pragma endregion
 
-
-	//bool CKStateChunk::UnPack(CKDWORD DestSize) {
-	//	// NOTE: in UnPack. pData store the compressed buffer, and 
-	//	// dwSize store the length of compressed buffer as CHAR size, not DWORD size!
-
-	//	// create a enough buffer
-	//	CKBYTE* buffer = new CKBYTE[DestSize];
-	//	uLongf destSize = DestSize;
-	//	// uncompress it
-	//	auto err = uncompress(
-	//		reinterpret_cast<Bytef*>(buffer), &destSize,
-	//		reinterpret_cast<const Bytef*>(this->m_pData), static_cast<uLong>(this->m_DataDwSize)
-	//	);
-	//	// if no error, assign data
-	//	if (err == Z_OK) {
-	//		// get dw size and copy it to remove useless blank data
-	//		this->m_DataDwSize = static_cast<CKDWORD>(destSize) / CKSizeof(CKDWORD);
-
-	//		delete[] this->m_pData;
-	//		this->m_pData = nullptr;
-	//		this->m_pData = new CKDWORD[this->m_DataDwSize];
-	//			std::memcpy(this->m_pData, buffer, this->m_DataDwSize * sizeof(CKDWORD));
-	//	}
-	//	delete[] buffer;
-	//	return true;
-	//}
-
 #pragma region Read Functions
 
 	void CKStateChunk::StartRead(void) {
@@ -529,38 +525,6 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-	const XContainer::XArray<IdentifierProfile> CKStateChunk::GetIdentifierProfile() {
-		XContainer::XArray<IdentifierProfile> collection;
-		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return collection;
-
-		CKDWORD pos = 0u;
-		if (this->m_DataDwSize < 2u) return collection;	// impossible to have a identifier
-
-		// iterate identifier
-		while (true) {
-			// add current identifier
-			CKDWORD nextptr = this->m_pData[pos + 1];
-			if (nextptr == 0u) {
-				nextptr = this->m_DataDwSize;	// got tail. no more identifier
-			}
-			collection.emplace_back(IdentifierProfile{
-				this->m_pData[pos],
-				this->m_pData + pos + 2,
-				CKSizeof(CKDWORD) * (nextptr - pos - 2u)
-			});
-
-			// move to next identifier or exit
-			// got tail. no more identifier
-			if (this->m_pData[pos + 1] == 0u) break;
-
-			pos = this->m_pData[pos + 1];
-
-			// out of buffer
-			if (pos + 1 >= this->m_DataDwSize) break;
-		};
-		return collection;
-
-	}
 
 	/* ========== Basic Data Read Functions ==========*/
 
