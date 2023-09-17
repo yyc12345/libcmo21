@@ -126,7 +126,7 @@ namespace LibCmo::CK2 {
 				+ 2 * CKSizeof(CKDWORD);
 		}
 
-		CKDWORD sumHdrIncludedFiles = CKSizeof(int32_t) + CKSizeof(CKDWORD);
+		CKDWORD sumHdrIncludedFiles = CKSizeof(CKINT) + CKSizeof(CKDWORD);
 
 		// calc the whole size
 		CKDWORD sumHdrSize = sumHdrObjSize + sumHdrPlgSize + sumHdrIncludedFiles;
@@ -173,14 +173,14 @@ namespace LibCmo::CK2 {
 
 			// todo: remove TOBEDELETED for referenced objects' m_ObjectFlags
 
-			hdrparser->Write(&obj.ObjectId, sizeof(CK_ID));
-			hdrparser->Write(&obj.ObjectCid, sizeof(CK_CLASSID));
-			hdrparser->Write(&obj.FileIndex, sizeof(CKDWORD));
+			hdrparser->Write(&obj.ObjectId);
+			hdrparser->Write(&obj.ObjectCid);
+			hdrparser->Write(&obj.FileIndex);
 
 			if (XContainer::NSXString::ToCKSTRING(obj.Name) != nullptr) {
 				m_Ctx->GetNativeString(obj.Name, name_conv);
 				CKDWORD namelen = static_cast<CKDWORD>(name_conv.size());
-				hdrparser->Write(&namelen, sizeof(CKDWORD));
+				hdrparser->Write(&namelen);
 				hdrparser->Write(name_conv.data(), namelen);
 			}
 		}
@@ -188,13 +188,13 @@ namespace LibCmo::CK2 {
 		// write plugin dep
 		{
 			CKDWORD depsize = static_cast<CKDWORD>(m_PluginsDep.size());
-			hdrparser->Write(&depsize, sizeof(CKDWORD));
+			hdrparser->Write(&depsize);
 
 			for (auto& dep : m_PluginsDep) {
 				hdrparser->Write(&dep.m_PluginCategory, sizeof(CK_PLUGIN_TYPE));
 
 				CKDWORD guidsize = static_cast<CKDWORD>(dep.m_Guids.size());
-				hdrparser->Write(&guidsize, sizeof(CKDWORD));
+				hdrparser->Write(&guidsize);
 
 				hdrparser->Write(dep.m_Guids.data(), sizeof(CKGUID) * guidsize);
 			}
@@ -203,10 +203,10 @@ namespace LibCmo::CK2 {
 		// write included file
 		{
 			CKDWORD cache = CKSizeof(CKDWORD);
-			hdrparser->Write(&cache, sizeof(CKDWORD));
+			hdrparser->Write(&cache);
 
 			cache = static_cast<CKDWORD>(m_IncludedFiles.size());
-			hdrparser->Write(&cache, sizeof(CKDWORD));
+			hdrparser->Write(&cache);
 		}
 
 		// compress header if needed
@@ -230,22 +230,22 @@ namespace LibCmo::CK2 {
 
 		// write manager
 		for (auto& mgr : m_ManagersData) {
-			datparser->Write(&mgr.Manager, sizeof(CKGUID));
+			datparser->Write(&mgr.Manager);
 
 			CKDWORD writtenSize = 0;
 			if (mgr.Data != nullptr) {
-				writtenSize = mgr.Data->ConvertToBuffer(datparser->GetMutablePtr(sizeof(CKDWORD)));
+				writtenSize = mgr.Data->ConvertToBuffer(datparser->GetMutablePtr(CKSizeof(CKDWORD)));
 				delete mgr.Data;
 				mgr.Data = nullptr;
 			}
 
-			datparser->Write(&writtenSize, sizeof(CKDWORD));
+			datparser->Write(&writtenSize);
 			datparser->MoveCursor(writtenSize);
 		}
 
 		// write object
 		for (auto& obj : m_FileObjects) {
-			datparser->Write(&obj.PackSize, sizeof(CKDWORD));
+			datparser->Write(&obj.PackSize);
 
 			if (obj.Data != nullptr) {
 				obj.Data->ConvertToBuffer(datparser->GetMutablePtr());
@@ -301,8 +301,8 @@ namespace LibCmo::CK2 {
 		if (fs == nullptr) return CKERROR::CKERR_CANTWRITETOFILE;
 		// write small header + header + data
 		std::fwrite(&rawHeader, sizeof(CKRawFileInfo), 1, fs);
-		std::fwrite(hdrparser->GetBase(), sizeof(char), hdrparser->GetSize(), fs);
-		std::fwrite(datparser->GetBase(), sizeof(char), datparser->GetSize(), fs);
+		std::fwrite(hdrparser->GetBase(), sizeof(CKBYTE), hdrparser->GetSize(), fs);
+		std::fwrite(datparser->GetBase(), sizeof(CKBYTE), datparser->GetSize(), fs);
 		// free buffer
 		hdrparser.reset();
 		datparser.reset();
@@ -313,7 +313,7 @@ namespace LibCmo::CK2 {
 			m_Ctx->GetNativeString(fentry, name_conv);
 			CKDWORD filenamelen = static_cast<CKDWORD>(name_conv.size());
 			std::fwrite(&filenamelen, sizeof(CKDWORD), 1, fs);
-			std::fwrite(name_conv.data(), sizeof(char), filenamelen, fs);
+			std::fwrite(name_conv.data(), sizeof(CKBYTE), filenamelen, fs);
 
 			// try mapping file.
 			XContainer::XString tempfilename = m_Ctx->GetPathManager()->GetTempFilePath(fentry.c_str());
@@ -324,7 +324,7 @@ namespace LibCmo::CK2 {
 				std::fwrite(&filebodylen, sizeof(CKDWORD), 1, fs);
 
 				// write file body
-				std::fwrite(mappedFile->GetBase(), sizeof(char), filebodylen, fs);
+				std::fwrite(mappedFile->GetBase(), sizeof(CKBYTE), filebodylen, fs);
 			} else {
 				// write zero file length
 				CKDWORD filebodylen = 0;

@@ -3,7 +3,7 @@
 
 namespace LibCmo::VxMath {
 
-	VxMemoryMappedFile::VxMemoryMappedFile(const char* u8_filepath) :
+	VxMemoryMappedFile::VxMemoryMappedFile(CKSTRING u8_filepath) :
 		// init members
 #if defined(LIBCMO_OS_WIN32)
 		m_hFile(NULL), m_hFileMapping(NULL), m_hFileMapView(NULL),

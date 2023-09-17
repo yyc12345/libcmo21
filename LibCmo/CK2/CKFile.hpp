@@ -11,10 +11,10 @@ namespace LibCmo::CK2 {
 
 	class CKBufferParser {
 	private:
-		char* m_MemBegin;
-		size_t m_MemPos;
+		CKBYTE* m_MemBegin;
+		CKDWORD m_MemPos;
 		bool m_NeedManualFree;
-		size_t m_MemSize;
+		CKDWORD m_MemSize;
 
 	public:
 		/**
@@ -23,8 +23,8 @@ namespace LibCmo::CK2 {
 		 * @param rsize The size of buffer.
 		 * @param need_manual_free True if provided buffer need freed by CKBufferParser automatically.
 		*/
-		CKBufferParser(const void* ptr, size_t rsize, bool need_manual_free) :
-			m_MemBegin(const_cast<char*>(static_cast<const char*>(ptr))),
+		CKBufferParser(const void* ptr, CKDWORD rsize, bool need_manual_free) :
+			m_MemBegin(const_cast<CKBYTE*>(static_cast<const CKBYTE*>(ptr))),
 			m_MemPos(0u), m_MemSize(rsize),
 			m_NeedManualFree(need_manual_free) 
 		{}
@@ -32,8 +32,8 @@ namespace LibCmo::CK2 {
 		 * @brief Create CKBufferParser from a new created buffer.
 		 * @param newsize The size of new buffer.
 		*/
-		CKBufferParser(size_t newsize) :
-			m_MemBegin(new char[newsize]),
+		CKBufferParser(CKDWORD newsize) :
+			m_MemBegin(new CKBYTE[newsize]),
 			m_MemPos(0u), m_MemSize(newsize),
 			m_NeedManualFree(true)
 		{}
@@ -42,21 +42,29 @@ namespace LibCmo::CK2 {
 		}
 		LIBCMO_DISABLE_COPY_MOVE(CKBufferParser);
 
-		const void* GetPtr(ptrdiff_t extraoff = 0) { return (this->m_MemBegin + m_MemPos + extraoff); }
-		void* GetMutablePtr(ptrdiff_t extraoff = 0) { return (this->m_MemBegin + m_MemPos + extraoff); }
-		void Read(void* data, size_t data_size) {
+		const void* GetPtr(CKINT extraoff = 0) { return (this->m_MemBegin + m_MemPos + extraoff); }
+		void* GetMutablePtr(CKINT extraoff = 0) { return (this->m_MemBegin + m_MemPos + extraoff); }
+		void* GetBase(void) { return this->m_MemBegin; }
+		CKDWORD GetSize(void) { return this->m_MemSize; }
+		CKDWORD GetCursor(void) { return this->m_MemPos; }
+		void MoveCursor(CKINT off) { this->m_MemPos += off; }
+		void SetCursor(CKDWORD off) { this->m_MemPos = off; }
+		void Read(void* data, CKDWORD data_size) {
 			std::memcpy(data, (this->m_MemBegin + m_MemPos), data_size);
 			this->m_MemPos += data_size;
 		}
-		void Write(const void* data, size_t data_size) {
+		template<class _Ty>
+		void Read(_Ty* data) {
+			Read(data, CKSizeof(_Ty));
+		}
+		void Write(const void* data, CKDWORD data_size) {
 			std::memcpy((this->m_MemBegin + m_MemPos), data, data_size);
 			this->m_MemPos += data_size;
 		}
-		void* GetBase(void) { return this->m_MemBegin; }
-		CKDWORD GetSize(void) { return static_cast<CKDWORD>(this->m_MemSize); }
-		CKDWORD GetCursor(void) { return static_cast<CKDWORD>(this->m_MemPos); }
-		void MoveCursor(ptrdiff_t off) { this->m_MemPos += off; }
-		void SetCursor(size_t off) { this->m_MemPos = off; }
+		template<class _Ty>
+		void Write(const _Ty* data) {
+			Write(data, CKSizeof(_Ty));
+		}
 	};
 
 #pragma pack(push)

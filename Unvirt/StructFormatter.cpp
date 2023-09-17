@@ -10,7 +10,7 @@ namespace Unvirt::StructFormatter {
 
 #define PRIuSIZET "zu"
 
-	static void PrintCKSTRING(LibCmo::CK2::CKSTRING name) {
+	static void PrintCKSTRING(LibCmo::CKSTRING name) {
 		if (name == nullptr) {
 			fputs(UNVIRT_TERMCOL_LIGHT_MAGENTA(("<anonymous>")), stdout);
 		} else {
@@ -70,7 +70,7 @@ namespace Unvirt::StructFormatter {
 			(fileinfo.CKVersion >> 0) & 0xFFFF
 		);
 
-		LibCmo::CK2::CKDWORD product_series[4] {
+		LibCmo::CKDWORD product_series[4] {
 			(fileinfo.ProductBuild >> 24) & 0xFF,
 			(fileinfo.ProductBuild >> 16) & 0xFF,
 			(fileinfo.ProductBuild >> 8) & 0xFF,
@@ -136,7 +136,7 @@ namespace Unvirt::StructFormatter {
 				fputc('\t', stdout);
 				PrintPointer(obj.Data);
 				fputc('\t', stdout);
-				PrintCKSTRING(obj.Name.toCKSTRING());
+				PrintCKSTRING(LibCmo::XContainer::NSXString::ToCKSTRING(obj.Name));
 				fputc('\n', stdout);
 			}
 			);
@@ -201,12 +201,12 @@ namespace Unvirt::StructFormatter {
 		fputc('\n', stdout);
 
 		fprintf(stdout, "Version (Data / Chunk): %" PRIuCKDWORD " (%s) / %" PRIuCKDWORD " (%s)\n",
-			static_cast<LibCmo::CK2::CKDWORD>(profile.m_DataVersion), AccessibleValue::GetEnumName(profile.m_DataVersion, AccessibleValue::EnumDesc::CK_STATECHUNK_DATAVERSION).c_str(),
-			static_cast<LibCmo::CK2::CKDWORD>(profile.m_ChunkVersion), AccessibleValue::GetEnumName(profile.m_ChunkVersion, AccessibleValue::EnumDesc::CK_STATECHUNK_CHUNKVERSION).c_str());
+			static_cast<LibCmo::CKDWORD>(profile.m_DataVersion), AccessibleValue::GetEnumName(profile.m_DataVersion, AccessibleValue::EnumDesc::CK_STATECHUNK_DATAVERSION).c_str(),
+			static_cast<LibCmo::CKDWORD>(profile.m_ChunkVersion), AccessibleValue::GetEnumName(profile.m_ChunkVersion, AccessibleValue::EnumDesc::CK_STATECHUNK_CHUNKVERSION).c_str());
 		fprintf(stdout, "List (Object / Chunk / Manager): %" PRIuCKDWORD " / %" PRIuCKDWORD " / %" PRIuCKDWORD "\n",
-			static_cast<LibCmo::CK2::CKDWORD>(profile.m_ObjectListSize),
-			static_cast<LibCmo::CK2::CKDWORD>(profile.m_ChunkListSize),
-			static_cast<LibCmo::CK2::CKDWORD>(profile.m_ManagerListSize));
+			static_cast<LibCmo::CKDWORD>(profile.m_ObjectListSize),
+			static_cast<LibCmo::CKDWORD>(profile.m_ChunkListSize),
+			static_cast<LibCmo::CKDWORD>(profile.m_ManagerListSize));
 
 		fputs("Data: ", stdout);
 		PrintPointer(profile.m_pData);
@@ -231,7 +231,7 @@ namespace Unvirt::StructFormatter {
 			PrintPointer(ident.m_DataPtr);
 			fputc('\t', stdout);
 			fprintf(stdout, "%" PRIuCKDWORD " (%" PRIuCKDWORD " DWORD + %" PRIuCKDWORD ")\n",
-				ident.m_AreaSize, ident.m_AreaSize / CKSizeof(LibCmo::CK2::CKDWORD), ident.m_AreaSize % CKSizeof(LibCmo::CK2::CKDWORD));
+				ident.m_AreaSize, ident.m_AreaSize / CKSizeof(LibCmo::CKDWORD), ident.m_AreaSize % CKSizeof(LibCmo::CKDWORD));
 		}
 	}
 

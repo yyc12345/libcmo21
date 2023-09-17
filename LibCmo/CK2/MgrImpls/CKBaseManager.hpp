@@ -90,7 +90,7 @@ namespace LibCmo::CK2::MgrImpls {
 			data for your manager.
 		@see CKStateChunk, LoadData
 		*/
-		virtual bool SaveData(CKStateChunk* chunk, CKFileVisitor* SavedFile) {
+		virtual bool SaveData(LIBCMO_UNUSED CKStateChunk* chunk, LIBCMO_UNUSED CKFileVisitor* SavedFile) {
 			return false;	// default value is false to indicate this manager do not need save any data.
 		}
 		/**
@@ -102,7 +102,7 @@ namespace LibCmo::CK2::MgrImpls {
 			+ During a load operation, each manager is automatically called if there was a chunk saved in the file with SaveData.
 		@see CKStateChunk, SaveData
 		*/
-		virtual CKERROR LoadData(CKStateChunk* chunk, CKFileVisitor* LoadedFile) {
+		virtual CKERROR LoadData(LIBCMO_UNUSED CKStateChunk* chunk, LIBCMO_UNUSED CKFileVisitor* LoadedFile) {
 			return CKERROR::CKERR_OK;
 		}
 
@@ -138,7 +138,7 @@ namespace LibCmo::CK2::MgrImpls {
 			CKMANAGER_FUNC_OnSequenceToBeDeleted for this function to get called.
 		@see Main Virtools Events, CKContext::DestroyObjects, SequenceDeleted
 		*/
-		virtual CKERROR SequenceToBeDeleted(const CK_ID* objids, CKDWORD count) { return CKERROR::CKERR_OK; }
+		virtual CKERROR SequenceToBeDeleted(LIBCMO_UNUSED const CK_ID* objids, LIBCMO_UNUSED CKDWORD count) { return CKERROR::CKERR_OK; }
 		/**
 		@brief Called after objects have been deleted.
 		@return CK_OK if successful or an error code otherwise.
@@ -150,7 +150,7 @@ namespace LibCmo::CK2::MgrImpls {
 			CKMANAGER_FUNC_OnSequenceDeleted for this function to get called.
 		@see Main Virtools Events, CKContext::DestroyObjects, SequenceToBeDeleted
 		*/
-		virtual CKERROR SequenceDeleted(const CK_ID* objids, CKDWORD count) { return CKERROR::CKERR_OK; }
+		virtual CKERROR SequenceDeleted(LIBCMO_UNUSED const CK_ID* objids, LIBCMO_UNUSED CKDWORD count) { return CKERROR::CKERR_OK; }
 
 
 	protected:

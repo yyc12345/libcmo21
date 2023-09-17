@@ -106,7 +106,7 @@ namespace LibCmo::CK2::ObjImpls {
 				// MARK: I ignore 0x4 in there because it involve video.
 
 				// set current slot, transparent color, and video format.
-				CKDWORD currentSlot, transColor, videoFmt;
+				CKDWORD currentSlot, transColor;
 				fmtbytesize -= CKSizeof(CKDWORD);
 				switch (fmtbytesize) {
 					case (3 * sizeof(CKDWORD)):

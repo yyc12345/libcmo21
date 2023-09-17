@@ -44,7 +44,7 @@ namespace Unvirt::Context {
 	protected:
 		bool HasOpenedFile();
 		void ClearDocument();
-		void PrintContextMsg(LibCmo::CK2::CKSTRING msg);
+		void PrintContextMsg(LibCmo::CKSTRING msg);
 
 		CmdHelper::CommandRoot m_Root;
 		CmdHelper::HelpDocument* m_Help;

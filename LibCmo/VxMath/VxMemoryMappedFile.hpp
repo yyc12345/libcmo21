@@ -40,7 +40,7 @@ namespace LibCmo::VxMath {
 		size_t m_cbFile;
 		bool m_bIsValid;
 	public:
-		VxMemoryMappedFile(const char* u8_filepath);
+		VxMemoryMappedFile(CKSTRING u8_filepath);
 		VxMemoryMappedFile(const VxMemoryMappedFile&) = delete;
 		VxMemoryMappedFile& operator=(const VxMemoryMappedFile&) = delete;
 		~VxMemoryMappedFile(void);

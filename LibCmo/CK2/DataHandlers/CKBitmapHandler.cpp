@@ -12,8 +12,8 @@ namespace LibCmo::CK2::DataHandlers {
 	*/
 
 	static void ABGRToARGB(CKDWORD count, const void* _abgr, void* _argb) {
-		const char* abgr = reinterpret_cast<const char*>(_abgr);
-		char* argb = reinterpret_cast<char*>(_argb);
+		const CKBYTE* abgr = static_cast<const CKBYTE*>(_abgr);
+		CKBYTE* argb = static_cast<CKBYTE*>(_argb);
 		// copy R
 		VxMath::VxCopyStructure(
 			count,
@@ -53,8 +53,8 @@ namespace LibCmo::CK2::DataHandlers {
 	}
 
 	static void ARGBToABGR(CKDWORD count, const void* _argb, void* _abgr) {
-		const char* argb = reinterpret_cast<const char*>(_argb);
-		char* abgr = reinterpret_cast<char*>(_abgr);
+		const CKBYTE* argb = static_cast<const CKBYTE*>(_argb);
+		CKBYTE* abgr = static_cast<CKBYTE*>(_abgr);
 		// copy R
 		VxMath::VxCopyStructure(
 			count,
@@ -147,7 +147,7 @@ namespace LibCmo::CK2::DataHandlers {
 	static void FileWriteFunction(void* context, void* data, int size) {
 		FileSaveContext* ctx = reinterpret_cast<FileSaveContext*>(context);
 		if (ctx->m_Fs != nullptr) {
-			std::fwrite(data, sizeof(char), size, ctx->m_Fs);
+			std::fwrite(data, sizeof(CKBYTE), size, ctx->m_Fs);
 		}
 		ctx->m_Counter += size;
 	}
@@ -161,7 +161,7 @@ namespace LibCmo::CK2::DataHandlers {
 		MemorySaveContext* ctx = reinterpret_cast<MemorySaveContext*>(context);
 		if (ctx->m_Mem != nullptr) {
 			std::memcpy(ctx->m_Mem, data, size);
-			ctx->m_Mem = reinterpret_cast<char*>(ctx->m_Mem) + size;
+			ctx->m_Mem = static_cast<CKBYTE*>(ctx->m_Mem) + size;
 		}
 		ctx->m_Counter += size;
 	}

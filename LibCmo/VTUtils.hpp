@@ -67,6 +67,8 @@
 
 #pragma endregion
 
+#define LIBCMO_UNUSED [[maybe_unused]]
+
 namespace LibCmo {
 
 	[[noreturn]] void LibPanic(int line, const char* file, const char* errmsg);

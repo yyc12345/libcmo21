@@ -25,7 +25,7 @@ namespace LibCmo::CK2 {
 
 	void* CKPackData(const void* Data, CKDWORD size, CKDWORD& NewSize, CKINT compressionlevel) {
 		uLong boundary = compressBound(static_cast<uLong>(size));
-		char* DestBuffer = new char[boundary];
+		CKBYTE* DestBuffer = new CKBYTE[boundary];
 
 		uLongf _destLen = static_cast<uLongf>(boundary);
 		if (compress2(
@@ -42,7 +42,7 @@ namespace LibCmo::CK2 {
 	}
 
 	void* CKUnPackData(CKDWORD DestSize, const void* SrcBuffer, CKDWORD SrcSize) {
-		char* DestBuffer = new char[DestSize];
+		CKBYTE* DestBuffer = new CKBYTE[DestSize];
 
 		uLongf cache = DestSize;
 		if (uncompress(

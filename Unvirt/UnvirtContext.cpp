@@ -173,7 +173,7 @@ namespace Unvirt::Context {
 		m_Ctx->ClearAll();
 	}
 
-	void UnvirtContext::PrintContextMsg(LibCmo::CK2::CKSTRING msg) {
+	void UnvirtContext::PrintContextMsg(LibCmo::CKSTRING msg) {
 		if (msg != nullptr) {
 			fprintf(stdout, UNVIRT_TERMCOL_LIGHT_YELLOW(("[CKContext] ")) "%s\n", msg);
 		}

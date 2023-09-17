@@ -261,11 +261,11 @@ namespace LibCmo::CK2 {
 		// read chunk ver and data ver first
 		// chunk ver always set in the 3rd BYTE in every format
 		this->m_ChunkVersion = static_cast<CK_STATECHUNK_CHUNKVERSION>(
-			reinterpret_cast<const char*>(buf)[2]
+			reinterpret_cast<const CKBYTE*>(buf)[2]
 			);
 		// data ver always set in the 1st BYTE in every format
 		this->m_DataVersion = static_cast<CK_STATECHUNK_DATAVERSION>(
-			reinterpret_cast<const char*>(buf)[0]
+			reinterpret_cast<const CKBYTE*>(buf)[0]
 			);
 
 		// switch according to chunk ver
@@ -336,11 +336,11 @@ namespace LibCmo::CK2 {
 			// re-read some extra data
 			// class id located the 2nd BYTE
 			this->m_ClassId = static_cast<CK_CLASSID>(
-				reinterpret_cast<const char*>(buf)[1]
+				reinterpret_cast<const CKBYTE*>(buf)[1]
 				);
 			// options located the 4th BYTE
 			CK_STATECHUNK_CHUNKOPTIONS options = static_cast<CK_STATECHUNK_CHUNKOPTIONS>(
-				reinterpret_cast<const char*>(buf)[3]
+				reinterpret_cast<const CKBYTE*>(buf)[3]
 				);
 
 			// read normal data
@@ -410,10 +410,10 @@ namespace LibCmo::CK2 {
 		// if buffer provided, write it
 		if (buf != nullptr) {
 			// write header
-			reinterpret_cast<char*>(buf)[0] = static_cast<char>(this->m_DataVersion);
-			reinterpret_cast<char*>(buf)[1] = static_cast<char>(this->m_ClassId);
-			reinterpret_cast<char*>(buf)[2] = static_cast<char>(this->m_ChunkVersion);
-			reinterpret_cast<char*>(buf)[3] = static_cast<char>(options);
+			reinterpret_cast<CKBYTE*>(buf)[0] = static_cast<CKBYTE>(this->m_DataVersion);
+			reinterpret_cast<CKBYTE*>(buf)[1] = static_cast<CKBYTE>(this->m_ClassId);
+			reinterpret_cast<CKBYTE*>(buf)[2] = static_cast<CKBYTE>(this->m_ChunkVersion);
+			reinterpret_cast<CKBYTE*>(buf)[3] = static_cast<CKBYTE>(options);
 
 			CKDWORD* dwbuf = reinterpret_cast<CKDWORD*>(buf);
 			// write buffer length
@@ -454,7 +454,7 @@ namespace LibCmo::CK2 {
 	//	// dwSize store the length of compressed buffer as CHAR size, not DWORD size!
 
 	//	// create a enough buffer
-	//	char* buffer = new char[DestSize];
+	//	CKBYTE* buffer = new CKBYTE[DestSize];
 	//	uLongf destSize = DestSize;
 	//	// uncompress it
 	//	auto err = uncompress(
@@ -776,7 +776,7 @@ namespace LibCmo::CK2 {
 		}
 
 		// create buffer
-		*buf = new char[bufByteSize];
+		*buf = new CKBYTE[bufByteSize];
 
 		// read data
 		if (!this->ReadByteData(*buf, bufByteSize)) {
@@ -813,12 +813,12 @@ namespace LibCmo::CK2 {
 	
 	void CKStateChunk::BufferDeleter::operator()(void* buf) {
 		if (buf == nullptr) return;
-		delete[] reinterpret_cast<const char*>(buf);
+		delete[] reinterpret_cast<const CKBYTE*>(buf);
 	}
 
 	void CKStateChunk::DeleteBuffer(const void* buf) {
 		if (buf == nullptr) return;
-		delete[] reinterpret_cast<const char*>(buf);
+		delete[] reinterpret_cast<const CKBYTE*>(buf);
 	}
 
 	/* ========== Sequence Functions ==========*/

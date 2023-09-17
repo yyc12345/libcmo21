@@ -50,7 +50,7 @@ namespace LibCmo::CK2 {
 		if (std::memcmp(parser->GetPtr(), CKNEMOFI, sizeof(CKRawFileInfo::NeMo))) return CKERROR::CKERR_INVALIDFILE;
 		// read header
 		CKRawFileInfo rawHeader;
-		parser->Read(&rawHeader, sizeof(CKRawFileInfo));
+		parser->Read(&rawHeader);
 
 		// ========== header checker ==========
 		// check zero flag?
@@ -120,12 +120,12 @@ namespace LibCmo::CK2 {
 			// read data
 			for (auto& fileobj : this->m_FileObjects) {
 				// read basic fields
-				parser->Read(&(fileobj.ObjectId), sizeof(CK_ID));
-				parser->Read(&(fileobj.ObjectCid), sizeof(CK_CLASSID));
-				parser->Read(&(fileobj.FileIndex), sizeof(CKDWORD));
+				parser->Read(&fileobj.ObjectId);
+				parser->Read(&fileobj.ObjectCid);
+				parser->Read(&fileobj.FileIndex);
 
 				CKDWORD namelen;
-				parser->Read(&namelen, sizeof(CKDWORD));
+				parser->Read(&namelen);
 				if (namelen != 0) {
 					name_conv.resize(namelen);
 					parser->Read(name_conv.data(), namelen);
@@ -141,15 +141,15 @@ namespace LibCmo::CK2 {
 		if (this->m_FileInfo.FileVersion >= 8) {
 			// get size and resize
 			CKDWORD depSize;
-			parser->Read(&depSize, sizeof(CKDWORD));
+			parser->Read(&depSize);
 			this->m_PluginsDep.resize(depSize);
 
 			CKDWORD guid_size;
 			for (auto& dep : this->m_PluginsDep) {
 				// read category
-				parser->Read(&(dep.m_PluginCategory), sizeof(CK_PLUGIN_TYPE));
+				parser->Read(&dep.m_PluginCategory);
 				// get size and resize
-				parser->Read(&guid_size, sizeof(CKDWORD));
+				parser->Read(&guid_size);
 				dep.m_Guids.resize(guid_size);
 				// read data
 				if (guid_size != 0) {
@@ -163,16 +163,16 @@ namespace LibCmo::CK2 {
 		// file ver >= 8 have this feature
 		if (this->m_FileInfo.FileVersion >= 8) {
 			// MARK: i don't knwo what is this!
-			int32_t hasIncludedFile;
-			parser->Read(&hasIncludedFile, sizeof(int32_t));
+			CKINT hasIncludedFile;
+			parser->Read(&hasIncludedFile);
 
 			if (hasIncludedFile > 0) {
 				// read included file size and resize
 				CKDWORD includedFileCount;
-				parser->Read(&includedFileCount, sizeof(CKDWORD));
+				parser->Read(&includedFileCount);
 				this->m_IncludedFiles.resize(includedFileCount);
 
-				hasIncludedFile -= static_cast<int32_t>(sizeof(CKDWORD));
+				hasIncludedFile -= static_cast<CKINT>(sizeof(CKDWORD));
 			}
 
 			// MARK: backward pos
@@ -225,9 +225,9 @@ namespace LibCmo::CK2 {
 
 			// MARK: why read again? especially for file ver == 7.
 			// get save id max
-			parser->Read(&this->m_SaveIDMax, sizeof(int32_t));
+			parser->Read(&this->m_SaveIDMax);
 			// get object count and resize
-			parser->Read(&this->m_FileInfo.ObjectCount, sizeof(CKDWORD));
+			parser->Read(&this->m_FileInfo.ObjectCount);
 			if (this->m_FileObjects.empty()) {
 				this->m_FileObjects.resize(this->m_FileInfo.ObjectCount);
 			}
@@ -242,10 +242,10 @@ namespace LibCmo::CK2 {
 
 			for (auto& mgr : this->m_ManagersData) {
 				// read guid
-				parser->Read(&(mgr.Manager), sizeof(CKGUID));
+				parser->Read(&mgr.Manager);
 
 				// read statechunk len
-				parser->Read(&stateChunkLen, sizeof(CKDWORD));
+				parser->Read(&stateChunkLen);
 				// check len
 				if (stateChunkLen == 0) {
 					mgr.Data = nullptr;
@@ -270,7 +270,7 @@ namespace LibCmo::CK2 {
 			bool stateChkParseSuccess = false;
 			for (auto& obj : this->m_FileObjects) {
 				// get statechunk len
-				parser->Read(&obj.PackSize, sizeof(CKDWORD));
+				parser->Read(&obj.PackSize);
 				// check state chunk len
 				if (obj.PackSize == 0) {
 					obj.Data = nullptr;
@@ -301,7 +301,7 @@ namespace LibCmo::CK2 {
 			for (auto& file : this->m_IncludedFiles) {
 				// get file name length and resize it
 				CKDWORD filenamelen = 0u;
-				parser->Read(&filenamelen, sizeof(CKDWORD));
+				parser->Read(&filenamelen);
 				name_conv.resize(filenamelen);
 
 				// read filename
@@ -312,13 +312,13 @@ namespace LibCmo::CK2 {
 
 				// read file body length
 				CKDWORD filebodylen = 0u;
-				parser->Read(&filebodylen, sizeof(CKDWORD));
+				parser->Read(&filebodylen);
 
 				// read file body
 				XContainer::XString tempfilename = m_Ctx->GetPathManager()->GetTempFilePath(file.c_str());
 				FILE* fp = EncodingHelper::U8FOpen(tempfilename.c_str(), "wb");
 				if (fp != nullptr) {
-					std::fwrite(parser->GetPtr(), sizeof(char), filebodylen, fp);
+					std::fwrite(parser->GetPtr(), sizeof(CKBYTE), filebodylen, fp);
 					std::fclose(fp);
 				} else {
 					m_Ctx->OutputToConsoleEx("Fail to open temp file: %s", tempfilename.c_str());

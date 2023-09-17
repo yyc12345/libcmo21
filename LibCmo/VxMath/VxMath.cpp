@@ -12,8 +12,8 @@ namespace LibCmo::VxMath {
 	void VxCopyStructure(CKDWORD Count, void* Dst, CKDWORD OutStride, CKDWORD SizeSrc, const void* Src, CKDWORD InStride) {
 		if (Dst == nullptr || Src == nullptr) return;
 
-		char* cdst = reinterpret_cast<char*>(Dst);
-		const char* csrc = reinterpret_cast<const char*>(Src);
+		CKBYTE* cdst = static_cast<CKBYTE*>(Dst);
+		const CKBYTE* csrc = static_cast<const CKBYTE*>(Src);
 		for (CKDWORD i = 0; i < Count; ++i) {
 			std::memcpy(cdst, csrc, SizeSrc);
 			cdst += OutStride;

@@ -36,7 +36,7 @@ namespace LibCmo::CK2 {
 		~CKStateChunk();
 
 	private:
-		enum class CKStateChunkStatus : int32_t {
+		enum class CKStateChunkStatus : CKDWORD {
 			IDLE,
 			READ,
 			WRITE
