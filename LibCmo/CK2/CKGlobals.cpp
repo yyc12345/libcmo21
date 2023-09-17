@@ -226,6 +226,36 @@ namespace LibCmo::CK2 {
 
 #pragma region Initializations functions
 
+	/*
+	A small hint for ToBeNotify, CommonToBeNotify and ToNotify
+	Assume that A need notification from B, we can see it as A want buy something from B.
+	This relation is represented in ToBeNotify, a pure relation without any inhertance hierarchy.
+
+	Ok, now we assume A have children AA, B also have children BB.
+	It's okey to order AA to buy something from B, becase AA is the children of A.
+	This relation is represneted in CommonToBeNotify.
+	For AA, he does not need want to buy something from B, but his parent A order he to do.
+	So AA's ToBeNotify do not have B, but his CommonToBeNotify have B.
+
+	So now, let we change the view from A to B.
+	B now can sell something to A or AA. This represent in B's ToNotify.
+
+	Because B is a bussiness man, as the children of B, let we assume BB also have capability to sell something.
+	He initially do not have any bussiness relation, because no one need to buy something from him.
+	But he is smart, he want to use his parent bussiness relation. He copied his parent relation, B's ToNotify.
+	Now BB can trade with A and AA, this represent in his ToNotify.
+
+	Now A and AA know that BB is children of B and B is their bussiness friend.
+	So they also can buy something from BB. This result in that BB is added into their CommonToBeNotify.
+
+	At the end of this story,
+	All bussiness man can use ToNofity to see whom they want to sell something to.
+	ToNofity list have A and all of his children.
+	And all buyer can use CommonToBeNofity to check who they can buy something from.
+	CommonToBeNotify have B and all of this children.
+	ToBeNotify is just a list to indicate the initial bussiness relation and will never used anymore after real relation established.
+	*/
+
 	static void ComputeParentsTable(CKClassDesc& desc) {
 		// if it has done, do not process it again.
 		if (desc.Done) return;
@@ -263,14 +293,48 @@ namespace LibCmo::CK2 {
 			ComputeParentsNotifyTable(parent);
 		}
 		
-		// copy self notify first
-		desc.CommonToBeNotify = desc.ToBeNotify;
+		// add all children of ToBeNofity list
+		for (CKDWORD idx = 0; idx < desc.ToBeNotify.size(); ++idx) {
+			if (!XContainer::NSXBitArray::IsSet(desc.ToBeNotify, idx)) 
+				continue;
+
+			CKClassDesc& target = g_CKClassInfo[idx];
+			if (!target.IsValid) continue;
+			XContainer::NSXBitArray::Or(desc.CommonToBeNotify, target.Children);
+		}
 		// and merge parent notify list
 		XContainer::NSXBitArray::Or(desc.CommonToBeNotify, parent.CommonToBeNotify);
 
 		// set done
 		desc.Done = true;
 	}
+	//static void ComputeParentsNotifyTable(CKClassDesc& desc) {
+	//	// if it has done, do not process it again.
+	//	if (desc.Done) return;
+	//	
+	//	// find direct parent
+	//	CKClassDesc& parent = g_CKClassInfo[static_cast<size_t>(desc.Parent)];
+	//	if (!parent.IsValid) LIBPANIC("No such CK_CLASSID.");
+
+	//	// if it is not self inheritance, call recursively
+	//	if (desc.Self != desc.Parent) {
+	//		ComputeParentsNotifyTable(parent);
+	//	}
+	//	
+	//	// copy parent ToNotify list
+	//	desc.ToNotify = parent.ToNotify;
+	//	// iterate all desc to know which id need beNotify me
+	//	// and add them
+	//	for (const auto& checking : g_CKClassInfo) {
+	//		if (!checking.IsValid) continue;
+	//		if (XContainer::NSXBitArray::IsSet(checking.CommonToBeNotify, static_cast<CKDWORD>(desc.Self))) {
+	//			XContainer::NSXBitArray::Set(desc.ToNotify, static_cast<CKDWORD>(checking.Self));
+	//		}
+	//	}
+
+	//	// set done
+	//	desc.Done = true;
+	//}
 	static void CKBuildClassHierarchyTable() {
 		size_t classCount = g_CKClassInfo.size();
 
@@ -278,16 +342,13 @@ namespace LibCmo::CK2 {
 		// set Done to false and resize inhertance XBitArray
 		for (auto& item : g_CKClassInfo) {
 			if (!item.IsValid) continue;
-
 			item.Done = false;
-
 			XContainer::NSXBitArray::Resize(item.Parents, static_cast<CKDWORD>(classCount));
 			XContainer::NSXBitArray::Resize(item.Children, static_cast<CKDWORD>(classCount));
 		}
 		// compute parents
 		for (auto& item : g_CKClassInfo) {
 			if (!item.IsValid) continue;
-
 			ComputeParentsTable(item);
 		}
 		// compute children by parents table
@@ -296,12 +357,13 @@ namespace LibCmo::CK2 {
 			if (!item.IsValid) continue;
 
 			for (size_t idx = 0; idx < classCount; ++idx) {
-				if (!g_CKClassInfo[idx].IsValid) continue;
+				CKClassDesc& checking = g_CKClassInfo[idx];
+				if (!checking.IsValid) continue;
 
 				// if this idx is its parent,
 				// add self to parent.
 				if (XContainer::NSXBitArray::IsSet(item.Parents, static_cast<CKDWORD>(idx))) {
-					XContainer::NSXBitArray::Set(g_CKClassInfo[idx].Children, static_cast<CKDWORD>(item.Self));
+					XContainer::NSXBitArray::Set(checking.Children, static_cast<CKDWORD>(item.Self));
 				}
 			}
 		}
@@ -314,35 +376,30 @@ namespace LibCmo::CK2 {
 		}
 		
 		// ===== Build Notify Hierarchy =====
-		// set Done to false and resize notify XBitArray
+		// set array first
 		for (auto& item : g_CKClassInfo) {
 			if (!item.IsValid) continue;
-
 			item.Done = false;
-			
 			XContainer::NSXBitArray::Resize(item.ToBeNotify, static_cast<CKDWORD>(classCount));
 			XContainer::NSXBitArray::Resize(item.CommonToBeNotify, static_cast<CKDWORD>(classCount));
 			XContainer::NSXBitArray::Resize(item.ToNotify, static_cast<CKDWORD>(classCount));
 		}
-		// compute notify
+		// compute CommonToBeNotify
 		for (auto& item : g_CKClassInfo) {
 			if (!item.IsValid) continue;
-
 			ComputeParentsNotifyTable(item);
 		}
-		// compute ToNotify table
-		// for each desc(represented as outter 'for'), iterate all desc(represented as inner 'for'), and check whether its 
-		// CommonToBeNotify contain this desc. If true, add checking desc into this desc's ToNotify.
-		for (size_t idx = 0; idx < classCount; ++idx) {
-			if (!g_CKClassInfo[idx].IsValid) continue;
+		// compute ToNotify
+		for (CKDWORD idx = 0; idx < classCount; ++idx) {
+			CKClassDesc& thisDesc = g_CKClassInfo[idx];
+			if (!thisDesc.IsValid) continue;
 
-			for (const auto& checkingDesc : g_CKClassInfo) {
-				if(!checkingDesc.IsValid) continue;
+			for (auto& checking : g_CKClassInfo) {
+				if (!checking.IsValid) continue;
 
-				// if checkingDesc's CommonToBeNotify order this desc,
-				// add checking desc to ToNofity
-				if (XContainer::NSXBitArray::IsSet(checkingDesc.CommonToBeNotify, static_cast<CKDWORD>(idx))) {
-					XContainer::NSXBitArray::Set(g_CKClassInfo[idx].ToNotify, static_cast<CKDWORD>(checkingDesc.Self));
+				// if checkingDesc order me, add it.
+				if (XContainer::NSXBitArray::IsSet(checking.CommonToBeNotify, idx)) {
+					XContainer::NSXBitArray::Set(thisDesc.ToNotify, static_cast<CKDWORD>(checking.Self));
 				}
 			}
 		}

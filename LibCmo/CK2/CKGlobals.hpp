@@ -106,7 +106,7 @@ namespace LibCmo::CK2 {
 		CKINT DerivationLevel; // O => CKObject , etc..
 		XContainer::XBitArray Parents; // Bit Mask of parents classes
 		XContainer::XBitArray Children;	 // Bit Mask of children classes
-		XContainer::XBitArray ToBeNotify; // User specified notify list, only for current class.
+		XContainer::XBitArray ToBeNotify; // User specified notify list, only for current class. If any deleted objects match class id in this XBitArray, notify the host of this XBitArray.
 		XContainer::XBitArray CommonToBeNotify; // Same as ToBeNotify, but merging all parents' notify list.
 		XContainer::XBitArray ToNotify; // The ClassID to notify when an object of this class is deleted (inverse of ToBeNotify)
 
