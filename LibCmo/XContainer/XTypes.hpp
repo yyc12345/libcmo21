@@ -80,15 +80,50 @@ namespace LibCmo::XContainer {
 	// ========== Patch Section ==========
 
 	namespace NSXBitArray {
+		
+		/**
+		 * @brief Resize XBitArray to the new size. Initial value is false.
+		 * @param ba The XBitArray
+		 * @param newsize New Size
+		*/
+		void Resize(XBitArray& ba, CKDWORD newsize);
 
 		/**
-			* @brief Returns the position of the n-th set(1) bit
-			* @return false if not found.
+		 * @brief Merge other XBitArray to this XBitArray with OR condition. 
+		 * This XBitArray will be resized at least equal with merged XBitArray if its size is lower than merged XBitArray
+		 * @param thisba This XBitArray
+		 * @param thatba Other XBitArray will be merged.
+		*/
+		void Or(XBitArray& thisba, const XBitArray& thatba);
+
+		/**
+		 * @brief Check whether bit flag is set.
+		 * @param ba The XBitArray
+		 * @param n The check position.
+		 * @return True if set. False if not set or out of range.
+		*/
+		bool IsSet(const XBitArray& ba, CKDWORD n);
+		/**
+		 * @brief Set specified position to true in XBitArray. Auto resize if no space to set.
+		 * @param ba The XBitArray
+		 * @param n The set position.
+		*/
+		void Set(XBitArray& ba, CKDWORD n);
+		/**
+		 * @brief Unset specified position to true in XBitArray. If out of range, simply return.
+		 * @param ba The XBitArray
+		 * @param n The unset position.
+		*/
+		void Unset(XBitArray& ba, CKDWORD n);
+
+		/**
+		* @brief Returns the position of the n-th set(1) bit
+		* @return false if not found.
 		*/
 		bool GetSetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got);
 		/**
-			* @brief Returns the position of the n-th unset(0) bit
-			* @return false if not found.
+		* @brief Returns the position of the n-th unset(0) bit
+		* @return false if not found.
 		*/
 		bool GetUnsetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got);
 
@@ -126,6 +161,20 @@ namespace LibCmo::XContainer {
 		 * @param ctx 
 		*/
 		void PostDeletedCheck(XObjectArray& objarray, CK2::CKContext* ctx);
+		
+		/**
+		 * @brief Check Object pointer validation and remove invalid pointers before deletion.
+		 * @param objarray 
+		 * @param ctx 
+		*/
+		void PreDeletedCheck(XList<CK2::CK_ID>& objarray, CK2::CKContext* ctx);
+		/**
+		 * @brief Check Object pointer validation and remove invalid pointers after deletion.
+		 * @param objarray 
+		 * @param ctx 
+		 * @remark The performance of this function is extremely low. Use it carefully.
+		*/
+		void PostDeletedCheck(XList<CK2::CK_ID>& objarray, CK2::CKContext* ctx);
 
 	}
 	

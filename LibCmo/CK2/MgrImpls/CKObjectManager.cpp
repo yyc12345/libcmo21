@@ -72,30 +72,73 @@ namespace LibCmo::CK2::MgrImpls {
 	}
 
 	void CKObjectManager::DestroyObjects(CK_ID* ids, CKDWORD count) {
-		// notice pre
+		// pre notice manager
 		m_Context->ExecuteManagersOnSequenceToBeDeleted(ids, count);
 
+		// collect object data
+		// remove invalid object first, set them to be deleted
+		// collection deleted object class ids
+		XContainer::XObjectArray validObjIds;
+		XContainer::XBitArray cids;
 		for (CKDWORD i = 0; i < count; ++i) {
 			CKDWORD off = Id2Offset(ids[i]);
 			if (off >= m_ObjectsList.size()) continue;
-
-			// get object and its classid for future use
 			ObjImpls::CKObject* obj = m_ObjectsList[off];
 			if (obj == nullptr) continue;
-			CK_CLASSID cls = obj->GetClassID();
 
+			// set to be deleted
+			CK_OBJECT_FLAGS objflag = obj->GetObjectFlags();
+			EnumsHelper::Add(objflag, CK_OBJECT_FLAGS::CK_OBJECT_TOBEDELETED);
+			obj->SetObjectFlags(objflag);
+
+			// collect class id
+			XContainer::NSXBitArray::Set(cids, static_cast<CKDWORD>(obj->GetClassID()));
+
+			// add into list
+			validObjIds.emplace_back(ids[i]);
+		}
+		
+		// then remove deleted object from m_ObjectListByClass
+		// because we have set to be deleted flag.
+		for (size_t i = 0; i < m_ObjectsListByClass.size(); ++i) {
+			if (!XContainer::NSXBitArray::IsSet(cids, static_cast<CKDWORD>(i))) 
+				continue;
+			XContainer::NSXObjectArray::PreDeletedCheck(m_ObjectsListByClass[i], m_Context);
+		}
+
+		// use collected cid to get all class ids which need receive notify
+		// and use m_ObjectListByClass to notify them
+		XContainer::XBitArray notifyCids = CKGetAllNotifyClassID(cids);
+		for (size_t i = 0; i < m_ObjectsListByClass.size(); ++i) {
+			if (!XContainer::NSXBitArray::IsSet(notifyCids, static_cast<CKDWORD>(i))) 
+				continue;
+			for (auto& objid : m_ObjectsListByClass[i]) {
+				m_ObjectsList[Id2Offset(objid)]->CheckPreDeletion();
+			}
+		}
+
+		// then free all valid object
+		for (const auto& objid : validObjIds) {
+			CKDWORD off = Id2Offset(objid);
+			ObjImpls::CKObject* obj = m_ObjectsList[off];
+			
 			// free it
 			InternalDestroy(obj);
-
+			
 			// return its allocated id.
 			// and dec count
 			m_ObjectsList[off] = nullptr;
 			m_ReturnedObjectOffsets.emplace_back(off);
 			--m_ObjectCount;
+		}
 
-			// remove from classid indexed list
-			std::erase(m_ObjectsListByClass[static_cast<size_t>(cls)], ids[i]);
-			
+		// run post deletion for notify object
+		for (size_t i = 0; i < m_ObjectsListByClass.size(); ++i) {
+			if (!XContainer::NSXBitArray::IsSet(notifyCids, static_cast<CKDWORD>(i))) 
+				continue;
+			for (auto& objid : m_ObjectsListByClass[i]) {
+				m_ObjectsList[Id2Offset(objid)]->CheckPostDeletion();
+			}
 		}
 
 		// notice post
@@ -156,6 +199,8 @@ namespace LibCmo::CK2::MgrImpls {
 		return result;
 	}
 
+#pragma region Object Check
+
 	bool CKObjectManager::IsObjectSafe(CK_ID objid) {
 		CKDWORD off = Id2Offset(objid);
 		if (off >= m_ObjectsList.size()) return false;
@@ -171,6 +216,10 @@ namespace LibCmo::CK2::MgrImpls {
 		}
 		return false;
 	}
+	
+#pragma endregion
+
+#pragma region Special Functions
 
 	CKDWORD CKObjectManager::AllocateGroupGlobalIndex() {
 		// try find first non-true position
@@ -182,7 +231,7 @@ namespace LibCmo::CK2::MgrImpls {
 		}
 		
 		// set to occupy
-		m_GroupGlobalIndex[index] = true;
+		XContainer::NSXBitArray::Set(m_GroupGlobalIndex, index);
 		return index;
 	}
 
@@ -194,7 +243,7 @@ namespace LibCmo::CK2::MgrImpls {
 			m_SceneGlobalIndex.resize(m_SceneGlobalIndex.size() + 1);
 		}
 		
-		m_SceneGlobalIndex[index] = true;
+		XContainer::NSXBitArray::Set(m_SceneGlobalIndex, index);
 		return index;
 	}
 
@@ -202,13 +251,15 @@ namespace LibCmo::CK2::MgrImpls {
 		// check position
 		if (id >= m_GroupGlobalIndex.size()) return;
 		// set value
-		m_GroupGlobalIndex[id] = false;
+		XContainer::NSXBitArray::Unset(m_GroupGlobalIndex, id);
 	}
 
 	void CKObjectManager::FreeSceneGlobalIndex(CKDWORD id) {
 		// same as group
 		if (id >= m_SceneGlobalIndex.size()) return;
-		m_SceneGlobalIndex[id] = false;
+		XContainer::NSXBitArray::Unset(m_SceneGlobalIndex, id);
 	}
+	
+#pragma endregion
 
 }

@@ -162,7 +162,7 @@ namespace LibCmo::CK2 {
 				for (CKDWORD i = 0; i < slotcount; ++i) {
 					CreateImage(width, height, i);
 					if (ReadSpecificFormatBitmap(chunk, GetImageDesc(i))) {
-						hasReadSlot[i] = true;
+						XContainer::NSXBitArray::Set(hasReadSlot, i);
 					} else {
 						ReleaseImage(i);
 					}
@@ -183,7 +183,7 @@ namespace LibCmo::CK2 {
 			for (CKDWORD i = 0; i < slotcount; ++i) {
 				VxMath::VxImageDescEx rawcache;
 				if (ReadRawBitmap(chunk, &rawcache)) {
-					hasReadSlot[i] = true;
+					XContainer::NSXBitArray::Set(hasReadSlot, i);
 
 					// do upside down blit
 					CreateImage(rawcache.GetWidth(), rawcache.GetHeight(), i);
@@ -202,7 +202,7 @@ namespace LibCmo::CK2 {
 			// MARK: a rough implement because we do not support this identifier
 			for (CKDWORD i = 0; i < slotcount; ++i) {
 				if (ReadOldRawBitmap(chunk, GetImageDesc(i))) {
-					hasReadSlot[i] = true;
+					XContainer::NSXBitArray::Set(hasReadSlot, i);
 				} else {
 					ReleaseImage(i);
 				}
@@ -224,7 +224,7 @@ namespace LibCmo::CK2 {
 				chunk->ReadString(filename);
 				if (filename.empty()) continue;
 				
-				bool isNotLoaded = (i >= hasReadSlot.size()) || (!hasReadSlot[i]);
+				bool isNotLoaded = (i >= hasReadSlot.size()) || (!XContainer::NSXBitArray::IsSet(hasReadSlot, i));
 				if (isNotLoaded) {
 					// if this image is not loaded.
 					// try resolve its file name and load it.

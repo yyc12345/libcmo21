@@ -68,6 +68,8 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual CK_CLASSID GetClassID(void) { 
 			return CK_CLASSID::CKCID_OBJECT; 
 		}
+		virtual void CheckPreDeletion();
+		virtual void CheckPostDeletion();
 		virtual void PreSave(CKFileVisitor* file, CKDWORD flags);
 		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags);
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file);

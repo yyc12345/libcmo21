@@ -37,13 +37,15 @@ namespace LibCmo::CK2::ObjImpls {
 	bool CKBeObject::IsInGroup(CKGroup* group) {
 		if (group == nullptr) return false;
 		CKDWORD idx = group->GetGroupIndex();
-		if (idx >= m_Groups.size()) return false;
-		return m_Groups[idx];
+		return XContainer::NSXBitArray::IsSet(m_Groups, idx);
 	}
 
 	void CKBeObject::ExplicitSetGroup(CKDWORD pos, bool val) {
-		if (pos >= m_Groups.size()) m_Groups.resize(pos + 1);
-		m_Groups[pos] = val;
+		if (val) {
+			XContainer::NSXBitArray::Set(m_Groups, pos);
+		} else {
+			XContainer::NSXBitArray::Unset(m_Groups, pos);
+		}
 	}
 
 }

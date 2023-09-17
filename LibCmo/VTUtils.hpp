@@ -75,6 +75,10 @@ namespace LibCmo {
 #define LIBPANIC(msg) LibCmo::LibPanic(__LINE__, __FILE__, msg);
 
 	namespace EnumsHelper {
+		
+		/**
+		 * @brief Return 'e1 | e2 | ... | en'
+		*/
 		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
 		inline TEnum Merge(std::initializer_list<TEnum> il) {
 			std::underlying_type_t<TEnum> result = 0;
@@ -84,26 +88,41 @@ namespace LibCmo {
 			return static_cast<TEnum>(result);
 		}
 
+		/**
+		 * @brief Return '~(e)'
+		*/
 		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
 		inline TEnum Inv(TEnum e) {
 			return static_cast<TEnum>(~(static_cast<std::underlying_type_t<TEnum>>(e)));
 		}
-
+		
+		/**
+		 * @brief Operate e1 &= (~e2)
+		*/
 		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
 		inline void Rm(TEnum& e1, TEnum e2) {
 			e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) & static_cast<std::underlying_type_t<TEnum>>(Inv(e2)));
 		}
 		
+		/**
+		 * @brief Operate e1 &= e2
+		*/
 		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
 		inline void Mask(TEnum& e1, TEnum e2) {
 			e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) & static_cast<std::underlying_type_t<TEnum>>(e2));
 		}
-
+		
+		/**
+		 * @brief Operate e1 |= e2
+		*/
 		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
 		inline void Add(TEnum& e1, TEnum e2) {
 			e1 = static_cast<TEnum>(static_cast<std::underlying_type_t<TEnum>>(e1) | static_cast<std::underlying_type_t<TEnum>>(e2));
 		}
-
+		
+		/**
+		 * @brief Return 'bool(e1 & e2)'
+		*/
 		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
 		inline bool Has(TEnum e, TEnum probe) {
 			return static_cast<bool>(static_cast<std::underlying_type_t<TEnum>>(e) & static_cast<std::underlying_type_t<TEnum>>(probe));

@@ -74,7 +74,7 @@ namespace LibCmo::CK2 {
 
 	// ========== Class registration utilities ==========
 
-	//using CKClassRegisterFct = std::function<void()>;
+	using CKClassRegisterFct = std::function<void()>;
 	using CKClassCreationFct = std::function<ObjImpls::CKObject* (CKContext*, CK_ID, CKSTRING)>;
 	using CKClassReleaseFct = std::function<void(CKContext*, ObjImpls::CKObject*)>;
 	using CKClassNameFct = std::function<CKSTRING()>;
@@ -87,7 +87,7 @@ namespace LibCmo::CK2 {
 		// Initialized upon class registration
 		CK_CLASSID Self;
 		CK_CLASSID Parent; // Class Identifier of parent class
-		//CKClassRegisterFct RegisterFct; // Pointer to Class Specific Registration function
+		CKClassRegisterFct RegisterFct; // Pointer to Class Specific Registration function
 		CKClassCreationFct CreationFct; // Pointer to Class instance creation function
 		CKClassReleaseFct ReleaseFct; // Pointer to Class instance release function
 		CKClassNameFct NameFct; // Pointer to Class name function
@@ -106,26 +106,27 @@ namespace LibCmo::CK2 {
 		CKINT DerivationLevel; // O => CKObject , etc..
 		XContainer::XBitArray Parents; // Bit Mask of parents classes
 		XContainer::XBitArray Children;	 // Bit Mask of children classes
-		//XContainer::XBitArray ToBeNotify; // Mask for Classes that should warn the objects of this class when they are deleted
-		//XContainer::XBitArray CommonToBeNotify; // idem but merged with sub classes masks
-		//XContainer::XSArray<CK_CLASSID> ToNotify; // List of ClassID to notify when an object of this class is deleted (inverse of ToBeNotify) 					
+		XContainer::XBitArray ToBeNotify; // User specified notify list, only for current class.
+		XContainer::XBitArray CommonToBeNotify; // Same as ToBeNotify, but merging all parents' notify list.
+		XContainer::XBitArray ToNotify; // The ClassID to notify when an object of this class is deleted (inverse of ToBeNotify)
 
 		CKClassDesc() :
 			IsValid(false),
 			Done(false),
 			Self(CK_CLASSID::CKCID_OBJECT), Parent(CK_CLASSID::CKCID_OBJECT),
-			CreationFct(nullptr), ReleaseFct(nullptr), NameFct(nullptr),
+			RegisterFct(nullptr), CreationFct(nullptr), ReleaseFct(nullptr), NameFct(nullptr),
 			DerivationLevel(0),
-			Parents(), Children()
+			Parents(), Children(), ToBeNotify(), CommonToBeNotify()
 		{}
 		LIBCMO_DEFAULT_COPY_MOVE(CKClassDesc);
 	};
 
 	// ========== CKClass Registration ==========
 
+	void CKClassNeedNotificationFrom(CK_CLASSID listener, CK_CLASSID listenTo);
 	CK_CLASSID CKClassGetNewIdentifier();
 	void CKClassRegister(CK_CLASSID cid, CK_CLASSID parentCid,
-		CKClassCreationFct createFct, CKClassReleaseFct relFct, CKClassNameFct nameFct);
+		CKClassRegisterFct regFct, CKClassCreationFct createFct, CKClassReleaseFct relFct, CKClassNameFct nameFct);
 
 	// ========== Class Hierarchy Management ==========
 
@@ -136,6 +137,21 @@ namespace LibCmo::CK2 {
 	bool CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent);
 	CK_CLASSID CKGetParentClassID(CK_CLASSID child);
 	CK_CLASSID CKGetCommonParent(CK_CLASSID cid1, CK_CLASSID cid2);
+
+	/**
+	 * @brief Check whether 'listener' need notified by the deletion of 'deletedObjCid'
+	 * @param listener 
+	 * @param deletedObjCid 
+	 * @return true if need notify
+	*/
+	bool CKIsNeedNotify(CK_CLASSID listener, CK_CLASSID deletedObjCid);
+	/**
+	 * @brief Get all object cid need to be notified when 'delObjCids' matched objects are deleting.
+	 * @param delObjCids 
+	 * @param cidCount 
+	 * @return 
+	*/
+	XContainer::XBitArray CKGetAllNotifyClassID(const XContainer::XBitArray& delObjCids);
 
 	// ========== Initializations functions ==========
 	CKERROR CKStartUp();

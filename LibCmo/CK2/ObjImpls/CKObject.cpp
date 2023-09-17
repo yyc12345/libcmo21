@@ -3,6 +3,8 @@
 
 namespace LibCmo::CK2::ObjImpls {
 
+	void CKObject::CheckPreDeletion() {}
+	void CKObject::CheckPostDeletion() {}
 
 	void CKObject::PreSave(CKFileVisitor* file, CKDWORD flags) {}
 

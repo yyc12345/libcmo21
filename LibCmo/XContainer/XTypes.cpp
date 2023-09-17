@@ -8,6 +8,37 @@ namespace LibCmo::XContainer {
 
 	namespace NSXBitArray {
 
+		void Resize(XBitArray& ba, CKDWORD newsize) {
+			ba.resize(newsize, false);
+		}
+
+		void Or(XBitArray& thisba, const XBitArray& thatba) {
+			if (thisba.size() < thatba.size()) {
+				Resize(thisba, static_cast<CKDWORD>(thatba.size()));
+			}
+
+			for (size_t i = 0; i < thisba.size(); ++i) {
+				thisba[i] = thisba[i] || thatba[i];
+			}
+		}
+
+		bool IsSet(const XBitArray& ba, CKDWORD n) {
+			if (n >= ba.size()) return false;
+			return ba[n];
+		}
+
+		void Set(XBitArray& ba, CKDWORD n)  {
+			if (n >= ba.size()) {
+				ba.resize(n + 1);
+			}
+			ba[n] = true;
+		}
+
+		void Unset(XBitArray& ba, CKDWORD n)  {
+			if (n >= ba.size()) return;
+			ba[n] = false;
+		}
+
 		template<bool _Cond>
 		bool GeneralGetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got) {
 			CKDWORD counter = 0;
@@ -88,6 +119,21 @@ namespace LibCmo::XContainer {
 		}
 
 		void PostDeletedCheck(XObjectArray& objarray, CK2::CKContext* ctx) {
+			if (ctx == nullptr) return;
+			std::erase_if(objarray, [ctx](const CK2::CK_ID& item) -> bool {
+				return GeneralXArrayCheck_ItemCheck<CK2::CK_ID, false>(item, ctx);
+				});
+		}
+		
+
+		void PreDeletedCheck(XList<CK2::CK_ID>& objarray, CK2::CKContext* ctx) {
+			if (ctx == nullptr) return;
+			std::erase_if(objarray, [ctx](const CK2::CK_ID& item) -> bool {
+				return GeneralXArrayCheck_ItemCheck<CK2::CK_ID, true>(item, ctx);
+				});
+		}
+
+		void PostDeletedCheck(XList<CK2::CK_ID>& objarray, CK2::CKContext* ctx) {
 			if (ctx == nullptr) return;
 			std::erase_if(objarray, [ctx](const CK2::CK_ID& item) -> bool {
 				return GeneralXArrayCheck_ItemCheck<CK2::CK_ID, false>(item, ctx);

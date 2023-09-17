@@ -8,6 +8,7 @@
 #include "CKGlobals.hpp"
 
 #include <algorithm>
+#include <initializer_list>
 
 #include "ObjImpls/CKObject.hpp"
 #include "ObjImpls/CKSceneObject.hpp"
@@ -110,6 +111,20 @@ namespace LibCmo::CK2 {
 #pragma region CKClass Registration
 
 	static XContainer::XArray<CKClassDesc> g_CKClassInfo;
+	
+	static bool GetClassIdIndex(CK_CLASSID cid, size_t& intcid) {
+		intcid = static_cast<size_t>(cid);
+		if (intcid >= g_CKClassInfo.size()) return false;
+		if (!g_CKClassInfo[intcid].IsValid) return false;
+		return true;
+	}
+
+	void CKClassNeedNotificationFrom(CK_CLASSID listener, CK_CLASSID listenTo) {
+		size_t idxListener, idxListenTo;
+		if (!GetClassIdIndex(listener, idxListener) || !GetClassIdIndex(listenTo, idxListenTo)) return;
+		
+		XContainer::NSXBitArray::Set(g_CKClassInfo[idxListener].ToBeNotify, static_cast<CKDWORD>(idxListenTo));
+	}
 
 	CK_CLASSID CKClassGetNewIdentifier() {
 		size_t classsize = g_CKClassInfo.size();
@@ -120,64 +135,8 @@ namespace LibCmo::CK2 {
 		}
 	}
 
-	static void ComputeParentsTable(CKClassDesc& desc) {
-		// if it has done, do not process it again.
-		if (desc.Done) return;
-
-		// find direct parent
-		CKClassDesc& parent = g_CKClassInfo[static_cast<size_t>(desc.Parent)];
-		if (!parent.IsValid) LIBPANIC("No such CK_CLASSID.");
-
-		// if it is not self inheritance, call recursively
-		if (desc.Self != desc.Parent) {
-			ComputeParentsTable(parent);
-		}
-
-		// copy parent's parents
-		desc.Parents = parent.Parents;
-		// and set self as its parent
-		desc.Parents[static_cast<size_t>(desc.Self)] = true;
-
-		// set derivation level
-		desc.DerivationLevel = parent.DerivationLevel + 1;
-		
-		// set done
-		desc.Done = true;
-	}
-	static void CKBuildClassHierarchyTable() {
-		// set Done to false and resize all XBitArray
-		size_t classCount = g_CKClassInfo.size();
-		for (auto& item : g_CKClassInfo) {
-			if (!item.IsValid) continue;
-
-			item.Done = false;
-			item.Parents.resize(classCount, false);
-			item.Children.resize(classCount, false);
-		}
-		// compute parents
-		for (auto& item : g_CKClassInfo) {
-			if (!item.IsValid) continue;
-
-			ComputeParentsTable(item);
-		}
-		// compute children by parents table
-		// iterate CKClassDesc::Parents and register it self to gotten parents
-		for (auto& item : g_CKClassInfo) {
-			if (!item.IsValid) continue;
-
-			for (size_t idx = 0; idx < classCount; ++idx) {
-				if (!g_CKClassInfo[idx].IsValid) continue;
-
-				// if this idx is its parent,
-				// add self to parent.
-				if (item.Parents[idx]) {
-					g_CKClassInfo[idx].Children[static_cast<size_t>(item.Self)] = true;
-				}
-			}
-		}
-	}
 	void CKClassRegister(CK_CLASSID cid, CK_CLASSID parentCid,
-		CKClassCreationFct createFct, CKClassReleaseFct relFct, CKClassNameFct nameFct) {
+		CKClassRegisterFct regFct, CKClassCreationFct createFct, CKClassReleaseFct relFct, CKClassNameFct nameFct) {
 
 		// resize class desc array
 		size_t intcid = static_cast<size_t>(cid);
@@ -190,6 +149,7 @@ namespace LibCmo::CK2 {
 		desc.IsValid = true;
 		desc.Self = cid;
 		desc.Parent = parentCid;
+		desc.RegisterFct = regFct;
 		desc.CreationFct = createFct;
 		desc.ReleaseFct = relFct;
 		desc.NameFct = nameFct;
@@ -199,13 +159,6 @@ namespace LibCmo::CK2 {
 #pragma endregion
 
 #pragma region Class Hierarchy Management
-
-	static bool GetClassIdIndex(CK_CLASSID cid, size_t& intcid) {
-		intcid = static_cast<size_t>(cid);
-		if (intcid >= g_CKClassInfo.size()) return false;
-		if (!g_CKClassInfo[intcid].IsValid) return false;
-		return true;
-	}
 
 	CKDWORD CKGetClassCount() {
 		return static_cast<CKDWORD>(g_CKClassInfo.size());
@@ -248,18 +201,172 @@ namespace LibCmo::CK2 {
 		return cid1;
 	}
 
+	bool CKIsNeedNotify(CK_CLASSID listener, CK_CLASSID deletedObjCid) {
+		const CKClassDesc* desc = CKGetClassDesc(listener);
+		if (desc == nullptr) return false;
+		return XContainer::NSXBitArray::IsSet(desc->CommonToBeNotify, static_cast<CKDWORD>(deletedObjCid));
+	}
+
+	XContainer::XBitArray CKGetAllNotifyClassID(const XContainer::XBitArray& delObjCids) {
+		XContainer::XBitArray result;
+
+		for (size_t i = 0; i < delObjCids.size(); ++i) {
+			if (!XContainer::NSXBitArray::IsSet(delObjCids, static_cast<CKDWORD>(i))) continue;
+
+			const CKClassDesc* desc = CKGetClassDesc(static_cast<CK_CLASSID>(i));
+			if (desc == nullptr) continue;
+
+			XContainer::NSXBitArray::Or(result, desc->ToNotify);
+		}
+
+		return result;
+	}
+
 #pragma endregion
 
 #pragma region Initializations functions
 
-	CKERROR CKStartUp() {
+	static void ComputeParentsTable(CKClassDesc& desc) {
+		// if it has done, do not process it again.
+		if (desc.Done) return;
 
+		// find direct parent
+		CKClassDesc& parent = g_CKClassInfo[static_cast<size_t>(desc.Parent)];
+		if (!parent.IsValid) LIBPANIC("No such CK_CLASSID.");
+
+		// if it is not self inheritance, call recursively
+		if (desc.Self != desc.Parent) {
+			ComputeParentsTable(parent);
+		}
+
+		// copy parent's parents
+		desc.Parents = parent.Parents;
+		// and set self as its parent
+		XContainer::NSXBitArray::Set(desc.Parents, static_cast<CKDWORD>(desc.Self));
+
+		// set derivation level
+		desc.DerivationLevel = parent.DerivationLevel + 1;
+		
+		// set done
+		desc.Done = true;
+	}
+	static void ComputeParentsNotifyTable(CKClassDesc& desc) {
+		// if it has done, do not process it again.
+		if (desc.Done) return;
+		
+		// find direct parent
+		CKClassDesc& parent = g_CKClassInfo[static_cast<size_t>(desc.Parent)];
+		if (!parent.IsValid) LIBPANIC("No such CK_CLASSID.");
+
+		// if it is not self inheritance, call recursively
+		if (desc.Self != desc.Parent) {
+			ComputeParentsNotifyTable(parent);
+		}
+		
+		// copy self notify first
+		desc.CommonToBeNotify = desc.ToBeNotify;
+		// and merge parent notify list
+		XContainer::NSXBitArray::Or(desc.CommonToBeNotify, parent.CommonToBeNotify);
+
+		// set done
+		desc.Done = true;
+	}
+	static void CKBuildClassHierarchyTable() {
+		size_t classCount = g_CKClassInfo.size();
+
+		// ===== Build Inhertance Hierarchy =====
+		// set Done to false and resize inhertance XBitArray
+		for (auto& item : g_CKClassInfo) {
+			if (!item.IsValid) continue;
+
+			item.Done = false;
+
+			XContainer::NSXBitArray::Resize(item.Parents, static_cast<CKDWORD>(classCount));
+			XContainer::NSXBitArray::Resize(item.Children, static_cast<CKDWORD>(classCount));
+		}
+		// compute parents
+		for (auto& item : g_CKClassInfo) {
+			if (!item.IsValid) continue;
+
+			ComputeParentsTable(item);
+		}
+		// compute children by parents table
+		// iterate CKClassDesc::Parents and register it self to gotten parents
+		for (auto& item : g_CKClassInfo) {
+			if (!item.IsValid) continue;
+
+			for (size_t idx = 0; idx < classCount; ++idx) {
+				if (!g_CKClassInfo[idx].IsValid) continue;
+
+				// if this idx is its parent,
+				// add self to parent.
+				if (XContainer::NSXBitArray::IsSet(item.Parents, static_cast<CKDWORD>(idx))) {
+					XContainer::NSXBitArray::Set(g_CKClassInfo[idx].Children, static_cast<CKDWORD>(item.Self));
+				}
+			}
+		}
+
+		// ===== Register =====
+		// run register
+		for (auto& item : g_CKClassInfo) {
+			if (!item.IsValid || item.RegisterFct == nullptr) continue;
+			item.RegisterFct();
+		}
+		
+		// ===== Build Notify Hierarchy =====
+		// set Done to false and resize notify XBitArray
+		for (auto& item : g_CKClassInfo) {
+			if (!item.IsValid) continue;
+
+			item.Done = false;
+			
+			XContainer::NSXBitArray::Resize(item.ToBeNotify, static_cast<CKDWORD>(classCount));
+			XContainer::NSXBitArray::Resize(item.CommonToBeNotify, static_cast<CKDWORD>(classCount));
+			XContainer::NSXBitArray::Resize(item.ToNotify, static_cast<CKDWORD>(classCount));
+		}
+		// compute notify
+		for (auto& item : g_CKClassInfo) {
+			if (!item.IsValid) continue;
+
+			ComputeParentsNotifyTable(item);
+		}
+		// compute ToNotify table
+		// for each desc(represented as outter 'for'), iterate all desc(represented as inner 'for'), and check whether its 
+		// CommonToBeNotify contain this desc. If true, add checking desc into this desc's ToNotify.
+		for (size_t idx = 0; idx < classCount; ++idx) {
+			if (!g_CKClassInfo[idx].IsValid) continue;
+
+			for (const auto& checkingDesc : g_CKClassInfo) {
+				if(!checkingDesc.IsValid) continue;
+
+				// if checkingDesc's CommonToBeNotify order this desc,
+				// add checking desc to ToNofity
+				if (XContainer::NSXBitArray::IsSet(checkingDesc.CommonToBeNotify, static_cast<CKDWORD>(idx))) {
+					XContainer::NSXBitArray::Set(g_CKClassInfo[idx].ToNotify, static_cast<CKDWORD>(checkingDesc.Self));
+				}
+			}
+		}
+	}
+
+	static void NeedNotificationWrapper(CK_CLASSID thiscid, std::initializer_list<CK_CLASSID> il) {
+		for (auto it = il.begin(); it != il.end(); ++it) {
+			CKClassNeedNotificationFrom(thiscid, *it);
+		}
+	}
+	CKERROR CKStartUp() {
 		// reserve class info array.
 		g_CKClassInfo.reserve(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));
 
 		// todo: add class type registrations
 #define EasyClassReg(clsname, cid, parentCid, strName) \
 CKClassRegister(cid, parentCid, \
+	nullptr, \
+	[](CKContext* ctx, CK_ID id, CKSTRING name) -> ObjImpls::CKObject* { return new clsname(ctx, id, name); }, \
+	[](CKContext* ctx, ObjImpls::CKObject* obj) -> void { delete obj; }, \
+	[]() -> CKSTRING { return strName; });
+#define EasyClassRegWithNotify(clsname, cid, parentCid, strName, notifyCids) \
+CKClassRegister(cid, parentCid, \
+	[]() -> void { NeedNotificationWrapper(cid, notifyCids); }, \
 	[](CKContext* ctx, CK_ID id, CKSTRING name) -> ObjImpls::CKObject* { return new clsname(ctx, id, name); }, \
 	[](CKContext* ctx, ObjImpls::CKObject* obj) -> void { delete obj; }, \
 	[]() -> CKSTRING { return strName; });
@@ -267,7 +374,7 @@ CKClassRegister(cid, parentCid, \
 		EasyClassReg(ObjImpls::CKObject, CK_CLASSID::CKCID_OBJECT, CK_CLASSID::CKCID_OBJECT, "Basic Object");
 		EasyClassReg(ObjImpls::CKSceneObject, CK_CLASSID::CKCID_SCENEOBJECT, CK_CLASSID::CKCID_OBJECT, "Scene Object");
 		EasyClassReg(ObjImpls::CKBeObject, CK_CLASSID::CKCID_BEOBJECT, CK_CLASSID::CKCID_SCENEOBJECT, "Behavioral Object");
-		EasyClassReg(ObjImpls::CKGroup, CK_CLASSID::CKCID_GROUP, CK_CLASSID::CKCID_BEOBJECT, "Group");
+		EasyClassRegWithNotify(ObjImpls::CKGroup, CK_CLASSID::CKCID_GROUP, CK_CLASSID::CKCID_BEOBJECT, "Group", { CK_CLASSID::CKCID_BEOBJECT });
 		EasyClassReg(ObjImpls::CKRenderObject, CK_CLASSID::CKCID_RENDEROBJECT, CK_CLASSID::CKCID_BEOBJECT, "Render Object");
 		EasyClassReg(ObjImpls::CK3dEntity, CK_CLASSID::CKCID_3DENTITY, CK_CLASSID::CKCID_RENDEROBJECT, "3D Entity");
 		EasyClassReg(ObjImpls::CK3dObject, CK_CLASSID::CKCID_3DOBJECT, CK_CLASSID::CKCID_3DENTITY, "3D Object");
@@ -275,6 +382,7 @@ CKClassRegister(cid, parentCid, \
 		EasyClassReg(ObjImpls::CKMaterial, CK_CLASSID::CKCID_MATERIAL, CK_CLASSID::CKCID_BEOBJECT, "Material");
 
 #undef EasyClassReg
+#undef EasyClassRegWithNotify
 
 		CKBuildClassHierarchyTable();
 
