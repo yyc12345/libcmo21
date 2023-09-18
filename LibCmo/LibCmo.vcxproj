@@ -179,6 +179,8 @@
     <ClCompile Include="CK2\CKFileOthers.cpp" />
     <ClCompile Include="CK2\CKFileWriter.cpp" />
     <ClCompile Include="CK2\CKGlobals.cpp" />
+    <ClCompile Include="CK2\CKStateChunkReader.cpp" />
+    <ClCompile Include="CK2\CKStateChunkWriter.cpp" />
     <ClCompile Include="CK2\DataHandlers\CKBitmapHandler.cpp" />
     <ClCompile Include="CK2\MgrImpls\CKBaseManager.cpp" />
     <ClCompile Include="CK2\CKContext.cpp" />
@@ -195,7 +197,7 @@
     <ClCompile Include="CK2\ObjImpls\CKTexture.cpp" />
     <ClCompile Include="VTEncoding.cpp" />
     <ClCompile Include="CK2\CKFileReader.cpp" />
-    <ClCompile Include="CK2\CKStateChunk.cpp" />
+    <ClCompile Include="CK2\CKStateChunkOthers.cpp" />
     <ClCompile Include="VTImage.cpp" />
     <ClCompile Include="VTUtils.cpp" />
     <ClCompile Include="VxMath\VxMath.cpp" />

@@ -81,7 +81,7 @@
     <ClCompile Include="CK2\CKContext.cpp">
       <Filter>Sources\CK2</Filter>
     </ClCompile>
-    <ClCompile Include="CK2\CKStateChunk.cpp">
+    <ClCompile Include="CK2\CKStateChunkOthers.cpp">
       <Filter>Sources\CK2</Filter>
     </ClCompile>
     <ClCompile Include="CK2\ObjImpls\CKSceneObject.cpp">
@@ -128,6 +128,12 @@
     </ClCompile>
     <ClCompile Include="XContainer\XTypes.cpp">
       <Filter>Sources\XContainer</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\CKStateChunkReader.cpp">
+      <Filter>Sources\CK2</Filter>
+    </ClCompile>
+    <ClCompile Include="CK2\CKStateChunkWriter.cpp">
+      <Filter>Sources\CK2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
