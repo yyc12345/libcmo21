@@ -79,14 +79,16 @@ namespace LibCmo::CK2::ObjImpls {
 			// read and set vertex count
 			CKDWORD vertexCount;
 			chunk->ReadStruct(vertexCount);
+			SetVertexCount(vertexCount);
 
 			if (vertexCount != 0) {
 				// read save flags
 				chunk->ReadStruct(saveflags);
 
-				// read size in dword
+				// read size in dword (including it self)
 				CKDWORD sizeInDword;
 				chunk->ReadStruct(sizeInDword);
+				--sizeInDword; // remove self.
 
 				// lock read buffer
 				auto buf = chunk->LockReadBufferWrapper(sizeInDword * CKSizeof(CKDWORD));
@@ -211,7 +213,14 @@ namespace LibCmo::CK2::ObjImpls {
 			chunk->ReadStruct(lineCount);
 			SetLineCount(lineCount);
 
-			chunk->ReadNoSizeBuffer(lineCount * 2 )
+			chunk->ReadAndFillBuffer(m_LineIndices.data(), CKSizeof(CKWORD) * lineCount * 2);
+		}
+
+		// build normals
+		if (EnumsHelper::Has(saveflags, VertexSaveFlags::NoNormal)) {
+			BuildNormals();
+		} else {
+			BuildFaceNormals();
 		}
 
 		return true;
@@ -226,6 +235,10 @@ namespace LibCmo::CK2::ObjImpls {
 		SetFaceCount(0);
 		SetLineCount(0);
 	}
+
+	void CKMesh::BuildNormals() {}
+
+	void CKMesh::BuildFaceNormals() {}
 
 #pragma region Vertex Section
 

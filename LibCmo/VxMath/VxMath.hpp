@@ -81,7 +81,7 @@ namespace LibCmo::VxMath {
 	 * @param AlphaValues[in] A BYTE array containing the alpha values for each pixel. This array should be allocated to Width*Height bytes.
 	 * @remark If the destination image does not have alpha information the function returns immediatly.
 	*/
-	void VxDoAlphaBlit(VxImageDescEx* dst_desc, CKBYTE* AlphaValues);
+	void VxDoAlphaBlit(VxImageDescEx* dst_desc, const CKBYTE* AlphaValues);
 
 }
 

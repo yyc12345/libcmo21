@@ -17,7 +17,7 @@ namespace LibCmo::CK2 {
 		// get ext and guid to find correct guid
 		CKCHAR filerawext[4];
 		CKGUID fileguid;
-		chk->ReadNoSizeBuffer(CKSizeof(filerawext), filerawext);
+		chk->ReadAndFillBuffer(filerawext, CKSizeof(filerawext));
 		chk->ReadStruct(fileguid);
 		CKFileExtension fileext(filerawext);
 		auto reader = DataHandlers::CKBitmapHandler::GetBitmapHandlerWrapper(fileext, fileguid);
@@ -56,7 +56,7 @@ namespace LibCmo::CK2 {
 					VxMath::VxDoAlphaBlit(slot, static_cast<CKBYTE>(globalalpha));
 				} else {
 					auto alphabuf = chk->ReadBufferWrapper();
-					VxMath::VxDoAlphaBlit(slot, reinterpret_cast<CKBYTE*>(alphabuf.get()));
+					VxMath::VxDoAlphaBlit(slot, reinterpret_cast<const CKBYTE*>(alphabuf.get()));
 				}
 			}
 
@@ -79,7 +79,6 @@ namespace LibCmo::CK2 {
 
 		// read RGBA buffer
 		CKStateChunk::Buffer_t redBuffer, greenBuffer, blueBuffer, alphaBuffer;
-		CKDWORD bufsize;
 		CKDWORD bufopt;
 		chk->ReadStruct(bufopt);
 		bufopt &= 0xFu;

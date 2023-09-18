@@ -289,57 +289,87 @@ namespace LibCmo::CK2 {
 
 	/* ========== Buffer Functions ==========*/
 
-	bool CKStateChunk::ReadNoSizeBuffer(CKDWORD size_in_byte, void* allocatedBuf) {
-		if (allocatedBuf == nullptr) return false;
-		return this->ReadByteData(allocatedBuf, size_in_byte);
-	}
+	bool CKStateChunk::ReadBuffer(void** ppData, CKDWORD* size_in_byte) {
+		if (ppData == nullptr || size_in_byte == nullptr) return false;
+		*ppData = nullptr;
+		*size_in_byte = 0;
 
-	bool CKStateChunk::ReadBuffer(void** buf, CKDWORD* len_in_byte) {
-		if (buf == nullptr || len_in_byte == nullptr) return false;
-
-		// get buffer size.
-		CKDWORD bufByteSize = 0u;
-		if (!this->ReadStruct(bufByteSize)) {
-			*buf = nullptr;
-			*len_in_byte = 0;
+		// read size first
+		if (!this->ReadStruct(size_in_byte)) {
 			return false;
 		}
-		*len_in_byte = bufByteSize;
 
-		// special treat for zero length buffer
-		if (bufByteSize == 0) {
-			*buf = nullptr;
+		// if it is empty buffer, create a fake buffer
+		// and simply return it.
+		if (*size_in_byte == 0) {
+			*ppData = new CKBYTE[1];
 			return true;
 		}
 
-		// create buffer
-		*buf = new CKBYTE[bufByteSize];
-
-		// read data
-		if (!this->ReadByteData(*buf, bufByteSize)) {
-			this->DeleteBuffer(*buf);
-			*buf = nullptr;
-			*len_in_byte = 0;
+		// use LockReadBuffer to get pointer
+		auto locker = LockReadBufferWrapper(*size_in_byte);
+		if (locker == nullptr) {
+			*size_in_byte = 0;
 			return false;
 		}
 
+		// copy data and unlock buffer
+		*ppData = new CKBYTE[*size_in_byte];
+		std::memcpy(*ppData, locker.get(), *size_in_byte);
+		locker.reset();
 		return true;
 	}
-
+	
 	void CKStateChunk::DeleteBuffer(const void* buf) {
 		if (buf == nullptr) return;
 		delete[] reinterpret_cast<const CKBYTE*>(buf);
 	}
 
 	CKStateChunk::Buffer_t CKStateChunk::ReadBufferWrapper() {
-		void* bufcache = nullptr;
-		CKDWORD len_in_byte;
-		bool ret = ReadBuffer(&bufcache, &len_in_byte);
-		if (ret) {
-			return Buffer_t(bufcache, BufferDeleter(this, len_in_byte));
-		} else {
+		void* cache;
+		CKDWORD size;
+		if (!ReadBuffer(&cache, &size)) {
 			return Buffer_t();
 		}
+		return Buffer_t(cache, BufferDeleter(this, size));
+	}
+
+	bool CKStateChunk::ReadAndFillBuffer(void* pData) {
+		if (pData == nullptr) return false;
+
+		// get buffer size.
+		CKDWORD size_in_byte;
+		if (!this->ReadStruct(size_in_byte)) {
+			return false;
+		}
+
+		// use LockReadBuffer to get pointer
+		// this step can process zero length buffer
+		// so we do not treat it specially
+		auto locker = LockReadBufferWrapper(size_in_byte);
+		if (locker == nullptr) {
+			return false;
+		}
+
+		// then copy the data
+		std::memcpy(pData, locker.get(), size_in_byte);
+		locker.reset();
+		return true;
+	}
+
+	bool CKStateChunk::ReadAndFillBuffer(void* pData, CKDWORD size_in_byte) {
+		if (pData == nullptr) return false;
+
+		// directly use LockReadBuffer to get pointer
+		auto locker = LockReadBufferWrapper(size_in_byte);
+		if (locker == nullptr) {
+			return false;
+		}
+
+		// then copy the data
+		std::memcpy(pData, locker.get(), size_in_byte);
+		locker.reset();
+		return true;
 	}
 
 	/* ========== Sequence Functions ==========*/

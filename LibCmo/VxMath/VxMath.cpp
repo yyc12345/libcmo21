@@ -109,7 +109,7 @@ namespace LibCmo::VxMath {
 		}
 	}
 
-	void VxDoAlphaBlit(VxImageDescEx* dst_desc, CKBYTE* AlphaValues) {
+	void VxDoAlphaBlit(VxImageDescEx* dst_desc, const CKBYTE* AlphaValues) {
 		if (dst_desc == nullptr) return;
 		
 		CKDWORD* pixels = dst_desc->GetMutablePixels();
