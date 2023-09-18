@@ -30,16 +30,18 @@ namespace LibCmo::CK2 {
 		chk->ReadStruct(imgbytesize);
 		if (imgbytesize != 0) {
 			// get image data ptr
-			const void* imgdata = nullptr;
-			if (!chk->ReadDryBuffer(&imgdata, imgbytesize)) {
+			auto imgdata = chk->LockReadBufferWrapper(imgbytesize);
+			if (imgdata == nullptr) {
 				return false;
 			}
 
 			// parse image
 			VxMath::VxImageDescEx cache;
-			if (!reader->ReadMemory(imgdata, imgbytesize, &cache)) {
+			if (!reader->ReadMemory(imgdata.get(), imgbytesize, &cache)) {
 				return false;
 			}
+			// unlock buffer
+			imgdata.reset();
 
 			// post proc image (copy to slot)
 			VxMath::VxDoBlit(&cache, slot);
@@ -53,9 +55,7 @@ namespace LibCmo::CK2 {
 					chk->ReadStruct(globalalpha);
 					VxMath::VxDoAlphaBlit(slot, static_cast<CKBYTE>(globalalpha));
 				} else {
-					CKStateChunk::TBuffer alphabuf;
-					CKDWORD buflen;
-					chk->ReadBufferWrapper(&alphabuf, &buflen);
+					auto alphabuf = chk->ReadBufferWrapper();
 					VxMath::VxDoAlphaBlit(slot, reinterpret_cast<CKBYTE*>(alphabuf.get()));
 				}
 			}
@@ -78,7 +78,7 @@ namespace LibCmo::CK2 {
 		chk->ReadStruct(blueMask);
 
 		// read RGBA buffer
-		CKStateChunk::TBuffer redBuffer, greenBuffer, blueBuffer, alphaBuffer;
+		CKStateChunk::Buffer_t redBuffer, greenBuffer, blueBuffer, alphaBuffer;
 		CKDWORD bufsize;
 		CKDWORD bufopt;
 		chk->ReadStruct(bufopt);
@@ -90,11 +90,11 @@ namespace LibCmo::CK2 {
 			// so return false simply
 			return false;
 		} else {
-			chk->ReadBufferWrapper(&blueBuffer, &bufsize);
-			chk->ReadBufferWrapper(&greenBuffer, &bufsize);
-			chk->ReadBufferWrapper(&redBuffer, &bufsize);
+			blueBuffer = chk->ReadBufferWrapper();
+			greenBuffer = chk->ReadBufferWrapper();
+			redBuffer = chk->ReadBufferWrapper();
 		}
-		chk->ReadBufferWrapper(&alphaBuffer, &bufsize);
+		alphaBuffer = chk->ReadBufferWrapper();
 
 		// write into file
 		if (redBuffer != nullptr && greenBuffer != nullptr && blueBuffer != nullptr) {

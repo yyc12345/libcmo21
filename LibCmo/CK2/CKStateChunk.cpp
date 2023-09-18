@@ -99,6 +99,37 @@ namespace LibCmo::CK2 {
 
 #pragma endregion
 
+#pragma region Self Used Data Struct
+
+	void CKStateChunk::LockedReadBufferDeleter::operator()(LIBCMO_UNUSED const void* buf) {
+		if (m_Host == nullptr) return;
+		m_Host->UnLockReadBuffer(m_ConsumedSize);
+	}
+
+	void CKStateChunk::LockedReadBufferDeleter::SetConsumedSize(CKDWORD newsize) {
+		m_ConsumedSize = newsize;
+	}
+	
+	void CKStateChunk::LockedWriteBufferDeleter::operator()(LIBCMO_UNUSED const void* buf) {
+		if (m_Host == nullptr) return;
+		m_Host->UnLockWriteBuffer(m_ConsumedSize);
+	}
+
+	void CKStateChunk::LockedWriteBufferDeleter::SetConsumedSize(CKDWORD newsize) {
+		m_ConsumedSize = newsize;
+	}
+	
+	void CKStateChunk::BufferDeleter::operator()(const void* buf) {
+		if (m_Host == nullptr) return;
+		m_Host->DeleteBuffer(buf);
+	}
+
+	CKDWORD CKStateChunk::BufferDeleter::GetBufferSize() const {
+		return m_BufSize;
+	}
+
+#pragma endregion
+	
 #pragma region Misc Funcs
 
 	// ========== Public Funcs ==========
@@ -525,24 +556,66 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-
-	/* ========== Basic Data Read Functions ==========*/
-
-	bool CKStateChunk::ReadByteData(void* data_ptr, CKDWORD size_in_byte) {
+	bool CKStateChunk::LockReadBuffer(const void** ppData, CKDWORD size_in_byte) {
+		// check arguments
+		if (*ppData == nullptr) return false;
+		*ppData = nullptr;
+		// check self status
 		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return false;
 
+		// get corresponding size
 		CKDWORD size_in_dword = this->GetCeilDwordSize(size_in_byte);
+		// ensure space
 		if (this->EnsureReadSpace(size_in_dword)) {
-			// only copy when data_ptr is not nullptr
-			// do dry run if there are no dest to copy for.
-			if (data_ptr != nullptr) {
-				std::memcpy(data_ptr, this->m_pData + this->m_Parser.m_CurrentPos, size_in_byte);
-			}
+			*ppData = this->m_pData + this->m_Parser.m_CurrentPos;
+			return true;
+		} else {
+			// failed, report to context
+			m_BindContext->OutputToConsoleEx("CKStateChunk::LockReadBuffer at buffer pos %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
+			return false;
+		}
+	}
+
+	bool CKStateChunk::UnLockReadBuffer(CKDWORD size_in_byte) {
+		// check self status
+		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return false;
+
+		// get corresponding size
+		CKDWORD size_in_dword = this->GetCeilDwordSize(size_in_byte);
+		// ensure space
+		if (this->EnsureReadSpace(size_in_dword)) {
 			this->m_Parser.m_CurrentPos += size_in_dword;
 			return true;
 		} else {
 			// failed, report to context
-			m_BindContext->OutputToConsoleEx("CKStateChunk read length error at %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
+			m_BindContext->OutputToConsoleEx("CKStateChunk::UnLockReadBuffer at buffer pos %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
+			return false;
+		}
+	}
+
+	CKStateChunk::LockedReadBuffer_t CKStateChunk::LockReadBufferWrapper(CKDWORD size_in_byte) {
+		const void* pData;
+		bool ret = LockReadBuffer(&pData, size_in_byte);
+		if (ret) {
+			return LockedReadBuffer_t(pData, LockedReadBufferDeleter(this, size_in_byte));
+		} else {
+			return LockedReadBuffer_t();
+		}
+	}
+
+	/* ========== Basic Data Read Functions ==========*/
+
+
+	bool CKStateChunk::ReadByteData(void* data_ptr, CKDWORD size_in_byte) {
+		if (data_ptr == nullptr) return false;
+
+		const void* pData;
+		bool ret = LockReadBuffer(&pData, size_in_byte);
+		if (ret) {
+			std::memcpy(data_ptr, pData, size_in_byte);
+			UnLockReadBuffer(size_in_byte);
+			return true;
+		} else {
 			return false;
 		}
 	}
@@ -753,36 +826,20 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-	bool CKStateChunk::ReadBufferWrapper(TBuffer* uptr, CKDWORD* len_in_byte) {
-		if (uptr == nullptr || len_in_byte == nullptr) return false;
-
-		void* bufcache = nullptr;
-		bool ret = ReadBuffer(&bufcache, len_in_byte);
-		uptr->reset(bufcache);
-
-		return ret;
-	}
-
-	bool CKStateChunk::ReadDryBuffer(const void** buf, CKDWORD ordered_size) {
-		if (buf == nullptr) return false;
-		
-		// backup current pos
-		*buf = GetCurrentPointer();
-		if (!this->ReadByteData(nullptr, ordered_size)) {
-			*buf = nullptr;
-			return false;
-		}
-		return true;
-	}
-	
-	void CKStateChunk::BufferDeleter::operator()(void* buf) {
-		if (buf == nullptr) return;
-		delete[] reinterpret_cast<const CKBYTE*>(buf);
-	}
-
 	void CKStateChunk::DeleteBuffer(const void* buf) {
 		if (buf == nullptr) return;
 		delete[] reinterpret_cast<const CKBYTE*>(buf);
+	}
+
+	CKStateChunk::Buffer_t CKStateChunk::ReadBufferWrapper() {
+		void* bufcache = nullptr;
+		CKDWORD len_in_byte;
+		bool ret = ReadBuffer(&bufcache, &len_in_byte);
+		if (ret) {
+			return Buffer_t(bufcache, BufferDeleter(this, len_in_byte));
+		} else {
+			return Buffer_t();
+		}
 	}
 
 	/* ========== Sequence Functions ==========*/
@@ -964,6 +1021,18 @@ namespace LibCmo::CK2 {
 		this->m_Parser.m_DataSize = this->m_DataDwSize;
 		this->m_Parser.m_PrevIdentifierPos = 0u;
 		this->m_Parser.m_Status = CKStateChunkStatus::IDLE;
+	}
+
+	bool CKStateChunk::LockWriteBuffer(const void** ppData, CKDWORD size_in_byte) {
+		return false;
+	}
+
+	bool CKStateChunk::UnLockWriteBuffer(CKDWORD size_in_byte) {
+		return false;
+	}
+
+	CKStateChunk::LockedWriteBuffer_t CKStateChunk::LockWriteBufferWrapper(CKDWORD size_in_byte) {
+		return LockedWriteBuffer_t();
 	}
 
 #pragma endregion

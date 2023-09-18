@@ -222,7 +222,7 @@ namespace Unvirt::StructFormatter {
 
 		// write identifiers
 		operchunk->StartRead();
-		const auto collection = operchunk->GetIdentifierProfile();
+		const auto collection = operchunk->GetIdentifiersProfile();
 		operchunk->StopRead();
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("Identifiers\n")), stdout);
 		fputs("Identifier\tData Pointer\tData Size\n", stdout);

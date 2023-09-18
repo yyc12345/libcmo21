@@ -168,9 +168,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 			// save properties
 			if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_TEXSAVEFORMAT)) {
-				CKDWORD bufsize;
-				CKStateChunk::TBuffer buf;
-				chunk->ReadBufferWrapper(&buf, &bufsize);
+				auto buf = chunk->ReadBufferWrapper();
 				if (buf != nullptr) {
 					FakeBitmapProperties* props = reinterpret_cast<FakeBitmapProperties*>(buf.get());
 
