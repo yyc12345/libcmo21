@@ -77,6 +77,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 	protected:
 		enum class VertexSaveFlags : CKDWORD {
+			None = 0,
 			SingleColor = 0x1u,	/**< if not set, the VertexColor is a list, otherwise a single global CKDWORD.*/
 			SingleSpecularColor = 0x2u,	/**< if not set, the VertexSpecularColor is a list, otherwise a single global CKDWORD. */
 			NoNormal = 0x4u,	/**< if set, there are no normal data for vertex. */

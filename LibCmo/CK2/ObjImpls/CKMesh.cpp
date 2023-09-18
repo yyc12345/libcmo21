@@ -74,19 +74,144 @@ namespace LibCmo::CK2::ObjImpls {
 		}
 
 		// read vertex data
+		VertexSaveFlags saveflags = VertexSaveFlags::None;
 		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHVERTICES)) {
 			// read and set vertex count
 			CKDWORD vertexCount;
 			chunk->ReadStruct(vertexCount);
 
 			if (vertexCount != 0) {
-				VertexSaveFlags saveflags;
+				// read save flags
 				chunk->ReadStruct(saveflags);
 
+				// read size in dword
+				CKDWORD sizeInDword;
+				chunk->ReadStruct(sizeInDword);
 
+				// lock read buffer
+				auto buf = chunk->LockReadBufferWrapper(sizeInDword * CKSizeof(CKDWORD));
+				const CKBYTE* rawbuf = static_cast<const CKBYTE*>(buf.get());
 
+				// copy position if it have
+				if (!EnumsHelper::Has(saveflags, VertexSaveFlags::NoPos)) {
+					CKDWORD consumed = CKSizeof(VxMath::VxVector3) * vertexCount;
+					std::memcpy(m_VertexPosition.data(), rawbuf, consumed);
+					rawbuf += consumed;
+				}
 
+				// copy color or apply single color
+				if (!EnumsHelper::Has(saveflags, VertexSaveFlags::SingleColor)) {
+					CKDWORD consumed = CKSizeof(CKDWORD) * vertexCount;
+					std::memcpy(m_VertexColor.data(), rawbuf, consumed);
+					rawbuf += consumed;
+				} else {
+					VxMath::VxCopyStructure(
+						vertexCount,
+						m_VertexColor.data(),
+						CKSizeof(CKDWORD),
+						CKSizeof(CKDWORD),
+						rawbuf,
+						0	// InStride = 0 to make sure copy this single value to every elements.
+					);
+					rawbuf += CKSizeof(CKDWORD);
+				}
+
+				// copy specular color or apply a single color
+				if (!EnumsHelper::Has(saveflags, VertexSaveFlags::SingleSpecularColor)) {
+					CKDWORD consumed = CKSizeof(CKDWORD) * vertexCount;
+					std::memcpy(m_VertexSpecularColor.data(), rawbuf, consumed);
+					rawbuf += consumed;
+				} else {
+					VxMath::VxCopyStructure(
+						vertexCount,
+						m_VertexSpecularColor.data(),
+						CKSizeof(CKDWORD),
+						CKSizeof(CKDWORD),
+						rawbuf,
+						0	// InStride = 0 to make sure copy this single value to every elements.
+					);
+					rawbuf += CKSizeof(CKDWORD);
+				}
+
+				// copy normals if it has
+				if (!EnumsHelper::Has(saveflags, VertexSaveFlags::NoNormal)) {
+					CKDWORD consumed = CKSizeof(VxMath::VxVector3) * vertexCount;
+					std::memcpy(m_VertexNormal.data(), rawbuf, consumed);
+					rawbuf += consumed;
+				}
+
+				// copy uv or apply single uv
+				if (!EnumsHelper::Has(saveflags, VertexSaveFlags::SingleUV)) {
+					CKDWORD consumed = CKSizeof(VxMath::VxVector2) * vertexCount;
+					std::memcpy(m_VertexUV.data(), rawbuf, consumed);
+					rawbuf += consumed;
+				} else {
+					VxMath::VxCopyStructure(
+						vertexCount,
+						m_VertexUV.data(),
+						CKSizeof(VxMath::VxVector2),
+						CKSizeof(VxMath::VxVector2),
+						rawbuf,
+						0	// InStride = 0 to make sure copy this single value to every elements.
+					);
+					rawbuf += CKSizeof(VxMath::VxVector2);
+				}
+
+				// free buf
+				buf.reset();
 			}
+		}
+
+		// read face data
+		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHFACES)) {
+			// read face count and set
+			CKDWORD faceCount;
+			chunk->ReadStruct(faceCount);
+			SetFaceCount(faceCount);
+
+			// lock buffer
+			auto buf = chunk->LockReadBufferWrapper(faceCount * CKSizeof(CKDWORD) * 2);
+			const CKWORD* rawbuf = static_cast<const CKWORD*>(buf.get());
+			// each face use 2 CKDWORD to describe
+			// first CKDWORD describe first 2 face vertex indices
+			// HIGH >>> 0xFFFF(indice 1) 0xFFFF(indice 0) <<< LOW
+			// second CKDWORD describe the third indices and used material slot index
+			// HIGH >>> 0xFFFF(mtl slot index) 0xFFFF(indice 2) <<< LOW
+			
+			// due to little endian, the data listed before are placed in memory like this:
+			// (indice 0) (indice 1) (indice 2) (mtl idx)
+
+			// copy indice
+			VxMath::VxCopyStructure(
+				faceCount,
+				m_FaceIndices.data(),
+				3 * CKSizeof(CKWORD),
+				3 * CKSizeof(CKWORD),
+				rawbuf,
+				2 * CKSizeof(CKDWORD)
+			);
+			// copy mtl index
+			VxMath::VxCopyStructure(
+				faceCount,
+				m_FaceMtlIndex.data(),
+				CKSizeof(CKWORD),
+				CKSizeof(CKWORD),
+				rawbuf + 3,
+				2 * CKSizeof(CKDWORD)
+			);
+
+			// free buf
+			buf.reset();
+		}
+
+		// read line data
+		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHLINES)) {
+			// read and set line count;
+			CKDWORD lineCount;
+			chunk->ReadStruct(lineCount);
+			SetLineCount(lineCount);
+
+			chunk->ReadNoSizeBuffer(lineCount * 2 )
 		}
 
 		return true;
