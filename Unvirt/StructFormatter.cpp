@@ -78,6 +78,42 @@ namespace Unvirt::StructFormatter {
 		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
 	}
 
+	static void PrintCKGroupDetail(LibCmo::CK2::ObjImpls::CKGroup* obj) {
+		PrintCKBeObjectDetail(obj);
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKGroup\n")), stdout);
+		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+	}
+	
+	static void PrintCKRenderObjectDetail(LibCmo::CK2::ObjImpls::CKRenderObject* obj) {
+		PrintCKBeObjectDetail(obj);
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKRenderObject\n")), stdout);
+		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+	}
+	
+	static void PrintCK3dEntityDetail(LibCmo::CK2::ObjImpls::CK3dEntity* obj) {
+		PrintCKRenderObjectDetail(obj);
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CK3dEntity\n")), stdout);
+		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+	}
+	
+	static void PrintCK3dObjectDetail(LibCmo::CK2::ObjImpls::CK3dObject* obj) {
+		PrintCK3dEntityDetail(obj);
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CK3dObject\n")), stdout);
+		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+	}
+	
+	static void PrintCKTextureDetail(LibCmo::CK2::ObjImpls::CKTexture* obj) {
+		PrintCKBeObjectDetail(obj);
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKTexture\n")), stdout);
+		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+	}
+	
+	static void PrintCKMaterialDetail(LibCmo::CK2::ObjImpls::CKMaterial* obj) {
+		PrintCKBeObjectDetail(obj);
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKMaterial\n")), stdout);
+		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+	}
+	
 	static void PrintCKMeshDetail(LibCmo::CK2::ObjImpls::CKMesh* obj) {
 		PrintCKBeObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKMesh\n")), stdout);
@@ -232,6 +268,33 @@ namespace Unvirt::StructFormatter {
 
 		LibCmo::CK2::ObjImpls::CKObject* mobj = const_cast<LibCmo::CK2::ObjImpls::CKObject*>(obj);
 		switch (mobj->GetClassID()) {
+			case LibCmo::CK2::CK_CLASSID::CKCID_OBJECT:
+				PrintCKObjectDetail(static_cast<LibCmo::CK2::ObjImpls::CKObject*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_SCENEOBJECT:
+				PrintCKSceneObjectDetail(static_cast<LibCmo::CK2::ObjImpls::CKSceneObject*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_BEOBJECT:
+				PrintCKBeObjectDetail(static_cast<LibCmo::CK2::ObjImpls::CKBeObject*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_GROUP:
+				PrintCKGroupDetail(static_cast<LibCmo::CK2::ObjImpls::CKGroup*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_RENDEROBJECT:
+				PrintCKRenderObjectDetail(static_cast<LibCmo::CK2::ObjImpls::CKRenderObject*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_3DENTITY:
+				PrintCK3dEntityDetail(static_cast<LibCmo::CK2::ObjImpls::CK3dEntity*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT:
+				PrintCK3dObjectDetail(static_cast<LibCmo::CK2::ObjImpls::CK3dObject*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE:
+				PrintCKTextureDetail(static_cast<LibCmo::CK2::ObjImpls::CKTexture*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL:
+				PrintCKMaterialDetail(static_cast<LibCmo::CK2::ObjImpls::CKMaterial*>(mobj));
+				break;
 			case LibCmo::CK2::CK_CLASSID::CKCID_MESH:
 				PrintCKMeshDetail(static_cast<LibCmo::CK2::ObjImpls::CKMesh*>(mobj));
 				break;
@@ -244,7 +307,7 @@ namespace Unvirt::StructFormatter {
 	void PrintCKBaseManager(const LibCmo::CK2::MgrImpls::CKBaseManager* mgr) {
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKBaseManager\n")), stdout);
 		if (mgr == nullptr) {
-			fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+			fputs(UNVIRT_TERMCOL_LIGHT_RED(("Null Manager\n")), stdout);
 			return;
 		}
 
@@ -253,7 +316,7 @@ namespace Unvirt::StructFormatter {
 	void PrintCKStateChunk(const LibCmo::CK2::CKStateChunk* chunk) {
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKStateChunk\n")), stdout);
 		if (chunk == nullptr) {
-			fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+			fputs(UNVIRT_TERMCOL_LIGHT_RED(("Null Chunk\n")), stdout);
 			return;
 		}
 

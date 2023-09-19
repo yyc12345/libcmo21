@@ -19,18 +19,10 @@ def GetFileLength(fs: io.BufferedReader) -> int:
     fs.seek(pos, io.SEEK_SET)
     return fsize
 
-def EvaluateVertexCount(filename: str) -> int:
+def EvaluateCount(filename: str, unit_size: int) -> int:
     with open(filename, 'rb') as fs:
         filesize = GetFileLength(fs)
-        count, modrem = divmod(filesize, 3 * 4) # 3 float(4 byte)
-        if modrem != 0:
-            raise Exception("invalid file length")
-        return count
-
-def EvaluateFaceCount(filename: str) -> int:
-    with open(filename, 'rb') as fs:
-        filesize = GetFileLength(fs)
-        count, modrem = divmod(filesize, 3 * 2) # 3 WORD(2 byte)
+        count, modrem = divmod(filesize, unit_size)
         if modrem != 0:
             raise Exception("invalid file length")
         return count
@@ -80,19 +72,21 @@ if __name__ == '__main__':
     # parse arg
     args = parser.parse_args()
 
-    input("Prepare VertexPositions please.")
-    vertexcount = EvaluateVertexCount(args.in_bin)
+    #input("Prepare VertexPositions please.")
+    vertexcount = EvaluateCount(args.in_vpos, 3 * 4) # 3 float(4 bytes)
     print(f'Vertex Count Evaluated: {vertexcount}')
-    vpos = RecoupleTuple(ReadFloats(args.in_bin, 3 * vertexcount), 3)
+    vpos = RecoupleTuple(ReadFloats(args.in_vpos, 3 * vertexcount), 3)
 
-    input("Prepare VertexNormals please.")
-    vnml = RecoupleTuple(ReadFloats(args.in_bin, 3 * vertexcount), 3)
+    #input("Prepare VertexNormals please.")
+    vnml = RecoupleTuple(ReadFloats(args.in_vnml, 3 * vertexcount), 3)
 
-    input("Prepare VertexUVs please.")
-    vuv = RecoupleTuple(ReadFloats(args.in_bin, 2 * vertexcount), 2)
+    #input("Prepare VertexUVs please.")
+    vuv = RecoupleTuple(ReadFloats(args.in_vuv, 2 * vertexcount), 2)
 
-    input("Prepare FaceIndices please.")
-    findices = RecoupleTuple(ReadShorts(args.in_bin, 3 * vertexcount), 3)
+    #input("Prepare FaceIndices please.")
+    facecount = EvaluateCount(args.in_findices, 3 * 2) # 3 WORD(2 bytes)
+    print(f'Face Count Evaluated: {facecount}')
+    findices = RecoupleTuple(ReadShorts(args.in_findices, 3 * facecount), 3)
 
     GenerateObj(args.out_obj, vpos, vnml, vuv, findices)
     print('Done')
