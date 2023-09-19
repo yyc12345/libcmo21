@@ -7,11 +7,8 @@ namespace LibCmo::CK2::ObjImpls {
 
 	class CK3dEntity : public CKRenderObject {
 	public:
-		CK3dEntity(CKContext* ctx, CK_ID ckid, CKSTRING name) : 
-			CKRenderObject(ctx, ckid, name),
-			m_Meshes(), m_CurrentMesh(nullptr), m_WorldMatrix()
-		{}
-		virtual ~CK3dEntity() {}
+		CK3dEntity(CKContext* ctx, CK_ID ckid, CKSTRING name);
+		virtual ~CK3dEntity();
 		LIBCMO_DISABLE_COPY_MOVE(CK3dEntity);
 
 		virtual CK_CLASSID GetClassID(void) override { 
@@ -23,10 +20,14 @@ namespace LibCmo::CK2::ObjImpls {
 		//virtual void PostLoad() override;
 
 	protected:
-		XContainer::XObjectPointerArray m_Meshes;
+		XContainer::XObjectPointerArray m_PotentialMeshes;
 		CKMesh* m_CurrentMesh;
 		VxMath::VxMatrix m_WorldMatrix;
+		CKDWORD m_ZOrder;	// replace the whole heavy CKSceneGraphNode
 		
+		VxMath::VX_MOVEABLE_FLAGS m_MoveableFlags;
+		CK_3DENTITY_FLAGS m_3dEntityFlags;
+
 	};
 
 }

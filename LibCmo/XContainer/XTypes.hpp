@@ -181,6 +181,13 @@ namespace LibCmo::XContainer {
 	namespace NSXObjectPointerArray {
 
 		/**
+		 * @brief Add object pointer if it is not list.
+		 * @param objarray 
+		 * @param obj 
+		*/
+		void AddIfNotHere(XObjectPointerArray& objarray, CK2::ObjImpls::CKObject* const obj);
+
+		/**
 		 * @brief Check Object pointer validation and remove invalid pointers before deletion.
 		 * @param objarray 
 		 * @param ctx 

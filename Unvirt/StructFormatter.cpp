@@ -118,37 +118,37 @@ namespace Unvirt::StructFormatter {
 		PrintCKBeObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKMesh\n")), stdout);
 
-		fputs("Vertex:\n", stdout);
 		fprintf(stdout, "Vertex Count: %" PRIuCKDWORD "\n", obj->GetVertexCount());
+		fputs("Type\tAddress\tSize\n", stdout);
 
-		fputs("VertexPositions: ", stdout);
+		fputs("Positions\t", stdout);
 		PrintPointer(obj->GetVertexPositions());
-		fprintf(stdout, " (0x%" PRIxCKDWORD " bytes)\n", obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector3));
-		fputs("VertexNormals: ", stdout);
+		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\n", obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector3));
+		fputs("Normals\t", stdout);
 		PrintPointer(obj->GetVertexNormals());
-		fprintf(stdout, " (0x%" PRIxCKDWORD " bytes)\n", obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector3));
-		fputs("VertexUVs: ", stdout);
+		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\n", obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector3));
+		fputs("UVs\t", stdout);
 		PrintPointer(obj->GetVertexUVs());
-		fprintf(stdout, " (0x%" PRIxCKDWORD " bytes)\n", obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector2));
-		fputs("VertexColors: ", stdout);
+		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\n", obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector2));
+		fputs("Colors\t", stdout);
 		PrintPointer(obj->GetVertexColors());
-		fprintf(stdout, " (0x%" PRIxCKDWORD " bytes)\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD));
-		fputs("VertexSpecularColors: ", stdout);
+		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD));
+		fputs("SpecularColors\t", stdout);
 		PrintPointer(obj->GetVertexSpecularColors());
-		fprintf(stdout, " (0x%" PRIxCKDWORD " bytes)\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD));
-		fputs("VertexWeights: ", stdout);
+		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD));
+		fputs("Weights\t", stdout);
 		PrintPointer(obj->GetVertexWeights());
-		fprintf(stdout, " (0x%" PRIxCKDWORD " bytes)\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKFLOAT));
+		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKFLOAT));
 		
-		fputs("Face:\n", stdout);
 		fprintf(stdout, "Face Count: %" PRIuCKDWORD "\n", obj->GetFaceCount());
+		fputs("Type\tAddress\tSize\n", stdout);
 		
-		fputs("FaceIndices: ", stdout);
+		fputs("Indices\t", stdout);
 		PrintPointer(obj->GetFaceIndices());
-		fprintf(stdout, " (0x%" PRIxCKDWORD " bytes)\n", obj->GetFaceCount() * 3 * CKSizeof(LibCmo::CKWORD));
-		fputs("FaceMaterialSlotIndexs: ", stdout);
+		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\n", obj->GetFaceCount() * 3 * CKSizeof(LibCmo::CKWORD));
+		fputs("MaterialSlotIndexs\t", stdout);
 		PrintPointer(obj->GetFaceMaterialSlotIndexs());
-		fprintf(stdout, " (0x%" PRIxCKDWORD " bytes)\n", obj->GetFaceCount() * CKSizeof(LibCmo::CKWORD));
+		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\n", obj->GetFaceCount() * CKSizeof(LibCmo::CKWORD));
 
 	}
 

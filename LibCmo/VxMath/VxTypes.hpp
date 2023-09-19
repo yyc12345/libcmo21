@@ -371,15 +371,21 @@ namespace LibCmo::VxMath {
 		CKFLOAT m_Data[4][4];
 
 		VxMatrix() : m_Data() {
-			std::memset(m_Data, 0, sizeof(m_Data));
-			m_Data[0][0] = m_Data[1][1] = m_Data[2][2] = m_Data[3][3] = 1.0f;
+			ResetToIdentity();
 		}
 		VxMatrix(CKFLOAT m[4][4]) : m_Data() { std::memcpy(m_Data, m, sizeof(m_Data)); }
 		LIBCMO_DEFAULT_COPY_MOVE(VxMatrix);
-
+		void ResetToIdentity() {
+			std::memset(m_Data, 0, sizeof(m_Data));
+			m_Data[0][0] = m_Data[1][1] = m_Data[2][2] = m_Data[3][3] = 1.0f;
+		}
 		VxVector4& operator[](size_t i) {
 			if (i >= 4) i = 0;
 			return *(reinterpret_cast<VxVector4*>(m_Data) + i);
+		}
+		const VxVector4& operator[](size_t i) const {
+			if (i >= 4) i = 0;
+			return *(reinterpret_cast<const VxVector4*>(m_Data) + i);
 		}
 		bool operator==(const VxMatrix& rhs) const {
 			return std::memcmp(m_Data, rhs.m_Data, sizeof(m_Data)) == 0;

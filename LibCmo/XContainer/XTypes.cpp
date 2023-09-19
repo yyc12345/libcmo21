@@ -3,6 +3,7 @@
 #include "../CK2/MgrImpls/CKObjectManager.hpp"
 #include "../CK2/ObjImpls/CKObject.hpp"
 #include <type_traits>
+#include <algorithm>
 
 namespace LibCmo::XContainer {
 
@@ -142,6 +143,13 @@ namespace LibCmo::XContainer {
 
 	}
 	namespace NSXObjectPointerArray {
+
+		void AddIfNotHere(XObjectPointerArray& objarray, CK2::ObjImpls::CKObject* const obj) {
+			auto finder = std::find(objarray.begin(), objarray.end(), obj);
+			if (finder == objarray.end()) {
+				objarray.emplace_back(obj);
+			}
+		}
 
 		void PreDeletedCheck(XObjectPointerArray& objarray, CK2::CKContext* ctx) {
 			if (ctx == nullptr) return;
