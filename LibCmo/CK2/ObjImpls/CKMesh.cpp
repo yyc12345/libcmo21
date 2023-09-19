@@ -226,6 +226,8 @@ namespace LibCmo::CK2::ObjImpls {
 		return true;
 	}
 
+#pragma region Misc Section
+
 	void CKMesh::CleanMesh() {
 		// clear material channel first
 		SetMtlChannelCount(0);
@@ -236,9 +238,46 @@ namespace LibCmo::CK2::ObjImpls {
 		SetLineCount(0);
 	}
 
-	void CKMesh::BuildNormals() {}
+	void CKMesh::BuildNormals() {
+		if (m_FaceCount == 0 || m_VertexCount == 0) return;
 
-	void CKMesh::BuildFaceNormals() {}
+		// build face normal first
+		BuildFaceNormals();
+
+		// iterate all face and add face normal to each point's normal
+		for (CKDWORD fid = 0; fid < m_FaceCount; ++fid) {
+			m_VertexNormal[m_FaceIndices[fid * 3]] += m_Faces[fid].m_Normal;
+			m_VertexNormal[m_FaceIndices[fid * 3 + 1]] += m_Faces[fid].m_Normal;
+			m_VertexNormal[m_FaceIndices[fid * 3 + 2]] += m_Faces[fid].m_Normal;
+		}
+
+		// then normalize all vertex normal
+		for (auto& nml : m_VertexNormal) {
+			nml.Normalized();
+		}
+	}
+
+	void CKMesh::BuildFaceNormals() {
+		if (m_FaceCount == 0 || m_VertexCount == 0) return;
+
+		// iertate all face to build face normal according to position data
+		for (CKDWORD fid = 0; fid < m_FaceCount; ++fid) {
+			VxMath::VxVector3 *p0 = &m_VertexPosition[m_FaceIndices[fid * 3]];
+
+			VxMath::VxVector3 p0_p1 = m_VertexPosition[m_FaceIndices[fid * 3 + 1]] - *p0,
+				p0_p2 = m_VertexPosition[m_FaceIndices[fid * 3 + 2]] - *p0;
+
+			// cross product to get normal
+			// and normalize it
+			VxMath::VxVector3 nml = VxMath::NSVxVector::CrossProduct(p0_p1, p0_p2);
+			nml.Normalized();
+
+			// assign it
+			m_Faces[fid].m_Normal = nml;
+		}
+	}
+
+#pragma endregion
 
 #pragma region Vertex Section
 

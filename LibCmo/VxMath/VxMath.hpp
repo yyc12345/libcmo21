@@ -83,5 +83,18 @@ namespace LibCmo::VxMath {
 	*/
 	void VxDoAlphaBlit(VxImageDescEx* dst_desc, const CKBYTE* AlphaValues);
 
+
+	// ========== Patch Section ==========
+
+	namespace NSVxVector {
+
+		CKFLOAT DotProduct(const VxVector2& lhs, const VxVector2& rhs);
+		CKFLOAT DotProduct(const VxVector3& lhs, const VxVector3& rhs);
+		CKFLOAT DotProduct(const VxVector4& lhs, const VxVector4& rhs);
+
+		VxVector3 CrossProduct(const VxVector3& lhs, const VxVector3& rhs);
+
+	}
+
 }
 

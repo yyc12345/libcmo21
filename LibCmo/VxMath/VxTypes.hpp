@@ -7,6 +7,7 @@
 #include <vector>
 #include <cstring>
 #include <cinttypes>
+#include <cmath>
 
 /**
  * @brief The VxMath part of LibCmo.
@@ -30,6 +31,12 @@ namespace LibCmo::VxMath {
 		VxVector2(CKFLOAT _x, CKFLOAT _y) : x(_x), y(_y) {}
 		LIBCMO_DEFAULT_COPY_MOVE(VxVector2);
 		CKFLOAT& operator[](size_t i) {
+			switch (i) {
+				case 0: return x;
+				case 1: return y;
+				default: return x;
+			}
+		}	const CKFLOAT& operator[](size_t i) const {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
@@ -63,6 +70,9 @@ namespace LibCmo::VxMath {
 		friend VxVector2 operator*(CKFLOAT lhs, const VxVector2& rhs) {
 			return VxVector2(lhs * rhs.x, lhs * rhs.y);
 		}
+		friend CKFLOAT operator*(const VxVector2& lhs, const VxVector2& rhs) {
+			return (lhs.x * rhs.x + lhs.y * rhs.y);
+		}
 		VxVector2& operator/=(CKFLOAT rhs) {
 			if (rhs == 0.0f) return *this;
 			x /= rhs;
@@ -79,6 +89,23 @@ namespace LibCmo::VxMath {
 		bool operator!=(const VxVector2& rhs) const {
 			return !(*this == rhs);
 		}
+		CKFLOAT SquaredLength() const {
+			return (x * x + y * y);
+		}
+		CKFLOAT Length() const {
+			return std::sqrt(SquaredLength());
+		}
+		void Normalized() {
+			CKFLOAT len = Length();
+			if (len == 0.0f) return;
+			x /= len;
+			y /= len;
+		}
+		VxVector2 Normalize() const {
+			CKFLOAT len = Length();
+			if (len == 0.0f) return VxVector2();
+			return VxVector2(x / len, y / len);
+		}
 	};
 
 	struct VxVector3 {
@@ -87,6 +114,13 @@ namespace LibCmo::VxMath {
 		VxVector3(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z) : x(_x), y(_y), z(_z) {}
 		LIBCMO_DEFAULT_COPY_MOVE(VxVector3);
 		CKFLOAT& operator[](size_t i) {
+			switch (i) {
+				case 0: return x;
+				case 1: return y;
+				case 2: return z;
+				default: return x;
+			}
+		}	const CKFLOAT& operator[](size_t i) const {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
@@ -124,6 +158,9 @@ namespace LibCmo::VxMath {
 		friend VxVector3 operator*(CKFLOAT lhs, const VxVector3& rhs) {
 			return VxVector3(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
 		}
+		friend CKFLOAT operator*(const VxVector3& lhs, const VxVector3& rhs) {
+			return (lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z);
+		}
 		VxVector3& operator/=(CKFLOAT rhs) {
 			if (rhs == 0.0f) return *this;
 			x /= rhs;
@@ -141,6 +178,24 @@ namespace LibCmo::VxMath {
 		bool operator!=(const VxVector3& rhs) const {
 			return !(*this == rhs);
 		}
+		CKFLOAT SquaredLength() const {
+			return (x * x + y * y + z * z);
+		}
+		CKFLOAT Length() const {
+			return std::sqrt(SquaredLength());
+		}
+		void Normalized() {
+			CKFLOAT len = Length();
+			if (len == 0.0f) return;
+			x /= len;
+			y /= len;
+			z /= len;
+		}
+		VxVector3 Normalize() const {
+			CKFLOAT len = Length();
+			if (len == 0.0f) return VxVector3();
+			return VxVector3(x / len, y / len, z / len);
+		}
 	};
 
 	struct VxVector4 {
@@ -149,6 +204,14 @@ namespace LibCmo::VxMath {
 		VxVector4(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z, CKFLOAT _w) : x(_x), y(_y), z(_z), w(_w) {}
 		LIBCMO_DEFAULT_COPY_MOVE(VxVector4);
 		CKFLOAT& operator[](size_t i) {
+			switch (i) {
+				case 0: return x;
+				case 1: return y;
+				case 2: return z;
+				case 3: return w;
+				default: return x;
+			}
+		}	const CKFLOAT& operator[](size_t i) const {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
@@ -190,6 +253,9 @@ namespace LibCmo::VxMath {
 		friend VxVector4 operator*(CKFLOAT lhs, const VxVector4& rhs) {
 			return VxVector4(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z, lhs * rhs.w);
 		}
+		friend CKFLOAT operator*(const VxVector4& lhs, const VxVector4& rhs) {
+			return (lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w);
+		}
 		VxVector4& operator/=(CKFLOAT rhs) {
 			if (rhs == 0.0f) return *this;
 			x /= rhs;
@@ -207,6 +273,25 @@ namespace LibCmo::VxMath {
 		}
 		bool operator!=(const VxVector4& rhs) const {
 			return !(*this == rhs);
+		}
+		CKFLOAT SquaredLength() const {
+			return (x * x + y * y + z * z + w * w);
+		}
+		CKFLOAT Length() const {
+			return std::sqrt(SquaredLength());
+		}
+		void Normalized() {
+			CKFLOAT len = Length();
+			if (len == 0.0f) return;
+			x /= len;
+			y /= len;
+			z /= len;
+			w /= len;
+		}
+		VxVector4 Normalize() const {
+			CKFLOAT len = Length();
+			if (len == 0.0f) return VxVector4();
+			return VxVector4(x / len, y / len, z / len, w / len);
 		}
 	};
 
@@ -259,7 +344,7 @@ namespace LibCmo::VxMath {
 			if (r > 1.0f) r = 1.0f;
 			else if (r < 0.0f) r = 0.0f;
 			if (g > 1.0f) g = 1.0f;
-			else if (g < 0.0f) g= 0.0f;
+			else if (g < 0.0f) g = 0.0f;
 			if (b > 1.0f) b = 1.0f;
 			else if (b < 0.0f) b = 0.0f;
 			if (a > 1.0f) a = 1.0f;
@@ -309,8 +394,7 @@ namespace LibCmo::VxMath {
 	public:
 		VxStridedData(_Ty ptr, CKDWORD stride) :
 			m_Ptr(reinterpret_cast<CKBYTE*>(m_Ptr)),
-			m_Stride(stride)
-		{}
+			m_Stride(stride) {}
 		~VxStridedData() {}
 
 		_Ty operator[](size_t idx) {
@@ -433,7 +517,7 @@ namespace LibCmo::VxMath {
 				m_Width != 0u &&
 				m_Height != 0u &&
 				m_Image != nullptr
-			);
+				);
 		}
 		bool IsHWEqual(const VxImageDescEx& rhs) const {
 			return (m_Width == rhs.m_Width && m_Height == rhs.m_Height);

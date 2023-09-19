@@ -35,6 +35,11 @@ def GetTmplOperOffset(sname: str, svars: tuple[str]) -> str:
 \t\t\t{sp.join(map(lambda x: f'case {x}: return {svars[x]};', range(len(svars))))}
 \t\t\tdefault: return {svars[0]};
 \t\t}}
+\t}}\tconst CKFLOAT& operator[](size_t i) const {{
+\t\tswitch (i) {{
+\t\t\t{sp.join(map(lambda x: f'case {x}: return {svars[x]};', range(len(svars))))}
+\t\t\tdefault: return {svars[0]};
+\t\t}}
 \t}}"""
 
 def GetTmplOperAddMinus(sname: str, svars: tuple[str], oper: str) -> str:
@@ -58,6 +63,9 @@ def GetTmplOperMul(sname: str, svars: tuple[str]) -> str:
 \t}}
 \tfriend {sname} operator*(CKFLOAT lhs, const {sname}& rhs) {{
 \t\treturn {sname}({', '.join(map(lambda x: f'lhs * rhs.{x}', svars))});
+\t}}
+\tfriend CKFLOAT operator*(const {sname}& lhs, const {sname}& rhs) {{
+\t\treturn ({' + '.join(map(lambda x: f'lhs.{x} * rhs.{x}', svars))});
 \t}}"""
 
 def GetTmplOperDiv(sname: str, svars: tuple[str]) -> str:
@@ -73,12 +81,32 @@ def GetTmplOperDiv(sname: str, svars: tuple[str]) -> str:
 \t}}"""
 
 def GetTmplOperEqual(sname: str, svars: tuple[str]) -> str:
-    sp: str = '\n\t\t'
     return f"""\tbool operator==(const {sname}& rhs) const {{
 \t\treturn ({' && '.join(map(lambda x: f'{x} == rhs.{x}', svars))});
 \t}}
 \tbool operator!=(const {sname}& rhs) const {{
 \t\treturn !(*this == rhs);
+\t}}"""
+
+def GetTmplLength(sname: str, svars: tuple[str]) -> str:
+    return f"""\tCKFLOAT SquaredLength() const {{
+\t\treturn ({' + '.join(map(lambda x: f'{x} * {x}', svars))});
+\t}}
+\tCKFLOAT Length() const {{
+\t\treturn std::sqrt(SquaredLength());
+\t}}"""
+
+def GetTmplNormalize(sname: str, svars: tuple[str]) -> str:
+    sp: str = '\n\t\t'
+    return f"""\tvoid Normalized() {{
+\t\tCKFLOAT len = Length();
+\t\tif (len == 0.0f) return;
+\t\t{sp.join(map(lambda x: f'{x} /= len;', svars))}
+\t}}
+\t{sname} Normalize() const {{
+\t\tCKFLOAT len = Length();
+\t\tif (len == 0.0f) return {sname}();
+\t\treturn {sname}({', '.join(map(lambda x: f'{x} / len', svars))});
 \t}}"""
 
 def GetTmplVector(sname: str, svars: tuple[str]) -> str:
@@ -94,6 +122,8 @@ struct {sname} {{
 {GetTmplOperMul(sname, svars)}
 {GetTmplOperDiv(sname, svars)}
 {GetTmplOperEqual(sname, svars)}
+{GetTmplLength(sname, svars)}
+{GetTmplNormalize(sname, svars)}
 }};
 """
 
