@@ -12,6 +12,9 @@ CodeGen/*.cpp
 CodeGen/EnumsMigration/dest/*.hpp
 CodeGen/EnumsMigration/dest/*.cpp
 
+Tools/*.obj
+Tools/*.mtl
+
 ## CMake Banned
 CMakeLists.txt.user
 CMakeCache.txt
