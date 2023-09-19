@@ -12,6 +12,7 @@ CodeGen/*.cpp
 CodeGen/EnumsMigration/dest/*.hpp
 CodeGen/EnumsMigration/dest/*.cpp
 
+Tools/*.bin
 Tools/*.obj
 Tools/*.mtl
 

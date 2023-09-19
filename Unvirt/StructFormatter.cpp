@@ -1,5 +1,4 @@
-#include <VTAll.hpp>
-#include <CK2/CKStateChunk.hpp>
+#include <VTUserAll.hpp>
 #include "StructFormatter.hpp"
 #include "AccessibleValue.hpp"
 #include "TerminalHelper.hpp"
@@ -59,6 +58,66 @@ namespace Unvirt::StructFormatter {
 	}
 
 #pragma endregion
+
+#pragma region Object Printer
+	
+	static void PrintCKObjectDetail(LibCmo::CK2::ObjImpls::CKObject* obj) {
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKObject\n")), stdout);
+		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+	}
+	
+	static void PrintCKSceneObjectDetail(LibCmo::CK2::ObjImpls::CKSceneObject* obj) {
+		PrintCKObjectDetail(obj);
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKSceneObject\n")), stdout);
+		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+	}
+
+	static void PrintCKBeObjectDetail(LibCmo::CK2::ObjImpls::CKBeObject* obj) {
+		PrintCKSceneObjectDetail(obj);
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKBeObject\n")), stdout);
+		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+	}
+
+	static void PrintCKMeshDetail(LibCmo::CK2::ObjImpls::CKMesh* obj) {
+		PrintCKBeObjectDetail(obj);
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKMesh\n")), stdout);
+
+		fputs("Vertex:\n", stdout);
+		fprintf(stdout, "Vertex Count: %" PRIuCKDWORD "\n", obj->GetVertexCount());
+
+		fputs("VertexPositions: ", stdout);
+		PrintPointer(obj->GetVertexPositions());
+		fputc('\n', stdout);
+		fputs("VertexNormals: ", stdout);
+		PrintPointer(obj->GetVertexNormals());
+		fputc('\n', stdout);
+		fputs("VertexUVs: ", stdout);
+		PrintPointer(obj->GetVertexUVs());
+		fputc('\n', stdout);
+		fputs("VertexColors: ", stdout);
+		PrintPointer(obj->GetVertexColors());
+		fputc('\n', stdout);
+		fputs("VertexSpecularColors: ", stdout);
+		PrintPointer(obj->GetVertexSpecularColors());
+		fputc('\n', stdout);
+		fputs("VertexWeights: ", stdout);
+		PrintPointer(obj->GetVertexWeights());
+		fputc('\n', stdout);
+		
+		fputs("Face:\n", stdout);
+		fprintf(stdout, "Face Count: %" PRIuCKDWORD "\n", obj->GetFaceCount());
+		
+		fputs("FaceIndices: ", stdout);
+		PrintPointer(obj->GetFaceIndices());
+		fputc('\n', stdout);
+		fputs("FaceMaterialSlotIndexs: ", stdout);
+		PrintPointer(obj->GetFaceMaterialSlotIndexs());
+		fputc('\n', stdout);
+
+	}
+
+#pragma endregion
+
 
 	void PrintCKFileInfo(const LibCmo::CK2::CKFileInfo& fileinfo) {
 
@@ -166,13 +225,21 @@ namespace Unvirt::StructFormatter {
 	}
 
 	void PrintCKObject(const LibCmo::CK2::ObjImpls::CKObject* obj) {
-		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKObject\n")), stdout);
 		if (obj == nullptr) {
-			fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+			fputs(UNVIRT_TERMCOL_LIGHT_RED(("Null Object\n")), stdout);
 			return;
 		}
 
-		fputs(UNVIRT_TERMCOL_LIGHT_RED(("Not Implemented.\n")), stdout);
+		LibCmo::CK2::ObjImpls::CKObject* mobj = const_cast<LibCmo::CK2::ObjImpls::CKObject*>(obj);
+		switch (mobj->GetClassID()) {
+			case LibCmo::CK2::CK_CLASSID::CKCID_MESH:
+				PrintCKMeshDetail(static_cast<LibCmo::CK2::ObjImpls::CKMesh*>(mobj));
+				break;
+			default:
+				fputs(UNVIRT_TERMCOL_LIGHT_RED(("Not Implemented.\n")), stdout);
+				break;
+		}
+
 	}
 	void PrintCKBaseManager(const LibCmo::CK2::MgrImpls::CKBaseManager* mgr) {
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKBaseManager\n")), stdout);

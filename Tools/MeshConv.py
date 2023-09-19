@@ -2,7 +2,10 @@ import argparse, io, math, struct
 
 # setup parser
 parser = argparse.ArgumentParser(description='The Mesh Converter.')
-parser.add_argument('-b', '--in-bin', required=True, type=str, action='store', dest='in_bin', metavar='mesh.bin')
+parser.add_argument('-p', '--in-vpos', required=True, type=str, action='store', dest='in_vpos', metavar='vpos.bin')
+parser.add_argument('-n', '--in-vbml', required=True, type=str, action='store', dest='in_vnml', metavar='vnml.bin')
+parser.add_argument('-u', '--in-vuv', required=True, type=str, action='store', dest='in_vuv', metavar='vuv.bin')
+parser.add_argument('-i', '--in-findices', required=True, type=str, action='store', dest='in_findices', metavar='findices.bin')
 parser.add_argument('-o', '--out-obj', required=True, type=str, action='store', dest='out_obj', metavar='mesh.obj')
 parser.add_argument('-m', '--out-mtl', required=True, type=str, action='store', dest='out_mtl', metavar='mesh.mtl')
 
@@ -20,6 +23,14 @@ def EvaluateVertexCount(filename: str) -> int:
     with open(filename, 'rb') as fs:
         filesize = GetFileLength(fs)
         count, modrem = divmod(filesize, 3 * 4) # 3 float(4 byte)
+        if modrem != 0:
+            raise Exception("invalid file length")
+        return count
+
+def EvaluateFaceCount(filename: str) -> int:
+    with open(filename, 'rb') as fs:
+        filesize = GetFileLength(fs)
+        count, modrem = divmod(filesize, 3 * 2) # 3 WORD(2 byte)
         if modrem != 0:
             raise Exception("invalid file length")
         return count
@@ -72,17 +83,16 @@ if __name__ == '__main__':
     input("Prepare VertexPositions please.")
     vertexcount = EvaluateVertexCount(args.in_bin)
     print(f'Vertex Count Evaluated: {vertexcount}')
-    vpos = RecoupleTuple(ReadFloats(3 * vertexcount), 3)
+    vpos = RecoupleTuple(ReadFloats(args.in_bin, 3 * vertexcount), 3)
 
     input("Prepare VertexNormals please.")
-    vnml = RecoupleTuple(ReadFloats(3 * vertexcount), 3)
+    vnml = RecoupleTuple(ReadFloats(args.in_bin, 3 * vertexcount), 3)
 
     input("Prepare VertexUVs please.")
-    vuv = RecoupleTuple(ReadFloats(2 * vertexcount), 2)
+    vuv = RecoupleTuple(ReadFloats(args.in_bin, 2 * vertexcount), 2)
 
     input("Prepare FaceIndices please.")
-    findices = RecoupleTuple(ReadShorts(3 * vertexcount), 3)
+    findices = RecoupleTuple(ReadShorts(args.in_bin, 3 * vertexcount), 3)
 
     GenerateObj(args.out_obj, vpos, vnml, vuv, findices)
     print('Done')
-    
