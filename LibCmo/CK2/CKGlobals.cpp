@@ -411,11 +411,11 @@ CKClassRegister(cid, parentCid, \
 		EasyClassReg(ObjImpls::CKBeObject, CK_CLASSID::CKCID_BEOBJECT, CK_CLASSID::CKCID_SCENEOBJECT, "Behavioral Object");
 		EasyClassRegWithNotify(ObjImpls::CKGroup, CK_CLASSID::CKCID_GROUP, CK_CLASSID::CKCID_BEOBJECT, "Group", { CK_CLASSID::CKCID_BEOBJECT });
 		EasyClassReg(ObjImpls::CKRenderObject, CK_CLASSID::CKCID_RENDEROBJECT, CK_CLASSID::CKCID_BEOBJECT, "Render Object");
-		EasyClassReg(ObjImpls::CK3dEntity, CK_CLASSID::CKCID_3DENTITY, CK_CLASSID::CKCID_RENDEROBJECT, "3D Entity");
+		EasyClassRegWithNotify(ObjImpls::CK3dEntity, CK_CLASSID::CKCID_3DENTITY, CK_CLASSID::CKCID_RENDEROBJECT, "3D Entity", { CK_CLASSID::CKCID_MESH });
 		EasyClassReg(ObjImpls::CK3dObject, CK_CLASSID::CKCID_3DOBJECT, CK_CLASSID::CKCID_3DENTITY, "3D Object");
 		EasyClassReg(ObjImpls::CKTexture, CK_CLASSID::CKCID_TEXTURE, CK_CLASSID::CKCID_BEOBJECT, "Texture");
-		EasyClassReg(ObjImpls::CKMaterial, CK_CLASSID::CKCID_MATERIAL, CK_CLASSID::CKCID_BEOBJECT, "Material");
-		EasyClassReg(ObjImpls::CKMesh, CK_CLASSID::CKCID_MESH, CK_CLASSID::CKCID_BEOBJECT, "Mesh");
+		EasyClassRegWithNotify(ObjImpls::CKMaterial, CK_CLASSID::CKCID_MATERIAL, CK_CLASSID::CKCID_BEOBJECT, "Material", { CK_CLASSID::CKCID_TEXTURE });
+		EasyClassRegWithNotify(ObjImpls::CKMesh, CK_CLASSID::CKCID_MESH, CK_CLASSID::CKCID_BEOBJECT, "Mesh", { CK_CLASSID::CKCID_MATERIAL });
 
 #undef EasyClassReg
 #undef EasyClassRegWithNotify

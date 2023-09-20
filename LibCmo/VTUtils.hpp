@@ -1,6 +1,9 @@
 #pragma once
 
-/*
+#if !defined(LIBCMO_BUILD_DEBUG) && !defined(LIBCMO_BUILD_RELEASE)
+#error "You must define LIBCMO_BUILD_DEBUG or LIBCMO_BUILD_RELEASE to indicate build type!"
+#endif
+
 // https://stackoverflow.com/questions/2164827/explicitly-exporting-shared-library-functions-in-linux
 // generate import export macro
 #if defined(_MSC_VER)
@@ -35,7 +38,7 @@
 #else
 #define LIBCMO_EXPORT LIBCMO_NAKED_EXPORT
 #endif
-*/
+
 
 #if defined(_WIN32)
 #define LIBCMO_OS_WIN32

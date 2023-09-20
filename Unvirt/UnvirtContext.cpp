@@ -128,6 +128,12 @@ namespace Unvirt::Context {
 				)
 			)
 		)
+		->Then((new CmdHelper::Literal("test"))
+			->Executes(
+				std::bind(&UnvirtContext::ProcTest, this, std::placeholders::_1),
+				"Call custom debugging function (only available in Debug mode)."
+			)
+		)
 		->Then((new CmdHelper::Literal("help"))
 			->Executes(
 				std::bind(&UnvirtContext::ProcHelp, this, std::placeholders::_1),
@@ -431,6 +437,16 @@ namespace Unvirt::Context {
 				PrintCommonError("Set data resource folder failed. Check your path first.");
 			}
 		}
+	}
+
+	void Unvirt::Context::UnvirtContext::ProcTest(const CmdHelper::ArgumentsMap* amap) {
+#if defined(LIBCMO_BUILD_DEBUG)
+		// MARK: Add the debug code here.
+
+
+#else
+		PrintCommonError("Test command only available in Debug mode.");
+#endif
 	}
 
 	void Unvirt::Context::UnvirtContext::ProcHelp(const CmdHelper::ArgumentsMap*) {

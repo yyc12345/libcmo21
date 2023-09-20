@@ -38,6 +38,7 @@ namespace Unvirt::Context {
 		void ProcEncoding(const CmdHelper::ArgumentsMap* amap);
 		void ProcTemp(const CmdHelper::ArgumentsMap* amap);
 		void ProcRsc(const CmdHelper::ArgumentsMap* amap, bool isClear);
+		void ProcTest(const CmdHelper::ArgumentsMap* amap);
 		void ProcHelp(const CmdHelper::ArgumentsMap* amap);
 		void ProcExit(const CmdHelper::ArgumentsMap* amap);
 
