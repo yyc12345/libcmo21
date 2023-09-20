@@ -442,8 +442,6 @@ namespace Unvirt::Context {
 	void Unvirt::Context::UnvirtContext::ProcTest(const CmdHelper::ArgumentsMap* amap) {
 #if defined(LIBCMO_BUILD_DEBUG)
 		// MARK: Add the debug code here.
-		char p = 0;
-		char a = 1 / p;
 
 #else
 		PrintCommonError("Test command only available in Debug mode.");

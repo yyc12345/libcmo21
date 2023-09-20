@@ -177,22 +177,20 @@ namespace IronPad {
 	}
 
 	static void UExceptionCoreDump(LPCWSTR filename, LPEXCEPTION_POINTERS info) {
-		// setup handle
-		HANDLE hProcess = GetCurrentProcess();
-		DWORD dwProcessId = GetCurrentProcessId();
-		DWORD dwThreadId = GetCurrentThreadId();
-		
 		// open file and write
-		if (hProcess != INVALID_HANDLE_VALUE) {
-			HANDLE hFile = CreateFileW(filename, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-			if (hFile != INVALID_HANDLE_VALUE) {
-				MINIDUMP_EXCEPTION_INFORMATION exception_info;
-				exception_info.ThreadId = dwThreadId;
-				exception_info.ExceptionPointers = info;
-				exception_info.ClientPointers = TRUE;
-				MiniDumpWriteDump(hProcess, dwProcessId, hFile, MiniDumpWithFullMemory, &exception_info, NULL, NULL);
-				CloseHandle(hFile);
-			}
+		HANDLE hFile = CreateFileW(filename, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (hFile != INVALID_HANDLE_VALUE) {
+			MINIDUMP_EXCEPTION_INFORMATION exception_info;
+			exception_info.ThreadId = GetCurrentThreadId();
+			exception_info.ExceptionPointers = info;
+			exception_info.ClientPointers = TRUE;
+			MiniDumpWriteDump(
+				GetCurrentProcess(), GetCurrentProcessId(), hFile,
+				MiniDumpWithFullMemory,
+				&exception_info,
+				NULL, NULL
+			);
+			CloseHandle(hFile);
 		}
 	}
 
