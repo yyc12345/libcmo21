@@ -14,10 +14,12 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual CK_CLASSID GetClassID(void) override { 
 			return CK_CLASSID::CKCID_3DENTITY; 
 		}
-		//virtual void PreSave(CKFileVisitor* file, CKDWORD flags) override;
+		
+		virtual void CheckPreDeletion() override;
+
+		// 2 RW functions
 		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) override;
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
-		//virtual void PostLoad() override;
 		
 		// it have special Show and IsVisible method
 		virtual void Show(CK_OBJECT_SHOWOPTION show = CK_OBJECT_SHOWOPTION::CKSHOW) override;

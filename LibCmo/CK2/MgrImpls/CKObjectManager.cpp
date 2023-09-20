@@ -97,7 +97,7 @@ namespace LibCmo::CK2::MgrImpls {
 			// add into list
 			validObjIds.emplace_back(ids[i]);
 		}
-		
+
 		// then remove deleted object from m_ObjectListByClass
 		// because we have set to be deleted flag.
 		for (size_t i = 0; i < m_ObjectsListByClass.size(); ++i) {
@@ -115,6 +115,11 @@ namespace LibCmo::CK2::MgrImpls {
 			for (auto& objid : m_ObjectsListByClass[i]) {
 				m_ObjectsList[Id2Offset(objid)]->CheckPreDeletion();
 			}
+		}
+
+		// calling PreDelete function for deleted objects
+		for (const auto& objid : validObjIds) {
+			m_ObjectsList[Id2Offset(objid)]->PreDelete();
 		}
 
 		// then free all valid object

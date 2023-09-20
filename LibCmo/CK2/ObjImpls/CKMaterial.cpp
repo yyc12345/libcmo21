@@ -33,6 +33,17 @@ namespace LibCmo::CK2::ObjImpls {
 
 	CKMaterial::~CKMaterial() {}
 
+	void CKMaterial::CheckPreDeletion() {
+		CKBeObject::CheckPreDeletion();
+
+		// check 4 textures
+		for (auto& tex : m_Textures) {
+			if (tex != nullptr && tex->IsToBeDeleted()) {
+				tex = nullptr;
+			}
+		}
+	}
+
 	bool CKMaterial::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
 		bool suc = CKBeObject::Save(chunk, file, flags);
 		if (!suc) return false;

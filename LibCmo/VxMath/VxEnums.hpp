@@ -183,11 +183,11 @@ namespace LibCmo::VxMath {
 	/**
 	Summary:  Material special effects
 	Remarks:
-		o Effects provide additionnal functionnalities to take advantage of graphic features such as bump mapping,cube maps etc... 
-		o When an effect is enabled on a material (CKMaterial::SetEffect) it may override the default settings of mesh channels or material blend options
-		o New effects can be created by providing a callback function (see CKRenderManager::AddEffect)
-		o This enumeration provides the list of hardcoded existing effects.
-		o Most of this effect are heavily hardware and device (DX8,DX7,etc..) dependant 
+		+ Effects provide additionnal functionnalities to take advantage of graphic features such as bump mapping,cube maps etc... 
+		+ When an effect is enabled on a material (CKMaterial::SetEffect) it may override the default settings of mesh channels or material blend options
+		+ New effects can be created by providing a callback function (see CKRenderManager::AddEffect)
+		+ This enumeration provides the list of hardcoded existing effects.
+		+ Most of this effect are heavily hardware and device (DX8,DX7,etc..) dependant 
 	See also: CKMaterial::SetEffect,CKMaterial::GetEffect,CKRenderManager::AddEffect
 	 */
 	enum class VX_EFFECT : CKDWORD {

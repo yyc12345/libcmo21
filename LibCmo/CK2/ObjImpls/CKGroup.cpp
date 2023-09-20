@@ -12,7 +12,25 @@ namespace LibCmo::CK2::ObjImpls {
 		m_GroupIndex(m_Context->GetObjectManager()->AllocateGroupGlobalIndex()) {}
 
 	CKGroup::~CKGroup() {
+		// free self allocated id
 		m_Context->GetObjectManager()->FreeGroupGlobalIndex(m_GroupIndex);
+	}
+
+	void CKGroup::PreDelete() {
+		CKBeObject::PreDelete();
+
+		// unlink all grouped object
+		for (auto& ptr : m_ObjectArray) {
+			static_cast<CKBeObject*>(ptr)->ExplicitSetGroup(m_GroupIndex, false);
+		}
+		m_ObjectArray.clear();
+	}
+
+	void CKGroup::CheckPreDeletion() {
+		CKBeObject::CheckPreDeletion();
+
+		// remove self invalid object ptr
+		XContainer::NSXObjectPointerArray::PreDeletedCheck(m_ObjectArray, m_Context);
 	}
 
 	bool CKGroup::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {

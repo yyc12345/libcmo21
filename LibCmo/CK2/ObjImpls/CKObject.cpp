@@ -28,12 +28,17 @@ namespace LibCmo::CK2::ObjImpls {
 	void CKObject::SetObjectFlags(CK_OBJECT_FLAGS flags) {
 		m_ObjectFlags = flags;
 	}
+	bool CKObject::IsToBeDeleted() const {
+		return EnumsHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_TOBEDELETED);
+	}
 	CKContext* CKObject::GetCKContext() const {
 		return m_Context;
 	}
 
 #pragma endregion
 
+
+	void CKObject::PreDelete() {}
 
 	void CKObject::CheckPreDeletion() {}
 

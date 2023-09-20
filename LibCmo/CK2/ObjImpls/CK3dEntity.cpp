@@ -19,6 +19,18 @@ namespace LibCmo::CK2::ObjImpls {
 
 	CK3dEntity::~CK3dEntity() {}
 
+	void CK3dEntity::CheckPreDeletion() {
+		CKRenderObject::CheckPreDeletion();
+
+		// check active mesh
+		if (m_CurrentMesh->IsToBeDeleted()) {
+			m_CurrentMesh = nullptr;
+		}
+
+		// check potential meshes
+		XContainer::NSXObjectPointerArray::PreDeletedCheck(m_PotentialMeshes, m_Context);
+	}
+
 	bool CK3dEntity::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
 		bool suc = CKRenderObject::Save(chunk, file, flags);
 		if (!suc) return false;

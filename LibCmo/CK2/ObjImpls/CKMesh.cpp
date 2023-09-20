@@ -35,6 +35,24 @@ namespace LibCmo::CK2::ObjImpls {
 
 	CKMesh::~CKMesh() {}
 
+	void CKMesh::CheckPreDeletion() {
+		CKBeObject::CheckPreDeletion();
+
+		// check material slots
+		for (auto& slot : m_MaterialSlot) {
+			if (slot != nullptr && slot->IsToBeDeleted()) {
+				slot = nullptr;
+			}
+		}
+
+		// check mtl channels
+		for (auto& chl : m_MaterialChannels) {
+			if (chl.m_Material != nullptr && chl.m_Material->IsToBeDeleted()) {
+				chl.m_Material = nullptr;
+			}
+		}
+	}
+
 	bool CKMesh::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
 		bool suc = CKBeObject::Save(chunk, file, flags);
 		if (!suc) return false;

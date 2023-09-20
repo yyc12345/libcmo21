@@ -204,6 +204,7 @@ namespace Unvirt::Context {
 
 			// split cmd and parse it
 			auto cmds = m_Splitter.Convert(u8cmd);
+			if (cmds.empty()) continue;
 
 			// get sub command
 			if (!m_Root.RootConsume(cmds)) {

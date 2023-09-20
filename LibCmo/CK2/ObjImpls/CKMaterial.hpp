@@ -15,11 +15,12 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual CK_CLASSID GetClassID(void) override { 
 			return CK_CLASSID::CKCID_MATERIAL; 
 		}
+
+		virtual void CheckPreDeletion() override;
 		
-		//virtual void PreSave(CKFileVisitor* file, CKDWORD flags) override;
+		// 2 RW functions
 		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) override;
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
-		//virtual void PostLoad() override;
 
 	protected:
 		VxMath::VxColor m_Diffuse;

@@ -16,6 +16,7 @@ Implement as original meaning:
 - Show()
 - IsVisible()
 
+- PreDelete()
 - CheckPreDeletion()
 - CheckPostDeletion()
 
@@ -30,7 +31,6 @@ No implement because don't care:
 
 Implement moved into other location:
 - Copy(): Use CKObject::CKObject(CK_ID newid, const CKObject* obj) ctor and CKClassDesc to implement.
-- PreDelete(): Write in dtor.
 
 */
 
@@ -47,12 +47,14 @@ namespace LibCmo::CK2::ObjImpls {
 		void SetName(CKSTRING u8_name);
 		CK_OBJECT_FLAGS GetObjectFlags(void) const;
 		void SetObjectFlags(CK_OBJECT_FLAGS flags);
+		bool IsToBeDeleted() const;
 		CKContext* GetCKContext() const;
 
 		virtual CK_CLASSID GetClassID(void) { 
 			return CK_CLASSID::CKCID_OBJECT; 
 		}
 
+		virtual void PreDelete();
 		virtual void CheckPreDeletion();
 		virtual void CheckPostDeletion();
 

@@ -98,7 +98,7 @@ namespace LibCmo::XContainer {
 			} else {
 				obj = item;
 			}
-			if (EnumsHelper::Has(obj->GetObjectFlags(), CK2::CK_OBJECT_FLAGS::CK_OBJECT_TOBEDELETED)) return false;
+			if (obj->IsToBeDeleted()) return false;
 		} else {
 			CK2::MgrImpls::CKObjectManager* objmgr = ctx->GetObjectManager();
 			if constexpr (std::is_same_v<_Ty, CK2::CK_ID>) {

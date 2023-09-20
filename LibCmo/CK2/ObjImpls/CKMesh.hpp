@@ -15,10 +15,11 @@ namespace LibCmo::CK2::ObjImpls {
 			return CK_CLASSID::CKCID_MESH; 
 		}
 		
-		//virtual void PreSave(CKFileVisitor* file, CKDWORD flags) override;
+		virtual void CheckPreDeletion() override;
+
+		// 2 RW functions
 		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) override;
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
-		//virtual void PostLoad() override;
 
 		// it only have special Show method
 		virtual void Show(CK_OBJECT_SHOWOPTION show = CK_OBJECT_SHOWOPTION::CKSHOW) override;
