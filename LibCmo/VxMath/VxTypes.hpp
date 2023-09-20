@@ -399,7 +399,7 @@ namespace LibCmo::VxMath {
 	class VxStridedData {
 	public:
 		VxStridedData(_Ty ptr, CKDWORD stride) :
-			m_Ptr(reinterpret_cast<CKBYTE*>(m_Ptr)),
+			m_Ptr(reinterpret_cast<CKBYTE*>(ptr)),
 			m_Stride(stride) {}
 		~VxStridedData() {}
 

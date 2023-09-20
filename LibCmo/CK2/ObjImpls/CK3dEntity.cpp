@@ -53,7 +53,13 @@ namespace LibCmo::CK2::ObjImpls {
 			XContainer::XObjectPointerArray potentials;
 			chunk->ReadXObjectPointerArray(potentials);
 			for (const auto& ptr : potentials) {
+				if (ptr == nullptr) continue;
 				XContainer::NSXObjectPointerArray::AddIfNotHere(m_PotentialMeshes, ptr);
+			}
+
+			// add current mesh to potential meshes
+			if (m_CurrentMesh != nullptr) {
+				XContainer::NSXObjectPointerArray::AddIfNotHere(m_PotentialMeshes, m_CurrentMesh);
 			}
 
 		}
@@ -88,6 +94,8 @@ namespace LibCmo::CK2::ObjImpls {
 			}
 
 			// read matrix
+			// reset
+			m_WorldMatrix.ResetToIdentity();
 			// force read as vector3
 			chunk->ReadStruct(reinterpret_cast<VxMath::VxVector3*>(&m_WorldMatrix[0]));
 			chunk->ReadStruct(reinterpret_cast<VxMath::VxVector3*>(&m_WorldMatrix[1]));
@@ -139,7 +147,12 @@ namespace LibCmo::CK2::ObjImpls {
 				chunk->ReadStruct(m_ZOrder);
 			}
 			
+		} else {
+			// MARK: compatibility code removed because I don't need them
+			return false;
 		}
+		
+		// MARK: skin and bone are skipped.
 
 		return true;
 	}

@@ -3,8 +3,45 @@
 
 namespace LibCmo::CK2::ObjImpls {
 
+	CKObject::CKObject(CKContext* ctx, CK_ID ckid, CKSTRING name) :
+		m_ID(ckid),
+		m_Name(name),
+		m_Context(ctx),
+		m_ObjectFlags(CK_OBJECT_FLAGS::CK_PARAMETERIN_DISABLED) {}
+
+	CKObject::~CKObject() {}
+
+#pragma region Non-virtual Functions
+
+	CK_ID CKObject::GetID(void) const {
+		return m_ID;
+	}
+	CKSTRING CKObject::GetName(void) const {
+		return XContainer::NSXString::ToCKSTRING(m_Name);
+	}
+	void CKObject::SetName(CKSTRING u8_name) {
+		XContainer::NSXString::FromCKSTRING(m_Name, u8_name);
+	}
+	CK_OBJECT_FLAGS CKObject::GetObjectFlags(void) const {
+		return m_ObjectFlags;
+	}
+	void CKObject::SetObjectFlags(CK_OBJECT_FLAGS flags) {
+		m_ObjectFlags = flags;
+	}
+	bool CKObject::IsHierarchicallyHide() const { 
+		return EnumsHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE);
+	}
+	CKContext* CKObject::GetCKContext() const {
+		return m_Context;
+	}
+
+#pragma endregion
+
+
 	void CKObject::CheckPreDeletion() {}
+
 	void CKObject::CheckPostDeletion() {}
+
 
 	void CKObject::PreSave(CKFileVisitor* file, CKDWORD flags) {}
 
@@ -36,90 +73,36 @@ namespace LibCmo::CK2::ObjImpls {
 	void CKObject::PostLoad() {}
 
 
-	//CKSceneObject::CKSceneObject(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
-	//}
-	//CKSceneObject::~CKSceneObject() {
-	//}
+	void CKObject::Show(CK_OBJECT_SHOWOPTION show) {
+		// clear all visible data of object flags
+		EnumsHelper::Rm(m_ObjectFlags, EnumsHelper::Merge({
+			CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE,
+			CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE
+			}));
 
-	//CKBeObject::CKBeObject(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKSceneObject(ctx, ckid, name) {
-	//}
-	//CKBeObject::~CKBeObject() {
-	//}
+		switch (show) {
+			case CK_OBJECT_SHOWOPTION::CKSHOW:
+				EnumsHelper::Add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+				break;
+			case CK_OBJECT_SHOWOPTION::CKHIERARCHICALHIDE:
+				EnumsHelper::Add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE);
+				break;
+			case CK_OBJECT_SHOWOPTION::CKHIDE:
+				return;
+		}
+	}
 
-	//CKGroup::CKGroup(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKBeObject(ctx, ckid, name) {
-	//}
-	//CKGroup::~CKGroup() {
-	//}
+	bool CKObject::IsHiddenByParent() const {
+		return false;
+	}
 
-	//CKMesh::CKMesh(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKBeObject(ctx, ckid, name) {
-	//}
-	//CKMesh::~CKMesh() {
-	//}
+	CK_OBJECT_CANBEHIDE CKObject::CanBeHide() const {
+		return CK_OBJECT_CANBEHIDE::CKCANNOTHIDE;
+	}
 
-	//CKTexture::CKTexture(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKBeObject(ctx, ckid, name) {
-	//}
-	//CKTexture::~CKTexture() {
-	//}
+	bool CKObject::IsVisible() const {
+		return EnumsHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+	}
 
-	//CKMaterial::CKMaterial(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKBeObject(ctx, ckid, name) {
-	//}
-	//CKMaterial::~CKMaterial() {
-	//}
-
-	//CKRenderObject::CKRenderObject(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKBeObject(ctx, ckid, name) {
-	//}
-	//CKRenderObject::~CKRenderObject() {
-	//}
-
-	//CK3dEntity::CK3dEntity(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKRenderObject(ctx, ckid, name) {
-	//}
-	//CK3dEntity::~CK3dEntity() {
-	//}
-
-	//CK3dObject::CK3dObject(CKContext* ctx, CK_ID ckid, CKSTRING name) : CK3dEntity(ctx, ckid, name) {
-	//}
-	//CK3dObject::~CK3dObject() {
-	//}
-
-
-	//CKParameterIn::CKParameterIn(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
-	//}
-	//CKParameterIn::~CKParameterIn() {
-	//}
-
-	//CKParameter::CKParameter(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
-	//}
-	//CKParameter::~CKParameter() {
-	//}
-
-	//CKParameterOut::CKParameterOut(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKParameter(ctx, ckid, name) {
-	//}
-	//CKParameterOut::~CKParameterOut() {
-	//}
-
-	//CKParameterLocal::CKParameterLocal(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKParameter(ctx, ckid, name) {
-	//}
-	//CKParameterLocal::~CKParameterLocal() {
-	//}
-
-	//CKParameterOperation::CKParameterOperation(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
-	//}
-	//CKParameterOperation::~CKParameterOperation() {
-	//}
-
-	//CKBehaviorLink::CKBehaviorLink(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
-	//}
-	//CKBehaviorLink::~CKBehaviorLink() {
-	//}
-
-	//CKBehaviorIO::CKBehaviorIO(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKObject(ctx, ckid, name) {
-	//}
-	//CKBehaviorIO::~CKBehaviorIO() {
-	//}
-
-	//CKBehavior::CKBehavior(CKContext* ctx, CK_ID ckid, CKSTRING name) : CKSceneObject(ctx, ckid, name) {
-	//}
-	//CKBehavior::~CKBehavior() {
-	//}
 
 }

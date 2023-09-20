@@ -32,7 +32,7 @@ namespace LibCmo::CK2 {
 		uLongf _destLen = static_cast<uLongf>(boundary);
 		if (compress2(
 			reinterpret_cast<Bytef*>(DestBuffer), &_destLen,
-			reinterpret_cast<const Bytef*>(Data), static_cast<uLong>(size),
+			static_cast<const Bytef*>(Data), static_cast<uLong>(size),
 			static_cast<int>(compressionlevel)) != Z_OK) {
 			NewSize = 0;
 			delete[] DestBuffer;
@@ -49,7 +49,7 @@ namespace LibCmo::CK2 {
 		uLongf cache = DestSize;
 		if (uncompress(
 			reinterpret_cast<Bytef*>(DestBuffer), &cache,
-			reinterpret_cast<const Bytef*>(SrcBuffer), static_cast<uLong>(SrcSize)) != Z_OK) {
+			static_cast<const Bytef*>(SrcBuffer), static_cast<uLong>(SrcSize)) != Z_OK) {
 			delete[] DestBuffer;
 			return nullptr;
 		}
@@ -60,7 +60,7 @@ namespace LibCmo::CK2 {
 	CKDWORD CKComputeDataCRC(const void* data, CKDWORD size, CKDWORD PreviousCRC) {
 		return static_cast<CKDWORD>(adler32(
 			static_cast<uLong>(PreviousCRC),
-			reinterpret_cast<const Bytef*>(data),
+			static_cast<const Bytef*>(data),
 			static_cast<uInt>(size)
 			));
 	}

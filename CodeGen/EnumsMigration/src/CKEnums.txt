@@ -129,6 +129,18 @@ enum CK_STATECHUNK_CHUNKOPTIONS {
 	CHNK_DONTDELETE_PARSER	= 0x80,		// m_Parser Ptr is not owned by CKStateChunk , it must not be deleted...
 };
 
+typedef enum CK_OBJECT_SHOWOPTION {
+	CKHIDE				=0,
+	CKSHOW				=1,
+	CKHIERARCHICALHIDE	=2
+} CK_OBJECT_SHOWOPTION;
+
+typedef enum CK_OBJECT_CANBEHIDE {
+	CKCANNOTHIDE				=0, // the object cannot be hidden
+	CKCANHIDE				=1, // the object can be hidden
+	CKCANHIERARCHICALHIDE	=2 // the object can be hidden and hierarchically hidden
+} CK_OBJECT_CANBEHIDE;
+
 /***************************************************
 {filename:CK_OBJECT_FLAGS}
 Summary: CKObject Flags

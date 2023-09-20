@@ -56,7 +56,7 @@ namespace LibCmo::CK2 {
 					VxMath::VxDoAlphaBlit(slot, static_cast<CKBYTE>(globalalpha));
 				} else {
 					auto alphabuf = chk->ReadBufferWrapper();
-					VxMath::VxDoAlphaBlit(slot, reinterpret_cast<const CKBYTE*>(alphabuf.get()));
+					VxMath::VxDoAlphaBlit(slot, static_cast<const CKBYTE*>(alphabuf.get()));
 				}
 			}
 
@@ -102,10 +102,10 @@ namespace LibCmo::CK2 {
 			// get essential data
 			CKDWORD pixelcount = slot->GetPixelCount();
 			CKBYTE* dst = slot->GetMutableImage(),
-				* redSrc = reinterpret_cast<CKBYTE*>(redBuffer.get()),
-				* greenSrc = reinterpret_cast<CKBYTE*>(greenBuffer.get()),
-				* blueSrc = reinterpret_cast<CKBYTE*>(blueBuffer.get()),
-				* alphaSrc = reinterpret_cast<CKBYTE*>(alphaBuffer.get());
+				* redSrc = static_cast<CKBYTE*>(redBuffer.get()),
+				* greenSrc = static_cast<CKBYTE*>(greenBuffer.get()),
+				* blueSrc = static_cast<CKBYTE*>(blueBuffer.get()),
+				* alphaSrc = static_cast<CKBYTE*>(alphaBuffer.get());
 			for (CKDWORD p = 0; p < pixelcount; ++p) {
 				*(dst++) = *(blueSrc++);
 				*(dst++) = *(greenSrc++);

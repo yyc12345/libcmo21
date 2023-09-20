@@ -315,15 +315,15 @@ namespace LibCmo::CK2 {
 		// read chunk ver and data ver first
 		// chunk ver always set in the 3rd BYTE in every format
 		this->m_ChunkVersion = static_cast<CK_STATECHUNK_CHUNKVERSION>(
-			reinterpret_cast<const CKBYTE*>(buf)[2]
+			static_cast<const CKBYTE*>(buf)[2]
 			);
 		// data ver always set in the 1st BYTE in every format
 		this->m_DataVersion = static_cast<CK_STATECHUNK_DATAVERSION>(
-			reinterpret_cast<const CKBYTE*>(buf)[0]
+			static_cast<const CKBYTE*>(buf)[0]
 			);
 
 		// switch according to chunk ver
-		const CKDWORD* dwbuf = reinterpret_cast<const CKDWORD*>(buf);
+		const CKDWORD* dwbuf = static_cast<const CKDWORD*>(buf);
 		size_t bufpos = 0u;
 		if (this->m_ChunkVersion < CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION2) {
 			// very old file
@@ -390,11 +390,11 @@ namespace LibCmo::CK2 {
 			// re-read some extra data
 			// class id located the 2nd BYTE
 			this->m_ClassId = static_cast<CK_CLASSID>(
-				reinterpret_cast<const CKBYTE*>(buf)[1]
+				static_cast<const CKBYTE*>(buf)[1]
 				);
 			// options located the 4th BYTE
 			CK_STATECHUNK_CHUNKOPTIONS options = static_cast<CK_STATECHUNK_CHUNKOPTIONS>(
-				reinterpret_cast<const CKBYTE*>(buf)[3]
+				static_cast<const CKBYTE*>(buf)[3]
 				);
 
 			// read normal data
@@ -464,12 +464,12 @@ namespace LibCmo::CK2 {
 		// if buffer provided, write it
 		if (buf != nullptr) {
 			// write header
-			reinterpret_cast<CKBYTE*>(buf)[0] = static_cast<CKBYTE>(this->m_DataVersion);
-			reinterpret_cast<CKBYTE*>(buf)[1] = static_cast<CKBYTE>(this->m_ClassId);
-			reinterpret_cast<CKBYTE*>(buf)[2] = static_cast<CKBYTE>(this->m_ChunkVersion);
-			reinterpret_cast<CKBYTE*>(buf)[3] = static_cast<CKBYTE>(options);
+			static_cast<CKBYTE*>(buf)[0] = static_cast<CKBYTE>(this->m_DataVersion);
+			static_cast<CKBYTE*>(buf)[1] = static_cast<CKBYTE>(this->m_ClassId);
+			static_cast<CKBYTE*>(buf)[2] = static_cast<CKBYTE>(this->m_ChunkVersion);
+			static_cast<CKBYTE*>(buf)[3] = static_cast<CKBYTE>(options);
 
-			CKDWORD* dwbuf = reinterpret_cast<CKDWORD*>(buf);
+			CKDWORD* dwbuf = static_cast<CKDWORD*>(buf);
 			// write buffer length
 			dwbuf[1] = this->m_DataDwSize;
 			size_t bufpos = 2u;

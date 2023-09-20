@@ -322,7 +322,7 @@ namespace LibCmo::CK2 {
 	
 	void CKStateChunk::DeleteBuffer(const void* buf) {
 		if (buf == nullptr) return;
-		delete[] reinterpret_cast<const CKBYTE*>(buf);
+		delete[] static_cast<const CKBYTE*>(buf);
 	}
 
 	CKStateChunk::Buffer_t CKStateChunk::ReadBufferWrapper() {

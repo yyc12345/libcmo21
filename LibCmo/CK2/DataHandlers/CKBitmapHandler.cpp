@@ -121,7 +121,7 @@ namespace LibCmo::CK2::DataHandlers {
 		// read data
 		int x, y, channels_in_file;
 		stbi_uc* data = stbi_load_from_memory(
-			reinterpret_cast<const stbi_uc*>(memory),
+			static_cast<const stbi_uc*>(memory),
 			static_cast<int>(size),
 			&x, &y, &channels_in_file, 4	// 4 == RGBA8888
 		);
@@ -145,7 +145,7 @@ namespace LibCmo::CK2::DataHandlers {
 		size_t m_Counter;
 	};
 	static void FileWriteFunction(void* context, void* data, int size) {
-		FileSaveContext* ctx = reinterpret_cast<FileSaveContext*>(context);
+		FileSaveContext* ctx = static_cast<FileSaveContext*>(context);
 		if (ctx->m_Fs != nullptr) {
 			std::fwrite(data, sizeof(CKBYTE), size, ctx->m_Fs);
 		}
@@ -158,7 +158,7 @@ namespace LibCmo::CK2::DataHandlers {
 		size_t m_Counter;
 	};
 	static void MemoryWriteFunction(void* context, void* data, int size) {
-		MemorySaveContext* ctx = reinterpret_cast<MemorySaveContext*>(context);
+		MemorySaveContext* ctx = static_cast<MemorySaveContext*>(context);
 		if (ctx->m_Mem != nullptr) {
 			std::memcpy(ctx->m_Mem, data, size);
 			ctx->m_Mem = static_cast<CKBYTE*>(ctx->m_Mem) + size;

@@ -139,6 +139,16 @@ namespace LibCmo::CK2 {
 		CHUNK_DEV_2_1 = 10,	/**< Changes in wavesound reading of inside, outside angles  */
 		CHUNKDATA_CURRENTVERSION = CHUNK_DEV_2_1,
 	};
+	enum class CK_OBJECT_SHOWOPTION : CKDWORD {
+		CKHIDE = 0x0,
+		CKSHOW = 0x1,
+		CKHIERARCHICALHIDE = 0x2,
+	};
+	enum class CK_OBJECT_CANBEHIDE : CKDWORD {
+		CKCANNOTHIDE = 0,	/**< the object cannot be hidden  */
+		CKCANHIDE = 1,	/**< the object can be hidden  */
+		CKCANHIERARCHICALHIDE = 2,	/**< the object can be hidden and hierarchically hidden  */
+	};
 	/**
 	CKObject Flags
 	@remark

@@ -144,10 +144,13 @@ namespace LibCmo::XContainer {
 	}
 	namespace NSXObjectPointerArray {
 
-		void AddIfNotHere(XObjectPointerArray& objarray, CK2::ObjImpls::CKObject* const obj) {
+		bool AddIfNotHere(XObjectPointerArray& objarray, CK2::ObjImpls::CKObject* const obj) {
 			auto finder = std::find(objarray.begin(), objarray.end(), obj);
 			if (finder == objarray.end()) {
 				objarray.emplace_back(obj);
+				return true;
+			} else {
+				return false;
 			}
 		}
 
