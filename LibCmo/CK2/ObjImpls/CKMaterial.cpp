@@ -70,9 +70,8 @@ namespace LibCmo::CK2::ObjImpls {
 				chunk->ReadStruct(m_SpecularPower);
 
 				// main texture
-				CK_ID objid;
-				chunk->ReadObjectID(objid);
-				CKObject* tex = m_Context->GetObject(objid);
+				CKObject* tex = nullptr;
+				chunk->ReadObjectPointer(tex);
 				if (tex != nullptr && tex->GetClassID() == CK_CLASSID::CKCID_TEXTURE) {
 					m_Textures[0] = static_cast<CKTexture*>(tex);
 				}
@@ -125,12 +124,10 @@ namespace LibCmo::CK2::ObjImpls {
 		// extra texture data
 		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MATERIAL::CK_STATESAVE_MATDATA2)) {
 			// read 3 extra texture
-			CK_ID objid;
 			CKObject* tex = nullptr;
 
 			for (size_t i = 1; i < 4; ++i) {
-				chunk->ReadObjectID(objid);
-				tex = m_Context->GetObject(objid);
+				chunk->ReadObjectPointer(tex);
 				if (tex != nullptr && tex->GetClassID() == CK_CLASSID::CKCID_TEXTURE) {
 					m_Textures[i] = static_cast<CKTexture*>(tex);
 				}

@@ -183,6 +183,17 @@ namespace LibCmo::CK2 {
 		return false;
 	}
 
+	bool CKStateChunk::ReadObjectPointer(ObjImpls::CKObject** obj) {
+		CK_ID cache;
+		bool ret = ReadObjectID(&cache);
+		if (ret) {
+			*obj = m_BindContext->GetObject(cache);
+		} else {
+			*obj = nullptr;
+		}
+		return ret;
+	}
+
 	bool CKStateChunk::ReadManagerInt(CKGUID* guid, CKINT* intval) {
 		if (guid == nullptr || intval == nullptr) return false;
 
@@ -374,7 +385,7 @@ namespace LibCmo::CK2 {
 
 	/* ========== Sequence Functions ==========*/
 
-	bool CKStateChunk::ReadObjectIDSequence(XContainer::XArray<CK_ID>* ls) {
+	bool CKStateChunk::ReadObjectIDSequence(XContainer::XObjectArray* ls) {
 		if (ls == nullptr) return false;
 		ls->clear();
 

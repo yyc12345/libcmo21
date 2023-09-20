@@ -6,7 +6,32 @@
 namespace LibCmo::CK2::ObjImpls {
 
 	CKMesh::CKMesh(CKContext* ctx, CK_ID ckid, CKSTRING name) :
-		CKBeObject(ctx, ckid, name) {}
+		CKBeObject(ctx, ckid, name),
+		// init vertex
+		m_VertexCount(0),
+		m_VertexPosition(), m_VertexNormal(), m_VertexUV(),
+		m_VertexColor(), m_VertexSpecularColor(),
+		m_VertexWeight(), m_NoVertexWeight(true),
+		// init mtl slots
+		m_MtlSlotCount(0),
+		m_MaterialSlot(),
+		// init face data
+		m_FaceCount(0),
+		m_FaceIndices(), m_FaceMtlIndex(), m_Faces(),
+		// init line
+		m_LineCount(0),
+		m_LineIndices(),
+		// init mtl channels
+		m_MtlChannelCount(0),
+		m_MaterialChannels(),
+		// init flags
+		m_Flags(EnumsHelper::Merge({
+			VxMath::VXMESH_FLAGS::VXMESH_FORCETRANSPARENCY,
+			VxMath::VXMESH_FLAGS::VXMESH_HASTRANSPARENCY
+		})) {
+		// set visible in default
+		EnumsHelper::Add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+	}
 
 	CKMesh::~CKMesh() {}
 
@@ -51,17 +76,15 @@ namespace LibCmo::CK2::ObjImpls {
 			SetMaterialSlotCount(mtlCount);
 
 			// read slot
-			CK_ID mtlId;
 			CKDWORD ph;
-			CKObject* objptr;
+			CKObject* objptr = nullptr;
 			for (auto& mtlSlot : m_MaterialSlot) {
 				// read id
-				chunk->ReadObjectID(mtlId);
+				chunk->ReadObjectPointer(objptr);
 				// and read a place holder idk what the fuck it is.
 				chunk->ReadStruct(ph);
 
-				// try getting object pointer and assign
-				objptr = m_Context->GetObject(mtlId);
+				// try to assign
 				if (objptr != nullptr && objptr->GetClassID() == CK_CLASSID::CKCID_MATERIAL) {
 					mtlSlot = static_cast<CKMaterial*>(objptr);
 				} else {
@@ -220,6 +243,99 @@ namespace LibCmo::CK2::ObjImpls {
 			BuildFaceNormals();
 		}
 
+		// read material channels
+		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHCHANNELS)) {
+			// read size and resize it
+			CKDWORD chlSize;
+			chunk->ReadStruct(chlSize);
+			SetMtlChannelCount(chlSize);
+
+			for (auto& chl : m_MaterialChannels) {
+				// read material
+				CKObject* mtlobj = nullptr;
+				chunk->ReadObjectPointer(mtlobj);
+				if (mtlobj != nullptr && mtlobj->GetClassID() == CK_CLASSID::CKCID_MATERIAL) {
+					chl.m_Material = static_cast<CKMaterial*>(mtlobj);
+				}
+
+				// read flags and call function to make sure a custom uv can be created if existed.
+				chunk->ReadStruct(chl.m_Flags);
+				SyncVertexCountToMtlChannel();
+
+				// read blend modes
+				chunk->ReadStruct(chl.m_SourceBlend);
+				chunk->ReadStruct(chl.m_DestBlend);
+
+				// read custom vertex
+				CKDWORD uvcount;
+				chunk->ReadStruct(uvcount);
+				if (uvcount != 0) {
+					// make sure no overflow
+					uvcount = std::min(uvcount, chl.m_CustomUV.size());
+
+					CKDWORD bufsize = uvcount * CKSizeof(VxMath::VxVector2);
+					auto locker = chunk->LockReadBufferWrapper(bufsize);
+					std::memcpy(chl.m_CustomUV.data(), locker.get(), bufsize);
+					locker.reset();
+				}
+			}
+		}
+
+		// vertex weight
+		CKDWORD weightSize;
+		m_NoVertexWeight = true;
+		if (chunk->SeekIdentifierAndReturnSize(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHWEIGHTS, &weightSize)) {
+			// set it has
+			m_NoVertexWeight = false;
+			// set count
+			CKDWORD weightCount;
+			chunk->ReadStruct(weightCount);
+
+			if (weightSize > CKSizeof(CKFLOAT)) {
+				// a float series
+				// read as a copy, to make sure no memory overflow
+				// because i couldn't understand how original CKMesh operate vertex weight count 
+				// seperated with vertex count.
+				auto buf = chunk->ReadBufferWrapper();
+				CKDWORD bufsize = std::min(buf.get_deleter().GetBufferSize(), static_cast<CKDWORD>(m_VertexWeight.size()) * CKSizeof(CKFLOAT));
+				std::memcpy(m_VertexWeight.data(), buf.get(), bufsize);
+				buf.reset();
+
+			} else {
+				// a single float
+				CKFLOAT single;
+				chunk->ReadStruct(single);
+
+				for (auto& weight : m_VertexWeight) {
+					weight = single;
+				}
+			}
+		}
+
+		// face mask
+		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHFACECHANMASK)) {
+			// 2 face mask (2 WORD) are compressed into a single DWORD.
+			// and if there is a remained WORD, read it as a single WORD.
+			// according to little endian, the actually stored data is just the mask placed
+			// one by one.
+			// so we just need to allocated it directly
+
+			// read mask count, and limit it to face count
+			CKDWORD maskCount;
+			chunk->ReadStruct(maskCount);
+			maskCount = std::min(maskCount, m_FaceCount);
+
+			auto locker = chunk->LockReadBufferWrapper(maskCount * CKSizeof(CKWORD));
+			const CKWORD* rawptr = static_cast<const CKWORD*>(locker.get());
+			for (auto& f : m_Faces) {
+				f.m_ChannelMask = *rawptr;
+				++rawptr;
+			}
+			locker.reset();
+		}
+
+		// MARK: progressive mesh data is dropper.
+
 		return true;
 	}
 
@@ -240,6 +356,8 @@ namespace LibCmo::CK2::ObjImpls {
 		SetMtlChannelCount(0);
 		// then clear other
 		SetVertexCount(0);
+		m_NoVertexWeight = true;
+
 		SetMaterialSlotCount(0);
 		SetFaceCount(0);
 		SetLineCount(0);
@@ -406,12 +524,16 @@ namespace LibCmo::CK2::ObjImpls {
 	}
 
 	void CKMesh::SetMtlChannelCount(CKDWORD count) {
+		// backup old count
+		CKDWORD oldcount = m_MtlChannelCount;
+
+		// set and resize
 		m_MtlChannelCount = count;
 		m_MaterialChannels.resize(count);
 
 		// sync mask to each face.
 		// each face accept all mask in default
-		SyncMtlChannelToFaceMask();
+		SyncMtlChannelToFaceMask(oldcount, count);
 	}
 
 	CKMaterial** CKMesh::GetMtlChannelMaterials(CKDWORD& stride) {
@@ -457,8 +579,20 @@ namespace LibCmo::CK2::ObjImpls {
 		}
 	}
 
-	void CKMesh::SyncMtlChannelToFaceMask() {
-		CKWORD mask = static_cast<CKWORD>(~(0xFFFF << m_MtlChannelCount));
+	void CKMesh::SyncMtlChannelToFaceMask(CKDWORD oldsize, CKDWORD newsize) {
+		// use oldsize and newsize to build mask
+		if (oldsize == newsize) return;
+
+		CKWORD mask = 0xFFFF;
+		if (oldsize > newsize) {
+			// channels shrinks
+			// set already removed bits to 1
+			mask = static_cast<CKWORD>(~(0xFFFF << newsize));
+		} else {
+			// channels expand
+			// set new added bits to 1
+			mask = static_cast<CKWORD>(~(0xFFFF << oldsize));
+		}
 		for (auto& face : m_Faces) {
 			face.m_ChannelMask |= mask;
 		}

@@ -30,7 +30,7 @@ namespace LibCmo::CK2::ObjImpls {
 		void BuildNormals();
 		void BuildFaceNormals();
 
-		// ===== Line Section =====
+		// ===== Vertex Section =====
 	public:
 		CKDWORD GetVertexCount();
 		void SetVertexCount(CKDWORD count);
@@ -76,7 +76,7 @@ namespace LibCmo::CK2::ObjImpls {
 	protected:
 		// 2 sync functions served for material channels.
 		void SyncVertexCountToMtlChannel();	// setup material channel custom uv properly
-		void SyncMtlChannelToFaceMask();	// request all face accept all material channels.
+		void SyncMtlChannelToFaceMask(CKDWORD oldsize, CKDWORD newsize);	// request all face accept all material channels.
 
 	protected:
 		enum class VertexSaveFlags : CKDWORD {
@@ -123,6 +123,7 @@ namespace LibCmo::CK2::ObjImpls {
 		XContainer::XArray<CKDWORD> m_VertexColor;
 		XContainer::XArray<CKDWORD> m_VertexSpecularColor;
 		XContainer::XArray<CKFLOAT> m_VertexWeight;
+		bool m_NoVertexWeight;	// true if there is actually no vertex weight
 
 		XContainer::XArray<CKMaterial*> m_MaterialSlot;
 

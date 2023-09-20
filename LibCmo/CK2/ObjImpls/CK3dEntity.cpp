@@ -42,11 +42,10 @@ namespace LibCmo::CK2::ObjImpls {
 			m_PotentialMeshes.clear();
 
 			// read current mesh
-			CK_ID currentMeshId;
-			chunk->ReadObjectID(currentMeshId);
-			CKObject* findobj = m_Context->GetObject(currentMeshId);
-			if (findobj != nullptr && findobj->GetClassID() == CK_CLASSID::CKCID_MESH) {
-				m_CurrentMesh = static_cast<CKMesh*>(findobj);
+			CKObject* pendingMesh = nullptr;
+			chunk->ReadObjectPointer(pendingMesh);
+			if (pendingMesh != nullptr && pendingMesh->GetClassID() == CK_CLASSID::CKCID_MESH) {
+				m_CurrentMesh = static_cast<CKMesh*>(pendingMesh);
 			}
 
 			// read other meshs

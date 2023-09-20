@@ -312,8 +312,12 @@ namespace LibCmo::CK2 {
 		/* ========== Complex Data Read Functions ==========*/
 
 		bool ReadObjectID(CK_ID* id);
+		bool ReadObjectPointer(ObjImpls::CKObject** obj);
 		inline bool ReadObjectID(CK_ID& id) {
 			return ReadObjectID(&id);
+		}
+		inline bool ReadObjectPointer(ObjImpls::CKObject*& id) {
+			return ReadObjectPointer(&id);
 		}
 
 		bool ReadManagerInt(CKGUID* guid, CKINT* intval);
@@ -424,8 +428,8 @@ namespace LibCmo::CK2 {
 		/// </summary>
 		/// <param name="ls"></param>
 		/// <returns></returns>
-		bool ReadObjectIDSequence(XContainer::XArray<CK_ID>* ls);
-		inline bool ReadObjectIDSequence(XContainer::XArray<CK_ID>& ls) {
+		bool ReadObjectIDSequence(XContainer::XObjectArray* ls);
+		inline bool ReadObjectIDSequence(XContainer::XObjectArray& ls) {
 			return ReadObjectIDSequence(&ls);
 		}
 
