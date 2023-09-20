@@ -7,6 +7,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibCmo", "LibCmo\LibCmo.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Unvirt", "Unvirt\Unvirt.vcxproj", "{77E7ADB6-0D0C-4BA4-8DE7-A284C7F83941}"
 	ProjectSection(ProjectDependencies) = postProject
+		{A6454164-2153-45AE-BDB8-19C77014E0CC} = {A6454164-2153-45AE-BDB8-19C77014E0CC}
+		{70F64F8D-099C-4C21-B29C-0A8F1E22FB2E} = {70F64F8D-099C-4C21-B29C-0A8F1E22FB2E}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IronPad", "IronPad\IronPad.vcxproj", "{A6454164-2153-45AE-BDB8-19C77014E0CC}"
+	ProjectSection(ProjectDependencies) = postProject
 		{70F64F8D-099C-4C21-B29C-0A8F1E22FB2E} = {70F64F8D-099C-4C21-B29C-0A8F1E22FB2E}
 	EndProjectSection
 EndProject
@@ -34,6 +40,14 @@ Global
 		{77E7ADB6-0D0C-4BA4-8DE7-A284C7F83941}.Release|x64.Build.0 = Release|x64
 		{77E7ADB6-0D0C-4BA4-8DE7-A284C7F83941}.Release|x86.ActiveCfg = Release|Win32
 		{77E7ADB6-0D0C-4BA4-8DE7-A284C7F83941}.Release|x86.Build.0 = Release|Win32
+		{A6454164-2153-45AE-BDB8-19C77014E0CC}.Debug|x64.ActiveCfg = Debug|x64
+		{A6454164-2153-45AE-BDB8-19C77014E0CC}.Debug|x64.Build.0 = Debug|x64
+		{A6454164-2153-45AE-BDB8-19C77014E0CC}.Debug|x86.ActiveCfg = Debug|Win32
+		{A6454164-2153-45AE-BDB8-19C77014E0CC}.Debug|x86.Build.0 = Debug|Win32
+		{A6454164-2153-45AE-BDB8-19C77014E0CC}.Release|x64.ActiveCfg = Release|x64
+		{A6454164-2153-45AE-BDB8-19C77014E0CC}.Release|x64.Build.0 = Release|x64
+		{A6454164-2153-45AE-BDB8-19C77014E0CC}.Release|x86.ActiveCfg = Release|Win32
+		{A6454164-2153-45AE-BDB8-19C77014E0CC}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
