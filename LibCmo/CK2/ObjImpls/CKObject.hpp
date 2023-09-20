@@ -14,8 +14,6 @@ Implement as original meaning:
 - GetClassID()
 
 - Show()
-- IsHiddenByParent()
-- CanBeHide()
 - IsVisible()
 
 - CheckPreDeletion()
@@ -26,6 +24,9 @@ No implement because don't care:
 - IsObjectUsed()
 - PrepareDependencies()
 - RemapDependencies()
+
+- IsHiddenByParent()
+- CanBeHide()
 
 Implement moved into other location:
 - Copy(): Use CKObject::CKObject(CK_ID newid, const CKObject* obj) ctor and CKClassDesc to implement.
@@ -46,7 +47,6 @@ namespace LibCmo::CK2::ObjImpls {
 		void SetName(CKSTRING u8_name);
 		CK_OBJECT_FLAGS GetObjectFlags(void) const;
 		void SetObjectFlags(CK_OBJECT_FLAGS flags);
-		bool IsHierarchicallyHide() const;
 		CKContext* GetCKContext() const;
 
 		virtual CK_CLASSID GetClassID(void) { 
@@ -73,27 +73,12 @@ namespace LibCmo::CK2::ObjImpls {
 		*/
 		virtual void Show(CK_OBJECT_SHOWOPTION show = CK_OBJECT_SHOWOPTION::CKSHOW);
 		/**
-		 * @brief Returns whether this object is hidden (and also hides its children).
-		 * @return true if hierarchically hidden.
+		 * @brief Returns whether this object is visible
+		 * @return TRUE if the object is visible, FALSE otherwise
 		 * @remark
-		 * + This methods returns if this object is hidden and also hides all its sub-hierarchy.
-		 * + See CKObject::Show¡ì for more details on hierarchically hidden objects.
+		 * + Only CKRenderObject and derived classes(CK2dEntity,CK3dEntity),CKMesh and CKGroup return relevant information about their visibility state. Other classes may return any values.
+		 * + An object can return CKSHOW and still be hidden if its parent (see CK3dEntity::GetParent and CK2dEntity::GetParent) is hierarchically hidden (see CKObject::Show)
 		*/
-		virtual bool IsHiddenByParent() const;
-		/**
-		 * @brief Returns whether this object class allows it to be shown or hidden.
-		 * @return 3 possible value according to its type.
-		 * + CKCANNOTHIDE if the object cannot be hidden
-		 * + CKCANHIDE if the object can be hidden
-		 * + CKCANHIERARCHICALHIDE if the object can be hidden and hierarchically hidden
-		 * @remark
-		 * + This virtual function is mainly used by the Virtools interface to known if visibility flags have an impact on a specific object class.
-		 * + CKRenderObject and derived classes,can be triggered as to be shown or hidden or hierarchically hidden and will return 2 to this function.
-		 * + CKMesh and CKGroup can be triggered as to be shown or hidden and will return 1 to this function.
-		 * + Other classes will return 0 which means CKObject::Show function will not have any impact on them.
-
-		*/
-		virtual CK_OBJECT_CANBEHIDE CanBeHide() const;
 		virtual bool IsVisible() const;
 
 	protected:

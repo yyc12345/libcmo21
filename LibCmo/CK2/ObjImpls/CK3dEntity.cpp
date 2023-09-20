@@ -116,11 +116,13 @@ namespace LibCmo::CK2::ObjImpls {
 
 			// copy visible data
 			// process direct visible
-			// todo add if visible
-			// and set or unset VX_MOVEABLE_VISIBLE
-			
+			if (EnumsHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE)) {
+				EnumsHelper::Add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE);
+			} else {
+				EnumsHelper::Rm(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE);
+			}
 			// process indirect visible
-			if (EnumsHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CKBEHAVIORLINK_ACTIVATEDLASTFRAME)) {
+			if (EnumsHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE)) {
 				EnumsHelper::Add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_HIERARCHICALHIDE);
 			} else {
 				EnumsHelper::Rm(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_HIERARCHICALHIDE);
@@ -155,6 +157,31 @@ namespace LibCmo::CK2::ObjImpls {
 		// MARK: skin and bone are skipped.
 
 		return true;
+	}
+
+	void CK3dEntity::Show(CK_OBJECT_SHOWOPTION show) {
+		CKObject::Show(show);
+
+		EnumsHelper::Rm(m_MoveableFlags, EnumsHelper::Merge({
+			VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE,
+			VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_HIERARCHICALHIDE,
+			}));
+		switch (show) {
+			case CK_OBJECT_SHOWOPTION::CKSHOW:
+				EnumsHelper::Add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE);
+				break;
+			case CK_OBJECT_SHOWOPTION::CKHIERARCHICALHIDE:
+				EnumsHelper::Add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_HIERARCHICALHIDE);
+				break;
+			case CK_OBJECT_SHOWOPTION::CKHIDE:
+				break;
+		}
+	}
+
+	bool CK3dEntity::IsVisible() const {
+		// MARK: originally there is a call to this->IsHiddenByParent.
+		// but we drop the support of parent, so we drop that condition.
+		return CKObject::IsVisible();
 	}
 
 }

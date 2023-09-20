@@ -192,8 +192,6 @@
     <ClCompile Include="CK2\ObjImpls\CKMaterial.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKMesh.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKObject.cpp" />
-    <ClCompile Include="CK2\ObjImpls\CKRenderObject.cpp" />
-    <ClCompile Include="CK2\ObjImpls\CKSceneObject.cpp" />
     <ClCompile Include="CK2\ObjImpls\CKTexture.cpp" />
     <ClCompile Include="VTEncoding.cpp" />
     <ClCompile Include="CK2\CKFileReader.cpp" />

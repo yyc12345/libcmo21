@@ -135,12 +135,6 @@ typedef enum CK_OBJECT_SHOWOPTION {
 	CKHIERARCHICALHIDE	=2
 } CK_OBJECT_SHOWOPTION;
 
-typedef enum CK_OBJECT_CANBEHIDE {
-	CKCANNOTHIDE				=0, // the object cannot be hidden
-	CKCANHIDE				=1, // the object can be hidden
-	CKCANHIERARCHICALHIDE	=2 // the object can be hidden and hierarchically hidden
-} CK_OBJECT_CANBEHIDE;
-
 /***************************************************
 {filename:CK_OBJECT_FLAGS}
 Summary: CKObject Flags

@@ -16,11 +16,13 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual CK_CLASSID GetClassID(void) override { 
 			return CK_CLASSID::CKCID_RENDEROBJECT; 
 		}
+
 		// CKRenderObject do not implement any load/save functions
 		//virtual void PreSave(CKFileVisitor* file, CKDWORD flags) override;
 		//virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) override;
 		//virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
 		//virtual void PostLoad() override;
+
 	protected:
 
 	};

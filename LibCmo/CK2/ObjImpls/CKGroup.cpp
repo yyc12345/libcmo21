@@ -54,6 +54,16 @@ namespace LibCmo::CK2::ObjImpls {
 		return true;
 	}
 
+	void CKGroup::Show(CK_OBJECT_SHOWOPTION show) {
+		CKObject::Show(show);
+
+		// call Show for all sub object
+		for (auto& ptr : m_ObjectArray) {
+			if (ptr == nullptr) continue;
+			ptr->Show(show);
+		}
+	}
+
 	CKDWORD CKGroup::GetGroupIndex() {
 		return m_GroupIndex;
 	}

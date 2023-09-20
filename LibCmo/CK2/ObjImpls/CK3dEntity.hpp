@@ -18,6 +18,10 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) override;
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
 		//virtual void PostLoad() override;
+		
+		// it have special Show and IsVisible method
+		virtual void Show(CK_OBJECT_SHOWOPTION show = CK_OBJECT_SHOWOPTION::CKSHOW) override;
+		virtual bool IsVisible() const override;
 
 	protected:
 		XContainer::XObjectPointerArray m_PotentialMeshes;

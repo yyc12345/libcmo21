@@ -33,10 +33,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 		// read flag
 		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHFLAGS)) {
-			CKDWORD flags;
-			chunk->ReadStruct(flags);
-
-			m_Flags = static_cast<VxMath::VXMESH_FLAGS>(flags);
+			chunk->ReadStruct(m_Flags);
 			EnumsHelper::Mask(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_ALLFLAGS);
 
 			// I don't know why, just interpter the IDA code.
@@ -224,6 +221,16 @@ namespace LibCmo::CK2::ObjImpls {
 		}
 
 		return true;
+	}
+
+	void CKMesh::Show(CK_OBJECT_SHOWOPTION show) {
+		CKObject::Show(show);
+
+		if (show == CK_OBJECT_SHOWOPTION::CKSHOW) {
+			EnumsHelper::Add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_VISIBLE);
+		} else {
+			EnumsHelper::Rm(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_VISIBLE);
+		}
 	}
 
 #pragma region Misc Section

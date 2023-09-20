@@ -84,16 +84,10 @@
     <ClCompile Include="CK2\CKStateChunkOthers.cpp">
       <Filter>Sources\CK2</Filter>
     </ClCompile>
-    <ClCompile Include="CK2\ObjImpls\CKSceneObject.cpp">
-      <Filter>Sources\CK2\ObjImpls</Filter>
-    </ClCompile>
     <ClCompile Include="CK2\ObjImpls\CKBeObject.cpp">
       <Filter>Sources\CK2\ObjImpls</Filter>
     </ClCompile>
     <ClCompile Include="CK2\ObjImpls\CKGroup.cpp">
-      <Filter>Sources\CK2\ObjImpls</Filter>
-    </ClCompile>
-    <ClCompile Include="CK2\ObjImpls\CKRenderObject.cpp">
       <Filter>Sources\CK2\ObjImpls</Filter>
     </ClCompile>
     <ClCompile Include="CK2\ObjImpls\CK3dEntity.cpp">

@@ -28,9 +28,6 @@ namespace LibCmo::CK2::ObjImpls {
 	void CKObject::SetObjectFlags(CK_OBJECT_FLAGS flags) {
 		m_ObjectFlags = flags;
 	}
-	bool CKObject::IsHierarchicallyHide() const { 
-		return EnumsHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE);
-	}
 	CKContext* CKObject::GetCKContext() const {
 		return m_Context;
 	}
@@ -90,14 +87,6 @@ namespace LibCmo::CK2::ObjImpls {
 			case CK_OBJECT_SHOWOPTION::CKHIDE:
 				return;
 		}
-	}
-
-	bool CKObject::IsHiddenByParent() const {
-		return false;
-	}
-
-	CK_OBJECT_CANBEHIDE CKObject::CanBeHide() const {
-		return CK_OBJECT_CANBEHIDE::CKCANNOTHIDE;
 	}
 
 	bool CKObject::IsVisible() const {

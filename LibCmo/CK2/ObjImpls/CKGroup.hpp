@@ -19,6 +19,9 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
 		//virtual void PostLoad() override;
 
+		// it only have special Show method
+		virtual void Show(CK_OBJECT_SHOWOPTION show = CK_OBJECT_SHOWOPTION::CKSHOW) override;
+
 		CKDWORD GetGroupIndex();
 		
 		// ===== Insert =====

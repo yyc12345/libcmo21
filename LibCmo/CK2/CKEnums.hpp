@@ -144,11 +144,6 @@ namespace LibCmo::CK2 {
 		CKSHOW = 0x1,
 		CKHIERARCHICALHIDE = 0x2,
 	};
-	enum class CK_OBJECT_CANBEHIDE : CKDWORD {
-		CKCANNOTHIDE = 0,	/**< the object cannot be hidden  */
-		CKCANHIDE = 1,	/**< the object can be hidden  */
-		CKCANHIERARCHICALHIDE = 2,	/**< the object can be hidden and hierarchically hidden  */
-	};
 	/**
 	CKObject Flags
 	@remark
