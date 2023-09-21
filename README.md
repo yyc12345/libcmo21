@@ -21,10 +21,18 @@ This project is based on reverse work of CK2.dll, VxMath.dll and CK2_3D.dll. The
 The ultimate goals of this project are:
 
 * Create a library which can read Virtools file and do not limited on x86 platform by original Virtools implement.
-* Create a user-firendly Python binding. And allow user can export Ballance Map from Blender on Linux platform natively.
-* Create a Godot Extension which can load Ballance Map natively.
+* Create a universal dynamic library for Ballance Map file loading.
+  * Create a Python binding for the loader. And allow user can export Ballance Map from Blender on Linux platform natively.
+  * Create a C# binding for the loader to enable that I can load Ballance Map in Godot on Linux / Android platform natively.
 
 There is still a long way to go. But I will try my best.
+
+## Project Layout
+
+* LibCmo: Core library. It is a static library. Link to your program freely because I don't want to process export table things.
+* IronPad: A tiny Crashpad like static library. Used by Unvirt and BMap. Report crash log and coredump only on Windows (Because I assume all Linux users have capacity to enable coredump and deliver it to developer.).
+* Unvirt: Interactive Virtools file viewer. Can provide more detail than Luigi Auriemma's unvirt but only can accept version limited Virtools file (< 4.0 I guess).
+* BMap: A dynamic library which is specific for Ballance Map loading by using LibCmo.
 
 ## Contributions
 
@@ -37,17 +45,9 @@ These features will be accepted as soon as possible.
 
 * The bug fix of Virtools file reader.
 * Class layout, `Load()` functions of following `CKObject` based classes.
-  - `CKBeObject`
-  - `CKGroup`
-  - `CKMaterial`
-  - `CKTexture`
-  - `CKMesh`
-  - `CKRenderObject`
   - `CK3dEntity`
-  - `CK3dObject`
 * Class layout, and `LoadData()` functions of following `CKBaseManager` based classes.
   - `CKAttributeManager`
-  - `CKBehaviorManager`
 
 ### Not Urgent Features
 
@@ -55,7 +55,6 @@ These features are in plan, but not urge to merge.
 
 * The `CK_ID` remap system of Reader & Writer.
 * Any Save functions.
-* The save steps of Virtools file.
 * Other CK classes implementations.
 * Non-Virtools 2.1 implementations.
 
@@ -76,6 +75,5 @@ This project require:
 * [stb](https://github.com/nothings/stb) (For image read / write)
 * iconv (non-Windows system required)
 
-It can be compiled on Windows via sln file, or on Linux platform via CMake file.  
-You should set up `LibRef.props` when using sln file.  
-However CMake may not be updated in time because I develop this project on Windows frequently.
+It can be compiled on Windows via sln file. You should set up `LibRef.props` when using sln file to build this project on Windows.  
+You also can use CMake file to compile this project on Linux or anything else platform. However CMake may not be updated in time because I develop this project on Windows frequently.
