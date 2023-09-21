@@ -16,6 +16,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IronPad", "IronPad\IronPad.
 		{70F64F8D-099C-4C21-B29C-0A8F1E22FB2E} = {70F64F8D-099C-4C21-B29C-0A8F1E22FB2E}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BMap", "BMap\BMap.vcxproj", "{0F0A8B98-35D7-4B8E-AF0A-041B1BD80FD2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A6454164-2153-45AE-BDB8-19C77014E0CC} = {A6454164-2153-45AE-BDB8-19C77014E0CC}
+		{70F64F8D-099C-4C21-B29C-0A8F1E22FB2E} = {70F64F8D-099C-4C21-B29C-0A8F1E22FB2E}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -48,6 +54,14 @@ Global
 		{A6454164-2153-45AE-BDB8-19C77014E0CC}.Release|x64.Build.0 = Release|x64
 		{A6454164-2153-45AE-BDB8-19C77014E0CC}.Release|x86.ActiveCfg = Release|Win32
 		{A6454164-2153-45AE-BDB8-19C77014E0CC}.Release|x86.Build.0 = Release|Win32
+		{0F0A8B98-35D7-4B8E-AF0A-041B1BD80FD2}.Debug|x64.ActiveCfg = Debug|x64
+		{0F0A8B98-35D7-4B8E-AF0A-041B1BD80FD2}.Debug|x64.Build.0 = Debug|x64
+		{0F0A8B98-35D7-4B8E-AF0A-041B1BD80FD2}.Debug|x86.ActiveCfg = Debug|Win32
+		{0F0A8B98-35D7-4B8E-AF0A-041B1BD80FD2}.Debug|x86.Build.0 = Debug|Win32
+		{0F0A8B98-35D7-4B8E-AF0A-041B1BD80FD2}.Release|x64.ActiveCfg = Release|x64
+		{0F0A8B98-35D7-4B8E-AF0A-041B1BD80FD2}.Release|x64.Build.0 = Release|x64
+		{0F0A8B98-35D7-4B8E-AF0A-041B1BD80FD2}.Release|x86.ActiveCfg = Release|Win32
+		{0F0A8B98-35D7-4B8E-AF0A-041B1BD80FD2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

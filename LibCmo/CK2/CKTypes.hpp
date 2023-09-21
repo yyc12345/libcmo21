@@ -418,9 +418,7 @@ namespace LibCmo::CK2 {
 		}
 
 		auto operator<=>(const CKGUID& rhs) const {
-			auto cmp = this->d1 <=> rhs.d1;
-			if (cmp != 0)
-				return cmp;
+			if (auto cmp = this->d1 <=> rhs.d1; cmp != 0) return cmp;
 			return this->d2 <=> rhs.d2;
 		}
 		bool operator==(const CKGUID& rhs) const {

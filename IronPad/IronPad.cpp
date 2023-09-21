@@ -25,6 +25,18 @@ namespace IronPad {
 	LPTOP_LEVEL_EXCEPTION_FILTER g_ProcBackup;
 
 #pragma region Exception Handler Detail
+	
+
+	static HMODULE GetCurrentModule() {
+		// Reference: https://stackoverflow.com/questions/557081/how-do-i-get-the-hmodule-for-the-currently-executing-code
+		HMODULE hModule = NULL;
+		GetModuleHandleExW(
+			GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,	// get address and do not inc ref counter.
+			(LPCWSTR)GetCurrentModule,
+			&hModule);
+
+		return hModule;
+	}
 
 	static const char* UExceptionGetCodeName(DWORD code) {
 		switch (code) {
@@ -68,8 +80,9 @@ namespace IronPad {
 				return "one instruction has been executed";
 			case EXCEPTION_STACK_OVERFLOW:
 				return "stack overflow";
+			default:
+				return "unknown exception";
 		}
-		return "unknown exception";
 	}
 
 	static void UExceptionFormat(std::FILE* fs, const char* fmt, ...) {
@@ -207,7 +220,7 @@ namespace IronPad {
 			std::filesystem::path ironpad_path;
 			WCHAR module_path[MAX_PATH];
 			std::memset(module_path, 0, sizeof(module_path));
-			if (GetModuleFileNameW(NULL, module_path, MAX_PATH) == 0) {
+			if (GetModuleFileNameW(GetCurrentModule(), module_path, MAX_PATH) == 0) {
 				goto failed;
 			}
 			ironpad_path = module_path;

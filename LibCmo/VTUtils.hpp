@@ -5,7 +5,9 @@
 #endif
 
 // https://stackoverflow.com/questions/2164827/explicitly-exporting-shared-library-functions-in-linux
-// generate import export macro
+// generate import export macro.
+// these macro is not used by LibCmo because LibCmo is static library
+// these macro may used by other project such as BMap.
 #if defined(_MSC_VER)
 //  Microsoft
 #define LIBCMO_RAW_EXPORT __declspec(dllexport)
@@ -22,7 +24,7 @@
 //  do nothing and hope for the best?
 #define LIBCMO_RAW_EXPORT
 #define LIBCMO_RAW_IMPORT
-#pragma warning Unknown dynamic link import/export semantics.
+#pragma warning "Unknown dynamic link import/export semantics."
 #endif
 
 // choosee proper style

@@ -83,9 +83,13 @@ def GetTmplOperDiv(sname: str, svars: tuple[str]) -> str:
 def GetTmplOperEqual(sname: str, svars: tuple[str]) -> str:
     return f"""\tbool operator==(const {sname}& rhs) const {{
 \t\treturn ({' && '.join(map(lambda x: f'{x} == rhs.{x}', svars))});
-\t}}
-\tbool operator!=(const {sname}& rhs) const {{
-\t\treturn !(*this == rhs);
+\t}}"""
+
+def GetTmplOperSpaceship(sname: str, svars: tuple[str]) -> str:
+    sp: str = '\n\t\t'
+    return f"""\tauto operator<=>(const {sname}& rhs) const {{
+\t\t{sp.join(map(lambda x: f'if (auto cmp = {x} <=> rhs.{x}; cmp != 0) return cmp;', svars[:-1]))}
+\t\treturn {svars[-1]} <=> rhs.{svars[-1]};
 \t}}"""
 
 def GetTmplLength(sname: str, svars: tuple[str]) -> str:
