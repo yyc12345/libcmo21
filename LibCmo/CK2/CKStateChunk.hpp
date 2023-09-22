@@ -8,7 +8,6 @@ namespace LibCmo::CK2 {
 
 	class CKStateChunk {
 	public:
-		//CKStateChunk();
 		CKStateChunk(CKFileVisitor* visitor, CKContext* ctx);
 		CKStateChunk(const CKStateChunk&);
 		CKStateChunk(CKStateChunk&&);
@@ -183,9 +182,43 @@ namespace LibCmo::CK2 {
 		bool Skip(CKDWORD DwordCount);
 
 	private:
+		/**
+		 * @brief Convert byte based size to DWORD based size.
+		 * 
+		 * Becase CKStateChunk use DWORD based buffer, so all data should be aligned to DWORD boundary.
+		 * This function can convert byte based size to DWORD based size while keeping its size aligned with DWORD boundary.
+		 * For example, caller want to allocate 3 bytes for data storing, this function will first align it to DWORD boundary, 4 bytes.
+		 * Then convert it in DWORD size, 1 DWORD.
+		 * 
+		 * @param char_size[in] The size in byte unit.
+		 * @return The size in DWORD unit.
+		*/
 		CKDWORD GetCeilDwordSize(size_t char_size);
 		bool ResizeBuffer(CKDWORD new_dwsize);
+		/**
+		 * @brief Check whether there are enough buffer to read.
+		 * 
+		 * This function will check whether current CKStateChunk is in read mode and 
+		 * whether data area is enough to write.
+		 * However, it is different with EnsureReadSpace. If no space to write, this function will
+		 * try calling ResizeBuffer to get a enough buffer. Only when resize failed, 
+		 * this function will return false.
+		 * 
+		 * @param dwsize[in] Required buffer size in DWORD unit.
+		 * @return True if have enough space to write.
+		 * @see EnsureReadSpace
+		*/
 		bool EnsureWriteSpace(CKDWORD dwsize);
+		/**
+		 * @brief Check whether there are enough buffer to read.
+		 * 
+		 * This function will check whether current CKStateChunk is in read mode and 
+		 * whether data area is enough to read.
+		 * 
+		 * @param dword_required[in] Required buffer size in DWORD unit.
+		 * @return True if have enough space to read.
+		 * @see EnsureWriteSpace
+		*/
 		bool EnsureReadSpace(CKDWORD dword_required);
 
 #pragma endregion
@@ -237,23 +270,21 @@ namespace LibCmo::CK2 {
 		/**
 		 * @brief A RAII wrapper for LockReadBuffer and UnLockReadBuffer.
 		 * @param size_in_byte[in] The value passed to LockReadBuffer.
-		 * @return A read-only buffer with RAII feature (more like std::unique_ptr).
+		 * @return LockedReadBuffer_t (actually is a std::unique_ptr with custom deleter)
 		 * @remark
-		 * + The return value is more like std::unique_ptr but it have more features.
-		 * + If GeneralBuffer_t::GetPtr return nullptr, it mean this function is failed.
-		 * + If you only use the pointer-getter provided by the return value, the final moving forward byte count is the value passed in this function.
-		 * + You also can use GeneralBuffer_t::SetSize to set the final moving forward byte count before the return value free itself.
-		 * + The value passed to GeneralBuffer_t::SetSize will finally be passed to UnLockReadBuffer.
-		 * + You can use GeneralBuffer_t::Reset to force free the return value.
-		 * @example
+		 * + The return value is just a std::unique_ptr but its deleter have more features.
+		 * + If return value contained data is nullptr, it mean that this function is failed.
+		 * + If you only use the pointer provided by the return value, the final moving forward byte count is the value passed in this function.
+		 * + You also can use LockedReadBuffer_t.get_deleter().SetConsumedSize() to set the final moving forward byte count before the return value free itself.
+		 * + The value passed to LockedReadBuffer_t..get_deleter().SetConsumedSize() will finally be passed to UnLockReadBuffer.
+		 * + You can use LockedReadBuffer_t.reset() to force free the return value.
+		 * @remark Here is a example.
 		 * ```
-		 * LockedReadBuffer_t buf = ReadBufferLocker(1919810);
-		 * if (buf.GetPtr() == nullptr) { 
-		 *     // failed
-		 * } else {
-		 *     stuff(buf); // do some operation...
-		 *     buf.SetSize(114514); // i only consume these bytes.
-		 *     buf.Reset(); // immediately free it.
+		 * auto buf = chunk->LockReadBufferWrapper(1919810);
+		 * if (buf) { 
+		 *     stuff(buf.get()); // do some operation...
+		 *     buf.get_deleter().SetConsumedSize(114514); // i only consume these bytes.
+		 *     buf.reset(); // immediately free it.
 		 * }
 		 * ```
 		 * @see LockReadBuffer, UnLockReadBuffer, LockedReadBuffer_t
@@ -348,14 +379,15 @@ namespace LibCmo::CK2 {
 
 		/**
 		 * @brief Read buffer and copy it.
+		 * 
 		 * The copied buffer and the size of buffer will be returned to caller.
 		 * Caller should free the buffer by calling CKStateChunk::DeleteBuffer(void*).
+		 * 
 		 * @param ppData[out] The pointer to pointer holding the new copied data.
 		 * @param size_in_byte[out] Set to the size of buffer when success.
 		 * @return True if success.
-		 * @remark
-		 * + Following original Virtools functions can use this function to implement:
-		 *   - ReadBuffer(void**)
+		 * @remark Following original Virtools functions can use this function to implement:
+		 * + ReadBuffer(void**)
 		*/
 		bool ReadBuffer(void** ppData, CKDWORD* size_in_byte);
 		/**
@@ -365,60 +397,51 @@ namespace LibCmo::CK2 {
 		*/
 		void DeleteBuffer(const void* buf);
 		/**
-		 * @brief A wrapper for ReadAndCopyBuffer(void**, CKDWORD*)
-		 * @return 
+		 * @brief A RAII wrapper for ReadAndCopyBuffer(void**, CKDWORD*)
+		 * @return Buffer_t (actually is a std::unique_ptr with custom deleter)
+		 * @remark
+		 * + The return value is std::unique_ptr but its deleter have more features.
+		 * + If return value containing value is nullptr, it mean this function is failed.
+		 * + Use Buffer_t.get_deleter().GetBufferSize() to get the size of buffer.
+		 * + You can use Buffer_t.reset() to force free the return value.
+		 * @remark Here is a exmaple about how to use this function
+		 * ```
+		 * Buffer_t buf = chunk->ReadBufferWrapper(114);
+		 * if (buf) { 
+		 *     stuff(buf.get(), buf.get_deleter().GetBufferSize()); // do some operation...
+		 *     buf.reset(); // immediately free it.
+		 * }
+		 * ```
 		*/
 		Buffer_t ReadBufferWrapper();
 
 		/**
 		 * @brief Read buffer and fill user struct.
+		 * 
 		 * The size of buffer will be read from CKStateChunk internally and return to caller.
+		 * 
 		 * @param pData[out] The pointer holding the data.
 		 * @return True if success.
-		 * @remark
-		 * + Following original Virtools functions can use this function to implement:
-		 *   - ReadAndFillBuffer(void*)
-		 *   - ReadAndFillBuffer_LEndian(void*)
-		 *   - ReadAndFillBuffer_LEndian16(void*)
+		 * @remark Following original Virtools functions can use this function to implement:
+		 * + ReadAndFillBuffer(void*)
+		 * + ReadAndFillBuffer_LEndian(void*)
+		 * + ReadAndFillBuffer_LEndian16(void*)
 		*/
 		bool ReadAndFillBuffer(void* pData);
 		/**
 		 * @brief Read buffer and fill user struct.
+		 * 
 		 * The size of buffer is provided by user.
+		 * 
 		 * @param pData[out] The pointer holding the data.
 		 * @param size_in_byte[in] The size of data which you want to read in byte unit
 		 * @return True if success.
-		 * @remark
-		 * + Following original Virtools functions can use this function to implement:
-		 *   - ReadAndFillBuffer(int, void*)
-		 *   - ReadAndFillBuffer_LEndian(int, void*)
-		 *   - ReadAndFillBuffer_LEndian16(int, void*)
+		 * @remark Following original Virtools functions can use this function to implement:
+		 * + ReadAndFillBuffer(int, void*)
+		 * + ReadAndFillBuffer_LEndian(int, void*)
+		 * + ReadAndFillBuffer_LEndian16(int, void*)
 		*/
 		bool ReadAndFillBuffer(void* pData, CKDWORD size_in_byte);
-
-		///**
-		// * @brief A RAII wrapper for ReadBuffer and DeleteBuffer
-		// * @param uptr The pointer to unique_ptr receiving data.
-		// * @param len_in_byte The size of gotten buffer.
-		// * @return A buffer with RAII feature (more like std::unique_ptr).
-		// * @remark
-		// * + The return value is more like std::unique_ptr but it have more features.
-		// * + If Buffer_t::GetPtr return nullptr, it mean this function is failed.
-		// * + Use Buffer_t::GetSize to get the size of buffer.
-		// * + You can use Buffer_t::Reset to force free the return value.
-		// * @example
-		// * ```
-		// * Buffer_t buf = ReadBufferWrapper(1919810);
-		// * if (buf.GetPtr() == nullptr) { 
-		// *     // failed
-		// * } else {
-		// *     stuff(buf); // do some operation...
-		// *     buf.SetSize(114514); // i only consume these bytes.
-		// *     buf.Reset(); // immediately free it.
-		// * }
-		// * ```
-		//*/
-		//Buffer_t ReadBufferWrapper();
 
 		/* ========== Sequence Functions ==========*/
 

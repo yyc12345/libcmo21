@@ -33,7 +33,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 		// ===== Vertex Section =====
 	public:
-		CKDWORD GetVertexCount();
+		CKDWORD GetVertexCount() const;
 		void SetVertexCount(CKDWORD count);
 		VxMath::VxVector3* GetVertexPositions();
 		VxMath::VxVector3* GetVertexNormals();
@@ -44,13 +44,13 @@ namespace LibCmo::CK2::ObjImpls {
 	
 		// ===== Material Slot Section =====
 	public:
-		CKDWORD GetMaterialSlotCount();
+		CKDWORD GetMaterialSlotCount() const;
 		void SetMaterialSlotCount(CKDWORD count);
-		void SetMaterialSlot(CKMaterial* mtl, CKDWORD idx);
+		CKMaterial** GetMaterialSlots();
 
 		// ===== Face Section =====
 	public:
-		CKDWORD GetFaceCount();
+		CKDWORD GetFaceCount() const;
 		void SetFaceCount(CKDWORD count);
 		CKWORD* GetFaceIndices();
 		CKWORD* GetFaceMaterialSlotIndexs();
@@ -59,20 +59,20 @@ namespace LibCmo::CK2::ObjImpls {
 
 		// ===== Line Section =====
 	public:
-		CKDWORD GetLineCount();
+		CKDWORD GetLineCount() const;
 		void SetLineCount(CKDWORD count);
 		CKWORD* GetLineIndices();
 		
 		// ===== Material Channel Section =====
 	public:
-		CKDWORD GetMtlChannelCount();
+		CKDWORD GetMtlChannelCount() const;
 		void SetMtlChannelCount(CKDWORD count);
 		CKMaterial** GetMtlChannelMaterials(CKDWORD& stride);
 		VxMath::VXBLEND_MODE* GetMtlChannelSourceBlends(CKDWORD& stride);
 		VxMath::VXBLEND_MODE* GetMtlChannelDestBlends(CKDWORD& stride);
 
 		VxMath::VxVector2* GetMtlChannelCustomUVs(CKDWORD idx);
-		VxMath::VXCHANNEL_FLAGS GetMtlChannelFlags(CKDWORD idx);
+		VxMath::VXCHANNEL_FLAGS GetMtlChannelFlags(CKDWORD idx) const;
 		void SetMtlChannelFlags(CKDWORD idx, VxMath::VXCHANNEL_FLAGS flags);
 	protected:
 		// 2 sync functions served for material channels.

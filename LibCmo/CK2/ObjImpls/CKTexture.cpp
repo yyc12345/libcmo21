@@ -94,7 +94,10 @@ namespace LibCmo::CK2::ObjImpls {
 		} else {
 			CKDWORD fmtbytesize;
 			if (chunk->SeekIdentifierAndReturnSize(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_OLDTEXONLY, &fmtbytesize)) {
-				// 0xFF (blank) 0xFF (save options) 0xFF (transparent + movie info + video fmt) 0xFF (mip map)
+				// for mid data:
+				// HIGH >>> 0xFF (blank) 0xFF (save options) 0xFF (transparent + movie info + video fmt) 0xFF (mip map) <<< LOW
+				// for mixed flags:
+				// HIGH >>> 1(blank) 1(cubemap) 1(has video fmt) 1(is transparent)
 				CKDWORD mixdata;
 				chunk->ReadStruct(mixdata);
 				m_UseMipMap = (mixdata & 0xFF);
@@ -103,6 +106,7 @@ namespace LibCmo::CK2::ObjImpls {
 				mixdata = mixdata & 0xFF00 >> 8;
 				m_ImageHost.SetTransparent(mixdata & 0x1);
 				bool hasVideoFmt = mixdata & 0x2;
+				m_ImageHost.SetCubeMap(mixdata & 0x4);
 				// MARK: I ignore 0x4 in there because it involve video.
 
 				// set current slot, transparent color, and video format.
@@ -189,5 +193,47 @@ namespace LibCmo::CK2::ObjImpls {
 
 		return true;
 	}
+
+#pragma region Visitor
+
+	CKBitmapData& CKTexture::GetUnderlyingData() {
+		return m_ImageHost;
+	}
+
+	bool CKTexture::IsUseMipmap() const {
+		return m_UseMipMap;
+	}
+
+	void CKTexture::UseMipmap(bool isUse) {
+		m_UseMipMap = isUse;
+
+		if (!m_UseMipMap) {
+			m_MipmapImages.clear();
+		}
+	}
+
+	CKDWORD CKTexture::GetMipmapLevel() const {
+		return static_cast<CKDWORD>(m_MipmapImages.size());
+	}
+
+	void CKTexture::SetMipmapLevel(CKDWORD level) {
+		m_MipmapImages.resize(level);
+	}
+
+	VxMath::VxImageDescEx* CKTexture::GetMipmapLevelData(CKDWORD level) {
+		if (!m_UseMipMap || level >= m_MipmapImages.size()) return nullptr;
+		return &m_MipmapImages[level];
+	}
+
+	VxMath::VX_PIXELFORMAT CKTexture::GetVideoFormat() const {
+		return m_VideoFormat;
+	}
+
+	void CKTexture::SetVideoFormat(VxMath::VX_PIXELFORMAT fmt) {
+		m_VideoFormat = fmt;
+	}
+
+#pragma endregion
+
 
 }

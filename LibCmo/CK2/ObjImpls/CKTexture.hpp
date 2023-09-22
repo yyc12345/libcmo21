@@ -16,10 +16,19 @@ namespace LibCmo::CK2::ObjImpls {
 			return CK_CLASSID::CKCID_TEXTURE; 
 		}
 		
-		//virtual void PreSave(CKFileVisitor* file, CKDWORD flags) override;
 		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) override;
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
-		//virtual void PostLoad() override;
+
+		CKBitmapData& GetUnderlyingData();
+
+		bool IsUseMipmap() const;
+		void UseMipmap(bool isUse);
+		CKDWORD GetMipmapLevel() const;
+		void SetMipmapLevel(CKDWORD level);
+		VxMath::VxImageDescEx* GetMipmapLevelData(CKDWORD level);
+
+		VxMath::VX_PIXELFORMAT GetVideoFormat() const;
+		void SetVideoFormat(VxMath::VX_PIXELFORMAT fmt);
 
 	protected:
 		CKBitmapData m_ImageHost;

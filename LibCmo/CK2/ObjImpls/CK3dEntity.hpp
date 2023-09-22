@@ -25,6 +25,22 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual void Show(CK_OBJECT_SHOWOPTION show = CK_OBJECT_SHOWOPTION::CKSHOW) override;
 		virtual bool IsVisible() const override;
 
+		const VxMath::VxMatrix& GetWorldMatrix() const;
+		void SetWorldMatrix(const VxMath::VxMatrix& mat);
+		CK_3DENTITY_FLAGS GetEntityFlags() const;
+		void SetEntityFlags(CK_3DENTITY_FLAGS flags);
+		VxMath::VX_MOVEABLE_FLAGS GetMoveableFlags() const;
+		void SetMoveableFlags(VxMath::VX_MOVEABLE_FLAGS flags);
+		CKDWORD GetZOrder() const;
+		void SetZOrder(CKDWORD ord);
+
+		void AddPotentialMesh(CKMesh* mesh);
+		void RemovePotentialMesh(CKMesh* mesh);
+		CKDWORD GetPotentialMeshCount() const;
+		CKMesh* GetPotentialMesh(CKDWORD idx) const;
+		CKMesh* GetCurrentMesh() const;
+		void SetCurrentMesh(CKMesh* mesh);
+
 	protected:
 		XContainer::XObjectPointerArray m_PotentialMeshes;
 		CKMesh* m_CurrentMesh;

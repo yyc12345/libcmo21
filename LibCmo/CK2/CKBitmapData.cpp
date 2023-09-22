@@ -255,7 +255,7 @@ namespace LibCmo::CK2 {
 
 #pragma endregion
 
-#pragma region Misc Functions
+#pragma region Slot Functions
 
 	void CKBitmapData::SetSlotCount(CKDWORD count) {
 		m_Slots.resize(count);
@@ -265,7 +265,7 @@ namespace LibCmo::CK2 {
 		}
 	}
 
-	CKDWORD CKBitmapData::GetSlotCount() {
+	CKDWORD CKBitmapData::GetSlotCount() const {
 		return static_cast<CKDWORD>(m_Slots.size());
 	}
 
@@ -280,16 +280,17 @@ namespace LibCmo::CK2 {
 		}
 	}
 
-	CKDWORD CKBitmapData::GetCurrentSlot() {
+	CKDWORD CKBitmapData::GetCurrentSlot() const {
 		return m_CurrentSlot;
 	}
 
-	void CKBitmapData::CreateImage(CKDWORD Width, CKDWORD Height, CKDWORD Slot) {
-		if (Slot >= m_Slots.size()) return;
+	bool CKBitmapData::CreateImage(CKDWORD Width, CKDWORD Height, CKDWORD Slot) {
+		if (Slot >= m_Slots.size()) return false;
 
 		CKBitmapSlot& slotdata = m_Slots[Slot];
 		slotdata.m_ImageData.CreateImage(Width, Height);
 		VxMath::VxDoAlphaBlit(&slotdata.m_ImageData, 0xFFu);
+		return true;
 	}
 
 	bool CKBitmapData::LoadImage(CKSTRING filename, CKDWORD slot) {
@@ -351,18 +352,36 @@ namespace LibCmo::CK2 {
 		m_Slots[slot].m_ImageData.FreeImage();
 	}
 
-	void CKBitmapData::SetSlotFileName(CKDWORD slot, CKSTRING filename) {
-		if (slot >= m_Slots.size()) return;
-		if (filename == nullptr) return;
+	bool CKBitmapData::SetSlotFileName(CKDWORD slot, CKSTRING filename) {
+		if (slot >= m_Slots.size()) return false;
+		if (filename == nullptr) return false;
 		m_Slots[slot].m_FileName = filename;
+		return true;
 	}
 
-	CKSTRING CKBitmapData::GetSlotFileName(CKDWORD slot) {
+	CKSTRING CKBitmapData::GetSlotFileName(CKDWORD slot) const {
 		if (slot >= m_Slots.size()) return nullptr;
 		return m_Slots[slot].m_FileName.c_str();
 	}
 
-	const CKBitmapProperties& CKBitmapData::GetSaveFormat() {
+#pragma endregion
+
+#pragma region Not important variable visitor
+
+	void CKBitmapData::SetCubeMap(bool is_cube) {
+		if (is_cube) {
+			SetSlotCount(6);
+			EnumsHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
+		} else {
+			EnumsHelper::Rm(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
+		}
+	}
+
+	bool CKBitmapData::IsCubeMap() const {
+		return EnumsHelper::Has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
+	}
+
+	const CKBitmapProperties& CKBitmapData::GetSaveFormat() const {
 		return m_SaveProperties;
 	}
 
@@ -370,7 +389,7 @@ namespace LibCmo::CK2 {
 		m_SaveProperties = props;
 	}
 
-	CK_TEXTURE_SAVEOPTIONS CKBitmapData::GetSaveOptions() {
+	CK_TEXTURE_SAVEOPTIONS CKBitmapData::GetSaveOptions() const {
 		return m_SaveOptions;
 	}
 
@@ -386,7 +405,7 @@ namespace LibCmo::CK2 {
 		}
 	}
 
-	bool CKBitmapData::IsTransparent() {
+	bool CKBitmapData::IsTransparent() const {
 		return EnumsHelper::Has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
 	}
 
@@ -395,7 +414,7 @@ namespace LibCmo::CK2 {
 		m_TransColor = col;
 	}
 
-	CKDWORD CKBitmapData::GetTransparentColor() {
+	CKDWORD CKBitmapData::GetTransparentColor() const {
 		return m_TransColor;
 	}
 
@@ -403,7 +422,7 @@ namespace LibCmo::CK2 {
 		m_PickThreshold = threshold;
 	}
 
-	CKDWORD CKBitmapData::GetPickThreshold() {
+	CKDWORD CKBitmapData::GetPickThreshold() const {
 		return m_PickThreshold;
 	}
 	

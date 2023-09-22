@@ -186,7 +186,7 @@ namespace LibCmo::XContainer {
 		 * @param obj 
 		 * @return True if the object was already present, false otherwise
 		*/
-		bool AddIfNotHere(XObjectPointerArray& objarray, CK2::ObjImpls::CKObject* const obj);
+		bool AddIfNotHere(XObjectPointerArray& objarray, CK2::ObjImpls::CKObject* obj);
 
 		/**
 		 * @brief Check Object pointer validation and remove invalid pointers before deletion.

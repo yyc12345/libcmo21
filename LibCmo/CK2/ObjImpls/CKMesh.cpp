@@ -424,7 +424,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 #pragma region Vertex Section
 
-	CKDWORD CKMesh::GetVertexCount() {
+	CKDWORD CKMesh::GetVertexCount() const {
 		return m_VertexCount;
 	}
 
@@ -469,7 +469,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 #pragma region Material Slot Section
 
-	CKDWORD CKMesh::GetMaterialSlotCount() {
+	CKDWORD CKMesh::GetMaterialSlotCount() const {
 		return m_MtlSlotCount;
 	}
 
@@ -478,16 +478,15 @@ namespace LibCmo::CK2::ObjImpls {
 		m_MaterialSlot.resize(count, nullptr);
 	}
 
-	void CKMesh::SetMaterialSlot(CKMaterial* mtl, CKDWORD idx) {
-		if (idx >= m_MtlSlotCount) return;
-		m_MaterialSlot[idx] = mtl;
+	CKMaterial** CKMesh::GetMaterialSlots() {
+		return m_MaterialSlot.data();
 	}
 
 #pragma endregion
 
 #pragma region Face Section
 
-	CKDWORD CKMesh::GetFaceCount() {
+	CKDWORD CKMesh::GetFaceCount() const {
 		return m_FaceCount;
 	}
 
@@ -520,7 +519,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 #pragma region Line Section
 
-	CKDWORD CKMesh::GetLineCount() {
+	CKDWORD CKMesh::GetLineCount() const {
 		return m_LineCount;
 	}
 
@@ -537,7 +536,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 #pragma region Mtl Channel Section
 
-	CKDWORD CKMesh::GetMtlChannelCount() {
+	CKDWORD CKMesh::GetMtlChannelCount() const {
 		return m_MtlChannelCount;
 	}
 
@@ -574,7 +573,7 @@ namespace LibCmo::CK2::ObjImpls {
 		return m_MaterialChannels[idx].m_CustomUV.data();
 	}
 
-	VxMath::VXCHANNEL_FLAGS CKMesh::GetMtlChannelFlags(CKDWORD idx) {
+	VxMath::VXCHANNEL_FLAGS CKMesh::GetMtlChannelFlags(CKDWORD idx) const {
 		if (idx >= m_MtlChannelCount) return static_cast<VxMath::VXCHANNEL_FLAGS>(0);
 		return m_MaterialChannels[idx].m_Flags;
 	}

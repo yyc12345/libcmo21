@@ -38,6 +38,8 @@ namespace LibCmo::CK2 {
 		~CKBitmapData();
 		LIBCMO_DISABLE_COPY_MOVE(CKBitmapData);
 
+#pragma region RW Funcs
+
 		static bool ReadSpecificFormatBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot);
 		static bool ReadRawBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot);
 		static bool ReadOldRawBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot);
@@ -47,78 +49,114 @@ namespace LibCmo::CK2 {
 		bool ReadFromChunk(CKStateChunk* chunk, CKFileVisitor* file, const CKBitmapDataReadIdentifiers& identifiers);
 		bool DumpToChunk(CKStateChunk* chunk, CKFileVisitor* file, const CKBitmapDataWriteIdentifiers& identifiers);
 
+#pragma endregion
+
+#pragma region Slot funcs
+
 		void SetSlotCount(CKDWORD count);
-		CKDWORD GetSlotCount();
+		CKDWORD GetSlotCount() const;
 		void SetCurrentSlot(CKDWORD slot);
-		CKDWORD GetCurrentSlot();
-
-		void CreateImage(CKDWORD Width, CKDWORD Height, CKDWORD Slot);
-		bool LoadImage(CKSTRING filename, CKDWORD slot);
-		bool SaveImage(CKSTRING filename, CKDWORD slot, bool isForceThisFmt = false);
-		VxMath::VxImageDescEx* GetImageDesc(CKDWORD slot);
-		void ReleaseImage(CKDWORD slot);
-
-		void SetSlotFileName(CKDWORD slot, CKSTRING filename);
-		CKSTRING GetSlotFileName(CKDWORD slot);
-
-		const CKBitmapProperties& GetSaveFormat();
-		void SetSaveFormat(const CKBitmapProperties& props);
-		CK_TEXTURE_SAVEOPTIONS GetSaveOptions();
-		void SetSaveOptions(CK_TEXTURE_SAVEOPTIONS opts);
+		CKDWORD GetCurrentSlot() const;
 
 		/**
-		Summary: Enables or disables the color key transparency.
+		 * @brief Create a black image with full alpha in specified slot.
+		 * @param Width[in] Image width
+		 * @param Height[in] Image height
+		 * @param Slot[in] The slot placing image.
+		 * @return True if creating success.
+		*/
+		bool CreateImage(CKDWORD Width, CKDWORD Height, CKDWORD Slot);
+		/**
+		 * @brief Load image into specified slot.
+		 * @param filename[in] The file name of loading image.
+		 * @param slot[in] The slot placing loaded image.
+		 * @return True if load successfully.
+		*/
+		bool LoadImage(CKSTRING filename, CKDWORD slot);
+		/**
+		 * @brief Save image for specified slot.
+		 * @param filename[in] The file name of saving image.
+		 * @param slot[in] The slot will be saved.
+		 * @param isForceThisFmt[in] True to use this class specified format to save image. Otherwise use the format evaluated by the image file name.
+		 * @return True if success.
+		*/
+		bool SaveImage(CKSTRING filename, CKDWORD slot, bool isForceThisFmt = false);
+		/**
+		 * @brief Get specified slot image descriptor.
+		 * @param slot[in] The slot to get.
+		 * @return The descriptor. nullptr if failed.
+		*/
+		VxMath::VxImageDescEx* GetImageDesc(CKDWORD slot);
+		/**
+		 * @brief Release specified slot image.
+		 * @param slot[in] The slot to free.
+		*/
+		void ReleaseImage(CKDWORD slot);
 
-		Arguments:
-			Transparency: TRUE activates transparency, FALSE disables it.
-		Remarks:
+		/**
+		 * @brief Set associated file name for specified slot.
+		 * @param slot[in] The slot to set.
+		 * @param filename[in] The associated file name.
+		*/
+		bool SetSlotFileName(CKDWORD slot, CKSTRING filename);
+		/**
+		 * @brief Get associated file name for specified slot.
+		 * @param slot[in] The slot to get.
+		 * @return The file name. nullptr if failed.
+		*/
+		CKSTRING GetSlotFileName(CKDWORD slot) const;
+
+#pragma endregion
+
+#pragma region Not important funcs
+
+		void SetCubeMap(bool is_cube);
+		bool IsCubeMap() const;
+		
+		const CKBitmapProperties& GetSaveFormat() const;
+		void SetSaveFormat(const CKBitmapProperties& props);
+		CK_TEXTURE_SAVEOPTIONS GetSaveOptions() const;
+		void SetSaveOptions(CK_TEXTURE_SAVEOPTIONS opts);
+		/**
+		@brief Enables or disables the color key transparency.
+		@param Transparency[in] TRUE activates transparency, FALSE disables it.
+		@remark
 			+ 0x00000000 (black) is the default transparent color.
 			+ Setting on the transparency and a transparent color automatically 
 			updates the alpha channel so that pixel with the transparent color have 
 			a 0 alpha value.
-		See also: IsTransparent,SetTranparentColor
+		@see IsTransparent, SetTranparentColor
 		*/
 		void SetTransparent(bool Transparency);
 		/**
-		Summary: Returns whether color keyed transparency is enabled.
-
-		Return Value:
-			TRUE if successful.
-		Arguments:
-			Transparency: TRUE activates transparency, FALSE disables it.
-		Return Value:
-			TRUE if color keying is enabled.
-		See also: IsTransparent
+		@brief Returns whether color keyed transparency is enabled.
+		@return TRUE if color keying is enabled.
+		@see SetTransparent
 		*/
-		bool IsTransparent();
+		bool IsTransparent() const;
 		/**
-		Summary: Sets the transparent color.
-		Arguments:
-			Color: A 32 bit ARGB transparent color.
-		Remarks:
+		@brief Sets the transparent color.
+		@param Color[in] A 32 bit ARGB transparent color.
+		@remark
 		+ 0x00000000 (black) is the default transparent color.
 		+ Setting on the transparency and a transparent color automatically 
 		updates the alpha channel so that pixel with the transparent color have 
 		a 0 alpha value.
-
-		See also: GetTranparentColor,SetTransparent
+		@see GetTranparentColor, SetTransparent
 		*/
 		void SetTransparentColor(CKDWORD col);
 		/**
-		Summary: Returns the transparent color.
-		Return Value:
-			Color: A 32 bit ARGB transparent color.
-		Remarks:
+		@brief Returns the transparent color.
+		@return A 32 bit ARGB transparent color.
+		@remark
 			+ 0x00000000 (black) is the default transparent color.
-
-		See also: SetTranparentColor,SetTransparent
+		@see SetTranparentColor, SetTransparent
 		*/
-		CKDWORD GetTransparentColor();
+		CKDWORD GetTransparentColor() const;
 		/**
-		Summary: Sets pick threshold value.
-		Arguments:
-			pt: Pick threshold value to be set.
-		Remarks:
+		@brief Sets pick threshold value.
+		@param pt[in] Pick threshold value to be set.
+		@remark
 			+ The pick threshold is used when picking object with 
 			transparent textures.
 			+ It is the minimum value for alpha component
@@ -126,14 +164,16 @@ namespace LibCmo::CK2 {
 			and the default value 0 means the picking is always valid.
 			+ But if a value >0 is used and the texture use transparency (some pixels of the bitmap will have
 			alpha component of 0) an object will not be picked on its transparent part.
-
-		See Also: CKRenderContext::Pick
+		@see CKRenderContext::Pick
 		*/
 		void SetPickThreshold(CKDWORD threshold);
 		/**
-		Summary: Gets pick threshold value.
+		@brief Gets pick threshold value.
+		@return Pick threshold value
 		*/
-		CKDWORD GetPickThreshold();
+		CKDWORD GetPickThreshold() const;
+
+#pragma endregion
 
 	protected:
 		CKContext* m_Context;

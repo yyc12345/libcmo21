@@ -13,7 +13,7 @@ namespace LibCmo::CK2::ObjImpls {
 		m_Specular(0.5f, 0.5f, 0.5f, 1.0f), m_SpecularPower(0.0f),
 		m_Emissive(0.0f, 0.0f, 0.0f, 1.0f),
 		m_EnableTwoSided(false),
-		m_Textures{nullptr, nullptr, nullptr, nullptr},
+		m_Textures { nullptr, nullptr, nullptr, nullptr },
 		m_TextureMinMode(VxMath::VXTEXTURE_FILTERMODE::VXTEXTUREFILTER_LINEAR), m_TextureMagMode(VxMath::VXTEXTURE_FILTERMODE::VXTEXTUREFILTER_LINEAR),
 		m_SourceBlend(VxMath::VXBLEND_MODE::VXBLEND_ONE), m_DestBlend(VxMath::VXBLEND_MODE::VXBLEND_ZERO), m_EnableAlphaBlend(false),
 		m_ShadeMode(VxMath::VXSHADE_MODE::VXSHADE_GOURAUD),
@@ -161,7 +161,7 @@ namespace LibCmo::CK2::ObjImpls {
 			// drop parameter id.
 			CK_ID paramid;
 			chunk->ReadObjectID(paramid);
-			
+
 			// read effect self
 			CKDWORD data;
 			chunk->ReadStruct(data);
@@ -170,5 +170,166 @@ namespace LibCmo::CK2::ObjImpls {
 
 		return true;
 	}
+
+#pragma region Data Visitor
+
+	const VxMath::VxColor& CKMaterial::GetDiffuse() const {
+		return m_Diffuse;
+	}
+	void CKMaterial::SetDiffuse(const VxMath::VxColor& col) {
+		m_Diffuse = col;
+	}
+	const VxMath::VxColor& CKMaterial::GetAmbient() const {
+		return m_Ambient;
+	}
+	void CKMaterial::SetAmbient(const VxMath::VxColor& col) {
+		m_Ambient = col;
+	}
+	const VxMath::VxColor& CKMaterial::GetSpecular() const {
+		return m_Specular;
+	}
+	void CKMaterial::SetSpecular(const VxMath::VxColor& col) {
+		m_Specular = col;
+	}
+	const VxMath::VxColor& CKMaterial::GetEmissive() const {
+		return m_Emissive;
+	}
+	void CKMaterial::SetEmissive(const VxMath::VxColor& col) {
+		m_Emissive = col;
+	}
+	CKFLOAT CKMaterial::GetSpecularPower() const {
+		return m_SpecularPower;
+	}
+	void CKMaterial::SetSpecularPower(CKFLOAT val) {
+		m_SpecularPower = val;
+	}
+
+
+	CKTexture* CKMaterial::GetTexture(CKDWORD idx) const {
+		if (idx >= m_Textures.size()) return nullptr;
+		return m_Textures[idx];
+	}
+	void CKMaterial::SetTexture(CKTexture* tex, CKDWORD idx) {
+		if (idx >= m_Textures.size()) return;
+		m_Textures[idx] = tex;
+	}
+	CKDWORD CKMaterial::GetTextureBorderColor() const {
+		return m_TextureBorderColor;
+	}
+	void CKMaterial::SetTextureBorderColor(CKDWORD val) {
+		m_TextureBorderColor = val;
+	}
+
+
+	VxMath::VXTEXTURE_BLENDMODE CKMaterial::GetTextureBlendMode() const {
+		return m_TextureBlendMode;
+	}
+	void CKMaterial::SetTextureBlendMode(VxMath::VXTEXTURE_BLENDMODE val) {
+		m_TextureBlendMode = val;
+	}
+	VxMath::VXTEXTURE_FILTERMODE CKMaterial::GetTextureMinMode() const {
+		return m_TextureMinMode;
+	}
+	void CKMaterial::SetTextureMinMode(VxMath::VXTEXTURE_FILTERMODE val) {
+		m_TextureMinMode = val;
+	}
+	VxMath::VXTEXTURE_FILTERMODE CKMaterial::GetTextureMagMode() const {
+		return m_TextureMagMode;
+	}
+	void CKMaterial::SetTextureMagMode(VxMath::VXTEXTURE_FILTERMODE val) {
+		m_TextureMagMode = val;
+	}
+	VxMath::VXTEXTURE_ADDRESSMODE CKMaterial::GetTextureAddressMode() const {
+		return m_TextureAddressMode;
+	}
+	void CKMaterial::SetTextureAddressMode(VxMath::VXTEXTURE_ADDRESSMODE val) {
+		m_TextureAddressMode = val;
+	}
+
+
+	VxMath::VXBLEND_MODE CKMaterial::GetSourceBlend() const {
+		return m_SourceBlend;
+	}
+	void CKMaterial::SetSourceBlend(VxMath::VXBLEND_MODE val) {
+		m_SourceBlend = val;
+	}
+	VxMath::VXBLEND_MODE CKMaterial::GetDestBlend() const {
+		return m_DestBlend;
+	}
+	void CKMaterial::SetDestBlend(VxMath::VXBLEND_MODE val) {
+		m_DestBlend = val;
+	}
+	VxMath::VXFILL_MODE CKMaterial::GetFillMode() const {
+		return m_FillMode;
+	}
+	void CKMaterial::SetFillMode(VxMath::VXFILL_MODE val) {
+		m_FillMode = val;
+	}
+	VxMath::VXSHADE_MODE CKMaterial::GetShadeMode() const {
+		return m_ShadeMode;
+	}
+	void CKMaterial::SetShadeMode(VxMath::VXSHADE_MODE val) {
+		m_ShadeMode = val;
+	}
+
+
+	bool CKMaterial::GetAlphaTestEnabled() const {
+		return m_EnableAlphaTest;
+	}
+	void CKMaterial::SetAlphaTestEnabled(bool enabled) {
+		m_EnableAlphaTest = enabled;
+	}
+	bool CKMaterial::GetAlphaBlendEnabled() const {
+		return m_EnableAlphaBlend;
+	}
+	void CKMaterial::SetAlphaBlendEnabled(bool enabled) {
+		m_EnableAlphaBlend = enabled;
+	}
+	bool CKMaterial::GetPerspectiveCorrectionEnabled() const {
+		return m_EnablePerspectiveCorrection;
+	}
+	void CKMaterial::SetPerspectiveCorrectionEnabled(bool enabled) {
+		m_EnablePerspectiveCorrection = enabled;
+	}
+	bool CKMaterial::GetZWriteEnabled() const {
+		return m_EnableZWrite;
+	}
+	void CKMaterial::SetZWriteEnabled(bool enabled) {
+		m_EnableZWrite = enabled;
+	}
+	bool CKMaterial::GetTwoSidedEnabled() const {
+		return m_EnableTwoSided;
+	}
+	void CKMaterial::SetTwoSidedEnabled(bool enabled) {
+		m_EnableTwoSided = enabled;
+	}
+
+
+	CKBYTE CKMaterial::GetAlphaRef() const {
+		return m_AlphaRef;
+	}
+	void CKMaterial::SetAlphaRef(CKBYTE val) {
+		m_AlphaRef = val;
+	}
+	VxMath::VXCMPFUNC CKMaterial::GetAlphaFunc() const {
+		return m_AlphaFunc;
+	}
+	void CKMaterial::SetAlphaFunc(VxMath::VXCMPFUNC val) {
+		m_AlphaFunc = val;
+	}
+	VxMath::VXCMPFUNC CKMaterial::GetZFunc() const {
+		return m_ZFunc;
+	}
+	void CKMaterial::SetZFunc(VxMath::VXCMPFUNC val) {
+		m_ZFunc = val;
+	}
+	VxMath::VX_EFFECT CKMaterial::GetEffect() const {
+		return m_Effect;
+	}
+	void CKMaterial::SetEffect(VxMath::VX_EFFECT val) {
+		m_Effect = val;
+	}
+
+#pragma endregion
 
 }

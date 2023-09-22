@@ -195,4 +195,71 @@ namespace LibCmo::CK2::ObjImpls {
 		return CKObject::IsVisible();
 	}
 
+#pragma region Misc Oper
+
+	const VxMath::VxMatrix& CK3dEntity::GetWorldMatrix() const {
+		return m_WorldMatrix;
+	}
+
+	void CK3dEntity::SetWorldMatrix(const VxMath::VxMatrix& mat) {
+		m_WorldMatrix = mat;
+	}
+
+	CK_3DENTITY_FLAGS CK3dEntity::GetEntityFlags() const {
+		return m_3dEntityFlags;
+	}
+
+	void CK3dEntity::SetEntityFlags(CK_3DENTITY_FLAGS flags) {
+		m_3dEntityFlags = flags;
+	}
+
+	VxMath::VX_MOVEABLE_FLAGS CK3dEntity::GetMoveableFlags() const {
+		return m_MoveableFlags;
+	}
+
+	void CK3dEntity::SetMoveableFlags(VxMath::VX_MOVEABLE_FLAGS flags) {
+		m_MoveableFlags = flags;
+	}
+
+	CKDWORD CK3dEntity::GetZOrder() const {
+		return m_ZOrder;
+	}
+
+	void CK3dEntity::SetZOrder(CKDWORD ord) {
+		m_ZOrder = ord;
+	}
+
+#pragma endregion
+
+#pragma region Mesh Oper
+
+	void CK3dEntity::AddPotentialMesh(CKMesh* mesh) {
+		XContainer::NSXObjectPointerArray::AddIfNotHere(m_PotentialMeshes, mesh);
+	}
+
+	void CK3dEntity::RemovePotentialMesh(CKMesh* mesh) {
+		std::erase(m_PotentialMeshes, mesh);
+	}
+
+	CKDWORD CK3dEntity::GetPotentialMeshCount() const {
+		return static_cast<CKDWORD>(m_PotentialMeshes.size());
+	}
+
+	CKMesh* CK3dEntity::GetPotentialMesh(CKDWORD idx) const {
+		if (idx >= m_PotentialMeshes.size()) return nullptr;
+		return static_cast<CKMesh*>(m_PotentialMeshes[idx]);
+	}
+
+	CKMesh* CK3dEntity::GetCurrentMesh() const {
+		return m_CurrentMesh;
+	}
+
+	void CK3dEntity::SetCurrentMesh(CKMesh* mesh) {
+		m_CurrentMesh = mesh;
+		AddPotentialMesh(mesh);
+	}
+
+#pragma endregion
+
+
 }

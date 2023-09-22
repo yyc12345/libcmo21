@@ -11,16 +11,70 @@ namespace LibCmo::CK2::ObjImpls {
 		CKMaterial(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKMaterial();
 		LIBCMO_DISABLE_COPY_MOVE(CKMaterial);
-		
-		virtual CK_CLASSID GetClassID(void) override { 
-			return CK_CLASSID::CKCID_MATERIAL; 
+
+		virtual CK_CLASSID GetClassID(void) override {
+			return CK_CLASSID::CKCID_MATERIAL;
 		}
 
 		virtual void CheckPreDeletion() override;
-		
+
 		// 2 RW functions
 		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) override;
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
+
+		const VxMath::VxColor& GetDiffuse() const;
+		void SetDiffuse(const VxMath::VxColor& col);
+		const VxMath::VxColor& GetAmbient() const;
+		void SetAmbient(const VxMath::VxColor& col);
+		const VxMath::VxColor& GetSpecular() const;
+		void SetSpecular(const VxMath::VxColor& col);
+		const VxMath::VxColor& GetEmissive() const;
+		void SetEmissive(const VxMath::VxColor& col);
+		CKFLOAT GetSpecularPower() const;
+		void SetSpecularPower(CKFLOAT val);
+
+		CKTexture* GetTexture(CKDWORD idx = 0) const;
+		void SetTexture(CKTexture* tex, CKDWORD idx = 0);
+		CKDWORD GetTextureBorderColor() const;
+		void SetTextureBorderColor(CKDWORD val);
+
+		VxMath::VXTEXTURE_BLENDMODE GetTextureBlendMode() const;
+		void SetTextureBlendMode(VxMath::VXTEXTURE_BLENDMODE val);
+		VxMath::VXTEXTURE_FILTERMODE GetTextureMinMode() const;
+		void SetTextureMinMode(VxMath::VXTEXTURE_FILTERMODE val);
+		VxMath::VXTEXTURE_FILTERMODE GetTextureMagMode() const;
+		void SetTextureMagMode(VxMath::VXTEXTURE_FILTERMODE val);
+		VxMath::VXTEXTURE_ADDRESSMODE GetTextureAddressMode() const;
+		void SetTextureAddressMode(VxMath::VXTEXTURE_ADDRESSMODE val);
+
+		VxMath::VXBLEND_MODE GetSourceBlend() const;
+		void SetSourceBlend(VxMath::VXBLEND_MODE val);
+		VxMath::VXBLEND_MODE GetDestBlend() const;
+		void SetDestBlend(VxMath::VXBLEND_MODE val);
+		VxMath::VXFILL_MODE GetFillMode() const;
+		void SetFillMode(VxMath::VXFILL_MODE val);
+		VxMath::VXSHADE_MODE GetShadeMode() const;
+		void SetShadeMode(VxMath::VXSHADE_MODE val);
+
+		bool GetAlphaTestEnabled() const;
+		void SetAlphaTestEnabled(bool enabled);
+		bool GetAlphaBlendEnabled() const;
+		void SetAlphaBlendEnabled(bool enabled);
+		bool GetPerspectiveCorrectionEnabled() const;
+		void SetPerspectiveCorrectionEnabled(bool enabled);
+		bool GetZWriteEnabled() const;
+		void SetZWriteEnabled(bool enabled);
+		bool GetTwoSidedEnabled() const;
+		void SetTwoSidedEnabled(bool enabled);
+
+		CKBYTE GetAlphaRef() const;
+		void SetAlphaRef(CKBYTE val);
+		VxMath::VXCMPFUNC GetAlphaFunc() const;
+		void SetAlphaFunc(VxMath::VXCMPFUNC val);
+		VxMath::VXCMPFUNC GetZFunc() const;
+		void SetZFunc(VxMath::VXCMPFUNC val);
+		VxMath::VX_EFFECT GetEffect() const;
+		void SetEffect(VxMath::VX_EFFECT val);
 
 	protected:
 		VxMath::VxColor m_Diffuse;
