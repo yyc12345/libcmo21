@@ -47,7 +47,7 @@ namespace Unvirt {
 		}
 
 		void GetCmdLine(std::string& u8cmd) {
-			fputs("Unvirt> ", stdout);
+			fputs(UNVIRT_TERMCOL_LIGHT_GREEN(("Unvirt> ")), stdout);
 #if defined(LIBCMO_OS_WIN32)
 			std::wstring wcmd;
 			std::getline(std::wcin, wcmd);

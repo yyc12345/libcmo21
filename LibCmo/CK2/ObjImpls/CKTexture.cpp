@@ -93,34 +93,41 @@ namespace LibCmo::CK2::ObjImpls {
 			return false;
 		} else {
 			CKDWORD fmtbytesize;
-			if (chunk->SeekIdentifierAndReturnSize(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_OLDTEXONLY, &fmtbytesize)) {
+			// MARK: there is a patch for virtools 2.1 implement.
+			// CK_STATESAVE_TEXONLY is noy valid in 2.1 but we add it for cpmpatibility reason.
+			if (chunk->SeekIdentifierAndReturnSize(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_OLDTEXONLY, &fmtbytesize) ||
+				chunk->SeekIdentifierAndReturnSize(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_TEXONLY, &fmtbytesize)) {
 				// for mid data:
 				// HIGH >>> 0xFF (blank) 0xFF (save options) 0xFF (transparent + movie info + video fmt) 0xFF (mip map) <<< LOW
 				// for mixed flags:
 				// HIGH >>> 1(blank) 1(cubemap) 1(has video fmt) 1(is transparent)
 				CKDWORD mixdata;
 				chunk->ReadStruct(mixdata);
+				// set mipmap
 				m_UseMipMap = (mixdata & 0xFF);
-				m_ImageHost.SetSaveOptions(static_cast<CK_TEXTURE_SAVEOPTIONS>((mixdata & 0xFF0000) >> 16));
+				mixdata >>= 8;
+				// mix flags
+				CKDWORD mixflags = mixdata & 0xFF;
+				mixdata >>= 8;
+				m_ImageHost.SetTransparent(mixflags & 0x1);
+				bool hasVideoFmt = mixflags & 0x2;
+				m_ImageHost.SetCubeMap(mixflags & 0x4);
+				// save options
+				m_ImageHost.SetSaveOptions(static_cast<CK_TEXTURE_SAVEOPTIONS>(mixdata & 0xFF));
+				mixdata >>= 8;
 				
-				mixdata = mixdata & 0xFF00 >> 8;
-				m_ImageHost.SetTransparent(mixdata & 0x1);
-				bool hasVideoFmt = mixdata & 0x2;
-				m_ImageHost.SetCubeMap(mixdata & 0x4);
-				// MARK: I ignore 0x4 in there because it involve video.
-
 				// set current slot, transparent color, and video format.
 				CKDWORD currentSlot, transColor;
 				fmtbytesize -= CKSizeof(CKDWORD);
 				switch (fmtbytesize) {
-					case (3 * sizeof(CKDWORD)):
+					case (3 * CKSizeof(CKDWORD)):
 						chunk->ReadStruct(transColor);
 						m_ImageHost.SetTransparentColor(transColor);
 						chunk->ReadStruct(currentSlot);
 						m_ImageHost.SetCurrentSlot(currentSlot);
 						chunk->ReadStruct(m_VideoFormat);
 						break;
-					case (2 * sizeof(CKDWORD)):
+					case (2 * CKSizeof(CKDWORD)):
 						if (m_ImageHost.GetSlotCount() <= 1 || !hasVideoFmt) {
 							chunk->ReadStruct(transColor);
 							m_ImageHost.SetTransparentColor(transColor);
@@ -133,7 +140,7 @@ namespace LibCmo::CK2::ObjImpls {
 							chunk->ReadStruct(m_VideoFormat);
 						}
 						break;
-					case (sizeof(CKDWORD)):
+					case (CKSizeof(CKDWORD)):
 						if (hasVideoFmt) {
 							chunk->ReadStruct(m_VideoFormat);
 						} else if (m_ImageHost.GetSlotCount() <= 1) {

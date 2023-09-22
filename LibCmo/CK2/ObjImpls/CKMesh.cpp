@@ -289,7 +289,7 @@ namespace LibCmo::CK2::ObjImpls {
 				chunk->ReadStruct(uvcount);
 				if (uvcount != 0) {
 					// make sure no overflow
-					uvcount = std::min(uvcount, chl.m_CustomUV.size());
+					uvcount = std::min(uvcount, static_cast<CKDWORD>(chl.m_CustomUV.size()));
 
 					CKDWORD bufsize = uvcount * CKSizeof(VxMath::VxVector2);
 					auto locker = chunk->LockReadBufferWrapper(bufsize);

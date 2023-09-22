@@ -110,6 +110,8 @@ namespace LibCmo::CK2 {
 
 #pragma region Not important funcs
 
+		CK_BITMAPDATA_FLAGS GetBitmapFlags() const;
+
 		void SetCubeMap(bool is_cube);
 		bool IsCubeMap() const;
 		

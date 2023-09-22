@@ -35,7 +35,10 @@ namespace Unvirt {
 			for (auto& item : desc) {
 				// if it have exacelt same entry, return directly
 				if (item.first == val) {
-					strl = item.second.mName;
+					StringHelper::StdstringPrintf(strl, "%s (0x%08" PRIXCKDWORD ")",
+						item.second.mName,
+						static_cast<LibCmo::CKDWORD>(item.first)
+					);
 					return strl;
 				}
 
@@ -80,7 +83,8 @@ namespace Unvirt {
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_OBJECT_FLAGS> CK_OBJECT_FLAGS;
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_3DENTITY_FLAGS> CK_3DENTITY_FLAGS;
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS> CK_TEXTURE_SAVEOPTIONS;
-		
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_BITMAPDATA_FLAGS> CK_BITMAPDATA_FLAGS;
+
 			extern const GeneralReflectionArray<LibCmo::VxMath::VX_PIXELFORMAT> VX_PIXELFORMAT;
 			extern const GeneralReflectionArray<LibCmo::VxMath::VXTEXTURE_BLENDMODE> VXTEXTURE_BLENDMODE;
 			extern const GeneralReflectionArray<LibCmo::VxMath::VXTEXTURE_FILTERMODE> VXTEXTURE_FILTERMODE;

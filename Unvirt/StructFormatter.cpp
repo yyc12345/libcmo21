@@ -45,12 +45,15 @@ namespace Unvirt::StructFormatter {
 			r = (argb & 0x00FF0000) >> 16,
 			g = (argb & 0x0000FF00) >> 8,
 			b = (argb & 0x000000FF);
-		fprintf(stdout, "A:%" PRIuCKDWORD " (%.4" PRIfCKFLOAT ") RGB(%" PRIuCKDWORD ", %" PRIuCKDWORD ", %" PRIuCKDWORD ") RGB#%" PRIxCKDWORD "%" PRIxCKDWORD "%" PRIxCKDWORD " RGBA#%" PRIxCKDWORD "%" PRIxCKDWORD "%" PRIxCKDWORD "%" PRIxCKDWORD,
+		fprintf(stdout, "A:%" PRIuCKDWORD " (%.4" PRIfCKFLOAT ") RGB(%" PRIuCKDWORD ", %" PRIuCKDWORD ", %" PRIuCKDWORD ") RGB#%02" PRIxCKDWORD "%02" PRIxCKDWORD "%02" PRIxCKDWORD " RGBA#%02" PRIxCKDWORD "%02" PRIxCKDWORD "%02" PRIxCKDWORD "%02" PRIxCKDWORD,
 			a, col.a, 
 			r, g, b, 
 			r, g, b, 
 			r, g, b, a
 		);
+	}
+	static void PrintColor(LibCmo::CKDWORD argb) {
+		PrintColor(LibCmo::VxMath::VxColor(argb));
 	}
 
 	template<class _Ty>
@@ -87,6 +90,10 @@ namespace Unvirt::StructFormatter {
 		fprintf(stdout, "CK ID: %" PRIuCKID "\n", obj->GetID());
 		// print class id
 		fprintf(stdout, "Class ID: %" PRIiCLASSID " (%s)\n", obj->GetClassID(), AccessibleValue::GetClassIdHierarchy(obj->GetClassID()).c_str());
+		// print flags
+		fputs("Flags:\n", stdout);
+		fputs(AccessibleValue::GetFlagEnumName(obj->GetObjectFlags(), AccessibleValue::EnumDesc::CK_OBJECT_FLAGS, "\n").c_str(), stdout);
+		fputc('\n', stdout);
 	}
 
 	static void PrintCKSceneObjectDetail(LibCmo::CK2::ObjImpls::CKSceneObject* obj) {
@@ -177,7 +184,40 @@ namespace Unvirt::StructFormatter {
 	static void PrintCKTextureDetail(LibCmo::CK2::ObjImpls::CKTexture* obj) {
 		PrintCKBeObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKTexture\n")), stdout);
-		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+
+		// texture
+		fputs("== Texture ==\n", stdout);
+
+		LibCmo::CK2::CKBitmapData& bd = obj->GetUnderlyingData();
+		LibCmo::CKDWORD slot_count = bd.GetSlotCount();
+		fprintf(stdout, "Slot Count: %" PRIuCKDWORD "\n", slot_count);
+		fprintf(stdout, "Current Slot: %" PRIuCKDWORD "\n", bd.GetCurrentSlot());
+
+		fputs("Index\tWidth\tHeight\tImage Addr\tImage Size\tFilename\n", stdout);
+		for (LibCmo::CKDWORD i = 0; i < slot_count; ++i) {
+			auto desc = bd.GetImageDesc(i);
+
+			fprintf(stdout, "#%" PRIuCKDWORD "\t", i);
+			fprintf(stdout, "%" PRIuCKDWORD "\t%" PRIuCKDWORD "\t", desc->GetWidth(), desc->GetHeight());
+			PrintPointer(desc->GetImage());
+			fputc('\t', stdout);
+			fprintf(stdout, "0x%" PRIxCKDWORD " bytes\t", desc->GetImageSize());
+			PrintCKSTRING(bd.GetSlotFileName(i));
+			fputc('\n', stdout);
+		}
+
+		// other data
+		fputs("== Misc ==\n", stdout);
+		fprintf(stdout, "Video Format: %s\n", AccessibleValue::GetEnumName(obj->GetVideoFormat(), AccessibleValue::EnumDesc::VX_PIXELFORMAT).c_str());
+		fprintf(stdout, "Save Option: %s\n", AccessibleValue::GetEnumName(bd.GetSaveOptions(), AccessibleValue::EnumDesc::CK_TEXTURE_SAVEOPTIONS).c_str());
+		fprintf(stdout, "Pick Threshold: %" PRIuCKDWORD "\n", bd.GetPickThreshold());
+		fputs("Transparent Color: ", stdout);
+		PrintColor(bd.GetTransparentColor());
+		fputc('\n', stdout);
+		
+		fputs("Bitmap Flags:\n", stdout);
+		fputs(AccessibleValue::GetFlagEnumName(bd.GetBitmapFlags(), AccessibleValue::EnumDesc::CK_BITMAPDATA_FLAGS, "\n").c_str(), stdout);
+		fputc('\n', stdout);
 	}
 
 	static void PrintCKMaterialDetail(LibCmo::CK2::ObjImpls::CKMaterial* obj) {
@@ -204,7 +244,7 @@ namespace Unvirt::StructFormatter {
 
 		// basic data
 		fputs("== Basic ==\n", stdout);
-		fprintf(stdout, "Both Sided: ");
+		fputs("Both Sided: ", stdout);
 		PrintBool(obj->GetTwoSidedEnabled());
 		fputc('\n', stdout);
 		fprintf(stdout, "Fill Mode: %s\n", AccessibleValue::GetEnumName(obj->GetFillMode(), AccessibleValue::EnumDesc::VXFILL_MODE).c_str());
@@ -227,13 +267,13 @@ namespace Unvirt::StructFormatter {
 		fprintf(stdout, "Filter Min: %s\n", AccessibleValue::GetEnumName(obj->GetTextureMinMode(), AccessibleValue::EnumDesc::VXTEXTURE_FILTERMODE).c_str());
 		fprintf(stdout, "Filter Mag: %s\n", AccessibleValue::GetEnumName(obj->GetTextureMagMode(), AccessibleValue::EnumDesc::VXTEXTURE_FILTERMODE).c_str());
 		fprintf(stdout, "Address Mode: %s\n", AccessibleValue::GetEnumName(obj->GetTextureAddressMode(), AccessibleValue::EnumDesc::VXTEXTURE_ADDRESSMODE).c_str());
-		fprintf(stdout, "Perspective Correct: ");
+		fputs("Perspective Correct: ", stdout);
 		PrintBool(obj->GetPerspectiveCorrectionEnabled());
 		fputc('\n', stdout);
 
 		// alpha test
 		fputs("== Alpha Test ==\n", stdout);
-		fprintf(stdout, "Enabled: ");
+		fputs("Enabled: ", stdout);
 		PrintBool(obj->GetAlphaTestEnabled());
 		fputc('\n', stdout);
 		fprintf(stdout, "Alpha Function: %s\n", AccessibleValue::GetEnumName(obj->GetAlphaFunc(), AccessibleValue::EnumDesc::VXCMPFUNC).c_str());
@@ -241,7 +281,7 @@ namespace Unvirt::StructFormatter {
 		
 		// alpha blend
 		fputs("== Alpha Blend ==\n", stdout);
-		fprintf(stdout, "Enabled: ");
+		fputs("Enabled: ", stdout);
 		PrintBool(obj->GetAlphaBlendEnabled());
 		fputc('\n', stdout);
 		fprintf(stdout, "Source Blend: %s\n", AccessibleValue::GetEnumName(obj->GetSourceBlend(), AccessibleValue::EnumDesc::VXBLEND_MODE).c_str());
@@ -249,7 +289,7 @@ namespace Unvirt::StructFormatter {
 		
 		// z buffer
 		fputs("== Z-Buffer Write ==\n", stdout);
-		fprintf(stdout, "Enabled: ");
+		fputs("Enabled: ", stdout);
 		PrintBool(obj->GetZWriteEnabled());
 		fputc('\n', stdout);
 		fprintf(stdout, "Z Compare Function: %s\n", AccessibleValue::GetEnumName(obj->GetZFunc(), AccessibleValue::EnumDesc::VXCMPFUNC).c_str());

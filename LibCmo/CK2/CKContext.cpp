@@ -157,7 +157,7 @@ namespace LibCmo::CK2 {
 	}
 
 	CKDWORD CKContext::GetManagerCount() {
-		return m_ManagerList.size();
+		return static_cast<CKDWORD>(m_ManagerList.size());
 	}
 
 	MgrImpls::CKBaseManager* CKContext::GetManager(CKDWORD index) {

@@ -368,6 +368,10 @@ namespace LibCmo::CK2 {
 
 #pragma region Not important variable visitor
 
+	CK_BITMAPDATA_FLAGS CKBitmapData::GetBitmapFlags() const {
+		return m_BitmapFlags;
+	}
+
 	void CKBitmapData::SetCubeMap(bool is_cube) {
 		if (is_cube) {
 			SetSlotCount(6);
