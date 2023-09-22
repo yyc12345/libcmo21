@@ -381,6 +381,10 @@ namespace LibCmo::CK2::ObjImpls {
 		SetLineCount(0);
 	}
 
+	VxMath::VXMESH_FLAGS CKMesh::GetMeshFlags() const {
+		return m_Flags;
+	}
+
 	void CKMesh::BuildNormals() {
 		if (m_FaceCount == 0 || m_VertexCount == 0) return;
 

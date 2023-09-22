@@ -36,6 +36,22 @@ namespace Unvirt::StructFormatter {
 	static void PrintCKGUID(const LibCmo::CK2::CKGUID& guid) {
 		fprintf(stdout, "<0x%08" PRIxCKDWORD ", 0x%08" PRIxCKDWORD ">", guid.d1, guid.d2);
 	}
+	static void PrintBool(bool v) {
+		fputs(v ? "true" : "false", stdout);
+	}
+	static void PrintColor(const LibCmo::VxMath::VxColor& col) {
+		LibCmo::CKDWORD argb = col.ToARGB();
+		LibCmo::CKDWORD a = (argb & 0xFF000000) >> 24,
+			r = (argb & 0x00FF0000) >> 16,
+			g = (argb & 0x0000FF00) >> 8,
+			b = (argb & 0x000000FF);
+		fprintf(stdout, "A:%" PRIuCKDWORD " (%.4" PRIfCKFLOAT ") RGB(%" PRIuCKDWORD ", %" PRIuCKDWORD ", %" PRIuCKDWORD ") RGB#%" PRIxCKDWORD "%" PRIxCKDWORD "%" PRIxCKDWORD " RGBA#%" PRIxCKDWORD "%" PRIxCKDWORD "%" PRIxCKDWORD "%" PRIxCKDWORD,
+			a, col.a, 
+			r, g, b, 
+			r, g, b, 
+			r, g, b, a
+		);
+	}
 
 	template<class _Ty>
 	static void GeneralPrintList(
@@ -60,7 +76,7 @@ namespace Unvirt::StructFormatter {
 #pragma endregion
 
 #pragma region Object Printer
-	
+
 	static void PrintCKObjectDetail(LibCmo::CK2::ObjImpls::CKObject* obj) {
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKObject\n")), stdout);
 		// print name
@@ -72,7 +88,7 @@ namespace Unvirt::StructFormatter {
 		// print class id
 		fprintf(stdout, "Class ID: %" PRIiCLASSID " (%s)\n", obj->GetClassID(), AccessibleValue::GetClassIdHierarchy(obj->GetClassID()).c_str());
 	}
-	
+
 	static void PrintCKSceneObjectDetail(LibCmo::CK2::ObjImpls::CKSceneObject* obj) {
 		PrintCKObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKSceneObject\n")), stdout);
@@ -88,13 +104,13 @@ namespace Unvirt::StructFormatter {
 	static void PrintCKGroupDetail(LibCmo::CK2::ObjImpls::CKGroup* obj) {
 		PrintCKBeObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKGroup\n")), stdout);
-		
+
 		LibCmo::CKDWORD count = obj->GetObjectCount();
 		fprintf(stdout, "Group Object Count: %" PRIuCKDWORD "\n", count);
 		fputs("Id\tType\tObject Pointer\tName\n", stdout);
 		for (LibCmo::CKDWORD i = 0; i < count; ++i) {
 			LibCmo::CK2::ObjImpls::CKBeObject* beobj = obj->GetObject(i);
-			
+
 			fprintf(stdout, "%" PRIuCKID "\t", beobj->GetID());
 			fputs(AccessibleValue::GetClassIdName(beobj->GetClassID()).c_str(), stdout);
 			fputc('\t', stdout);
@@ -104,41 +120,157 @@ namespace Unvirt::StructFormatter {
 			fputc('\n', stdout);
 		}
 	}
-	
+
 	static void PrintCKRenderObjectDetail(LibCmo::CK2::ObjImpls::CKRenderObject* obj) {
 		PrintCKBeObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKRenderObject\n")), stdout);
 		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
 	}
-	
+
 	static void PrintCK3dEntityDetail(LibCmo::CK2::ObjImpls::CK3dEntity* obj) {
 		PrintCKRenderObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CK3dEntity\n")), stdout);
-		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+
+		fputs("== World Matrix ==\n", stdout);
+		auto mat = obj->GetWorldMatrix();
+		for (LibCmo::CKDWORD i = 0; i < 4; ++i) {
+			fprintf(stdout, "%+" PRIeCKFLOAT "\t%+" PRIeCKFLOAT "\t%+" PRIeCKFLOAT "\t%+" PRIeCKFLOAT "\n",
+				mat[i].x, mat[i].y, mat[i].z, mat[i].w
+			);
+		}
+
+		fputs("== Flags ==\n", stdout);
+		fputs("3dEntity Flags:\n", stdout);
+		fputs(AccessibleValue::GetFlagEnumName(obj->GetEntityFlags(), AccessibleValue::EnumDesc::CK_3DENTITY_FLAGS, "\n").c_str(), stdout);
+		fputc('\n', stdout);
+		fputs("Moveable Flags:\n", stdout);
+		fputs(AccessibleValue::GetFlagEnumName(obj->GetMoveableFlags(), AccessibleValue::EnumDesc::VX_MOVEABLE_FLAGS, "\n").c_str(), stdout);
+		fputc('\n', stdout);
+
+		fputs("== Meshs ==\n", stdout);
+		fputs("Index\tAddress\tName\n", stdout);
+		// print current mesh
+		auto curmesh = obj->GetCurrentMesh();
+		fputs("->\t", stdout);
+		PrintPointer(curmesh);
+		fputc('\t', stdout);
+		if (curmesh != nullptr)
+			PrintCKSTRING(curmesh->GetName());
+		fputc('\n', stdout);
+		for (LibCmo::CKDWORD i = 0; i < obj->GetPotentialMeshCount(); ++i) {
+			auto thismesh = obj->GetPotentialMesh(i);
+			fprintf(stdout, "#%" PRIuCKDWORD "\t", i);
+			PrintPointer(thismesh);
+			fputc('\t', stdout);
+			PrintCKSTRING(thismesh->GetName());
+			fputc('\n', stdout);
+		}
+
 	}
-	
+
 	static void PrintCK3dObjectDetail(LibCmo::CK2::ObjImpls::CK3dObject* obj) {
 		PrintCK3dEntityDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CK3dObject\n")), stdout);
 		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
 	}
-	
+
 	static void PrintCKTextureDetail(LibCmo::CK2::ObjImpls::CKTexture* obj) {
 		PrintCKBeObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKTexture\n")), stdout);
 		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
 	}
-	
+
 	static void PrintCKMaterialDetail(LibCmo::CK2::ObjImpls::CKMaterial* obj) {
 		PrintCKBeObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKMaterial\n")), stdout);
-		fputs(UNVIRT_TERMCOL_LIGHT_RED(("No Data\n")), stdout);
+		
+		// color
+		fputs("== Color ==\n", stdout);
+
+		fputs("Diffuse: ", stdout);
+		PrintColor(obj->GetDiffuse());
+		fputc('\n', stdout);
+		fputs("Ambient: ", stdout);
+		PrintColor(obj->GetAmbient());
+		fputc('\n', stdout);
+		fputs("Specular: ", stdout);
+		PrintColor(obj->GetSpecular());
+		fputc('\n', stdout);
+		fputs("Emissive: ", stdout);
+		PrintColor(obj->GetEmissive());
+		fputc('\n', stdout);
+
+		fprintf(stdout, "Specular Power: %.2" PRIfCKFLOAT "\n", obj->GetSpecularPower());
+
+		// basic data
+		fputs("== Basic ==\n", stdout);
+		fprintf(stdout, "Both Sided: ");
+		PrintBool(obj->GetTwoSidedEnabled());
+		fputc('\n', stdout);
+		fprintf(stdout, "Fill Mode: %s\n", AccessibleValue::GetEnumName(obj->GetFillMode(), AccessibleValue::EnumDesc::VXFILL_MODE).c_str());
+		fprintf(stdout, "Shade Mode: %s\n", AccessibleValue::GetEnumName(obj->GetShadeMode(), AccessibleValue::EnumDesc::VXSHADE_MODE).c_str());
+
+		// textures
+		fputs("== Texture ==\n", stdout);
+		fputs("Textures:\n", stdout);
+		fputs("Index\tAddress\tName\n", stdout);
+		for (LibCmo::CKDWORD i = 0; i < 4; ++i) {
+			auto tex = obj->GetTexture(i);
+			fprintf(stdout, "#%" PRIuCKDWORD "\t", i);
+			PrintPointer(tex);
+			fputc('\t', stdout);
+			if (tex != nullptr)
+				PrintCKSTRING(tex->GetName());
+			fputc('\n', stdout);
+		}
+		fprintf(stdout, "Texture Blend: %s\n", AccessibleValue::GetEnumName(obj->GetTextureBlendMode(), AccessibleValue::EnumDesc::VXTEXTURE_BLENDMODE).c_str());
+		fprintf(stdout, "Filter Min: %s\n", AccessibleValue::GetEnumName(obj->GetTextureMinMode(), AccessibleValue::EnumDesc::VXTEXTURE_FILTERMODE).c_str());
+		fprintf(stdout, "Filter Mag: %s\n", AccessibleValue::GetEnumName(obj->GetTextureMagMode(), AccessibleValue::EnumDesc::VXTEXTURE_FILTERMODE).c_str());
+		fprintf(stdout, "Address Mode: %s\n", AccessibleValue::GetEnumName(obj->GetTextureAddressMode(), AccessibleValue::EnumDesc::VXTEXTURE_ADDRESSMODE).c_str());
+		fprintf(stdout, "Perspective Correct: ");
+		PrintBool(obj->GetPerspectiveCorrectionEnabled());
+		fputc('\n', stdout);
+
+		// alpha test
+		fputs("== Alpha Test ==\n", stdout);
+		fprintf(stdout, "Enabled: ");
+		PrintBool(obj->GetAlphaTestEnabled());
+		fputc('\n', stdout);
+		fprintf(stdout, "Alpha Function: %s\n", AccessibleValue::GetEnumName(obj->GetAlphaFunc(), AccessibleValue::EnumDesc::VXCMPFUNC).c_str());
+		fprintf(stdout, "Alpha Ref Value: %" PRIuCKBYTE "\n", obj->GetAlphaRef());
+		
+		// alpha blend
+		fputs("== Alpha Blend ==\n", stdout);
+		fprintf(stdout, "Enabled: ");
+		PrintBool(obj->GetAlphaBlendEnabled());
+		fputc('\n', stdout);
+		fprintf(stdout, "Source Blend: %s\n", AccessibleValue::GetEnumName(obj->GetSourceBlend(), AccessibleValue::EnumDesc::VXBLEND_MODE).c_str());
+		fprintf(stdout, "Destination Blend: %s\n", AccessibleValue::GetEnumName(obj->GetDestBlend(), AccessibleValue::EnumDesc::VXBLEND_MODE).c_str());
+		
+		// z buffer
+		fputs("== Z-Buffer Write ==\n", stdout);
+		fprintf(stdout, "Enabled: ");
+		PrintBool(obj->GetZWriteEnabled());
+		fputc('\n', stdout);
+		fprintf(stdout, "Z Compare Function: %s\n", AccessibleValue::GetEnumName(obj->GetZFunc(), AccessibleValue::EnumDesc::VXCMPFUNC).c_str());
+		
+		// effect
+		fputs("== Effect ==\n", stdout);
+		fprintf(stdout, "Effect: %s\n", AccessibleValue::GetEnumName(obj->GetEffect(), AccessibleValue::EnumDesc::VX_EFFECT).c_str());
+
 	}
-	
+
 	static void PrintCKMeshDetail(LibCmo::CK2::ObjImpls::CKMesh* obj) {
 		PrintCKBeObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKMesh\n")), stdout);
-
+		
+		fputs("== Flags ==\n", stdout);
+		fputs("Mesh Flags:\n", stdout);
+		fputs(AccessibleValue::GetFlagEnumName(obj->GetMeshFlags(), AccessibleValue::EnumDesc::VXMESH_FLAGS, "\n").c_str(), stdout);
+		fputc('\n', stdout);
+		
+		// vertex data
+		fputs("== Vertex ==\n", stdout);
 		fprintf(stdout, "Vertex Count: %" PRIuCKDWORD "\n", obj->GetVertexCount());
 		fputs("Address\tSize\tType\n", stdout);
 
@@ -155,9 +287,11 @@ namespace Unvirt::StructFormatter {
 		PrintPointer(obj->GetVertexWeights());
 		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\tWeights\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKFLOAT));
 		
+		// face data
+		fputs("== Face ==\n", stdout);
 		fprintf(stdout, "Face Count: %" PRIuCKDWORD "\n", obj->GetFaceCount());
 		fputs("Address\tSize\tType\n", stdout);
-		
+
 		PrintPointer(obj->GetFaceIndices());
 		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\tIndices\n", obj->GetFaceCount() * 3 * CKSizeof(LibCmo::CKWORD));
 		PrintPointer(obj->GetFaceMaterialSlotIndexs());
@@ -189,7 +323,7 @@ namespace Unvirt::StructFormatter {
 		);
 
 		fprintf(stdout, "Save Flags: %s\n", AccessibleValue::GetFlagEnumName(
-			fileinfo.FileWriteMode, AccessibleValue::EnumDesc::CK_FILE_WRITEMODE
+			fileinfo.FileWriteMode, AccessibleValue::EnumDesc::CK_FILE_WRITEMODE, ", "
 		).c_str());
 
 		fprintf(stdout, "File Size: %s\n", AccessibleValue::GetReadableFileSize(fileinfo.FileSize).c_str());

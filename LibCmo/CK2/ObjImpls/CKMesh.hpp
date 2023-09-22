@@ -27,6 +27,7 @@ namespace LibCmo::CK2::ObjImpls {
 		// ===== Misc Section =====
 	public:
 		void CleanMesh();
+		VxMath::VXMESH_FLAGS GetMeshFlags() const;
 	protected:
 		void BuildNormals();
 		void BuildFaceNormals();

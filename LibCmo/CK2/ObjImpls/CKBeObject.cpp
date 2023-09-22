@@ -26,7 +26,7 @@ namespace LibCmo::CK2::ObjImpls {
 		return true;
 	}
 
-	bool CKBeObject::IsInGroup(CKGroup* group) {
+	bool CKBeObject::IsInGroup(CKGroup* group) const {
 		if (group == nullptr) return false;
 		CKDWORD idx = group->GetGroupIndex();
 		return XContainer::NSXBitArray::IsSet(m_Groups, idx);

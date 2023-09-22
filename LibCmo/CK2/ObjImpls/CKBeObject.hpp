@@ -14,12 +14,16 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual CK_CLASSID GetClassID(void) override { 
 			return CK_CLASSID::CKCID_BEOBJECT; 
 		}
-		//virtual void PreSave(CKFileVisitor* file, CKDWORD flags) override;
+
 		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) override;
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
-		//virtual void PostLoad() override;
 
-		bool IsInGroup(CKGroup* group);
+		/**
+		 * @brief Check whether this object is in specified group.
+		 * @param group[in] The group to be checked.
+		 * @return True if in it.
+		*/
+		bool IsInGroup(CKGroup* group) const;
 		/**
 		 * @brief Directly set group data.
 		 * @param pos 

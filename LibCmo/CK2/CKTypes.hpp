@@ -106,6 +106,11 @@ namespace LibCmo {
 
 #define PRIiCKINT PRIi32
 
+#define PRIfCKFLOAT "f"
+#define PRIfCKDOUBLE "lf"
+#define PRIeCKFLOAT "e"
+#define PRIeCKDOUBLE "le"
+
 #define PRIxCKPTR PRIx32
 #define PRIXCKPTR PRIX32
 

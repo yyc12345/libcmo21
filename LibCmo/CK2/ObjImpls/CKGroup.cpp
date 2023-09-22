@@ -82,7 +82,7 @@ namespace LibCmo::CK2::ObjImpls {
 		}
 	}
 
-	CKDWORD CKGroup::GetGroupIndex() {
+	CKDWORD CKGroup::GetGroupIndex() const {
 		return m_GroupIndex;
 	}
 
@@ -134,12 +134,12 @@ namespace LibCmo::CK2::ObjImpls {
 		m_ObjectArray.clear();
 	}
 
-	CKBeObject* CKGroup::GetObject(CKDWORD pos) {
+	CKBeObject* CKGroup::GetObject(CKDWORD pos) const {
 		if (pos >= m_ObjectArray.size()) return nullptr;
 		else return static_cast<CKBeObject*>(m_ObjectArray[pos]);
 	}
 
-	CKDWORD CKGroup::GetObjectCount() {
+	CKDWORD CKGroup::GetObjectCount() const {
 		return static_cast<CKDWORD>(m_ObjectArray.size());
 	}
 

@@ -26,7 +26,7 @@ namespace LibCmo::CK2::ObjImpls {
 		// it only have special Show method
 		virtual void Show(CK_OBJECT_SHOWOPTION show = CK_OBJECT_SHOWOPTION::CKSHOW) override;
 
-		CKDWORD GetGroupIndex();
+		CKDWORD GetGroupIndex() const;
 		
 		// ===== Insert =====
 		CKERROR AddObject(CKBeObject *o);
@@ -37,8 +37,8 @@ namespace LibCmo::CK2::ObjImpls {
 		void Clear();
 		
 		// ===== Access =====
-		CKBeObject* GetObject(CKDWORD pos);
-		CKDWORD GetObjectCount();
+		CKBeObject* GetObject(CKDWORD pos) const;
+		CKDWORD GetObjectCount() const;
 
 	protected:
 		XContainer::XObjectPointerArray m_ObjectArray;
