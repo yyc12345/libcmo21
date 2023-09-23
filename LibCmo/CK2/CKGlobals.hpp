@@ -154,6 +154,7 @@ namespace LibCmo::CK2 {
 	XContainer::XBitArray CKGetAllNotifyClassID(const XContainer::XBitArray& delObjCids);
 
 	// ========== Initializations functions ==========
+
 	CKERROR CKStartUp();
 	CKERROR CKShutdown();
 

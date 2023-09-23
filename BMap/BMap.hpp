@@ -7,51 +7,6 @@
 
 namespace BMap {
 	
-	class BMGroup {
-	public:
-		BMGroup(LibCmo::CK2::ObjImpls::CKGroup* ptr);
-		~BMGroup();
-		LIBCMO_DEFAULT_COPY_MOVE(BMGroup);
-
-		LibCmo::CK2::ObjImpls::CKGroup* m_NativePtr;
-	};
-	
-	class BMTexture {
-	public:
-		BMTexture(LibCmo::CK2::ObjImpls::CKTexture* ptr);
-		~BMTexture();
-		LIBCMO_DEFAULT_COPY_MOVE(BMTexture);
-
-		LibCmo::CK2::ObjImpls::CKTexture* m_NativePtr;
-	};
-	
-	class BMMaterial {
-	public:
-		BMMaterial(LibCmo::CK2::ObjImpls::CKMaterial* ptr);
-		~BMMaterial();
-		LIBCMO_DEFAULT_COPY_MOVE(BMMaterial);
-
-		LibCmo::CK2::ObjImpls::CKMaterial* m_NativePtr;
-	};
-	
-	class BMMesh {
-	public:
-		BMMesh(LibCmo::CK2::ObjImpls::CKMesh* ptr);
-		~BMMesh();
-		LIBCMO_DEFAULT_COPY_MOVE(BMMesh);
-
-		LibCmo::CK2::ObjImpls::CKMesh* m_NativePtr;
-	};
-	
-	class BM3dEntity {
-	public:
-		BM3dEntity(LibCmo::CK2::ObjImpls::CK3dEntity* ptr);
-		~BM3dEntity();
-		LIBCMO_DEFAULT_COPY_MOVE(BM3dEntity);
-
-		LibCmo::CK2::ObjImpls::CK3dEntity* m_NativePtr;
-	};
-	
 	class BMMeshTransition {
 	private:
 		struct TransitionVertex {
@@ -64,9 +19,9 @@ namespace BMap {
 			LibCmo::VxMath::VxVector2 m_UV;
 		};
 		struct TransitionFace {
-			TransitionFace(uint32_t _i1, uint32_t _i2, uint32_t _i3, uint32_t mtl_id);
-			uint32_t m_Idx1, m_Idx2, m_Idx3;
-			uint32_t m_MtlSlotIdx;
+			TransitionFace(LibCmo::CKDWORD _i1, LibCmo::CKDWORD _i2, LibCmo::CKDWORD _i3, LibCmo::CKDWORD mtl_id);
+			LibCmo::CKDWORD m_Idx1, m_Idx2, m_Idx3;
+			LibCmo::CKDWORD m_MtlSlotIdx;
 		};
 		struct TransitionVertexCompare {
 			bool operator()(const TransitionVertex& lhs, const TransitionVertex& rhs) const;
@@ -76,54 +31,81 @@ namespace BMap {
 		BMMeshTransition();
 		~BMMeshTransition();
 
-		void PrepareVertexCount(uint32_t count);
-		void PrepareVertex(uint32_t index, float x, float y, float z);
-		void PrepareNormalCount(uint32_t count);
-		void PrepareNormal(uint32_t index, float x, float y, float z);
-		void PrepareUVCount(uint32_t count);
-		void PrepareUV(uint32_t index, float u, float v);
-		void PrepareMtlSlotCount(uint32_t count);
-		void PrepareMtlSlot(uint32_t index, BMMaterial* mtl);
-		void PrepareFaceCount(uint32_t count);
-		void PrepareFaceVertexIndices(uint32_t index, uint32_t indice1, uint32_t indice2, uint32_t indice3);
-		void PrepareFaceNormalIndices(uint32_t index, uint32_t indice1, uint32_t indice2, uint32_t indice3);
-		void PrepareFaceUVIndices(uint32_t index, uint32_t indice1, uint32_t indice2, uint32_t indice3);
-		void PrepareFaceMtlSlot(uint32_t index, uint32_t mtl_slot);
+		void PrepareVertexCount(LibCmo::CKDWORD count);
+		LibCmo::VxMath::VxVector3* PrepareVertex();
+		void PrepareNormalCount(LibCmo::CKDWORD count);
+		LibCmo::VxMath::VxVector3* PrepareNormal();
+		void PrepareUVCount(LibCmo::CKDWORD count);
+		LibCmo::VxMath::VxVector2* PrepareUV();
+		void PrepareMtlSlotCount(LibCmo::CKDWORD count);
+		LibCmo::CK2::ObjImpls::CKMaterial** PrepareMtlSlot();
+		void PrepareFaceCount(LibCmo::CKDWORD count);
+		LibCmo::CKDWORD* PrepareFaceVertexIndices();
+		LibCmo::CKDWORD* PrepareFaceNormalIndices();
+		LibCmo::CKDWORD* PrepareFaceUVIndices();
+		LibCmo::CKDWORD* PrepareFaceMtlSlot();
 
-		bool Parse(BMMesh* write_into_mesh);
+		bool Parse(LibCmo::CK2::ObjImpls::CKMesh* write_into_mesh);
 
 	private:
 		void DoRealParse();
-		void ApplyToMesh(BMMesh* write_into_mesh);
+		void ApplyToMesh(LibCmo::CK2::ObjImpls::CKMesh* write_into_mesh);
 
 		bool m_IsVertexOK, m_IsNormalOK, m_IsUVOK, m_IsFaceOK, m_IsMtlSlotOK;
 		bool m_IsParsed;
 
 		std::vector<LibCmo::VxMath::VxVector3> m_Vertexs, m_Normals;
 		std::vector<LibCmo::VxMath::VxVector2> m_UVs;
-		std::vector<uint32_t> m_FaceVertexs, m_FaceNormals, m_FaceUVs;
-		std::vector<uint32_t> m_FaceMtlSlotIdxs;
-		std::vector<BMMaterial*> m_MtlSlots;
+		std::vector<LibCmo::CKDWORD> m_FaceVertexs, m_FaceNormals, m_FaceUVs;
+		std::vector<LibCmo::CKDWORD> m_FaceMtlSlotIdxs;
+		std::vector<LibCmo::CK2::ObjImpls::CKMaterial*> m_MtlSlots;
 
 		std::vector<TransitionVertex> m_ProcVertexs;
 		std::vector<TransitionFace> m_ProcFaces;
-		// unordered_map have performance problem when dealing with massive data (in this case, big mesh)
-		// so we use map to get stable time cost.
-		std::map<TransitionVertex, uint32_t, TransitionVertexCompare> m_ProcDupRemover;
+		/**
+		@brief The core duplication vertex remover.
+		@remark
+		unordered_map have performance problem when dealing with massive data (in this case, big mesh).
+		so we use map to get stable time cost.
+		*/
+		std::map<TransitionVertex, LibCmo::CKDWORD, TransitionVertexCompare> m_ProcDupRemover;
 	};
 
 	class BMFile {
 	public:
-		BMFile();
+		BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING encodings[], bool is_reader);
 		~BMFile();
 
+		bool Load(LibCmo::CKSTRING filename);
+		bool Save(LibCmo::CKSTRING filename, LibCmo::CKINT compress_level);
+
+#define VISITOR_DECL(namepart) \
+LibCmo::CKDWORD Get ## namepart ## Count(); \
+LibCmo::CK2::ObjImpls::CK ## namepart * Get ## namepart (LibCmo::CKDWORD idx); \
+LibCmo::CK2::ObjImpls::CK ## namepart * Create ## namepart (LibCmo::CKSTRING name);
+
+		VISITOR_DECL(Group)
+		VISITOR_DECL(3dObject)
+		VISITOR_DECL(Mesh)
+		VISITOR_DECL(Material)
+		VISITOR_DECL(Texture)
+
+#undef VISITOR_DECL
+
 	private:
+		bool m_IsReader;
 		LibCmo::CK2::CKContext* m_Context;
-		std::vector<LibCmo::CK2::ObjImpls::CKGroup*> m_ObjGroups;
-		std::vector<LibCmo::CK2::ObjImpls::CK3dObject*> m_Obj3dObjects;
-		std::vector<LibCmo::CK2::ObjImpls::CKMesh*> m_ObjMeshs;
-		std::vector<LibCmo::CK2::ObjImpls::CKMaterial*> m_ObjMaterials;
-		std::vector<LibCmo::CK2::ObjImpls::CKTexture*> m_ObjTextures;
+
+#define VISITOR_SELF(namepart) \
+std::vector<LibCmo::CK2::ObjImpls::CK ## namepart *> m_Obj ## namepart ## s;
+
+		VISITOR_SELF(Group)
+		VISITOR_SELF(3dObject)
+		VISITOR_SELF(Mesh)
+		VISITOR_SELF(Material)
+		VISITOR_SELF(Texture)
+
+#undef VISITOR_SELF
 	};
 
 }

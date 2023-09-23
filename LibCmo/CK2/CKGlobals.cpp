@@ -392,7 +392,7 @@ namespace LibCmo::CK2 {
 		// reserve class info array.
 		g_CKClassInfo.reserve(static_cast<size_t>(CK_CLASSID::CKCID_MAXCLASSID));
 
-		// todo: add class type registrations
+		// MARK: add class type registrations here
 #define EasyClassReg(clsname, cid, parentCid, strName) \
 CKClassRegister(cid, parentCid, \
 	nullptr, \

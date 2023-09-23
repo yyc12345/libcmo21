@@ -145,6 +145,8 @@ namespace LibCmo::CK2::ObjImpls {
 				// so we just read it and skip it.
 				CK_ID placeid;
 				chunk->ReadObjectID(placeid);
+				// and remove this flag
+				EnumsHelper::Rm(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PLACEVALID);
 			}
 
 			// read parent
@@ -153,6 +155,8 @@ namespace LibCmo::CK2::ObjImpls {
 				// we ignore this field.
 				CK_ID parentid;
 				chunk->ReadObjectID(parentid);
+				// and remove this flag
+				EnumsHelper::Rm(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PARENTVALID);
 			}
 
 			// read priority (non-zero zorder)

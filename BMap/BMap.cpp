@@ -10,7 +10,7 @@ namespace BMap {
 		const LibCmo::VxMath::VxVector2& uv) :
 		m_Vertex(vec), m_Norm(norm), m_UV(uv) {}
 
-	BMMeshTransition::TransitionFace::TransitionFace(uint32_t _i1, uint32_t _i2, uint32_t _i3, uint32_t mtl_id) :
+	BMMeshTransition::TransitionFace::TransitionFace(LibCmo::CKDWORD _i1, LibCmo::CKDWORD _i2, LibCmo::CKDWORD _i3, LibCmo::CKDWORD mtl_id) :
 		m_Idx1(_i1), m_Idx2(_i2), m_Idx3(_i3), m_MtlSlotIdx(mtl_id) {}
 
 	bool BMMeshTransition::TransitionVertexCompare::operator()(const TransitionVertex& lhs, const TransitionVertex& rhs) const {
@@ -29,56 +29,51 @@ namespace BMap {
 
 	BMMeshTransition::~BMMeshTransition() {}
 
-	void BMMeshTransition::PrepareVertexCount(uint32_t count) {
+	void BMMeshTransition::PrepareVertexCount(LibCmo::CKDWORD count) {
 		if (m_IsParsed) return;
 		m_Vertexs.resize(count);
 		m_IsVertexOK = true;
 	}
 
-	void BMMeshTransition::PrepareVertex(uint32_t index, float x, float y, float z) {
-		if (m_IsParsed || index >= m_Vertexs.size()) return;
-		m_Vertexs[index].x = x;
-		m_Vertexs[index].y = y;
-		m_Vertexs[index].z = z;
+	LibCmo::VxMath::VxVector3* BMMeshTransition::PrepareVertex() {
+		if (m_IsParsed || !m_IsVertexOK) return nullptr;
+		return m_Vertexs.data();
 	}
 
-	void BMMeshTransition::PrepareNormalCount(uint32_t count) {
+	void BMMeshTransition::PrepareNormalCount(LibCmo::CKDWORD count) {
 		if (m_IsParsed) return;
 		m_Normals.resize(count);
 		m_IsNormalOK = true;
 	}
 
-	void BMMeshTransition::PrepareNormal(uint32_t index, float x, float y, float z) {
-		if (m_IsParsed || index >= m_Normals.size()) return;
-		m_Normals[index].x = x;
-		m_Normals[index].y = y;
-		m_Normals[index].z = z;
+	LibCmo::VxMath::VxVector3* BMMeshTransition::PrepareNormal() {
+		if (m_IsParsed || !m_IsNormalOK) return nullptr;
+		return m_Normals.data();
 	}
 
-	void BMMeshTransition::PrepareUVCount(uint32_t count) {
+	void BMMeshTransition::PrepareUVCount(LibCmo::CKDWORD count) {
 		if (m_IsParsed) return;
 		m_UVs.resize(count);
 		m_IsUVOK = true;
 	}
 
-	void BMMeshTransition::PrepareUV(uint32_t index, float u, float v) {
-		if (m_IsParsed || index >= m_UVs.size()) return;
-		m_UVs[index].x = u;
-		m_UVs[index].y = v;
+	LibCmo::VxMath::VxVector2* BMMeshTransition::PrepareUV() {
+		if (m_IsParsed || !m_IsUVOK) return nullptr;
+		return m_UVs.data();
 	}
 
-	void BMMeshTransition::PrepareMtlSlotCount(uint32_t count) {
+	void BMMeshTransition::PrepareMtlSlotCount(LibCmo::CKDWORD count) {
 		if (m_IsParsed) return;
 		m_MtlSlots.resize(count, nullptr);
 		m_IsMtlSlotOK = true;
 	}
 
-	void BMMeshTransition::PrepareMtlSlot(uint32_t index, BMMaterial* mtl) {
-		if (m_IsParsed || index >= m_MtlSlots.size()) return;
-		m_MtlSlots[index] = mtl;
+	LibCmo::CK2::ObjImpls::CKMaterial** BMMeshTransition::PrepareMtlSlot() {
+		if (m_IsParsed || !m_IsMtlSlotOK) return nullptr;
+		return m_MtlSlots.data();
 	}
 
-	void BMMeshTransition::PrepareFaceCount(uint32_t count) {
+	void BMMeshTransition::PrepareFaceCount(LibCmo::CKDWORD count) {
 		if (m_IsParsed) return;
 		m_FaceVertexs.resize(count * 3);
 		m_FaceNormals.resize(count * 3);
@@ -87,45 +82,46 @@ namespace BMap {
 		m_IsFaceOK = true;
 	}
 
-	void BMMeshTransition::PrepareFaceVertexIndices(uint32_t index, uint32_t indice1, uint32_t indice2, uint32_t indice3) {
-		index *= 3;
-		if (m_IsParsed || index >= m_FaceVertexs.size()) return;
-		m_FaceVertexs[index] = indice1;
-		m_FaceVertexs[index + 1] = indice2;
-		m_FaceVertexs[index + 2] = indice3;
+	LibCmo::CKDWORD* BMMeshTransition::PrepareFaceVertexIndices() {
+		if (m_IsParsed || !m_IsFaceOK) return nullptr;
+		return m_FaceVertexs.data();
 	}
 
-	void BMMeshTransition::PrepareFaceNormalIndices(uint32_t index, uint32_t indice1, uint32_t indice2, uint32_t indice3) {
-		index *= 3;
-		if (m_IsParsed || index >= m_FaceNormals.size()) return;
-		m_FaceNormals[index] = indice1;
-		m_FaceNormals[index + 1] = indice2;
-		m_FaceNormals[index + 2] = indice3;
-	
+	LibCmo::CKDWORD* BMMeshTransition::PrepareFaceNormalIndices() {
+		if (m_IsParsed || !m_IsFaceOK) return nullptr;
+		return m_FaceVertexs.data();
 	}
 
-	void BMMeshTransition::PrepareFaceUVIndices(uint32_t index, uint32_t indice1, uint32_t indice2, uint32_t indice3) {
-		index *= 3;
-		if (m_IsParsed || index >= m_FaceUVs.size()) return;
-		m_FaceUVs[index] = indice1;
-		m_FaceUVs[index + 1] = indice2;
-		m_FaceUVs[index + 2] = indice3;
-	
+	LibCmo::CKDWORD* BMMeshTransition::PrepareFaceUVIndices() {
+		if (m_IsParsed || !m_IsFaceOK) return nullptr;
+		return m_FaceVertexs.data();
 	}
 
-	void BMMeshTransition::PrepareFaceMtlSlot(uint32_t index, uint32_t mtl_slot) {
-		if (m_IsParsed || index >= m_FaceMtlSlotIdxs.size()) return;
-		m_FaceMtlSlotIdxs[index] = mtl_slot;
+	LibCmo::CKDWORD* BMMeshTransition::PrepareFaceMtlSlot() {
+		if (m_IsParsed || !m_IsFaceOK) return nullptr;
+		return m_FaceVertexs.data();
 	}
 
-	bool BMMeshTransition::Parse(BMMesh* write_into_mesh) {
+	bool BMMeshTransition::Parse(LibCmo::CK2::ObjImpls::CKMesh* write_into_mesh) {
 		if (m_IsParsed || write_into_mesh == nullptr) return false;
 		if (!m_IsVertexOK || !m_IsNormalOK || !m_IsUVOK || !m_IsFaceOK || !m_IsMtlSlotOK) return false;
+		m_IsParsed = true;
 
+		// do parse
 		DoRealParse();
+		
+		// check vertex overflow
+		if (m_ProcVertexs.size() > std::numeric_limits<LibCmo::CKWORD>::max()) {
+			return false;
+		}
+		// check mtl slot overflow
+		if (m_MtlSlots.size() > std::numeric_limits<LibCmo::CKWORD>::max()) {
+			return false;
+		}
+
+		// apply to mesh
 		ApplyToMesh(write_into_mesh);
 
-		m_IsParsed = true;
 		return true;
 	}
 
@@ -138,7 +134,7 @@ namespace BMap {
 
 		// iterate face
 		for (size_t faceid = 0; faceid < face_size; ++faceid) {
-			uint32_t idx[3];
+			LibCmo::CKDWORD idx[3];
 			for (int j = 0; j < 3; ++j) {
 				// create one first
 				TransitionVertex tvec(
@@ -148,7 +144,7 @@ namespace BMap {
 				);
 
 				// try insert it
-				auto insert_result = m_ProcDupRemover.try_emplace(tvec, static_cast<uint32_t>(m_ProcVertexs.size()));
+				auto insert_result = m_ProcDupRemover.try_emplace(tvec, static_cast<LibCmo::CKDWORD>(m_ProcVertexs.size()));
 				// get the new inserted index or existed index.
 				idx[j] = insert_result.first->second;
 				// if insert successfully, append to proc vertexs
@@ -162,12 +158,104 @@ namespace BMap {
 		}
 	}
 
-	void BMMeshTransition::ApplyToMesh(BMMesh* write_into_mesh) {
-		// todo: apply to mesh
+	void BMMeshTransition::ApplyToMesh(LibCmo::CK2::ObjImpls::CKMesh* write_into_mesh) {
+		LibCmo::CKDWORD vec_count = static_cast<LibCmo::CKDWORD>(m_ProcVertexs.size()),
+			face_count = static_cast<LibCmo::CKDWORD>(m_ProcFaces.size()),
+			mtl_count = static_cast<LibCmo::CKDWORD>(m_MtlSlots.size());
+		write_into_mesh->CleanMesh();
+
+		// write vertex
+		write_into_mesh->SetVertexCount(vec_count);
+		LibCmo::VxMath::VxCopyStructure(
+			vec_count,
+			write_into_mesh->GetVertexPositions(),
+			CKSizeof(LibCmo::VxMath::VxVector3),
+			CKSizeof(LibCmo::VxMath::VxVector3),
+			&m_ProcVertexs.data()->m_Vertex,
+			CKSizeof(TransitionVertex)
+		);
+		LibCmo::VxMath::VxCopyStructure(
+			vec_count,
+			write_into_mesh->GetVertexNormals(),
+			CKSizeof(LibCmo::VxMath::VxVector3),
+			CKSizeof(LibCmo::VxMath::VxVector3),
+			&m_ProcVertexs.data()->m_Norm,
+			CKSizeof(TransitionVertex)
+		);
+		LibCmo::VxMath::VxCopyStructure(
+			vec_count,
+			write_into_mesh->GetVertexUVs(),
+			CKSizeof(LibCmo::VxMath::VxVector2),
+			CKSizeof(LibCmo::VxMath::VxVector2),
+			&m_ProcVertexs.data()->m_UV,
+			CKSizeof(TransitionVertex)
+		);
+
+		// write face
+		write_into_mesh->SetFaceCount(face_count);
+		auto pIndices = write_into_mesh->GetFaceIndices();
+		auto pMtlIdx = write_into_mesh->GetFaceMaterialSlotIndexs();
+		for (LibCmo::CKDWORD i = 0; i < face_count; ++i) {
+			*(pIndices++) = static_cast<LibCmo::CKWORD>(m_ProcFaces[i].m_Idx1);
+			*(pIndices++) = static_cast<LibCmo::CKWORD>(m_ProcFaces[i].m_Idx2);
+			*(pIndices++) = static_cast<LibCmo::CKWORD>(m_ProcFaces[i].m_Idx3);
+
+			*(pMtlIdx++) = static_cast<LibCmo::CKWORD>(m_ProcFaces[i].m_MtlSlotIdx);
+		}
+
+		// set mtl slot
+		write_into_mesh->SetMaterialSlotCount(mtl_count);
+		auto pMtlSlot = write_into_mesh->GetMaterialSlots();
+		for (LibCmo::CKDWORD i = 0; i < mtl_count; ++i) {
+			*(pMtlSlot++) = m_MtlSlots[i];
+		}
 	}
 
 
 #pragma endregion
 
+#pragma region BMfile
+
+	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING encodings[], bool is_reader) {
+	
+	}
+
+	BMFile::~BMFile() {}
+
+	bool BMFile::Load(LibCmo::CKSTRING filename) {
+		return false;
+	}
+
+	bool BMFile::Save(LibCmo::CKSTRING filename, LibCmo::CKINT compress_level) {
+		return false;
+	}
+
+#define VISITOR_IMPL(namepart, cidpart) \
+LibCmo::CKDWORD BMFile::Get ## namepart ## Count() { \
+	if (!m_IsReader) return 0; \
+	return static_cast<LibCmo::CKDWORD>(m_Obj ## namepart ## s.size()); \
+} \
+LibCmo::CK2::ObjImpls::CK ## namepart * BMFile::Get ## namepart (LibCmo::CKDWORD idx) { \
+	if (!m_IsReader || idx >= m_Obj ## namepart ## s.size()) return nullptr; \
+	return m_Obj ## namepart ## s[idx]; \
+} \
+LibCmo::CK2::ObjImpls::CK ## namepart * BMFile::Create ## namepart (LibCmo::CKSTRING name) { \
+	if (m_IsReader) return nullptr; \
+	LibCmo::CK2::ObjImpls::CK ## namepart * obj = static_cast<LibCmo::CK2::ObjImpls::CK ## namepart *>( \
+		m_Context->CreateObject(LibCmo::CK2::CK_CLASSID::CKCID_ ## cidpart, name) \
+		); \
+	if (obj != nullptr) m_Obj ## namepart ## s.emplace_back(obj); \
+	return obj; \
+}
+	
+	VISITOR_IMPL(Group, GROUP)
+	VISITOR_IMPL(3dObject, 3DOBJECT)
+	VISITOR_IMPL(Mesh, MESH)
+	VISITOR_IMPL(Material, MATERIAL)
+	VISITOR_IMPL(Texture, TEXTURE)
+
+#undef VISITOR_IMPL
+
+#pragma endregion
 
 }
