@@ -22,6 +22,8 @@ namespace LibCmo::CK2::MgrImpls {
 	CKPathManager::~CKPathManager() {}
 
 	bool CKPathManager::SetTempFolder(CKSTRING u8_temp) {
+		if (u8_temp == nullptr) return false;
+
 		std::filesystem::path cache;
 		EncodingHelper::U8PathToStdPath(cache, u8_temp);
 		if (std::filesystem::is_directory(cache)) {
@@ -39,6 +41,8 @@ namespace LibCmo::CK2::MgrImpls {
 	}
 
 	XContainer::XString CKPathManager::GetTempFilePath(CKSTRING u8_filename) {
+		if (u8_filename == nullptr) return XContainer::XString();
+
 		std::filesystem::path stdfilename;
 		EncodingHelper::U8PathToStdPath(stdfilename, u8_filename);
 		auto realfile = this->m_TempFolder / stdfilename;
@@ -50,6 +54,7 @@ namespace LibCmo::CK2::MgrImpls {
 
 	bool CKPathManager::AddPath(CKSTRING u8path) {
 		if (u8path == nullptr) return false;
+
 		std::filesystem::path newpath;
 		EncodingHelper::U8PathToStdPath(newpath, u8path);
 		if (std::filesystem::is_directory(newpath)) {

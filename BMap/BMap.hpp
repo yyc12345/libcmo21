@@ -30,6 +30,7 @@ namespace BMap {
 	public:
 		BMMeshTransition();
 		~BMMeshTransition();
+		LIBCMO_DISABLE_COPY_MOVE(BMMeshTransition);
 
 		void PrepareVertexCount(LibCmo::CKDWORD count);
 		LibCmo::VxMath::VxVector3* PrepareVertex();
@@ -75,7 +76,9 @@ namespace BMap {
 	public:
 		BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING encodings[], bool is_reader);
 		~BMFile();
+		LIBCMO_DISABLE_COPY_MOVE(BMFile);
 
+		bool IsFailed();
 		bool Load(LibCmo::CKSTRING filename);
 		bool Save(LibCmo::CKSTRING filename, LibCmo::CKINT compress_level);
 
@@ -93,6 +96,7 @@ LibCmo::CK2::ObjImpls::CK ## namepart * Create ## namepart (LibCmo::CKSTRING nam
 #undef VISITOR_DECL
 
 	private:
+		bool m_IsFailed;
 		bool m_IsReader;
 		LibCmo::CK2::CKContext* m_Context;
 

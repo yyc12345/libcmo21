@@ -11,10 +11,10 @@ LIBCMO_EXPORT void BMDispose();
 
 #pragma region BMFile
 
-//LIBCMO_EXPORT BMap::BMFile* BMFile_Load(const char* file_name, const char* temp_folder, const char* texture_folder, const char* encoding);
-//LIBCMO_EXPORT BMap::BMFile* BMFile_Create();
-//LIBCMO_EXPORT bool BMFile_Save(BMap::BMFile* map_file, const char* file_name, int compreess_level);
-//LIBCMO_EXPORT void BMFile_Free(BMap::BMFile* map_file);
+LIBCMO_EXPORT BMap::BMFile* BMFile_Load(LibCmo::CKSTRING file_name, LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING encodings[]);
+LIBCMO_EXPORT BMap::BMFile* BMFile_Create(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING encodings[]);
+LIBCMO_EXPORT bool BMFile_Save(BMap::BMFile* map_file, LibCmo::CKSTRING file_name, LibCmo::CKINT compreess_level);
+LIBCMO_EXPORT void BMFile_Free(BMap::BMFile* map_file);
 
 #pragma endregion
 

@@ -109,7 +109,7 @@ namespace BMap {
 
 		// do parse
 		DoRealParse();
-		
+
 		// check vertex overflow
 		if (m_ProcVertexs.size() > std::numeric_limits<LibCmo::CKWORD>::max()) {
 			return false;
@@ -216,11 +216,29 @@ namespace BMap {
 
 #pragma region BMfile
 
-	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING encodings[], bool is_reader) {
-	
+	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING encodings[], bool is_reader) :
+		m_IsReader(is_reader), m_IsFailed(false) {
+		m_Context = new LibCmo::CK2::CKContext();
+		// set temp folder and texture folder
+		auto pm = m_Context->GetPathManager();
+		m_IsFailed = m_IsFailed || !pm->AddPath(texture_folder);
+		m_IsFailed = m_IsFailed || !pm->SetTempFolder(temp_folder);
+		// set encoding
+		LibCmo::XContainer::XArray<LibCmo::XContainer::XString> cache;
+		for (LibCmo::CKDWORD i = 0; i < encoding_count; ++i) {
+			if (encodings[i] != nullptr)
+				cache.emplace_back(encodings[i]);
+		}
+		m_Context->SetEncoding(cache);
 	}
 
-	BMFile::~BMFile() {}
+	BMFile::~BMFile() {
+		delete m_Context;
+	}
+
+	bool BMFile::IsFailed() {
+		return m_IsFailed;
+	}
 
 	bool BMFile::Load(LibCmo::CKSTRING filename) {
 		return false;
@@ -247,12 +265,12 @@ LibCmo::CK2::ObjImpls::CK ## namepart * BMFile::Create ## namepart (LibCmo::CKST
 	if (obj != nullptr) m_Obj ## namepart ## s.emplace_back(obj); \
 	return obj; \
 }
-	
+
 	VISITOR_IMPL(Group, GROUP)
-	VISITOR_IMPL(3dObject, 3DOBJECT)
-	VISITOR_IMPL(Mesh, MESH)
-	VISITOR_IMPL(Material, MATERIAL)
-	VISITOR_IMPL(Texture, TEXTURE)
+		VISITOR_IMPL(3dObject, 3DOBJECT)
+		VISITOR_IMPL(Mesh, MESH)
+		VISITOR_IMPL(Material, MATERIAL)
+		VISITOR_IMPL(Texture, TEXTURE)
 
 #undef VISITOR_IMPL
 

@@ -102,7 +102,7 @@ namespace LibCmo::CK2 {
 	public:
 		void GetUtf8String(const XContainer::XString& native_name, XContainer::XString& u8_name);
 		void GetNativeString(const XContainer::XString& u8_name, XContainer::XString& native_name);
-		void SetEncoding(const XContainer::XArray<XContainer::XString> encoding_series);
+		void SetEncoding(const XContainer::XArray<XContainer::XString>& encoding_series);
 		
 	protected:
 		XContainer::XArray<EncodingHelper::ENCODING_TOKEN> m_NameEncoding;

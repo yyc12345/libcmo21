@@ -309,7 +309,7 @@ namespace LibCmo::CK2 {
 		}
 	}
 
-	void CKContext::SetEncoding(const XContainer::XArray<XContainer::XString> encoding_series) {
+	void CKContext::SetEncoding(const XContainer::XArray<XContainer::XString>& encoding_series) {
 		// free all current series
 		for (const auto& encoding : this->m_NameEncoding) {
 			LibCmo::EncodingHelper::DestroyEncodingToken(encoding);
