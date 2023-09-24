@@ -326,7 +326,7 @@ namespace LibCmo::CK2 {
 
 	CKDWORD CKFileVisitor::GetIndexByObjectID(CK_ID objid) {
 		// see CKFile::SaveFindObjectIndex in IDA
-		CKDWORD idx = -1;
+		CKDWORD idx = static_cast<CKDWORD>(-1);
 		if (m_IsReader) return idx;
 
 		auto finder = m_Writer->m_ObjectsHashTable.find(objid);

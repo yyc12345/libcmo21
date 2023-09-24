@@ -3,6 +3,22 @@
 #include "CKContext.hpp"
 #include "ObjImpls/CKObject.hpp"
 
+/*
+Memorandum:
+
+No need to write any data in m_ObjectList when writing Object ID.
+Because m_ObjectList only need to be written in when no bind CKFile
+according to IDA reversed code.
+However we assuem all CKStateChunk have bind file so no need to treat it.
+
+However, m_ManagerList should be filled when writing Manager Int.
+This is also instructed by IDA revsersed code.
+
+For m_ChunkList, it is same as m_ManagerList. We need write it.
+
+*/
+
+
 namespace LibCmo::CK2 {
 
 	void CKStateChunk::StartWrite() {
@@ -129,7 +145,7 @@ namespace LibCmo::CK2 {
 	}
 
 	bool CKStateChunk::WriteString(const XContainer::XString* strl) {
-		if (strl == nullptr) return;
+		if (strl == nullptr) return false;
 
 		// convert encoding
 		XContainer::XString cache;
@@ -156,17 +172,15 @@ namespace LibCmo::CK2 {
 	}
 
 	bool CKStateChunk::WriteObjectPointer(ObjImpls::CKObject* obj) {
-		CK_ID objid;
-		if (obj != nullptr) {
-			objid = obj->GetID();
-		}
+		CK_ID objid = 0;
+		if (obj != nullptr) objid = obj->GetID();
 
 		return WriteObjectID(objid);
 	}
 
 	bool CKStateChunk::WriteManagerInt(const CKGUID* guid, CKINT intval) {
 		// push into manager list
-		m_ManagerList.emplace_back(m_Parser.m_CurrentPos);
+		AddEntry(m_ManagerList, m_Parser.m_CurrentPos);
 		// write data
 		if (!this->WriteStruct(guid)) return false;
 		if (!this->WriteStruct(intval)) return false;
@@ -207,19 +221,63 @@ namespace LibCmo::CK2 {
 	/* ========== Sequence Functions ==========*/
 
 	bool CKStateChunk::WriteObjectIDSequence(const XContainer::XObjectArray* ls) {
-		return false;
+		if (ls == nullptr) return false;
+		
+		// MARK: there is a recording oper for object list when no bind file.
+		// but we always have bind file, so ignore it
+
+		// write size first
+		CKDWORD objidsize = static_cast<CKDWORD>(ls->size());
+		if (!this->WriteStruct(objidsize)) return false;
+
+		// write each data
+		for (auto objid : *ls) {
+			// MARK: originally we should not call WriteObjectID like ReadObjectIDSequence.
+			// because we do not write position data in obj list for each item.
+			// even if bind file always is not nullptr.
+			if (!this->WriteStruct(m_BindFile->GetIndexByObjectID(objid))) return false;
+		}
+
+		return true;
 	}
 
 	bool CKStateChunk::WriteManagerIntSequence(const CKGUID* guid, const XContainer::XArray<CKINT>* ls) {
-		return false;
+		if (guid == nullptr || ls == nullptr) return false;
+
+		// add current pos into manager list
+		AddEntries(m_ManagerList, m_Parser.m_CurrentPos);
+
+		// write data length
+		CKDWORD lssize = static_cast<CKDWORD>(ls->size());
+		if (!this->WriteStruct(lssize)) return false;
+		// write guid
+		if (!this->WriteStruct(guid)) return false;
+
+		// then write each items
+		for (auto iv : *ls) {
+			// MARK: we should not call WriteManagerInt like ReadManagerIntSequence.
+			// because we do not want to write postion info into manager list for each item.
+			if (!this->WriteStruct(iv)) return false;
+		}
+
+		return true;
 	}
 
 	bool CKStateChunk::WriteXObjectArray(const XContainer::XObjectArray* ls) {
-		return false;
+		// same as WriteObjectIDSequence.
+		return WriteObjectIDSequence(ls);
 	}
 
 	bool CKStateChunk::WriteXObjectPointerArray(const XContainer::XObjectPointerArray* ls) {
-		return false;
+		if (ls == nullptr) return false;
+
+		XContainer::XObjectArray conv;
+		for (auto obj : *ls) {
+			if (obj == nullptr) conv.emplace_back(0);
+			else conv.emplace_back(obj->GetID());
+		}
+
+		return WriteObjectIDSequence(conv);
 	}
 
 }

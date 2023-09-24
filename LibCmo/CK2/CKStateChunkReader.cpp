@@ -205,98 +205,98 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-	CKStateChunk* CKStateChunk::ReadSubChunk(void) {
-		CKStateChunk* subchunk = nullptr;
+	//CKStateChunk* CKStateChunk::ReadSubChunk(void) {
+	//	CKStateChunk* subchunk = nullptr;
 
-		// get size and do a enough space check
-		CKDWORD subDwordChunkSize;
-		if (!this->ReadStruct(subDwordChunkSize)) goto subchunk_defer;
-		if (!this->EnsureReadSpace(subDwordChunkSize)) goto subchunk_defer;
+	//	// get size and do a enough space check
+	//	CKDWORD subDwordChunkSize;
+	//	if (!this->ReadStruct(subDwordChunkSize)) goto subchunk_defer;
+	//	if (!this->EnsureReadSpace(subDwordChunkSize)) goto subchunk_defer;
 
-		// create statechunk
-		subchunk = new CKStateChunk(this->m_BindFile, this->m_BindContext);
+	//	// create statechunk
+	//	subchunk = new CKStateChunk(this->m_BindFile, this->m_BindContext);
 
-		// start read data
-		// read class id
-		if (!this->ReadStruct(subchunk->m_ClassId)) goto subchunk_defer;
+	//	// start read data
+	//	// read class id
+	//	if (!this->ReadStruct(subchunk->m_ClassId)) goto subchunk_defer;
 
-		// different read strategy by chunk version
-		if (this->m_ChunkVersion >= CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1) {
-			// new file
+	//	// different read strategy by chunk version
+	//	if (this->m_ChunkVersion >= CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1) {
+	//		// new file
 
-			// read combined version
-			CKDWORD versionInfo;
-			if (!this->ReadStruct(versionInfo)) goto subchunk_defer;
-			subchunk->m_DataVersion = static_cast<CK_STATECHUNK_DATAVERSION>(versionInfo & 0xffff);
-			subchunk->m_ChunkVersion = static_cast<CK_STATECHUNK_CHUNKVERSION>((versionInfo >> 16) & 0xffff);
+	//		// read combined version
+	//		CKDWORD versionInfo;
+	//		if (!this->ReadStruct(versionInfo)) goto subchunk_defer;
+	//		subchunk->m_DataVersion = static_cast<CK_STATECHUNK_DATAVERSION>(versionInfo & 0xffff);
+	//		subchunk->m_ChunkVersion = static_cast<CK_STATECHUNK_CHUNKVERSION>((versionInfo >> 16) & 0xffff);
 
-			// read data size and create it
-			if (!this->ReadStruct(subchunk->m_DataDwSize)) goto subchunk_defer;
-			subchunk->m_pData = new CKDWORD[subchunk->m_DataDwSize];
+	//		// read data size and create it
+	//		if (!this->ReadStruct(subchunk->m_DataDwSize)) goto subchunk_defer;
+	//		subchunk->m_pData = new CKDWORD[subchunk->m_DataDwSize];
 
-			// has bind file?
-			CKDWORD hasBindFile;
-			if (!this->ReadStruct(hasBindFile)) goto subchunk_defer;
-			if (hasBindFile == 1) subchunk->m_BindFile = nullptr;
+	//		// has bind file?
+	//		CKDWORD hasBindFile;
+	//		if (!this->ReadStruct(hasBindFile)) goto subchunk_defer;
+	//		if (hasBindFile == 1) subchunk->m_BindFile = nullptr;
 
-			// 3 list size
-			// manager only existed when ver > 4
-			CKDWORD lssize;
-			if (!this->ReadStruct(lssize)) goto subchunk_defer;
-			subchunk->m_ObjectList.resize(lssize);
-			if (!this->ReadStruct(lssize)) goto subchunk_defer;
-			subchunk->m_ChunkList.resize(lssize);
-			if (this->m_ChunkVersion > CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1) {
-				if (!this->ReadStruct(lssize)) goto subchunk_defer;
-				subchunk->m_ManagerList.resize(lssize);
-			}
+	//		// 3 list size
+	//		// manager only existed when ver > 4
+	//		CKDWORD lssize;
+	//		if (!this->ReadStruct(lssize)) goto subchunk_defer;
+	//		subchunk->m_ObjectList.resize(lssize);
+	//		if (!this->ReadStruct(lssize)) goto subchunk_defer;
+	//		subchunk->m_ChunkList.resize(lssize);
+	//		if (this->m_ChunkVersion > CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1) {
+	//			if (!this->ReadStruct(lssize)) goto subchunk_defer;
+	//			subchunk->m_ManagerList.resize(lssize);
+	//		}
 
-			// core data
-			if (subchunk->m_DataDwSize != 0) {
-				if (!this->ReadByteData(subchunk->m_pData, subchunk->m_DataDwSize * CKSizeof(CKDWORD))) goto subchunk_defer;
-			}
+	//		// core data
+	//		if (subchunk->m_DataDwSize != 0) {
+	//			if (!this->ReadByteData(subchunk->m_pData, subchunk->m_DataDwSize * CKSizeof(CKDWORD))) goto subchunk_defer;
+	//		}
 
-			// 3 list data
-			if (!subchunk->m_ObjectList.empty()) {
-				if (!this->ReadByteData(
-					subchunk->m_ObjectList.data(),
-					static_cast<CKDWORD>(subchunk->m_ObjectList.size()) * CKSizeof(CKDWORD)
-					)) goto subchunk_defer;
-			}
-			if (!subchunk->m_ChunkList.empty()) {
-				if (!this->ReadByteData(
-					subchunk->m_ChunkList.data(),
-					static_cast<CKDWORD>(subchunk->m_ChunkList.size()) * CKSizeof(CKDWORD)
-					)) goto subchunk_defer;
-			}
-			if (!subchunk->m_ManagerList.empty()) {
-				if (!this->ReadByteData(
-					subchunk->m_ManagerList.data(),
-					static_cast<CKDWORD>(subchunk->m_ManagerList.size()) * CKSizeof(CKDWORD)
-					)) goto subchunk_defer;
-			}
+	//		// 3 list data
+	//		if (!subchunk->m_ObjectList.empty()) {
+	//			if (!this->ReadByteData(
+	//				subchunk->m_ObjectList.data(),
+	//				static_cast<CKDWORD>(subchunk->m_ObjectList.size()) * CKSizeof(CKDWORD)
+	//				)) goto subchunk_defer;
+	//		}
+	//		if (!subchunk->m_ChunkList.empty()) {
+	//			if (!this->ReadByteData(
+	//				subchunk->m_ChunkList.data(),
+	//				static_cast<CKDWORD>(subchunk->m_ChunkList.size()) * CKSizeof(CKDWORD)
+	//				)) goto subchunk_defer;
+	//		}
+	//		if (!subchunk->m_ManagerList.empty()) {
+	//			if (!this->ReadByteData(
+	//				subchunk->m_ManagerList.data(),
+	//				static_cast<CKDWORD>(subchunk->m_ManagerList.size()) * CKSizeof(CKDWORD)
+	//				)) goto subchunk_defer;
+	//		}
 
-		} else {
-			// old file
+	//	} else {
+	//		// old file
 
-			// read data size and create it
-			if (!this->ReadStruct(subchunk->m_DataDwSize)) goto subchunk_defer;
-			subchunk->m_pData = new CKDWORD[subchunk->m_DataDwSize];
+	//		// read data size and create it
+	//		if (!this->ReadStruct(subchunk->m_DataDwSize)) goto subchunk_defer;
+	//		subchunk->m_pData = new CKDWORD[subchunk->m_DataDwSize];
 
-			// skip one?
-			// I don't know why
-			this->Skip(1u);
+	//		// skip one?
+	//		// I don't know why
+	//		this->Skip(1u);
 
-			// read core buf
-			if (!this->ReadByteData(subchunk->m_pData, subchunk->m_DataDwSize * CKSizeof(CKDWORD))) goto subchunk_defer;
+	//		// read core buf
+	//		if (!this->ReadByteData(subchunk->m_pData, subchunk->m_DataDwSize * CKSizeof(CKDWORD))) goto subchunk_defer;
 
-		}
+	//	}
 
-		return subchunk;
-	subchunk_defer:
-		if (subchunk != nullptr) delete subchunk;
-		return nullptr;
-	}
+	//	return subchunk;
+	//subchunk_defer:
+	//	if (subchunk != nullptr) delete subchunk;
+	//	return nullptr;
+	//}
 
 	/* ========== Buffer Functions ==========*/
 
@@ -427,38 +427,38 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-	bool CKStateChunk::ReadSubChunkSequence(XContainer::XArray<CKStateChunk*>* ls) {
-		if (ls == nullptr) return false;
+	//bool CKStateChunk::ReadSubChunkSequence(XContainer::XArray<CKStateChunk*>* ls) {
+	//	if (ls == nullptr) return false;
 
-		// clear first
-		for (auto& item : *ls) {
-			if (item != nullptr)
-				delete (item);
-		}
-		ls->clear();
+	//	// clear first
+	//	for (auto& item : *ls) {
+	//		if (item != nullptr)
+	//			delete (item);
+	//	}
+	//	ls->clear();
 
-		// read count
-		CKDWORD count;
-		if (!this->ReadStruct(count)) return false;
+	//	// read count
+	//	CKDWORD count;
+	//	if (!this->ReadStruct(count)) return false;
 
-		// resize list and read it
-		ls->resize(count, nullptr);
-		for (size_t i = 0; i < count; ++i) {
-			(*ls)[i] = this->ReadSubChunk();
-			if ((*ls)[i] == nullptr) {
-				// fail. remove all created statechunk and clear it
-				for (auto& item : *ls) {
-					if (item != nullptr)
-						delete (item);
-				}
-				ls->clear();
-				// return
-				return false;
-			}
-		}
+	//	// resize list and read it
+	//	ls->resize(count, nullptr);
+	//	for (size_t i = 0; i < count; ++i) {
+	//		(*ls)[i] = this->ReadSubChunk();
+	//		if ((*ls)[i] == nullptr) {
+	//			// fail. remove all created statechunk and clear it
+	//			for (auto& item : *ls) {
+	//				if (item != nullptr)
+	//					delete (item);
+	//			}
+	//			ls->clear();
+	//			// return
+	//			return false;
+	//		}
+	//	}
 
-		return true;
-	}
+	//	return true;
+	//}
 
 	bool CKStateChunk::ReadXObjectArray(XContainer::XObjectArray* ls) {
 		if (ls == nullptr) return false;

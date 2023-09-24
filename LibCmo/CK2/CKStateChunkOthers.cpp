@@ -303,6 +303,14 @@ namespace LibCmo::CK2 {
 			(this->m_Parser.m_CurrentPos + dword_required <= this->m_Parser.m_DataSize);
 	}
 
+	void CKStateChunk::AddEntry(XContainer::XArray<CKDWORD>& entry_ls, CKDWORD pos) {
+		entry_ls.emplace_back(pos);
+	}
+
+	void CKStateChunk::AddEntries(XContainer::XArray<CKDWORD>& entry_ls, CKDWORD pos) {
+		entry_ls.emplace_back(static_cast<CKDWORD>(-1));
+		entry_ls.emplace_back(pos);
+	}
 
 #pragma endregion
 

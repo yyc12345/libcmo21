@@ -232,6 +232,29 @@ namespace LibCmo::CK2 {
 		*/
 		bool EnsureReadSpace(CKDWORD dword_required);
 
+		/**
+		 * @brief The helper writer of m_ObjectList, m_ManagerList and m_ChunkList.
+		 * 
+		 * Add a position indicator into list which represent a single data.
+		 * 
+		 * @param entry_ls[in] The list to be written.
+		 * @param pos[int] The written position data.
+		 * @remark:
+		 * + IntList::AddEntry() redirect to this.
+		*/
+		void AddEntry(XContainer::XArray<CKDWORD>& entry_ls, CKDWORD pos);
+		/**
+		 * @brief The helper writer of m_ObjectList, m_ManagerList and m_ChunkList.
+		 * 
+		 * Add a position indicator into list which represent a series of data.
+		 * 
+		 * @param entry_ls[in] The list to be written.
+		 * @param pos[int] The written position data.
+		 * @remark:
+		 * + IntList::AddEntries() redirect to this.
+		*/
+		void AddEntries(XContainer::XArray<CKDWORD>& entry_ls, CKDWORD pos);
+
 #pragma endregion
 
 #pragma region Read Function
@@ -368,12 +391,12 @@ namespace LibCmo::CK2 {
 			return ReadManagerInt(&guid, &intval);
 		}
 
-		/**
-		 * @brief Read sub chunk
-		 * @return Returned a new created of CKStateChunk if success, otherwise nullptr.
-		 * Returned CKStateChunk should be manually released!
-		*/
-		CKStateChunk* ReadSubChunk();
+		///**
+		// * @brief Read sub chunk
+		// * @return Returned a new created of CKStateChunk if success, otherwise nullptr.
+		// * Returned CKStateChunk should be manually released!
+		//*/
+		//CKStateChunk* ReadSubChunk();
 
 		/* ========== Buffer Functions ==========*/
 
@@ -480,17 +503,17 @@ namespace LibCmo::CK2 {
 			return ReadManagerIntSequence(&guid, &ls);
 		}
 
-		/// <summary>
-		/// Read Sub Chunk Sequence
-		/// <para>The combination using of StartReadSequence() and ReadSubChunk() redirect to this.</para>
-		/// <para>The item of returned CKStateChunk* list should be manually released!</para>
-		/// </summary>
-		/// <param name="ls"></param>
-		/// <returns></returns>
-		bool ReadSubChunkSequence(XContainer::XArray<CKStateChunk*>* ls);
-		inline bool ReadSubChunkSequence(XContainer::XArray<CKStateChunk*>& ls) {
-			return ReadSubChunkSequence(&ls);
-		}
+		///// <summary>
+		///// Read Sub Chunk Sequence
+		///// <para>The combination using of StartReadSequence() and ReadSubChunk() redirect to this.</para>
+		///// <para>The item of returned CKStateChunk* list should be manually released!</para>
+		///// </summary>
+		///// <param name="ls"></param>
+		///// <returns></returns>
+		//bool ReadSubChunkSequence(XContainer::XArray<CKStateChunk*>* ls);
+		//inline bool ReadSubChunkSequence(XContainer::XArray<CKStateChunk*>& ls) {
+		//	return ReadSubChunkSequence(&ls);
+		//}
 
 		/**
 		 * @brief Read Object Array (actually still is CK_ID)
@@ -601,7 +624,7 @@ namespace LibCmo::CK2 {
 		
 	public:
 		bool WriteObjectIDSequence(const XContainer::XObjectArray* ls);
-		inline bool ReadObjectIDSequence(const XContainer::XObjectArray& ls) {
+		inline bool WriteObjectIDSequence(const XContainer::XObjectArray& ls) {
 			return WriteObjectIDSequence(&ls);
 		}
 
