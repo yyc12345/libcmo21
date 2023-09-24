@@ -54,8 +54,14 @@ namespace LibCmo::CK2::MgrImpls {
 		bool ResolveFileName(XContainer::XString& u8_filename);
 
 		/**
+		 * @brief Get file name part of given path.
+		 * @param u8path[inout] The given path. overwritten by the gotten file name.
+		*/
+		void GetFileName(XContainer::XString& u8path);
+
+		/**
 		 * @brief Returns the file extension including period (.)
-		 * @param u8path[inout] The given path. overwritten by the gotten extension. set to blank when failed.
+		 * @param u8path[inout] The given path. overwritten by the gotten extension.
 		*/
 		void GetExtension(XContainer::XString& u8path);
 

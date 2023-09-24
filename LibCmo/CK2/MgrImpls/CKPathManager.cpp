@@ -99,6 +99,14 @@ namespace LibCmo::CK2::MgrImpls {
 		return false;
 	}
 
+	void CKPathManager::GetFileName(XContainer::XString& u8path) {
+		std::filesystem::path filepath;
+		EncodingHelper::U8PathToStdPath(filepath, u8path.c_str());
+
+		auto result = filepath.filename();
+		EncodingHelper::StdPathToU8Path(u8path, result);
+	}
+
 	void CKPathManager::GetExtension(XContainer::XString& u8path) {
 		std::filesystem::path filepath;
 		EncodingHelper::U8PathToStdPath(filepath, u8path.c_str());

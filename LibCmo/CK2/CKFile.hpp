@@ -172,7 +172,7 @@ namespace LibCmo::CK2 {
 		CKFileVisitor& operator=(const CKFileVisitor&);
 		CKFileVisitor& operator=(CKFileVisitor&&);
 
-		const CKFileObject* GetFileObjectByIndex(size_t index);
+		const CKFileObject* GetFileObjectByIndex(CKDWORD index);
 		CKDWORD GetIndexByObjectID(CK_ID objid);
 	protected:
 		bool m_IsReader;

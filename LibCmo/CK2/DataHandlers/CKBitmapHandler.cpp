@@ -1,4 +1,6 @@
 #include "CKBitmapHandler.hpp"
+#include "stb_image.h"
+#include "stb_image_write.h"
 
 namespace LibCmo::CK2::DataHandlers {
 

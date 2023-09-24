@@ -267,7 +267,7 @@ namespace LibCmo::CK2 {
 
 		// find direct parent
 		CKClassDesc& parent = g_CKClassInfo[static_cast<size_t>(desc.Parent)];
-		if (!parent.IsValid) LIBPANIC("No such CK_CLASSID.");
+		if (!parent.IsValid) LIBCMO_PANIC("No such CK_CLASSID.");
 
 		// if it is not self inheritance, call recursively
 		if (desc.Self != desc.Parent) {
@@ -291,7 +291,7 @@ namespace LibCmo::CK2 {
 		
 		// find direct parent
 		CKClassDesc& parent = g_CKClassInfo[static_cast<size_t>(desc.Parent)];
-		if (!parent.IsValid) LIBPANIC("No such CK_CLASSID.");
+		if (!parent.IsValid) LIBCMO_PANIC("No such CK_CLASSID.");
 
 		// if it is not self inheritance, call recursively
 		if (desc.Self != desc.Parent) {

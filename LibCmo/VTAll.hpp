@@ -38,10 +38,6 @@ Use native Win32 function in Windows.
 And use iconv under other OS.
 */
 #include "VTEncoding.hpp"
-/*
-System independent image loader / saver
-*/
-#include "VTImage.hpp"
 
 // Define the basic type of CK2.
 #include "CK2/CKTypes.hpp"

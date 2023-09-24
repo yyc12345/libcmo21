@@ -228,7 +228,6 @@
     <ClInclude Include="VTAll.hpp" />
     <ClInclude Include="VTEncoding.hpp" />
     <ClInclude Include="CK2\ObjImpls\CKObject.hpp" />
-    <ClInclude Include="VTImage.hpp" />
     <ClInclude Include="VTUserAll.hpp" />
     <ClInclude Include="VTUtils.hpp" />
     <ClInclude Include="VxMath\VxEnums.hpp" />

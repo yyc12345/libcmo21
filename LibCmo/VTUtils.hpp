@@ -77,7 +77,21 @@
 namespace LibCmo {
 
 	[[noreturn]] void LibPanic(int line, const char* file, const char* errmsg);
-#define LIBPANIC(msg) LibCmo::LibPanic(__LINE__, __FILE__, msg);
+#define LIBCMO_PANIC(msg) LibCmo::LibPanic(__LINE__, __FILE__, msg);
+
+	void LibOrderDebugger();
+#if defined(LIBCMO_BUILD_DEBUG)
+	/**
+	This macro only available in Debug mode.
+	It will order debugger stop.
+	This macro frequently used when program entering some rarely area.
+	For example, in CKStateChunk::ReadObjectID, if code run into the calling of Skip, it mean that this file is pretty old and debugger should notice it.
+	*/
+#define LIBCMO_ORDER_DEBUGGER LibOrderDebugger();
+#else
+	// define a blank one
+#define LIBCMO_ORDER_DEBUGGER
+#endif
 
 	namespace EnumsHelper {
 		

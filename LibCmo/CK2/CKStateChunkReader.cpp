@@ -149,7 +149,7 @@ namespace LibCmo::CK2 {
 		if (id == nullptr) return false;
 
 		// get basic value
-		CKINT gotten_id = 0;
+		CKDWORD gotten_id = 0;
 		if (!this->ReadStruct(gotten_id)) return false;
 
 		// different strategy according to chunk ver
@@ -162,7 +162,7 @@ namespace LibCmo::CK2 {
 				return true;
 			}
 			// if it is positive, return corresponding value
-			if (gotten_id >= 0) {
+			if ((gotten_id & 0x80000000) == 0) {
 				*id = this->m_BindFile->GetFileObjectByIndex(gotten_id)->CreatedObjectId;
 				return true;
 			}

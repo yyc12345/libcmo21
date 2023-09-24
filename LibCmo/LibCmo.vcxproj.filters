@@ -224,9 +224,6 @@
     <ClInclude Include="CK2\ObjImpls\CKMesh.hpp">
       <Filter>Headers\CK2\ObjImpls</Filter>
     </ClInclude>
-    <ClInclude Include="VTImage.hpp">
-      <Filter>Headers</Filter>
-    </ClInclude>
     <ClInclude Include="VTUserAll.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
