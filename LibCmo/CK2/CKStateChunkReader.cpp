@@ -209,9 +209,9 @@ namespace LibCmo::CK2 {
 		CKStateChunk* subchunk = nullptr;
 
 		// get size and do a enough space check
-		CKDWORD subChunkSize;
-		if (!this->ReadStruct(subChunkSize)) goto subchunk_defer;
-		if (!this->EnsureReadSpace(subChunkSize)) goto subchunk_defer;
+		CKDWORD subDwordChunkSize;
+		if (!this->ReadStruct(subDwordChunkSize)) goto subchunk_defer;
+		if (!this->EnsureReadSpace(subDwordChunkSize)) goto subchunk_defer;
 
 		// create statechunk
 		subchunk = new CKStateChunk(this->m_BindFile, this->m_BindContext);
@@ -502,6 +502,7 @@ namespace LibCmo::CK2 {
 
 	bool CKStateChunk::ReadXObjectPointerArray(XContainer::XObjectPointerArray* ls) {
 		if (ls == nullptr) return false;
+		ls->clear();
 
 		// very very similar to ReadXObjectArray
 		// we execute it first.

@@ -6,6 +6,17 @@
 
 namespace LibCmo::CK2 {
 
+	/**
+	 * @remark
+	 * + We make sure m_BindContext and m_BindFile always are not nullptr. So some code of BindFile check and write different data struct has been removed.
+	 * + Calling StartRead multiple times is illegal. 
+	 *   - The solution is that use StartRead and StopRead to warp the real CKStateChunk consumer. And just calling read functions in real consumer directly.
+	 *   - See CKFileReader for more infomation.
+	 * + Same as StartRead, calling StartWrite multiple times also is illegal. We also remove CKStateChunk merge function, AddChunkAndDelete and AddChunk.
+	 *   - The solution is same as StartRead solution. Use StartWrite and StopWrite warp the real CKStateChunk writer. Call write function in consumer directly.
+	 *   - Every inherited CKObject::Save must call SetClassId at the end of function if they have data to write.
+	 *   - See CKFileWrite for more infomation.
+	*/
 	class CKStateChunk {
 	public:
 		CKStateChunk(CKFileVisitor* visitor, CKContext* ctx);
@@ -50,7 +61,7 @@ namespace LibCmo::CK2 {
 			CKStateChunk* m_Host;
 			CKDWORD m_ConsumedSize;
 		};
-		
+
 		class LockedWriteBufferDeleter {
 		public:
 			LockedWriteBufferDeleter() : m_Host(nullptr), m_ConsumedSize(0) {}
@@ -64,11 +75,11 @@ namespace LibCmo::CK2 {
 			CKStateChunk* m_Host;
 			CKDWORD m_ConsumedSize;
 		};
-		
+
 		class BufferDeleter {
 		public:
 			BufferDeleter() : m_Host(nullptr), m_BufSize(0) {}
-			BufferDeleter(CKStateChunk* host, CKDWORD bufsize) : 
+			BufferDeleter(CKStateChunk* host, CKDWORD bufsize) :
 				m_Host(host), m_BufSize(bufsize) {}
 			LIBCMO_DEFAULT_COPY_MOVE(BufferDeleter);
 
@@ -137,7 +148,7 @@ namespace LibCmo::CK2 {
 		*/
 		const ProfileStateChunk_t GetStateChunkProfile();
 		/**
-		 * @brief Get all indentifier infos of this CKStateChunk, 
+		 * @brief Get all indentifier infos of this CKStateChunk,
 		 * including identifier self, data area size and address.
 		 * @return A arrary, each item describe a single identifier's info.
 		 * @remark The detail of implement can be seen in SeekIdentifierAndReturnSize()
@@ -184,12 +195,12 @@ namespace LibCmo::CK2 {
 	private:
 		/**
 		 * @brief Convert byte based size to DWORD based size.
-		 * 
+		 *
 		 * Becase CKStateChunk use DWORD based buffer, so all data should be aligned to DWORD boundary.
 		 * This function can convert byte based size to DWORD based size while keeping its size aligned with DWORD boundary.
 		 * For example, caller want to allocate 3 bytes for data storing, this function will first align it to DWORD boundary, 4 bytes.
 		 * Then convert it in DWORD size, 1 DWORD.
-		 * 
+		 *
 		 * @param char_size[in] The size in byte unit.
 		 * @return The size in DWORD unit.
 		*/
@@ -197,13 +208,13 @@ namespace LibCmo::CK2 {
 		bool ResizeBuffer(CKDWORD new_dwsize);
 		/**
 		 * @brief Check whether there are enough buffer to read.
-		 * 
-		 * This function will check whether current CKStateChunk is in read mode and 
+		 *
+		 * This function will check whether current CKStateChunk is in read mode and
 		 * whether data area is enough to write.
 		 * However, it is different with EnsureReadSpace. If no space to write, this function will
-		 * try calling ResizeBuffer to get a enough buffer. Only when resize failed, 
+		 * try calling ResizeBuffer to get a enough buffer. Only when resize failed,
 		 * this function will return false.
-		 * 
+		 *
 		 * @param dwsize[in] Required buffer size in DWORD unit.
 		 * @return True if have enough space to write.
 		 * @see EnsureReadSpace
@@ -211,10 +222,10 @@ namespace LibCmo::CK2 {
 		bool EnsureWriteSpace(CKDWORD dwsize);
 		/**
 		 * @brief Check whether there are enough buffer to read.
-		 * 
-		 * This function will check whether current CKStateChunk is in read mode and 
+		 *
+		 * This function will check whether current CKStateChunk is in read mode and
 		 * whether data area is enough to read.
-		 * 
+		 *
 		 * @param dword_required[in] Required buffer size in DWORD unit.
 		 * @return True if have enough space to read.
 		 * @see EnsureWriteSpace
@@ -231,6 +242,7 @@ namespace LibCmo::CK2 {
 
 		/* ========== Identifier Functions ==========*/
 
+	public:
 		bool SeekIdentifierDword(CKDWORD identifier);
 		bool SeekIdentifierDwordAndReturnSize(CKDWORD identifier, CKDWORD* out_size);
 		template<typename TEnum>
@@ -281,7 +293,7 @@ namespace LibCmo::CK2 {
 		 * @remark Here is a example.
 		 * ```
 		 * auto buf = chunk->LockReadBufferWrapper(1919810);
-		 * if (buf) { 
+		 * if (buf) {
 		 *     stuff(buf.get()); // do some operation...
 		 *     buf.get_deleter().SetConsumedSize(114514); // i only consume these bytes.
 		 *     buf.reset(); // immediately free it.
@@ -290,7 +302,7 @@ namespace LibCmo::CK2 {
 		 * @see LockReadBuffer, UnLockReadBuffer, LockedReadBuffer_t
 		*/
 		LockedReadBuffer_t LockReadBufferWrapper(CKDWORD size_in_byte);
-		
+
 		/* ========== Basic Data Read Functions ==========*/
 
 	private:
@@ -379,10 +391,10 @@ namespace LibCmo::CK2 {
 
 		/**
 		 * @brief Read buffer and copy it.
-		 * 
+		 *
 		 * The copied buffer and the size of buffer will be returned to caller.
 		 * Caller should free the buffer by calling CKStateChunk::DeleteBuffer(void*).
-		 * 
+		 *
 		 * @param ppData[out] The pointer to pointer holding the new copied data.
 		 * @param size_in_byte[out] Set to the size of buffer when success.
 		 * @return True if success.
@@ -407,7 +419,7 @@ namespace LibCmo::CK2 {
 		 * @remark Here is a exmaple about how to use this function
 		 * ```
 		 * Buffer_t buf = chunk->ReadBufferWrapper(114);
-		 * if (buf) { 
+		 * if (buf) {
 		 *     stuff(buf.get(), buf.get_deleter().GetBufferSize()); // do some operation...
 		 *     buf.reset(); // immediately free it.
 		 * }
@@ -417,9 +429,9 @@ namespace LibCmo::CK2 {
 
 		/**
 		 * @brief Read buffer and fill user struct.
-		 * 
+		 *
 		 * The size of buffer will be read from CKStateChunk internally and return to caller.
-		 * 
+		 *
 		 * @param pData[out] The pointer holding the data.
 		 * @return True if success.
 		 * @remark Following original Virtools functions can use this function to implement:
@@ -430,9 +442,9 @@ namespace LibCmo::CK2 {
 		bool ReadAndFillBuffer(void* pData);
 		/**
 		 * @brief Read buffer and fill user struct.
-		 * 
+		 *
 		 * The size of buffer is provided by user.
-		 * 
+		 *
 		 * @param pData[out] The pointer holding the data.
 		 * @param size_in_byte[in] The size of data which you want to read in byte unit
 		 * @return True if success.
@@ -502,60 +514,121 @@ namespace LibCmo::CK2 {
 			return ReadXObjectPointerArray(&ls);
 		}
 
-		//int		ReadInt();
-		//int 		StartReadSequence();
-		//CK_ID	ReadObjectID();
-		//CKStateChunk* ReadSubChunk();
-		//int 		StartManagerReadSequence(CKGUID* guid);
-		//CKGUID	ReadGuid();
-		//void ReadAndFillBuffer_LEndian(void* buffer);
-		//void ReadAndFillBuffer_LEndian16(void* buffer);
-		//float	ReadFloat();
-		//CKWORD	ReadWord();
-		//CKDWORD	ReadDword();
-		//CKDWORD	ReadDwordAsWords();
-		//void		ReadVector(VxMath::VxVector* v);
-		//void		ReadMatrix(VxMath::VxMatrix& mat);
-		//CKObjectImplements::CKObject* ReadObject(CKMinContext*);
-		//void ReadAndFillBuffer(void* buffer);
-		//CKBYTE* ReadRawBitmap(VxMath::VxImageDescEx& desc);
-		//XObjectArray ReadXObjectArray(void);
-
 #pragma endregion
 
 #pragma region Write Function
 
 	public:
 		void StartWrite();
-		//void WriteIdentifier(CKDWORD id);
-		//void AddChunkAndDelete(CKStateChunk*);
-		//void StartObjectIDSequence(int count);
-		//void WriteObjectSequence(CKObjectImplements::CKObject* obj);
-		//void WriteInt(int data);
-		//void WriteFloat(float data);
-		//void WriteDword(CKDWORD data);
-		//void WriteDwordAsWords(CKDWORD data);
-		//void WriteVector(const VxMath::VxVector* v);
-		//void WriteMatrix(const VxMath::VxMatrix& mat);
-		//void WriteObject(CKObjectImplements::CKObject* obj);
-		//void WriteBuffer_LEndian(int size, void* buf);
-		//void WriteBuffer_LEndian16(int size, void* buf);
-		//void WriteBufferNoSize_LEndian(int size, void* buf);
-		///*void UpdateDataSize();*/
-		//void* LockWriteBuffer(int DwordCount);
-
 		/*
-		* Old Name: CloseChunk();
+		* Actually this function mix various functions, including CloseChunk(), UpdateSize() and etc.
 		*/
 		void StopWrite(void);
 
-		bool LockWriteBuffer(const void** ppData, CKDWORD size_in_byte);
+
+		/* ========== Identifier Functions ==========*/
+
+	public:
+		bool WriteIdentifierDword(CKDWORD identifier);
+		template<typename TEnum>
+		inline bool WriteIdentifier(TEnum enum_v) {
+			return WriteIdentifierDword(static_cast<CKDWORD>(enum_v));
+		}
+
+		/* ========== Write Buffer Controller ==========*/
+
+	public:
+		bool LockWriteBuffer(void** ppData, CKDWORD size_in_byte);
 		bool UnLockWriteBuffer(CKDWORD size_in_byte);
 		LockedWriteBuffer_t LockWriteBufferWrapper(CKDWORD size_in_byte);
 
+		/* ========== Basic Data Write Functions ==========*/
+
+	private:
+		bool WriteByteData(const void* data_ptr, CKDWORD size_in_byte);
+
+	public:
+		template<typename T>
+		bool WriteStruct(const T* data) {
+			return WriteByteData(data, CKSizeof(T));
+		}
+		template<typename T>
+		inline bool WriteStruct(const T& data) {
+			return WriteByteData(&data, CKSizeof(T));
+		}
+
+		bool WriteString(const XContainer::XString* strl);
+		inline bool WriteString(const XContainer::XString& strl) {
+			return WriteString(&strl);
+		}
+
+		
+		/* ========== Complex Data Read Functions ==========*/
+
+	public:
+		bool WriteObjectID(const CK_ID* id);
+		bool WriteObjectPointer(ObjImpls::CKObject* obj);
+		inline bool WriteObjectID(const CK_ID& id) {
+			return WriteObjectID(&id);
+		}
+
+		bool WriteManagerInt(const CKGUID* guid, CKINT intval);
+		inline bool WriteManagerInt(const CKGUID& guid, CKINT intval) {
+			return WriteManagerInt(&guid, intval);
+		}
+
+		// Sub Chunk not support now.
+		// Too complex and I even don't use it in my code.
+		//CKStateChunk* ReadSubChunk();
+
+		/* ========== Buffer Functions ==========*/
+
+		/*
+		Buffer related function implements:
+
+		WriteBuffer(int, void*)						Write buffer with size.		-> WriteBuffer(const void*, CKDWORD)
+		WriteBufferNoSize(int, void*)				Write buffer without size.	-> WriteBufferNoSize(const void*, CKDWORD)
+		WriteBuffer_LEndian(int, void*)				Write buffer with size.		-> WriteBuffer(const void*, CKDWORD)
+		WriteBuffer_LEndian16(int, void*)			Write buffer with size.		-> WriteBuffer(const void*, CKDWORD)
+		WriteBufferNoSize_LEndian(int, void*)		Write buffer without size.	-> WriteBufferNoSize(const void*, CKDWORD)
+		WriteBufferNoSize_LEndian16(int, void*)		Write buffer without size.	-> WriteBufferNoSize(const void*, CKDWORD)
+		*/
+
+		bool WriteBuffer(const void* buf, CKDWORD size_in_byte);
+		bool WriteBufferNoSize(const void* buf, CKDWORD size_in_byte);
+
+		/* ========== Sequence Functions ==========*/
+		
+	public:
+		bool WriteObjectIDSequence(const XContainer::XObjectArray* ls);
+		inline bool ReadObjectIDSequence(const XContainer::XObjectArray& ls) {
+			return WriteObjectIDSequence(&ls);
+		}
+
+		bool WriteManagerIntSequence(const CKGUID* guid, const XContainer::XArray<CKINT>* ls);
+		inline bool WriteManagerIntSequence(const CKGUID& guid, const XContainer::XArray<CKINT>& ls) {
+			return WriteManagerIntSequence(&guid, &ls);
+		}
+
+		// Sub chunk is not available now
+		// Because my code never use it and it is too complex.
+		//bool ReadSubChunkSequence(XContainer::XArray<CKStateChunk*>* ls);
+		//inline bool ReadSubChunkSequence(XContainer::XArray<CKStateChunk*>& ls) {
+		//	return ReadSubChunkSequence(&ls);
+		//}
+
+		bool WriteXObjectArray(const XContainer::XObjectArray* ls);
+		inline bool WriteXObjectArray(const XContainer::XObjectArray& ls) {
+			return WriteXObjectArray(&ls);
+		}
+
+		bool WriteXObjectPointerArray(const XContainer::XObjectPointerArray* ls);
+		inline bool WriteXObjectPointerArray(const XContainer::XObjectPointerArray& ls) {
+			return WriteXObjectPointerArray(&ls);
+		}
+
+
 #pragma endregion
-
-
 
 	};
 

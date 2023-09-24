@@ -173,6 +173,7 @@ namespace LibCmo::CK2 {
 		CKFileVisitor& operator=(CKFileVisitor&&);
 
 		const CKFileObject* GetFileObjectByIndex(size_t index);
+		CKDWORD GetIndexByObjectID(CK_ID objid);
 	protected:
 		bool m_IsReader;
 		CKFileReader* m_Reader;
@@ -226,7 +227,7 @@ namespace LibCmo::CK2 {
 
 		// ========== Saving Preparing ==========
 		bool AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags = CK_STATESAVE_ALL);
-		bool AddSavedObjects(CKObjectArray* objarray, CKDWORD flags = CK_STATESAVE_ALL);
+		bool AddSavedObjects(const XContainer::XObjectPointerArray& objarray, CKDWORD flags = CK_STATESAVE_ALL);
 		bool AddSavedFile(CKSTRING u8FileName);
 
 		// ========== Saving ==========
@@ -248,6 +249,8 @@ namespace LibCmo::CK2 {
 		XContainer::XArray<CKFileManagerData> m_ManagersData; /**< Manager Data loaded */
 		XContainer::XArray<CKFilePluginDependencies> m_PluginsDep;	/**< Plugins dependencies for this file */
 		XContainer::XArray<XContainer::XString> m_IncludedFiles; /**< List of files that should be inserted in the CMO file. */
+		XContainer::XHashTable<CK_ID, CKDWORD> m_ObjectsHashTable; /**< A Object ID to save index hash table. */
+		XContainer::XBitArray m_AlreadySavedMask; /**< Field recording saved object id. If this object is saved, set m_AlreadySavedMask[id] to true. Also used to check whether object already is in save list. */
 		CKFileInfo m_FileInfo; /**< Headers summary */
 
 		CKERROR PrepareFile(CKSTRING filename);

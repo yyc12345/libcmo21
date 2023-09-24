@@ -234,17 +234,47 @@ namespace LibCmo::CK2 {
 
 	bool CKFileWriter::AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags) {
 		if (m_Done || m_IsCopyFromReader) return false;
-		return false;
+		if (obj == nullptr) return false;
+
+		// check whether is saved.
+		CK_ID objid = obj->GetID();
+		if (XContainer::NSXBitArray::IsSet(m_AlreadySavedMask, static_cast<CKDWORD>(objid))) return false;
+
+		// ok, insert this value
+		m_ObjectsHashTable.try_emplace(objid, static_cast<CKDWORD>(m_FileObjects.size()));
+
+		XContainer::NSXBitArray::Set(m_AlreadySavedMask, static_cast<CKDWORD>(objid));
+
+		CKFileObject fobj;
+		fobj.ObjectId = objid;
+		fobj.ObjPtr = obj;
+		fobj.ObjectCid = obj->GetClassID();
+		fobj.SaveFlags = flags;
+		XContainer::NSXString::FromCKSTRING(fobj.Name, obj->GetName());
+		m_FileObjects.emplace_back(std::move(fobj));
+		
+		return true;
 	}
 
-	bool CKFileWriter::AddSavedObjects(CKObjectArray* objarray, CKDWORD flags) {
+	bool CKFileWriter::AddSavedObjects(const XContainer::XObjectPointerArray& objarray, CKDWORD flags) {
 		if (m_Done || m_IsCopyFromReader) return false;
-		return false;
+		
+		bool ret = true;
+		for (auto obj : objarray) {
+			if (!AddSavedObject(obj, flags)) {
+				ret = false;
+			}
+		}
+
+		return ret;
 	}
 
 	bool CKFileWriter::AddSavedFile(CKSTRING u8FileName) {
 		if (m_Done || m_IsCopyFromReader) return false;
-		return false;
+		if (u8FileName == nullptr) return false;
+
+		m_IncludedFiles.emplace_back(u8FileName);
+		return true;
 	}
 
 #pragma endregion
@@ -292,6 +322,16 @@ namespace LibCmo::CK2 {
 		} else {
 			return nullptr;
 		}
+	}
+
+	CKDWORD CKFileVisitor::GetIndexByObjectID(CK_ID objid) {
+		// see CKFile::SaveFindObjectIndex in IDA
+		CKDWORD idx = -1;
+		if (m_IsReader) return idx;
+
+		auto finder = m_Writer->m_ObjectsHashTable.find(objid);
+		if (finder == m_Writer->m_ObjectsHashTable.end()) return idx;
+		return finder->second;
 	}
 
 #pragma endregion
