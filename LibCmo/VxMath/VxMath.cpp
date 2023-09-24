@@ -129,15 +129,15 @@ namespace LibCmo::VxMath {
 
 	namespace NSVxVector {
 
-		float LibCmo::VxMath::NSVxVector::DotProduct(const VxVector2& lhs, const VxVector2& rhs) {
+		float DotProduct(const VxVector2& lhs, const VxVector2& rhs) {
 			return lhs * rhs;
 		}
 		
-		float LibCmo::VxMath::NSVxVector::DotProduct(const VxVector3& lhs, const VxVector3& rhs) {
+		float DotProduct(const VxVector3& lhs, const VxVector3& rhs) {
 			return lhs * rhs;
 		}
 
-		float LibCmo::VxMath::NSVxVector::DotProduct(const VxVector4& lhs, const VxVector4& rhs) {
+		float DotProduct(const VxVector4& lhs, const VxVector4& rhs) {
 			return lhs * rhs;
 		}
 
