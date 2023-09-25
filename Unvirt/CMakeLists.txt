@@ -1,15 +1,17 @@
 cmake_minimum_required(VERSION 3.12)
 project(Unvirt LANGUAGES CXX)
 
-# set languages
-set(CMAKE_CXX_STANDARD 20)
-
-# add libcmo
-add_subdirectory("../LibCmo" "LibCmo.out")
-# add ironpad
-#add_subdirectory("../IronPad" "IronPad.out")
+# add libcmo if not existed
+if (NOT TARGET LibCmo)
+	add_subdirectory("../LibCmo" "LibCmo.out")
+endif ()
+# add ironpad if not existed
+if (NOT TARGET IronPad)
+	add_subdirectory("../IronPad" "IronPad.out")
+endif ()
 
 # setup sources
+set(unvirt_headers ".")
 set(unvirt_sources
 	AccessibleValue.cpp
 	CmdHelper.cpp
@@ -27,4 +29,17 @@ PRIVATE
 	LibCmo
 	IronPad
 )
+target_include_directories(Unvirt
+PRIVATE
+	${unvirt_headers}
+)
+
+# set project standard
+set_target_properties(Unvirt
+PROPERTIES
+	CXX_STANDARD 20
+	CXX_STANDARD_REQUIRED 20
+	CXX_EXTENSION OFF
+)
+
 

@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 project(IronPad LANGUAGES CXX)
 
-# set standard
-set(CMAKE_CXX_STANDARD 20)
-
-# add libcmo
-add_subdirectory("../LibCmo" "LibCmo.out")
+# add libcmo if not existed
+if (NOT TARGET LibCmo)
+	add_subdirectory("../LibCmo" "LibCmo.out")
+endif ()
 
 # setup sources
 set(ironpad_headers ".")
@@ -23,4 +22,12 @@ PRIVATE
 target_include_directories(IronPad
 PUBLIC
 	${ironpad_headers}
+)
+
+# set project standard
+set_target_properties(IronPad
+PROPERTIES
+	CXX_STANDARD 20
+	CXX_STANDARD_REQUIRED 20
+	CXX_EXTENSION OFF
 )

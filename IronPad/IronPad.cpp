@@ -1,9 +1,14 @@
 #include "IronPad.hpp"
+
+// only include these header on windows.
+// in other words, include these header when ironpad enabled.
+#if defined(IRONPAD_ENABLED)
 #include <Windows.h>
 #include <DbgHelp.h>
 #include <filesystem>
 #include <cstdarg>
 #include <cstdio>
+#endif
 
 namespace IronPad {
 

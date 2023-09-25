@@ -13,9 +13,7 @@ if ((NOT EXISTS "${STB_IMAGE_PATH}/stb_image.h") OR (NOT EXISTS "${STB_IMAGE_PAT
 message(FATAL_ERROR "Invalid stb_image library path.")
 endif ()
 
-# set standard
-set(CMAKE_CXX_STANDARD 20)
-
+# set up file list
 set(libcmo_headers ".")
 
 set(libcmo_vt_src
@@ -84,7 +82,14 @@ PRIVATE
 	${Iconv_INCLUDE_DIRS}
 )
 
-# add essential build macro
+# set project standard
+set_target_properties(LibCmo
+PROPERTIES
+	CXX_STANDARD 20
+	CXX_STANDARD_REQUIRED 20
+	CXX_EXTENSION OFF
+)
+# add essential build macro and populate them
 target_compile_definitions(LibCmo
 PUBLIC
 	$<$<CONFIG:Debug>:LIBCMO_BUILD_DEBUG>
