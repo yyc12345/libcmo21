@@ -57,11 +57,11 @@ namespace LibCmo::CK2 {
 	}
 
 	bool CKStateChunk::LockReadBuffer(const void** ppData, CKDWORD size_in_byte) {
-		// check arguments
-		if (*ppData == nullptr) return false;
-		*ppData = nullptr;
 		// check self status
 		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return false;
+		// check arguments
+		if (ppData == nullptr) return false;
+		*ppData = nullptr;
 
 		// get corresponding size
 		CKDWORD size_in_dword = this->GetCeilDwordSize(size_in_byte);
@@ -94,7 +94,7 @@ namespace LibCmo::CK2 {
 	}
 
 	CKStateChunk::LockedReadBuffer_t CKStateChunk::LockReadBufferWrapper(CKDWORD size_in_byte) {
-		const void* pData;
+		const void* pData = nullptr;
 		bool ret = LockReadBuffer(&pData, size_in_byte);
 		if (ret) {
 			return LockedReadBuffer_t(pData, LockedReadBufferDeleter(this, size_in_byte));
@@ -109,7 +109,7 @@ namespace LibCmo::CK2 {
 	bool CKStateChunk::ReadByteData(void* data_ptr, CKDWORD size_in_byte) {
 		if (data_ptr == nullptr) return false;
 
-		const void* pData;
+		const void* pData = nullptr;
 		bool ret = LockReadBuffer(&pData, size_in_byte);
 		if (ret) {
 			std::memcpy(data_ptr, pData, size_in_byte);

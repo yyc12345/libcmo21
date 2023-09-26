@@ -11,7 +11,7 @@ namespace LibCmo::CK2 {
 
 	CKERROR CKFileWriter::Save(CKSTRING u8_filename) {
 		// check document status
-		if (this->m_Done) CKERROR::CKERR_CANCELLED;
+		if (this->m_Done) return CKERROR::CKERR_CANCELLED;
 
 		// encoding conv helper
 		XContainer::XString name_conv;

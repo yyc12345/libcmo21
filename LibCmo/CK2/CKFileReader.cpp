@@ -17,7 +17,7 @@ namespace LibCmo::CK2 {
 
 	CKERROR CKFileReader::ShallowLoad(CKSTRING u8_filename) {
 		// check document status
-		if (this->m_Done) CKERROR::CKERR_CANCELLED;
+		if (this->m_Done) return CKERROR::CKERR_CANCELLED;
 
 		// check file and open memory
 		if (u8_filename == nullptr) return CKERROR::CKERR_INVALIDPARAMETER;
@@ -334,7 +334,7 @@ namespace LibCmo::CK2 {
 
 	CKERROR CKFileReader::DeepLoad(CKSTRING u8_filename) {
 		// check document status
-		if (this->m_Done) CKERROR::CKERR_CANCELLED;
+		if (this->m_Done) return CKERROR::CKERR_CANCELLED;
 
 		// ========== prepare work ==========
 		CKERROR err = CKERROR::CKERR_OK;
