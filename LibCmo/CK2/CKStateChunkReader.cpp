@@ -337,8 +337,8 @@ namespace LibCmo::CK2 {
 	}
 
 	CKStateChunk::Buffer_t CKStateChunk::ReadBufferWrapper() {
-		void* cache;
-		CKDWORD size;
+		void* cache = nullptr;
+		CKDWORD size = 0;
 		if (!ReadBuffer(&cache, &size)) {
 			return Buffer_t();
 		}

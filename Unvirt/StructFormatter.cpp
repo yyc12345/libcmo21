@@ -337,6 +337,23 @@ namespace Unvirt::StructFormatter {
 		PrintPointer(obj->GetFaceMaterialSlotIndexs());
 		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\tMaterialSlotIndexs\n", obj->GetFaceCount() * CKSizeof(LibCmo::CKWORD));
 
+		// mtl slot data
+		fputs("== Material Slot ==\n", stdout);
+		LibCmo::CKDWORD slotcount = obj->GetMaterialSlotCount();
+		LibCmo::CK2::ObjImpls::CKMaterial** pMtlSlots = obj->GetMaterialSlots();
+		fprintf(stdout, "Material Slot Count: %" PRIuCKDWORD "\n", slotcount);
+		fputs("Index\tAddress\tName\n", stdout);
+		for (LibCmo::CKDWORD i = 0; i < slotcount; ++i) {
+			LibCmo::CK2::ObjImpls::CKMaterial* mtl = pMtlSlots[i];
+
+			fprintf(stdout, "#%" PRIuCKDWORD "\t", i);
+			PrintPointer(mtl);
+			fputc('\t', stdout);
+			if (mtl != nullptr)
+				PrintCKSTRING(mtl->GetName());
+			fputc('\n', stdout);
+		}
+
 	}
 
 #pragma endregion
