@@ -174,6 +174,8 @@ namespace LibCmo::CK2 {
 
 		const CKFileObject* GetFileObjectByIndex(CKDWORD index);
 		CKDWORD GetIndexByObjectID(CK_ID objid);
+		bool AddSavedFile(CKSTRING u8FileName);
+
 	protected:
 		bool m_IsReader;
 		CKFileReader* m_Reader;

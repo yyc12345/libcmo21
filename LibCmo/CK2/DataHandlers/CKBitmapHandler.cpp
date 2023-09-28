@@ -323,8 +323,8 @@ namespace LibCmo::CK2::DataHandlers {
 		return nullptr;
 	}
 
-	std::unique_ptr<CKBitmapHandler, CKBitmapHandlerDeleter> CKBitmapHandler::GetBitmapHandlerWrapper(const CKFileExtension& ext, const CKGUID& guid) {
-		return std::unique_ptr<CKBitmapHandler, CKBitmapHandlerDeleter>(GetBitmapHandler(ext, guid));
+	CKBitmapHandlerWrapper_t CKBitmapHandler::GetBitmapHandlerWrapper(const CKFileExtension& ext, const CKGUID& guid) {
+		return CKBitmapHandlerWrapper_t(GetBitmapHandler(ext, guid));
 	}
 
 	void CKBitmapHandlerDeleter::operator()(CKBitmapHandler* handler) {

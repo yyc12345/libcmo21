@@ -110,6 +110,10 @@ namespace LibCmo::CK2 {
 			return m_Data;
 		}
 
+		CKDWORD GetSize() const {
+			return c_DataLen;
+		}
+
 		bool operator==(const CKFileExtension& rhs) const {
 			return CKStrEqualI(m_Data, rhs.m_Data);
 		}

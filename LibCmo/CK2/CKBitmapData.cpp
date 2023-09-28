@@ -1,6 +1,7 @@
 #include "CKBitmapData.hpp"
 #include "CKContext.hpp"
 #include "CKStateChunk.hpp"
+#include "CKFile.hpp"
 #include "DataHandlers/CKBitmapHandler.hpp"
 #include "MgrImpls/CKPathManager.hpp"
 #include <memory>
@@ -123,7 +124,7 @@ namespace LibCmo::CK2 {
 		return false;
 	}
 
-	void CKBitmapData::WriteSpecificFormatBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* slot) {
+	void CKBitmapData::WriteSpecificFormatBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* slot, const CKBitmapProperties* savefmt) {
 
 	}
 
@@ -250,7 +251,98 @@ namespace LibCmo::CK2 {
 	}
 
 	bool CKBitmapData::DumpToChunk(CKStateChunk* chunk, CKFileVisitor* file, const CKBitmapDataWriteIdentifiers& identifiers) {
-		return false;
+		// resolve save fmt and save opt
+		CK_TEXTURE_SAVEOPTIONS saveopt = GetSaveOptions();
+		if (saveopt == CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_USEGLOBAL) {
+			saveopt = m_Context->GetGlobalImagesSaveOptions();
+		}
+		CKBitmapProperties savefmt(GetSaveFormat());
+		if (GetSaveOptions() == CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_USEGLOBAL) {
+			savefmt = m_Context->GetGlobalImagesSaveFormat();
+		}
+
+		// filter external / original files
+		// the slot can not fulfill extrnal saving requirement will be written in raw data
+		CKDWORD slotcount = GetSlotCount();
+		XContainer::XBitArray validExternalSavingSlot;
+		if (saveopt == CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_EXTERNAL) {
+			for (CKDWORD i = 0; i < slotcount; ++i) {
+				if (GetSlotFileName(i) == nullptr) {
+					saveopt = CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_RAWDATA;
+				} else {
+					XContainer::NSXBitArray::Set(validExternalSavingSlot, i);
+				}
+			}
+		}
+		if (saveopt == CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_INCLUDEORIGINALFILE) {
+			for (CKDWORD i = 0; i < slotcount; ++i) {
+				if (file->AddSavedFile(GetSlotFileName(i))) {
+					XContainer::NSXBitArray::Set(validExternalSavingSlot, i);
+				} else {
+					saveopt = CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_RAWDATA;
+				}
+			}
+		}
+
+		// save data
+		if (saveopt == CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_RAWDATA) {
+			// save as raw data
+			chunk->WriteIdentifier(identifiers.m_RawData);
+			chunk->WriteStruct(slotcount);
+
+			VxMath::VxImageDescEx invalidDesc;
+			for (CKDWORD i = 0; i < slotcount; ++i) {
+				if (XContainer::NSXBitArray::IsSet(validExternalSavingSlot, i)) {
+					// if this slot can save as external, pass a invalid desc to writer
+					WriteRawBitmap(chunk, &invalidDesc);
+				} else {
+					// otherwise, pass the real slot data
+					WriteRawBitmap(chunk, GetImageDesc(i));
+				}
+			}
+
+		}
+		if (saveopt == CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_IMAGEFORMAT) {
+			// save as special format
+			chunk->WriteIdentifier(identifiers.m_SpecificFormat);
+			chunk->WriteStruct(slotcount);
+
+			// prepare height, width, bpp data
+			CKDWORD height = 0, width = 0, bpp = 32;
+			for (CKDWORD i = 0; i < slotcount; ++i) {
+				VxMath::VxImageDescEx* desc = GetImageDesc(i);
+				if (desc->IsValid()) {
+					height = desc->GetHeight();
+					width = desc->GetWidth();
+					break;
+				}
+			}
+			// write it
+			chunk->WriteStruct(width);
+			chunk->WriteStruct(height);
+			chunk->WriteStruct(bpp);
+
+			// write slot one by one
+			for (CKDWORD i = 0; i < slotcount; ++i) {
+				WriteSpecificFormatBitmap(chunk, GetImageDesc(i), &savefmt);
+			}
+
+		}
+
+		// write filename
+		{
+			chunk->WriteIdentifier(identifiers.m_FileNames);
+			chunk->WriteStruct(slotcount);
+
+			XContainer::XString filename;
+			for (CKDWORD i = 0; i < slotcount; ++i) {
+				XContainer::NSXString::FromCKSTRING(filename, GetSlotFileName(i));
+				m_Context->GetPathManager()->GetFileName(filename);
+				chunk->WriteString(filename);
+			}
+		}
+
+		return true;
 	}
 
 #pragma endregion
@@ -361,7 +453,9 @@ namespace LibCmo::CK2 {
 
 	CKSTRING CKBitmapData::GetSlotFileName(CKDWORD slot) const {
 		if (slot >= m_Slots.size()) return nullptr;
-		return m_Slots[slot].m_FileName.c_str();
+		// return nullptr if no corresponding filename
+		if (m_Slots[slot].m_FileName.empty()) return nullptr;
+		else return m_Slots[slot].m_FileName.c_str();
 	}
 
 #pragma endregion

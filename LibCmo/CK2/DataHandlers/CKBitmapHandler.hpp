@@ -16,6 +16,10 @@ namespace LibCmo::CK2::DataHandlers {
 		CKBitmapHandlerDeleter(const CKBitmapHandlerDeleter&) noexcept {}
 		void operator()(CKBitmapHandler* handler);
 	};
+	/**
+	 * @brief The type of Auto-free wrapper of CKBitmapHandler.
+	*/
+	using CKBitmapHandlerWrapper_t = std::unique_ptr<CKBitmapHandler, CKBitmapHandlerDeleter>;
 
 	/**
 	 * The interface about processing bitmap data between raw data and specific data.
@@ -41,7 +45,7 @@ namespace LibCmo::CK2::DataHandlers {
 		/**
 		 * @brief A auto free wrapper for GetBitmapHandler
 		*/
-		static std::unique_ptr<CKBitmapHandler, CKBitmapHandlerDeleter> GetBitmapHandlerWrapper(const CKFileExtension& ext, const CKGUID& guid);
+		static CKBitmapHandlerWrapper_t GetBitmapHandlerWrapper(const CKFileExtension& ext, const CKGUID& guid);
 		/**
 		 * @brief General CKBitmapHandler disposer
 		 * @param handler[in] The handler need to be free.

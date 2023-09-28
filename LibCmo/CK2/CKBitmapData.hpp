@@ -43,7 +43,7 @@ namespace LibCmo::CK2 {
 		static bool ReadSpecificFormatBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot);
 		static bool ReadRawBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot);
 		static bool ReadOldRawBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot);
-		static void WriteSpecificFormatBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* slot);
+		static void WriteSpecificFormatBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* slot, const CKBitmapProperties* savefmt);
 		static void WriteRawBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* slot);
 
 		bool ReadFromChunk(CKStateChunk* chunk, CKFileVisitor* file, const CKBitmapDataReadIdentifiers& identifiers);

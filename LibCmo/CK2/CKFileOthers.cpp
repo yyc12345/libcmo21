@@ -334,6 +334,14 @@ namespace LibCmo::CK2 {
 		return finder->second;
 	}
 
+	bool CKFileVisitor::AddSavedFile(CKSTRING u8FileName) {
+		if (m_IsReader) {
+			return false;
+		} else {
+			return m_Writer->AddSavedFile(u8FileName);
+		}
+	}
+
 #pragma endregion
 
 }
