@@ -91,7 +91,11 @@ namespace LibCmo::CK2::DataHandlers {
 		@see SaveFile
 		*/
 		virtual CKDWORD SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) = 0;
-
+		/**
+		 * @brief Check whether this bitmap handler can save alpha data.
+		 * @return True if this bitmap handler can save alpha data.
+		*/
+		virtual bool CanSaveAlpha() = 0;
 	};
 
 	class CKBitmapBMPHandler : public CKBitmapHandler {
@@ -106,6 +110,7 @@ namespace LibCmo::CK2::DataHandlers {
 		virtual bool ReadMemory(const void* memory, CKDWORD size, VxMath::VxImageDescEx* read_image) override;
 		virtual bool SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
 		virtual CKDWORD SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
+		virtual bool CanSaveAlpha() override;
 
 	};
 	
@@ -121,6 +126,7 @@ namespace LibCmo::CK2::DataHandlers {
 		virtual bool ReadMemory(const void* memory, CKDWORD size, VxMath::VxImageDescEx* read_image) override;
 		virtual bool SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
 		virtual CKDWORD SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
+		virtual bool CanSaveAlpha() override;
 
 	};
 

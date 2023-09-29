@@ -310,10 +310,9 @@ namespace LibCmo::CK2 {
 			return false;
 		}
 
-		// if it is empty buffer, create a fake buffer
-		// and simply return it.
+		// if it is empty buffer,
+		// simply return it but need return true to notify read okey.
 		if (*size_in_byte == 0) {
-			*ppData = new CKBYTE[1];
 			return true;
 		}
 

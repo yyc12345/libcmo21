@@ -617,6 +617,8 @@ namespace LibCmo::CK2 {
 		WriteBufferNoSize_LEndian16(int, void*)		Write buffer without size.	-> WriteBufferNoSize(const void*, CKDWORD)
 		*/
 
+		// MARK: buf can be nullptr, but buf size must is 0. and WriteBuffer will only write a zero to indicate there is a zero buffer.
+
 		bool WriteBuffer(const void* buf, CKDWORD size_in_byte);
 		bool WriteBufferNoSize(const void* buf, CKDWORD size_in_byte);
 

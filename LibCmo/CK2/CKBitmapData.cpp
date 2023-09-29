@@ -10,6 +10,9 @@ namespace LibCmo::CK2 {
 
 #pragma region Assist RW Functions
 
+	constexpr const CKDWORD c_SpecificFmtHasTransparent = 2;
+	constexpr const CKDWORD c_SpecificFmtNoTransparent = 1;
+
 	bool CKBitmapData::ReadSpecificFormatBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot) {
 		// read transparent prop
 		CKDWORD transprop;
@@ -48,7 +51,7 @@ namespace LibCmo::CK2 {
 			VxMath::VxDoBlit(&cache, slot);
 
 			// proc image alpha
-			if (transprop == 2) {
+			if (transprop == c_SpecificFmtHasTransparent) {
 				CKDWORD alphacount;
 				chk->ReadStruct(alphacount);
 				if (alphacount == 1) {
@@ -125,11 +128,179 @@ namespace LibCmo::CK2 {
 	}
 
 	void CKBitmapData::WriteSpecificFormatBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* slot, const CKBitmapProperties* savefmt) {
+		// check image validation
+		if (slot->IsValid()) {
+			// get reader
+			auto reader = DataHandlers::CKBitmapHandler::GetBitmapHandlerWrapper(savefmt->m_Ext, savefmt->m_ReaderGuid);
+			if (reader != nullptr) {
+
+				// prepare file data
+				CKDWORD expectedSize = reader->SaveMemory(nullptr, slot, *savefmt);
+				std::unique_ptr<CKBYTE[]> filebuf(new CKBYTE[expectedSize]);
+				reader->SaveMemory(filebuf.get(), slot, *savefmt);
+				reader.reset();
+
+				// in original Virtools design, only save alpha data when raw data can not represent alpha data
+				bool canSaveAlpha = reader->CanSaveAlpha();
+
+				// write basic data
+				// whether has transparent
+				chk->WriteStruct(canSaveAlpha ? c_SpecificFmtNoTransparent : c_SpecificFmtHasTransparent);
+				// write ext and guid
+				chk->WriteBufferNoSize(savefmt->m_Ext.GetExt(), savefmt->m_Ext.GetSize());
+				chk->WriteStruct(savefmt->m_ReaderGuid);
+				
+				// write file data len and self
+				chk->WriteStruct(expectedSize);
+				chk->WriteBufferNoSize(filebuf.get(), expectedSize);
+				// free filebuf
+				filebuf.reset();
+
+				// write alpha if necessary
+				if (!canSaveAlpha) {
+					// prepare alpha list
+					CKDWORD pixelCount = slot->GetPixelCount();
+					std::unique_ptr<CKBYTE[]> alphabuf(new CKBYTE[pixelCount * VxMath::VxImageDescEx::ColorFactorSize]);
+					VxMath::VxCopyStructure(
+						pixelCount,
+						alphabuf.get(),
+						VxMath::VxImageDescEx::ColorFactorSize,
+						VxMath::VxImageDescEx::ColorFactorSize,
+						slot->GetImage() + 3 * VxMath::VxImageDescEx::ColorFactorSize,	// move to A factor
+						VxMath::VxImageDescEx::PixelSize
+					);
+
+					// check whether alpha are the same value
+					bool isSameAlpha = true;
+					CKDWORD sameAlpha = 0;
+					for (CKDWORD i = 0; i < pixelCount; ++i) {
+						if (i == 0) {
+							sameAlpha = static_cast<CKDWORD>(alphabuf[i * VxMath::VxImageDescEx::ColorFactorSize]);
+						} else {
+							if (sameAlpha != static_cast<CKDWORD>(alphabuf[i * VxMath::VxImageDescEx::ColorFactorSize])) {
+								isSameAlpha = false;
+								break;
+							}
+						}
+					}
+
+					// write alpha count
+					// MARK: originally, the written value is how many different alpha value in this image.
+					// so obviously its range is from 1 - 255 and 1 mean all alpha are the same value.
+					// thus we write 2 here because Virtools do not depend this value in reader, 
+					// we only just let virtools to know there is a alpha list.
+					chk->WriteStruct(isSameAlpha ? 1 : 2);
+					if (isSameAlpha) {
+						chk->WriteStruct(sameAlpha);
+					} else {
+						chk->WriteBuffer(alphabuf.get(), pixelCount * VxMath::VxImageDescEx::ColorFactorSize);
+					}
+
+					// free alphabuf
+					alphabuf.reset();
+
+				}
+
+				// explicitly return to skip fallback
+				return;
+			}
+		} 
+
+		// fallback
+		// if image is invalid, or get reader failed.
+		// write a zero
+		chk->WriteStruct(0);
 
 	}
 
 	void CKBitmapData::WriteRawBitmap(CKStateChunk* chk, const VxMath::VxImageDescEx* slot) {
-		
+		// check image validation
+		if (slot->IsValid()) {
+			// write basic data
+			chk->WriteStruct(32);	// write bytePerPixel. always is 32 bpp.
+			chk->WriteStruct(slot->GetWidth());
+			chk->WriteStruct(slot->GetHeight());
+			// alpha, red, green, blue mask, we always use ARGB8888 fmt.
+			chk->WriteStruct(0xFF000000);
+			chk->WriteStruct(0x00FF0000);
+			chk->WriteStruct(0x0000FF00);
+			chk->WriteStruct(0x000000FF);
+
+			// write bufopt
+			// write 0 to indicate there is no shitty jpeg compression
+			// see ReadRawBitmap for more info.
+			chk->WriteStruct(0);
+
+			// MARK: originally there is a bunch of code to convert non-ARGB data into ARGB fmt.
+			// but in my project design, all data is ARGB fmt, so we can simply write them.
+			// all convertion code removed.
+
+			// create 4 channel buf
+			// we always write alpha channel data.
+			CKDWORD pixelCount = slot->GetPixelCount();
+			CKDWORD bufSize = pixelCount * VxMath::VxImageDescEx::ColorFactorSize;
+			std::unique_ptr<CKBYTE[]> redbuf(new CKBYTE[bufSize]);
+			std::unique_ptr<CKBYTE[]> greenbuf(new CKBYTE[bufSize]);
+			std::unique_ptr<CKBYTE[]> bluebuf(new CKBYTE[bufSize]);
+			std::unique_ptr<CKBYTE[]> alphabuf(new CKBYTE[bufSize]);
+
+			// copy channel data
+			// copy a
+			VxMath::VxCopyStructure(
+				pixelCount,
+				alphabuf.get(),
+				VxMath::VxImageDescEx::ColorFactorSize,
+				VxMath::VxImageDescEx::ColorFactorSize,
+				slot->GetImage() + (3 * VxMath::VxImageDescEx::ColorFactorSize),
+				VxMath::VxImageDescEx::PixelSize
+			);
+			// copy r
+			VxMath::VxCopyStructure(
+				pixelCount,
+				redbuf.get(),
+				VxMath::VxImageDescEx::ColorFactorSize,
+				VxMath::VxImageDescEx::ColorFactorSize,
+				slot->GetImage() + (2 * VxMath::VxImageDescEx::ColorFactorSize),
+				VxMath::VxImageDescEx::PixelSize
+			);
+			// copy g
+			VxMath::VxCopyStructure(
+				pixelCount,
+				greenbuf.get(),
+				VxMath::VxImageDescEx::ColorFactorSize,
+				VxMath::VxImageDescEx::ColorFactorSize,
+				slot->GetImage() + (1 * VxMath::VxImageDescEx::ColorFactorSize),
+				VxMath::VxImageDescEx::PixelSize
+			);
+			// copy b
+			VxMath::VxCopyStructure(
+				pixelCount,
+				bluebuf.get(),
+				VxMath::VxImageDescEx::ColorFactorSize,
+				VxMath::VxImageDescEx::ColorFactorSize,
+				slot->GetImage() + (0 * VxMath::VxImageDescEx::ColorFactorSize),
+				VxMath::VxImageDescEx::PixelSize
+			);
+
+			// write 4 buf
+			chk->WriteBuffer(bluebuf.get(), bufSize);
+			chk->WriteBuffer(greenbuf.get(), bufSize);
+			chk->WriteBuffer(redbuf.get(), bufSize);
+			chk->WriteBuffer(alphabuf.get(), bufSize);
+
+			// free 4 buf
+			redbuf.reset();
+			greenbuf.reset();
+			bluebuf.reset();
+			alphabuf.reset();
+			
+			// explicitly return to skip fallback
+			return;
+		}
+
+		// fallback
+		// if image is invalid, write a zero
+		chk->WriteStruct(0);
 	}
 
 #pragma endregion
@@ -243,14 +414,14 @@ namespace LibCmo::CK2 {
 		}
 
 		// movie info
-		if (chunk->SeekIdentifierDword(identifiers.m_MovieFileName)) {
-			// MARK: movie is not implemented here.
-		}
+		// MARK: movie is not implemented here.
 		
 		return true;
 	}
 
 	bool CKBitmapData::DumpToChunk(CKStateChunk* chunk, CKFileVisitor* file, const CKBitmapDataWriteIdentifiers& identifiers) {
+		// MARK: movie is not supported in this project in plan.
+		
 		// resolve save fmt and save opt
 		CK_TEXTURE_SAVEOPTIONS saveopt = GetSaveOptions();
 		if (saveopt == CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_USEGLOBAL) {

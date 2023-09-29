@@ -256,6 +256,10 @@ namespace LibCmo::CK2::DataHandlers {
 			});
 	}
 
+	bool CKBitmapBMPHandler::CanSaveAlpha() {
+		return false;
+	}
+
 #pragma endregion
 
 #pragma region CKBitmapTGAHandler
@@ -291,6 +295,10 @@ namespace LibCmo::CK2::DataHandlers {
 			[&codec_param](stbi_write_func* func, void* context, int w, int h, int comp, const void* data) -> int {
 				return stbi_write_tga_to_func(func, context, w, h, comp, data);
 			});
+	}
+
+	bool CKBitmapTGAHandler::CanSaveAlpha() {
+		return true;
 	}
 
 #pragma endregion
