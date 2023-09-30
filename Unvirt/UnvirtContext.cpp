@@ -9,7 +9,7 @@ namespace Unvirt::Context {
 	UnvirtContext::UnvirtContext() :
 		m_Root(), m_Splitter(), m_Help(nullptr),
 		m_PageLen(10u), m_OrderExit(false),
-		m_Ctx(nullptr), m_FileReader(nullptr) {
+		m_Ctx(nullptr), m_FileReader(nullptr), m_IsShallowRead(true) {
 
 		// create command root
 		CmdHelper::CommandRoot* root = &m_Root;
@@ -175,6 +175,7 @@ namespace Unvirt::Context {
 		// delete reader
 		delete m_FileReader;
 		m_FileReader = nullptr;
+		m_IsShallowRead = true;
 		// clear context
 		m_Ctx->ClearAll();
 	}
@@ -242,8 +243,10 @@ namespace Unvirt::Context {
 		LibCmo::CK2::CKERROR err;
 		if (is_deep) {
 			err = m_FileReader->DeepLoad(filepath.c_str());
+			m_IsShallowRead = false;
 		} else {
 			err = m_FileReader->ShallowLoad(filepath.c_str());
+			m_IsShallowRead = true;
 		}
 		if (err != LibCmo::CK2::CKERROR::CKERR_OK) {
 			// fail to load. release all.
@@ -277,7 +280,7 @@ namespace Unvirt::Context {
 		std::string filepath = *amap->Get<CmdHelper::StringArgument::vType>("filepath");
 
 		// construct writer from reader
-		LibCmo::CK2::CKFileWriter writer(m_Ctx, m_FileReader);
+		LibCmo::CK2::CKFileWriter writer(m_Ctx, m_FileReader, m_IsShallowRead);
 
 		// backup current file write mode
 		// and replace it with reader

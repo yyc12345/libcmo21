@@ -1,5 +1,7 @@
 #include "CKFile.hpp"
 #include "CKStateChunk.hpp"
+#include "CKContext.hpp"
+#include "MgrImpls/CKPathManager.hpp"
 #include "ObjImpls/CKObject.hpp"
 #include <cstdarg>
 
@@ -132,7 +134,7 @@ namespace LibCmo::CK2 {
 
 	CKFileReader::~CKFileReader() {}
 
-	CKINT CKFileReader::GetSaveIdMax() {
+	CK_ID CKFileReader::GetSaveIdMax() {
 		return m_SaveIDMax;
 	}
 
@@ -162,78 +164,124 @@ namespace LibCmo::CK2 {
 
 	CKFileWriter::CKFileWriter(CKContext* ctx) :
 		m_Ctx(ctx), m_Visitor(this),
-		m_Done(false), m_IsCopyFromReader(false),
+		m_Done(false),
+		m_DisableAddingObject(false), m_DisableAddingFile(false),
 		m_SaveIDMax(0),
 		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles(),
 		m_FileInfo()
 	{}
 
-	CKFileWriter::CKFileWriter(CKContext* ctx, CKFileReader* reader) :
+	CKFileWriter::CKFileWriter(CKContext* ctx, CKFileReader* reader, bool is_shallow) :
 		m_Ctx(ctx), m_Visitor(this),
-		m_Done(false), m_IsCopyFromReader(true),
+		m_Done(false),
+		m_DisableAddingObject(true), m_DisableAddingFile(!is_shallow),	// only disable adding file in shallow mode. but disable adding object in all mode.
 		m_SaveIDMax(0),
 		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles(),
 		m_FileInfo()
 	{
-		// sync save id max
-		this->m_SaveIDMax = reader->GetSaveIdMax();
+		if (is_shallow) {
 
-		// copy objects
-		for (const auto& item : reader->GetFileObjects()) {
-			CKFileObject obj;
-			// copy CKObject pointer
-			obj.ObjPtr = item.ObjPtr;
-			// and use ctor to copy CKStateChunk
-			if (item.Data == nullptr) {
-				obj.Data = nullptr;
-			} else {
-				obj.Data = new CKStateChunk(*item.Data);
+#pragma region Shallow Assign
+
+			// sync save id max
+			this->m_SaveIDMax = reader->GetSaveIdMax();
+
+			// copy statechunk
+			for (const auto& item : reader->GetFileObjects()) {
+				CKFileObject obj;
+
+				// use ctor to copy CKStateChunk
+				if (item.Data == nullptr) {
+					obj.Data = nullptr;
+				} else {
+					obj.Data = new CKStateChunk(*item.Data);
+				}
+
+				// set other data
+				obj.ObjectId = item.ObjectId;
+				obj.CreatedObjectId = 0;
+				obj.ObjectCid = item.ObjectCid;
+				obj.ObjPtr = nullptr;	// set zero for obj
+				obj.Name = item.Name;
+				obj.SaveFlags = item.SaveFlags;
+
+				// insert
+				m_FileObjects.emplace_back(std::move(obj));
 			}
 
-			// copy other data
-			obj.ObjectId = item.ObjectId;
-			obj.ObjectCid = item.ObjectCid;
-			obj.SaveFlags = item.SaveFlags;
-			obj.Name = item.Name;
+			// copy managers
+			for (const auto& item : reader->GetManagersData()) {
+				CKFileManagerData mgr;
+				// copy guid
+				mgr.Manager = item.Manager;
+				// copy chunk
+				if (item.Data == nullptr) {
+					mgr.Data = nullptr;
+				} else {
+					mgr.Data = new CKStateChunk(*item.Data);
+				}
 
-			// insert
-			m_FileObjects.emplace_back(std::move(obj));
-		}
-
-		// copy managers
-		for (const auto& item : reader->GetManagersData()) {
-			CKFileManagerData mgr;
-			// copy guid
-			mgr.Manager = item.Manager;
-			// copy chunk
-			if (item.Data == nullptr) {
-				mgr.Data = nullptr;
-			} else {
-				mgr.Data = new CKStateChunk(*item.Data);
+				// insert
+				m_ManagersData.emplace_back(std::move(mgr));
 			}
 
-			// insert
-			m_ManagersData.emplace_back(std::move(mgr));
-		}
+			// copy plugin dep
+			for (const auto& item : reader->GetPluginsDep()) {
+				// direct copy
+				m_PluginsDep.emplace_back(item);
+			}
 
-		// copy plugin dep
-		for (const auto& item : reader->GetPluginsDep()) {
-			// direct copy
-			m_PluginsDep.emplace_back(item);
-		}
+			// copy included file
+			for (const auto& item : reader->GetIncludedFiles()) {
+				// resolve it to temp folder
+				// and add it
+				m_IncludedFiles.emplace_back(m_Ctx->GetPathManager()->GetTempFilePath(item.c_str()));
+			}
 
-		// copy included file
-		for (const auto& item : reader->GetIncludedFiles()) {
-			// direct copy
-			m_IncludedFiles.emplace_back(item);
-		}
+#pragma endregion
 
+		} else {
+
+#pragma region Deep Assign
+
+			// copy object and calc max id
+			CK_ID maxid = 0;
+			for (const auto& item : reader->GetFileObjects()) {
+				CKFileObject obj;
+
+				// skip if invalid
+				if (item.ObjPtr == nullptr) continue;
+
+				// set obj ptr
+				obj.ObjPtr = item.ObjPtr;
+
+				// set other data
+				obj.ObjectId = obj.ObjPtr->GetID();
+				obj.ObjectCid = obj.ObjPtr->GetClassID();
+				obj.Data = nullptr;	// blank statechunk
+				obj.SaveFlags = CK_STATESAVE_ALL;
+				XContainer::NSXString::FromCKSTRING(obj.Name, obj.ObjPtr->GetName());
+
+				// update max id
+				maxid = std::max(maxid, obj.ObjectId);
+
+				// insert
+				m_FileObjects.emplace_back(std::move(obj));
+
+			}
+
+			// set max id
+			m_SaveIDMax = maxid;
+
+#pragma endregion
+
+		}
 	}
 
 	CKFileWriter::~CKFileWriter() {}
 
 	bool CKFileWriter::AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags) {
-		if (m_Done || m_IsCopyFromReader) return false;
+		if (m_Done || m_DisableAddingObject) return false;
 		if (obj == nullptr) return false;
 
 		// check whether is saved.
@@ -242,9 +290,11 @@ namespace LibCmo::CK2 {
 
 		// ok, insert this value
 		m_ObjectsHashTable.try_emplace(objid, static_cast<CKDWORD>(m_FileObjects.size()));
-
 		XContainer::NSXBitArray::Set(m_AlreadySavedMask, static_cast<CKDWORD>(objid));
+		// update max id
+		m_SaveIDMax = std::max(m_SaveIDMax, objid);
 
+		// add entry
 		CKFileObject fobj;
 		fobj.ObjectId = objid;
 		fobj.ObjPtr = obj;
@@ -257,7 +307,7 @@ namespace LibCmo::CK2 {
 	}
 
 	bool CKFileWriter::AddSavedObjects(const XContainer::XObjectPointerArray& objarray, CKDWORD flags) {
-		if (m_Done || m_IsCopyFromReader) return false;
+		if (m_Done || m_DisableAddingObject) return false;
 		
 		bool ret = true;
 		for (auto obj : objarray) {
@@ -270,7 +320,7 @@ namespace LibCmo::CK2 {
 	}
 
 	bool CKFileWriter::AddSavedFile(CKSTRING u8FileName) {
-		if (m_Done || m_IsCopyFromReader) return false;
+		if (m_Done || m_DisableAddingFile) return false;
 		if (u8FileName == nullptr) return false;
 
 		m_IncludedFiles.emplace_back(u8FileName);

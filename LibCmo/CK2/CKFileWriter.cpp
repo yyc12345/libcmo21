@@ -46,8 +46,8 @@ namespace LibCmo::CK2 {
 		}
 
 		// iterate manager
-		// if copied from reader. skip
-		if (!m_IsCopyFromReader) {
+		// if object adding is disabled, skip. because in that mode, no need to query manager data.
+		if (!m_DisableAddingObject) {
 			CKINT mgrcount = m_Ctx->GetManagerCount();
 			CKINT availablemgr = 0;
 
@@ -75,13 +75,10 @@ namespace LibCmo::CK2 {
 
 		}
 
-		// if copied from reader, skip plugin dep
-		if (!m_IsCopyFromReader) {
+		// if object adding is disabled, skip plugin dep. same reason with manager iteration.
+		if (!m_DisableAddingObject) {
 			// todo: finish plugin dep filling
 		}
-
-		// MARK: skip include file filling.
-		// we order user manually fill it.
 
 		// ========== Size Calc ==========
 		// iterate 3 list to get each parts' size
@@ -161,7 +158,7 @@ namespace LibCmo::CK2 {
 		rawHeader.DataPackSize = sumDataSize;
 		rawHeader.ProductVersion = DEVVERSION;
 		rawHeader.ProductBuild = DEVBUILD;
-		rawHeader.MaxIDSaved = m_SaveIDMax;
+		rawHeader.MaxIDSaved = static_cast<CKDWORD>(m_SaveIDMax);
 		// crc will filled later
 
 		// ========== Write header ==========
@@ -289,7 +286,7 @@ namespace LibCmo::CK2 {
 		this->m_FileInfo.DataUnPackSize = rawHeader.DataUnPackSize;
 		this->m_FileInfo.ManagerCount = rawHeader.ManagerCount;
 		this->m_FileInfo.ObjectCount = rawHeader.ObjectCount;
-		this->m_FileInfo.MaxIDSaved = rawHeader.MaxIDSaved;
+		this->m_FileInfo.MaxIDSaved = static_cast<CK_ID>(rawHeader.MaxIDSaved);
 		// fill file size and crc
 		this->m_FileInfo.FileSize = CKSizeof(CKRawFileInfo) + rawHeader.DataPackSize + rawHeader.Hdr1PackSize;
 		this->m_FileInfo.Crc = computedcrc;
@@ -308,16 +305,19 @@ namespace LibCmo::CK2 {
 		datparser.reset();
 
 		// ========== Included Files ==========
-		for (auto& fentry : m_IncludedFiles) {
+		for (const auto& fentry : m_IncludedFiles) {
+			// get file name from full path
+			XContainer::XString filename(fentry);
+			m_Ctx->GetPathManager()->GetFileName(filename);
+
 			// write filename
-			m_Ctx->GetNativeString(fentry, name_conv);
+			m_Ctx->GetNativeString(filename, name_conv);
 			CKDWORD filenamelen = static_cast<CKDWORD>(name_conv.size());
 			std::fwrite(&filenamelen, sizeof(CKDWORD), 1, fs);
 			std::fwrite(name_conv.data(), sizeof(CKBYTE), filenamelen, fs);
 
 			// try mapping file.
-			XContainer::XString tempfilename = m_Ctx->GetPathManager()->GetTempFilePath(fentry.c_str());
-			std::unique_ptr<VxMath::VxMemoryMappedFile> mappedFile(new VxMath::VxMemoryMappedFile(tempfilename.c_str()));
+			std::unique_ptr<VxMath::VxMemoryMappedFile> mappedFile(new VxMath::VxMemoryMappedFile(fentry.c_str()));
 			if (mappedFile->IsValid()) {
 				// write file length
 				CKDWORD filebodylen = mappedFile->GetFileSize();
@@ -331,7 +331,7 @@ namespace LibCmo::CK2 {
 				std::fwrite(&filebodylen, sizeof(CKDWORD), 1, fs);
 
 				// report error
-				m_Ctx->OutputToConsoleEx("Fail to open temp file: %s", tempfilename.c_str());
+				m_Ctx->OutputToConsoleEx("Fail to open temp file: %" PRI_CKSTRING, fentry.c_str());
 			}
 
 			// release mapped file

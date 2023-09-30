@@ -72,7 +72,7 @@ namespace LibCmo::CK2 {
 		this->m_FileInfo.FileSize = parser->GetSize();
 		this->m_FileInfo.ManagerCount = rawHeader.ManagerCount;
 		this->m_FileInfo.ObjectCount = rawHeader.ObjectCount;
-		this->m_FileInfo.MaxIDSaved = rawHeader.MaxIDSaved;
+		this->m_FileInfo.MaxIDSaved = static_cast<CK_ID>(rawHeader.MaxIDSaved);
 		this->m_FileInfo.Hdr1PackSize = rawHeader.FileVersion >= 8 ? rawHeader.Hdr1PackSize : 0u;
 		this->m_FileInfo.Hdr1UnPackSize = rawHeader.FileVersion >= 8 ? rawHeader.Hdr1UnPackSize : 0u;
 		this->m_FileInfo.DataPackSize = rawHeader.DataPackSize;

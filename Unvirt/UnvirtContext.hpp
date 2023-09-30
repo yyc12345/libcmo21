@@ -55,6 +55,7 @@ namespace Unvirt::Context {
 		bool m_OrderExit;
 		LibCmo::CK2::CKContext* m_Ctx;
 		LibCmo::CK2::CKFileReader* m_FileReader;
+		bool m_IsShallowRead;
 	};
 
 

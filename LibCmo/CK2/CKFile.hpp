@@ -107,7 +107,7 @@ namespace LibCmo::CK2 {
 		CKDWORD FileSize; /**< Size of file in bytes. */
 		CKDWORD ObjectCount; /**< Number of objects stored in the file. */
 		CKDWORD ManagerCount; /**< Number of managers which saved data in the file. */
-		CKDWORD MaxIDSaved; /**< Maximum Object identifier saved */
+		CK_ID MaxIDSaved; /**< Maximum Object identifier saved */
 		CKDWORD Crc; /**< Crc of data */
 		CKDWORD Hdr1PackSize; /**< The compressed size of Header section. */
 		CKDWORD Hdr1UnPackSize; /**< The uncompressed size of Header section. */
@@ -195,7 +195,7 @@ namespace LibCmo::CK2 {
 		CKERROR DeepLoad(CKSTRING u8_filename);
 
 		// ========== Loading Result ==========
-		CKINT GetSaveIdMax();
+		CK_ID GetSaveIdMax();
 		const XContainer::XArray<CKFileObject>& GetFileObjects();
 		const XContainer::XArray<CKFileManagerData>& GetManagersData();
 		const XContainer::XArray<CKFilePluginDependencies>& GetPluginsDep();
@@ -204,12 +204,16 @@ namespace LibCmo::CK2 {
 
 	protected:
 		bool m_Done;
-		CKINT m_SaveIDMax; /**< Maximum CK_ID found when saving or loading objects */
+		CK_ID m_SaveIDMax; /**< Maximum CK_ID found when saving or loading objects */
 		XContainer::XArray<CKFileObject> m_FileObjects; /**< List of objects being saved / loaded */
 		XContainer::XArray<CKFileManagerData> m_ManagersData; /**< Manager Data loaded */
 		XContainer::XArray<CKFilePluginDependencies> m_PluginsDep;	/**< Plugins dependencies for this file */
 		// XContainer::XClassArray<XContainer::XIntArray> m_IndexByClassId; /**< List of index in the m_FileObjects table sorted by ClassID */
-		XContainer::XArray<XContainer::XString> m_IncludedFiles; /**< List of files that should be inserted in the CMO file. */
+		/**
+		 * @brief List of files that should be inserted in the CMO file.
+		 * @remark Each item is just file name, not the full path to file.
+		*/
+		XContainer::XArray<XContainer::XString> m_IncludedFiles;
 		CKFileInfo m_FileInfo; /**< Headers summary */
 
 		CKERROR ReadFileHeader(CKBufferParser* ParserPtr);
@@ -223,7 +227,7 @@ namespace LibCmo::CK2 {
 		friend class CKFileVisitor;
 	public:
 		CKFileWriter(CKContext* ctx);
-		CKFileWriter(CKContext* ctx, CKFileReader* reader);
+		CKFileWriter(CKContext* ctx, CKFileReader* reader, bool is_shallow);
 		~CKFileWriter();
 		LIBCMO_DISABLE_COPY_MOVE(CKFileWriter);
 
@@ -238,19 +242,29 @@ namespace LibCmo::CK2 {
 	protected:
 		bool m_Done;
 		/**
-		 * True if this writer is copy from reader.
-		 * The data copied from reader mean that calling just only do some small modification.
-		 * So we don't need try getting some managers or save file options from CKContext.
-		 * Just apply the data coming from reader.
-		 * Also, Add object functions is not allowed when writer copying from reader. 
+		 * @brief True if this writer is not allowed to add objects.
+		 * @remark
+		 * + This field should be false in default.
+		 * + This field usually be set when importing from reader.
 		*/
-		bool m_IsCopyFromReader;
+		bool m_DisableAddingObject;
+		/**
+		 * @brief True if this writer is not allowed to add files.
+		 * @remark
+		 * + This field should be false in default.
+		 * + This field usually be set when importing from reader.
+		*/
+		bool m_DisableAddingFile;
 		
-		CKINT m_SaveIDMax; /**< Maximum CK_ID found when saving or loading objects */
+		CK_ID m_SaveIDMax; /**< Maximum CK_ID found when saving or loading objects */
 		XContainer::XArray<CKFileObject> m_FileObjects; /**< List of objects being saved / loaded */
 		XContainer::XArray<CKFileManagerData> m_ManagersData; /**< Manager Data loaded */
 		XContainer::XArray<CKFilePluginDependencies> m_PluginsDep;	/**< Plugins dependencies for this file */
-		XContainer::XArray<XContainer::XString> m_IncludedFiles; /**< List of files that should be inserted in the CMO file. */
+		/**
+		 * @brief List of files that should be inserted in the CMO file.
+		 * @remark Each item is the full path to file.
+		*/
+		XContainer::XArray<XContainer::XString> m_IncludedFiles;
 		XContainer::XHashTable<CK_ID, CKDWORD> m_ObjectsHashTable; /**< A Object ID to save index hash table. */
 		XContainer::XBitArray m_AlreadySavedMask; /**< Field recording saved object id. If this object is saved, set m_AlreadySavedMask[id] to true. Also used to check whether object already is in save list. */
 		CKFileInfo m_FileInfo; /**< Headers summary */

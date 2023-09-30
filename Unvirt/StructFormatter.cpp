@@ -399,7 +399,7 @@ namespace Unvirt::StructFormatter {
 		fputc('\n', stdout);
 
 
-		fprintf(stdout, "Manager Count: %" PRIuCKDWORD "\nObject Count: %" PRIuCKDWORD "\nMax ID Saved: %" PRIuCKDWORD "\n",
+		fprintf(stdout, "Manager Count: %" PRIuCKDWORD "\nObject Count: %" PRIuCKDWORD "\nMax ID Saved: %" PRIuCKID "\n",
 			fileinfo.ManagerCount, fileinfo.ObjectCount, fileinfo.MaxIDSaved
 		);
 
