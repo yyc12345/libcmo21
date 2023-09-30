@@ -164,10 +164,9 @@ namespace LibCmo::CK2::ObjImpls {
 				chunk->ReadStruct(m_ZOrder);
 			}
 			
-		} else {
-			// MARK: compatibility code removed because I don't need them
-			return false;
-		}
+		} 
+		// MARK: compatibility alternative core data read code removed because I don't need them
+
 		
 		// MARK: skin and bone are skipped.
 

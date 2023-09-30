@@ -130,9 +130,18 @@ namespace LibCmo::CK2 {
 			return false;
 		}
 
+		// check blank string
+		if (strByteSize == 0) {
+			strl->clear();
+			return true;
+		}
+
 		// read data
+		// MARK: the written string has NULL terminal.
+		// strByteSize also include NULL terminal, 
+		// so we need minus 1 when resizing (not ReadByteData, because we still need read NULL terminal to skip it.)
 		XContainer::XString cache;
-		cache.resize(strByteSize);
+		cache.resize(strByteSize - 1);
 		if (!this->ReadByteData(cache.data(), strByteSize)) {
 			strl->clear();
 			return false;

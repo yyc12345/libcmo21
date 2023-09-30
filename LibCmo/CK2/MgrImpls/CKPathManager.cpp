@@ -78,6 +78,13 @@ namespace LibCmo::CK2::MgrImpls {
 			return true;
 		}
 
+		// test in temp folder
+		auto tempfile = m_TempFolder / filepath;
+		if (std::filesystem::is_regular_file(tempfile)) {
+			EncodingHelper::StdPathToU8Path(u8_filename, tempfile);
+			return true;
+		}
+
 		// otherwise check it in extra path
 		for (const auto& extrapath : m_ExtraPathes) {
 			auto combinedpath = extrapath / filepath;
@@ -86,13 +93,6 @@ namespace LibCmo::CK2::MgrImpls {
 				EncodingHelper::StdPathToU8Path(u8_filename, combinedpath);
 				return true;
 			}
-		}
-
-		// test in temp folder
-		auto tempfile = m_TempFolder / filepath;
-		if (std::filesystem::is_regular_file(tempfile)) {
-			EncodingHelper::StdPathToU8Path(u8_filename, tempfile);
-			return true;
 		}
 
 		// failed

@@ -174,7 +174,7 @@ namespace LibCmo::CK2 {
 	CKFileWriter::CKFileWriter(CKContext* ctx, CKFileReader* reader, bool is_shallow) :
 		m_Ctx(ctx), m_Visitor(this),
 		m_Done(false),
-		m_DisableAddingObject(true), m_DisableAddingFile(!is_shallow),	// only disable adding file in shallow mode. but disable adding object in all mode.
+		m_DisableAddingObject(true), m_DisableAddingFile(is_shallow),	// only disable adding file in shallow mode. but disable adding object in all mode.
 		m_SaveIDMax(0),
 		m_FileObjects(), m_ManagersData(), m_PluginsDep(), m_IncludedFiles(),
 		m_FileInfo()

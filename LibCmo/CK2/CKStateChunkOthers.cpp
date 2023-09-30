@@ -261,18 +261,26 @@ namespace LibCmo::CK2 {
 				delete[] this->m_pData;
 				this->m_pData = nullptr;
 			}
+
+			// set buf size
+			this->m_Parser.m_DataSize = 0u;
 		} else {
 			// otherwise, we create a new buffer instead it
 			CKDWORD* newbuf = new CKDWORD[new_dwsize];
 
-			// if no original data, we do not need copy it and free it
+			// we copy original data only when it has.
 			if (this->m_pData != nullptr) {
-				std::memcpy(newbuf, this->m_pData, sizeof(CKDWORD) * new_dwsize);
+				// MARK: use std::min to copy for the minilist one
+				// otherwise, EnsureWriteSpace or StopWrite will crash.
+				std::memcpy(newbuf, this->m_pData, sizeof(CKDWORD) * std::min(this->m_Parser.m_DataSize, new_dwsize));
 				delete[] this->m_pData;
 			}
 
 			// assign new buffer
 			this->m_pData = newbuf;
+
+			// set buf size
+			this->m_Parser.m_DataSize = new_dwsize;
 		}
 
 		return true;
@@ -290,9 +298,6 @@ namespace LibCmo::CK2 {
 
 			// try resizing it
 			if (!this->ResizeBuffer(needed)) return false;
-
-			// update size
-			this->m_Parser.m_DataSize = needed;
 		}
 
 		return true;

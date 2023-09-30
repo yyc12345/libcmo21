@@ -47,8 +47,8 @@ namespace LibCmo::CK2::MgrImpls {
 		 * @remark
 		 * We match file in following order.
 		 *		+ Whether given file is absolute path. return if true.
-		 *		+ User provided extra path.
 		 *		+ Virtools temp folder.
+		 *		+ User provided extra path.
 		 * @return true if success
 		*/
 		bool ResolveFileName(XContainer::XString& u8_filename);

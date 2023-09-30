@@ -138,7 +138,6 @@ namespace LibCmo::CK2 {
 				CKDWORD expectedSize = reader->SaveMemory(nullptr, slot, *savefmt);
 				std::unique_ptr<CKBYTE[]> filebuf(new CKBYTE[expectedSize]);
 				reader->SaveMemory(filebuf.get(), slot, *savefmt);
-				reader.reset();
 
 				// in original Virtools design, only save alpha data when raw data can not represent alpha data
 				bool canSaveAlpha = reader->CanSaveAlpha();
@@ -200,6 +199,9 @@ namespace LibCmo::CK2 {
 					alphabuf.reset();
 
 				}
+
+				// free reader
+				reader.reset();
 
 				// explicitly return to skip fallback
 				return;

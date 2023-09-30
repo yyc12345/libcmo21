@@ -104,6 +104,10 @@ namespace LibCmo::CK2 {
 		struct ChunkParser {
 			CKStateChunkStatus m_Status;
 			CKDWORD m_CurrentPos;
+			/**
+			 * @brief The runtime size of CKStateChunk internal buf in DWORD unit.
+			 * Usually be used and changed when resizing buffer in writing mode.
+			*/
 			CKDWORD m_DataSize;
 			CKDWORD m_PrevIdentifierPos;
 		};

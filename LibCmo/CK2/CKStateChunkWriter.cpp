@@ -140,18 +140,25 @@ namespace LibCmo::CK2 {
 		XContainer::XString cache;
 		m_BindContext->GetNativeString(*strl, cache);
 
-		// get size
-		CKDWORD strByteSize = static_cast<CKDWORD>(cache.size());
-		if (!this->WriteStruct(strByteSize)) {
-			return false;
-		}
+		if (cache.empty()) {
+			// write zero string
+			return this->WriteStruct(0);
+		} else {
+			// write string with NULL terminal
 
-		// write data
-		if (!this->WriteByteData(cache.c_str(), strByteSize)) {
-			return false;
-		}
+			// write size
+			CKDWORD strByteSize = static_cast<CKDWORD>(cache.size()) + 1;
+			if (!this->WriteStruct(strByteSize)) {
+				return false;
+			}
 
-		return true;
+			// write data with NULL terminal
+			if (!this->WriteByteData(cache.c_str(), strByteSize)) {
+				return false;
+			}
+
+			return true;
+		}
 	}
 
 	bool CKStateChunk::WriteObjectID(const CK_ID* id) {

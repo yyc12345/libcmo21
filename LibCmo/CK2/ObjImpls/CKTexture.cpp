@@ -87,23 +87,23 @@ namespace LibCmo::CK2::ObjImpls {
 			// prepare mix data. see Read for more info about the struct of this mix data
 			CKDWORD mixdata = 0;
 			// save options
-			mixdata &= static_cast<CKDWORD>(m_ImageHost.GetSaveOptions()) & 0xFF;
+			mixdata |= static_cast<CKDWORD>(m_ImageHost.GetSaveOptions()) & 0xFF;
 			mixdata <<= 8;
 			// mix flags
 			CKDWORD mixflags = 0;
 			if (m_ImageHost.IsTransparent()) {
-				mixflags &= 0x1;
+				mixflags |= 0x1;
 			}
 			if (m_VideoFormat != VxMath::VX_PIXELFORMAT::UNKNOWN_PF) {
-				mixflags &= 0x2;
+				mixflags |= 0x2;
 			}
 			if (m_ImageHost.IsCubeMap()) {
-				mixflags &= 0x4;
+				mixflags |= 0x4;
 			}
-			mixdata &= mixflags & 0xFF;
+			mixdata |= mixflags & 0xFF;
 			mixdata <<= 8;
 			// mipmap
-			mixdata &= (IsUseMipmap() ? 0xFF : 0);
+			mixdata |= (IsUseMipmap() ? 0xFF : 0);
 
 			// write mix data
 			chunk->WriteStruct(mixdata);
