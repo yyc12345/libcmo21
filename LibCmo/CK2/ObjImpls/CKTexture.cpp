@@ -70,6 +70,129 @@ namespace LibCmo::CK2::ObjImpls {
 		bool suc = CKBeObject::Save(chunk, file, flags);
 		if (!suc) return false;
 
+		// save base image
+		suc = m_ImageHost.DumpToChunk(chunk, file, CKBitmapDataWriteIdentifiers {
+			.m_SpecificFormat = static_cast<CKDWORD>(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_TEXREADER),
+			.m_RawData = static_cast<CKDWORD>(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_TEXCOMPRESSED),
+			.m_FileNames = static_cast<CKDWORD>(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_TEXFILENAMES),
+			.m_MovieFileName = static_cast<CKDWORD>(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_TEXAVIFILENAME)
+		});
+		if (!suc) return false;
+
+		// write main properties
+		{
+			// write ident
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_OLDTEXONLY);
+
+			// prepare mix data. see Read for more info about the struct of this mix data
+			CKDWORD mixdata = 0;
+			// save options
+			mixdata &= static_cast<CKDWORD>(m_ImageHost.GetSaveOptions()) & 0xFF;
+			mixdata <<= 8;
+			// mix flags
+			CKDWORD mixflags = 0;
+			if (m_ImageHost.IsTransparent()) {
+				mixflags &= 0x1;
+			}
+			if (m_VideoFormat != VxMath::VX_PIXELFORMAT::UNKNOWN_PF) {
+				mixflags &= 0x2;
+			}
+			if (m_ImageHost.IsCubeMap()) {
+				mixflags &= 0x4;
+			}
+			mixdata &= mixflags & 0xFF;
+			mixdata <<= 8;
+			// mipmap
+			mixdata &= (IsUseMipmap() ? 0xFF : 0);
+
+			// write mix data
+			chunk->WriteStruct(mixdata);
+
+			// transparent color
+			chunk->WriteStruct(m_ImageHost.GetTransparentColor());
+			// current slot
+			if (m_ImageHost.GetSlotCount() > 1) {
+				chunk->WriteStruct(m_ImageHost.GetCurrentSlot());
+			}
+			// video fmt
+			if (m_VideoFormat != VxMath::VX_PIXELFORMAT::UNKNOWN_PF) {
+				chunk->WriteStruct(m_VideoFormat);
+			}
+
+		}
+
+		// mipmap
+		if (GetMipmapLevel() != 0) {
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_USERMIPMAP);
+
+			// write mipmap level
+			chunk->WriteStruct(GetMipmapLevel());
+
+			// write data
+			for (auto& level : m_MipmapImages) {
+				if (level.IsValid()) {
+					// do upside down and write
+					VxMath::VxImageDescEx upsidedown(level.GetWidth(), level.GetHeight());
+					VxMath::VxDoBlitUpsideDown(&level, &upsidedown);
+					CKBitmapData::WriteRawBitmap(chunk, &upsidedown);
+				} else {
+					// write it directly
+					CKBitmapData::WriteRawBitmap(chunk, &level);
+				}
+			}
+		}
+
+		// pick threshold
+		if (m_ImageHost.GetPickThreshold() != 0) {
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_PICKTHRESHOLD);
+			chunk->WriteStruct(m_ImageHost.GetPickThreshold());
+		}
+
+		// bitmap properties
+		{
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_TEXSAVEFORMAT);
+
+			// prepare a fake one
+			FakeBitmapProperties props;
+			const CKBitmapProperties& realprops = m_ImageHost.GetSaveFormat();
+
+			// setup fake self
+			props.m_Size = CKSizeof(props);
+			props.m_Data = 6172;
+
+			// setup fake VxImageDescEx
+			props.m_Format.Size = CKSizeof(props.m_Format);
+			props.m_Format.Flags = static_cast<CKDWORD>(VxMath::VX_PIXELFORMAT::_32_ARGB8888);
+			props.m_Format.Width = m_ImageHost.GetWidth();
+			props.m_Format.Height = m_ImageHost.GetHeight();
+			props.m_Format.BytesPerLine = VxMath::VxImageDescEx::PixelSize * props.m_Format.Height * props.m_Format.Width;
+			props.m_Format.BitsPerPixel = 32;
+
+			props.m_Format.RedMask = 0x00FF0000;
+			props.m_Format.GreenMask = 0x0000FF00;
+			props.m_Format.BlueMask = 0x000000FF;
+			props.m_Format.AlphaMask = 0xFF000000;
+
+			props.m_Format.BytesPerColorEntry = 0;
+			props.m_Format.ColorMapEntries = 0;
+
+			props.m_Format.ColorMap = 0;
+			props.m_Format.Image = 0;
+
+			// setup ext and guid
+			props.m_ReaderGuid.d1 = realprops.m_ReaderGuid.d1;
+			props.m_ReaderGuid.d2 = realprops.m_ReaderGuid.d2;
+			std::memcpy(
+				props.m_Ext.m_Data, 
+				realprops.m_Ext.GetExt(), 
+				std::min(CKSizeof(props.m_Ext.m_Data), realprops.m_Ext.GetSize())
+			);
+
+			// write fake one
+			chunk->WriteBuffer(&props, CKSizeof(props));
+		}
+
+		chunk->SetClassId(CK_CLASSID::CKCID_TEXTURE);
 		return true;
 	}
 
@@ -104,7 +227,7 @@ namespace LibCmo::CK2::ObjImpls {
 				CKDWORD mixdata;
 				chunk->ReadStruct(mixdata);
 				// set mipmap
-				m_UseMipMap = (mixdata & 0xFF);
+				UseMipmap(mixdata & 0xFF);
 				mixdata >>= 8;
 				// mix flags
 				CKDWORD mixflags = mixdata & 0xFF;
@@ -159,7 +282,7 @@ namespace LibCmo::CK2::ObjImpls {
 			if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_USERMIPMAP)) {
 				CKDWORD mipmapCount;
 				chunk->ReadStruct(mipmapCount);
-				m_MipmapImages.resize(mipmapCount);
+				SetMipmapLevel(mipmapCount);
 
 				for (CKDWORD i = 0; i < mipmapCount; ++i) {
 					VxMath::VxImageDescEx cache;

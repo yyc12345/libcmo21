@@ -106,6 +106,17 @@ namespace LibCmo::CK2 {
 		*/
 		CKSTRING GetSlotFileName(CKDWORD slot) const;
 
+		/**
+		 * @brief Get first valid image's width.
+		 * @return 0 if no valid image.
+		*/
+		CKDWORD GetWidth() const;
+		/**
+		 * @brief Get first valid image's height.
+		 * @return 0 if no valid image
+		*/
+		CKDWORD GetHeight() const;
+
 #pragma endregion
 
 #pragma region Not important funcs

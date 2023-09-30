@@ -458,40 +458,35 @@ namespace LibCmo::CK2 {
 		// save data
 		if (saveopt == CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_RAWDATA) {
 			// save as raw data
-			chunk->WriteIdentifier(identifiers.m_RawData);
+			chunk->WriteIdentifierDword(identifiers.m_RawData);
 			chunk->WriteStruct(slotcount);
 
 			VxMath::VxImageDescEx invalidDesc;
 			for (CKDWORD i = 0; i < slotcount; ++i) {
-				if (XContainer::NSXBitArray::IsSet(validExternalSavingSlot, i)) {
+				VxMath::VxImageDescEx* thisimg = GetImageDesc(i);
+				if (XContainer::NSXBitArray::IsSet(validExternalSavingSlot, i) || !thisimg->IsValid()) {
 					// if this slot can save as external, pass a invalid desc to writer
+					// or image is invalid, simply write it as invalid one.
 					WriteRawBitmap(chunk, &invalidDesc);
 				} else {
 					// otherwise, pass the real slot data
-					WriteRawBitmap(chunk, GetImageDesc(i));
+					// do upside down first as reader done
+					VxMath::VxImageDescEx upsidedown(thisimg->GetWidth(), thisimg->GetHeight());
+					VxMath::VxDoBlitUpsideDown(thisimg, &upsidedown);
+					WriteRawBitmap(chunk, &upsidedown);
 				}
 			}
 
 		}
 		if (saveopt == CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_IMAGEFORMAT) {
 			// save as special format
-			chunk->WriteIdentifier(identifiers.m_SpecificFormat);
+			chunk->WriteIdentifierDword(identifiers.m_SpecificFormat);
 			chunk->WriteStruct(slotcount);
 
-			// prepare height, width, bpp data
-			CKDWORD height = 0, width = 0, bpp = 32;
-			for (CKDWORD i = 0; i < slotcount; ++i) {
-				VxMath::VxImageDescEx* desc = GetImageDesc(i);
-				if (desc->IsValid()) {
-					height = desc->GetHeight();
-					width = desc->GetWidth();
-					break;
-				}
-			}
-			// write it
-			chunk->WriteStruct(width);
-			chunk->WriteStruct(height);
-			chunk->WriteStruct(bpp);
+			// write width, height and bpp
+			chunk->WriteStruct(GetWidth());
+			chunk->WriteStruct(GetHeight());
+			chunk->WriteStruct(32);
 
 			// write slot one by one
 			for (CKDWORD i = 0; i < slotcount; ++i) {
@@ -502,7 +497,7 @@ namespace LibCmo::CK2 {
 
 		// write filename
 		{
-			chunk->WriteIdentifier(identifiers.m_FileNames);
+			chunk->WriteIdentifierDword(identifiers.m_FileNames);
 			chunk->WriteStruct(slotcount);
 
 			XContainer::XString filename;
@@ -627,6 +622,24 @@ namespace LibCmo::CK2 {
 		// return nullptr if no corresponding filename
 		if (m_Slots[slot].m_FileName.empty()) return nullptr;
 		else return m_Slots[slot].m_FileName.c_str();
+	}
+
+	CKDWORD CKBitmapData::GetWidth() const {
+		for (auto& slot : m_Slots) {
+			if (slot.m_ImageData.IsValid()) {
+				return slot.m_ImageData.GetWidth();
+			}
+		}
+		return 0;
+	}
+
+	CKDWORD CKBitmapData::GetHeight() const {
+		for (auto& slot : m_Slots) {
+			if (slot.m_ImageData.IsValid()) {
+				return slot.m_ImageData.GetHeight();
+			}
+		}
+		return 0;
 	}
 
 #pragma endregion

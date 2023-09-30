@@ -3,6 +3,7 @@
 #include "../VTAll.hpp"
 #include <memory>
 #include <functional>
+#include <type_traits>
 
 namespace LibCmo::CK2 {
 
@@ -268,11 +269,11 @@ namespace LibCmo::CK2 {
 	public:
 		bool SeekIdentifierDword(CKDWORD identifier);
 		bool SeekIdentifierDwordAndReturnSize(CKDWORD identifier, CKDWORD* out_size);
-		template<typename TEnum>
+		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
 		inline bool SeekIdentifier(TEnum enum_v) {
 			return SeekIdentifierDword(static_cast<CKDWORD>(enum_v));
 		}
-		template<typename TEnum>
+		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
 		inline bool SeekIdentifierAndReturnSize(TEnum enum_v, CKDWORD* out_size) {
 			return SeekIdentifierDwordAndReturnSize(static_cast<CKDWORD>(enum_v), out_size);
 		}
@@ -403,18 +404,21 @@ namespace LibCmo::CK2 {
 		/*
 		Buffer related function implements:
 
-		ReadBuffer(void**)						Read Byte based size.		-> ReadAndCopyBuffer(void**, CKDWORD*)
-		ReadAndFillBuffer(int, void*)			User give Byte based size.	-> ReadBuffer(const void**, CKDWORD)
-		ReadAndFillBuffer(void*)				Read Byte based size.		-> ReadBuffer(const void**, CKDWORD*)
-		ReadAndFillBuffer_LEndian(int, void*)	User give Byte based size.	-> ReadBuffer(const void**, CKDWORD)
-		ReadAndFillBuffer_LEndian(void*)		Read Byte based size.		-> ReadBuffer(const void**, CKDWORD*)
-		ReadAndFillBuffer_LEndian16(int, void*)	User give Byte based size.	-> ReadBuffer(const void**, CKDWORD)
-		ReadAndFillBuffer_LEndian16(void*)		Read Byte based size.		-> ReadBuffer(const void**, CKDWORD*)
+		ReadBuffer(void**)						Read Byte based size.		-> ReadBuffer(void**, CKDWORD*)
+		ReadAndFillBuffer(int, void*)			User give Byte based size.	-> ReadAndFillBuffer(const void*, CKDWORD)
+		ReadAndFillBuffer(void*)				Read Byte based size.		-> ReadAndFillBuffer(const void*)
+		ReadAndFillBuffer_LEndian(int, void*)	User give Byte based size.	-> ReadAndFillBuffer(const void*, CKDWORD)
+		ReadAndFillBuffer_LEndian(void*)		Read Byte based size.		-> ReadAndFillBuffer(const void*)
+		ReadAndFillBuffer_LEndian16(int, void*)	User give Byte based size.	-> ReadAndFillBuffer(const void*, CKDWORD)
+		ReadAndFillBuffer_LEndian16(void*)		Read Byte based size.		-> ReadAndFillBuffer(const void*)
 		*/
 
 		/**
 		 * @brief Read buffer and copy it.
 		 *
+		 * The size of buffer will be read from CKStateChunk internally.
+		 * It mean the read buffer must be written by WriteBuffer().
+		 * 
 		 * The copied buffer and the size of buffer will be returned to caller.
 		 * Caller should free the buffer by calling CKStateChunk::DeleteBuffer(void*).
 		 *
@@ -454,6 +458,7 @@ namespace LibCmo::CK2 {
 		 * @brief Read buffer and fill user struct.
 		 *
 		 * The size of buffer will be read from CKStateChunk internally and return to caller.
+		 * It mean the read buffer must be written by WriteBuffer().
 		 *
 		 * @param pData[out] The pointer holding the data.
 		 * @return True if success.
@@ -467,6 +472,7 @@ namespace LibCmo::CK2 {
 		 * @brief Read buffer and fill user struct.
 		 *
 		 * The size of buffer is provided by user.
+		 * It mean the read buffer must be written by WriteBufferNoSize().
 		 *
 		 * @param pData[out] The pointer holding the data.
 		 * @param size_in_byte[in] The size of data which you want to read in byte unit
@@ -553,7 +559,7 @@ namespace LibCmo::CK2 {
 
 	public:
 		bool WriteIdentifierDword(CKDWORD identifier);
-		template<typename TEnum>
+		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
 		inline bool WriteIdentifier(TEnum enum_v) {
 			return WriteIdentifierDword(static_cast<CKDWORD>(enum_v));
 		}

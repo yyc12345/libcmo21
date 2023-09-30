@@ -22,6 +22,11 @@ namespace LibCmo::CK2 {
 
 		// force chunk version
 		this->m_ChunkVersion = CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4;
+		// set data version
+		// MARK: in virtools impl, this statement is written in CKObject::Save
+		// and data version is delivered by merging CKStateChunk.
+		// but we do not use that saving strategy, so we init data version in here.
+		this->m_DataVersion = CK_STATECHUNK_DATAVERSION::CHUNK_DEV_2_1;
 
 		// switch status
 		this->m_Parser.m_Status = CKStateChunkStatus::WRITE;
