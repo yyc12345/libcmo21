@@ -93,6 +93,8 @@ namespace LibCmo::VxMath {
 		CKFLOAT DotProduct(const VxVector4& lhs, const VxVector4& rhs);
 
 		VxVector3 CrossProduct(const VxVector3& lhs, const VxVector3& rhs);
+		
+		void Abs(VxVector3& lhs);
 
 	}
 

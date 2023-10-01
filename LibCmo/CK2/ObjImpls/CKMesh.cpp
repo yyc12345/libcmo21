@@ -11,19 +11,15 @@ namespace LibCmo::CK2::ObjImpls {
 		m_VertexCount(0),
 		m_VertexPosition(), m_VertexNormal(), m_VertexUV(),
 		m_VertexColor(), m_VertexSpecularColor(),
-		m_VertexWeight(), m_NoVertexWeight(true),
 		// init mtl slots
 		m_MtlSlotCount(0),
 		m_MaterialSlot(),
 		// init face data
 		m_FaceCount(0),
-		m_FaceIndices(), m_FaceMtlIndex(), m_Faces(),
+		m_FaceIndices(), m_FaceMtlIndex(), m_FaceOthers(),
 		// init line
 		m_LineCount(0),
 		m_LineIndices(),
-		// init mtl channels
-		m_MtlChannelCount(0),
-		m_MaterialChannels(),
 		// init flags
 		m_Flags(EnumsHelper::Merge({
 			VxMath::VXMESH_FLAGS::VXMESH_FORCETRANSPARENCY,
@@ -44,18 +40,162 @@ namespace LibCmo::CK2::ObjImpls {
 				slot = nullptr;
 			}
 		}
-
-		// check mtl channels
-		for (auto& chl : m_MaterialChannels) {
-			if (chl.m_Material != nullptr && chl.m_Material->IsToBeDeleted()) {
-				chl.m_Material = nullptr;
-			}
-		}
 	}
 
 	bool CKMesh::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
 		bool suc = CKBeObject::Save(chunk, file, flags);
 		if (!suc) return false;
+
+		// write mesh flags
+		{
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHFLAGS);
+			chunk->WriteStruct(m_Flags);
+		}
+
+		// write material slots
+		if (GetMaterialSlotCount() != 0) {
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHMATERIALS);
+			chunk->WriteStruct(GetMaterialSlotCount());
+
+			for (auto& mtlSlot : m_MaterialSlot) {
+				// write object id
+				chunk->WriteObjectPointer(mtlSlot);
+				// MARK: write a zero? idk what the fuck it is.
+				chunk->WriteStruct(static_cast<CKDWORD>(0));
+			}
+		}
+
+		// write face data
+		if (GetFaceCount() != 0) {
+			CKDWORD faceCount = GetFaceCount();
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHFACES);
+			chunk->WriteStruct(faceCount);
+
+			// write compressed data, see Read for more info about this struct
+			// lock buffer first
+			auto buf = chunk->LockWriteBufferWrapper(faceCount * CKSizeof(CKDWORD) * 2);
+			CKWORD* rawbuf = static_cast<CKWORD*>(buf.get());
+
+			// copy indice
+			VxMath::VxCopyStructure(
+				faceCount,
+				rawbuf,
+				2 * CKSizeof(CKDWORD),
+				3 * CKSizeof(CKWORD),
+				m_FaceIndices.data(),
+				3 * CKSizeof(CKWORD)
+			);
+			// copy mtl index
+			VxMath::VxCopyStructure(
+				faceCount,
+				rawbuf + 3,
+				2 * CKSizeof(CKDWORD),
+				CKSizeof(CKWORD),
+				m_FaceMtlIndex.data(),
+				CKSizeof(CKWORD)
+			);
+
+			// free buf
+			buf.reset();
+		}
+
+		// write line data
+		if (GetLineCount() != 0) {
+			CKDWORD lineCount = GetLineCount();
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHLINES);
+			chunk->WriteStruct(lineCount);
+
+			chunk->WriteBuffer(m_LineIndices.data(), CKSizeof(CKWORD) * 2 * lineCount);
+		}
+
+		// write vertex data
+		if (GetVertexCount() != 0) {
+			CKDWORD vtxCount = GetVertexCount();
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHVERTICES);
+			chunk->WriteStruct(vtxCount);
+
+			// construct vertex save flags
+			// and save it
+			VertexSaveFlags saveflags = GenerateSaveFlags();
+			chunk->WriteStruct(saveflags);
+
+			// reserve enough space for full data written, but we can specify the real consumed size later
+			// we also need calc the consumed size when writing file
+			auto buf = chunk->LockWriteBufferWrapper((
+				CKSizeof(VxMath::VxVector3) +	// vertex position
+				CKSizeof(CKDWORD) + CKSizeof(CKDWORD) +		// color and specular color
+				CKSizeof(VxMath::VxVector3) +	// vertex normal
+				CKSizeof(VxMath::VxVector2)		// vertex uv
+			) * vtxCount);	// mul vertex count
+			CKBYTE* rawbuf = static_cast<CKBYTE*>(buf.get());
+			
+			// reserve length data
+			CKDWORD* reservedBufSize = reinterpret_cast<CKDWORD*>(rawbuf);
+			rawbuf += CKSizeof(CKDWORD);
+
+			// write vertex position
+			if (!EnumsHelper::Has(saveflags, VertexSaveFlags::NoPos)) {
+				CKDWORD consumed = CKSizeof(VxMath::VxVector3) * vtxCount;
+				std::memcpy(rawbuf, m_VertexPosition.data(), consumed);
+				rawbuf += consumed;
+			}
+
+			// write color and specular color
+			{
+				CKDWORD consumed = 0;
+				if (!EnumsHelper::Has(saveflags, VertexSaveFlags::SingleColor)) {
+					consumed = CKSizeof(CKDWORD) * vtxCount;
+				} else {
+					consumed = CKSizeof(CKDWORD);
+				}
+
+				std::memcpy(rawbuf, m_VertexColor.data(), consumed);
+				rawbuf += consumed;
+			}
+			{
+				CKDWORD consumed = 0;
+				if (!EnumsHelper::Has(saveflags, VertexSaveFlags::SingleSpecularColor)) {
+					consumed = CKSizeof(CKDWORD) * vtxCount;
+				} else {
+					consumed = CKSizeof(CKDWORD);
+				}
+
+				std::memcpy(rawbuf, m_VertexSpecularColor.data(), consumed);
+				rawbuf += consumed;
+			}
+
+			// write normal
+			if (!EnumsHelper::Has(saveflags, VertexSaveFlags::NoNormal)) {
+				CKDWORD consumed = CKSizeof(VxMath::VxVector3) * vtxCount;
+				std::memcpy(rawbuf, m_VertexNormal.data(), consumed);
+				rawbuf += consumed;
+			}
+
+			// write uv
+			{
+				CKDWORD consumed = 0;
+				if (!EnumsHelper::Has(saveflags, VertexSaveFlags::SingleUV)) {
+					consumed = CKSizeof(VxMath::VxVector2) * vtxCount;
+				} else {
+					consumed = CKSizeof(VxMath::VxVector2);
+				}
+
+				std::memcpy(rawbuf, m_VertexUV.data(), consumed);
+				rawbuf += consumed;
+			}
+
+			// calc real consumed size
+			CKDWORD realConsumedSize = rawbuf - static_cast<CKBYTE*>(buf.get());
+			// assign to reserved length field
+			// length also include length indicator it self
+			*reservedBufSize = realConsumedSize;
+			// notify buffer real consumed size
+			buf.get_deleter().SetConsumedSize(realConsumedSize);
+
+			// free buffer
+			buf.reset();
+
+		}
 
 		return true;
 	}
@@ -251,7 +391,7 @@ namespace LibCmo::CK2::ObjImpls {
 			chunk->ReadStruct(lineCount);
 			SetLineCount(lineCount);
 
-			chunk->ReadAndFillBuffer(m_LineIndices.data(), CKSizeof(CKWORD) * lineCount * 2);
+			chunk->ReadAndFillBuffer(m_LineIndices.data());
 		}
 
 		// build normals
@@ -261,96 +401,8 @@ namespace LibCmo::CK2::ObjImpls {
 			BuildFaceNormals();
 		}
 
-		// read material channels
-		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHCHANNELS)) {
-			// read size and resize it
-			CKDWORD chlSize;
-			chunk->ReadStruct(chlSize);
-			SetMtlChannelCount(chlSize);
-
-			for (auto& chl : m_MaterialChannels) {
-				// read material
-				CKObject* mtlobj = nullptr;
-				chunk->ReadObjectPointer(mtlobj);
-				if (mtlobj != nullptr && mtlobj->GetClassID() == CK_CLASSID::CKCID_MATERIAL) {
-					chl.m_Material = static_cast<CKMaterial*>(mtlobj);
-				}
-
-				// read flags and call function to make sure a custom uv can be created if existed.
-				chunk->ReadStruct(chl.m_Flags);
-				SyncVertexCountToMtlChannel();
-
-				// read blend modes
-				chunk->ReadStruct(chl.m_SourceBlend);
-				chunk->ReadStruct(chl.m_DestBlend);
-
-				// read custom vertex
-				CKDWORD uvcount;
-				chunk->ReadStruct(uvcount);
-				if (uvcount != 0) {
-					// make sure no overflow
-					uvcount = std::min(uvcount, static_cast<CKDWORD>(chl.m_CustomUV.size()));
-
-					CKDWORD bufsize = uvcount * CKSizeof(VxMath::VxVector2);
-					auto locker = chunk->LockReadBufferWrapper(bufsize);
-					std::memcpy(chl.m_CustomUV.data(), locker.get(), bufsize);
-					locker.reset();
-				}
-			}
-		}
-
-		// vertex weight
-		CKDWORD weightSize;
-		m_NoVertexWeight = true;
-		if (chunk->SeekIdentifierAndReturnSize(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHWEIGHTS, &weightSize)) {
-			// set it has
-			m_NoVertexWeight = false;
-			// set count
-			CKDWORD weightCount;
-			chunk->ReadStruct(weightCount);
-
-			if (weightSize > CKSizeof(CKFLOAT)) {
-				// a float series
-				// read as a copy, to make sure no memory overflow
-				// because i couldn't understand how original CKMesh operate vertex weight count 
-				// seperated with vertex count.
-				auto buf = chunk->ReadBufferWrapper();
-				CKDWORD bufsize = std::min(buf.get_deleter().GetBufferSize(), static_cast<CKDWORD>(m_VertexWeight.size()) * CKSizeof(CKFLOAT));
-				std::memcpy(m_VertexWeight.data(), buf.get(), bufsize);
-				buf.reset();
-
-			} else {
-				// a single float
-				CKFLOAT single;
-				chunk->ReadStruct(single);
-
-				for (auto& weight : m_VertexWeight) {
-					weight = single;
-				}
-			}
-		}
-
-		// face mask
-		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHFACECHANMASK)) {
-			// 2 face mask (2 WORD) are compressed into a single DWORD.
-			// and if there is a remained WORD, read it as a single WORD.
-			// according to little endian, the actually stored data is just the mask placed
-			// one by one.
-			// so we just need to allocated it directly
-
-			// read mask count, and limit it to face count
-			CKDWORD maskCount;
-			chunk->ReadStruct(maskCount);
-			maskCount = std::min(maskCount, m_FaceCount);
-
-			auto locker = chunk->LockReadBufferWrapper(maskCount * CKSizeof(CKWORD));
-			const CKWORD* rawptr = static_cast<const CKWORD*>(locker.get());
-			for (auto& f : m_Faces) {
-				f.m_ChannelMask = *rawptr;
-				++rawptr;
-			}
-			locker.reset();
-		}
+		// MARK: material channels, vertex weight, face mask added originally 
+		// but removed at Oct 1st, 2023 because I will not use them and I couldn't test them.
 
 		// MARK: progressive mesh data is dropper.
 
@@ -370,12 +422,7 @@ namespace LibCmo::CK2::ObjImpls {
 #pragma region Misc Section
 
 	void CKMesh::CleanMesh() {
-		// clear material channel first
-		SetMtlChannelCount(0);
-		// then clear other
 		SetVertexCount(0);
-		m_NoVertexWeight = true;
-
 		SetMaterialSlotCount(0);
 		SetFaceCount(0);
 		SetLineCount(0);
@@ -383,6 +430,93 @@ namespace LibCmo::CK2::ObjImpls {
 
 	VxMath::VXMESH_FLAGS CKMesh::GetMeshFlags() const {
 		return m_Flags;
+	}
+
+	CKMesh::VertexSaveFlags CKMesh::GenerateSaveFlags() {
+		// set to initial status
+		VertexSaveFlags saveflags = EnumsHelper::Merge({
+			VertexSaveFlags::SingleColor,
+			VertexSaveFlags::SingleSpecularColor,
+			VertexSaveFlags::NoNormal,
+			VertexSaveFlags::SingleUV
+			});
+
+		// check no pos
+		// if position is generated, skip saving position
+		if (EnumsHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PROCEDURALPOS)) {
+			EnumsHelper::Add(saveflags, VertexSaveFlags::NoPos);
+		}
+
+		// check uv
+		// if uv is not generated and all uv are not the same value, remove single uv
+		if (!EnumsHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PROCEDURALUV)) {
+			for (const auto& uv : m_VertexUV) {
+				if (uv != m_VertexUV.front()) {
+					EnumsHelper::Rm(saveflags, VertexSaveFlags::SingleUV);
+					break;
+				}
+			}
+		}
+
+		// check color and specular color
+		// if all color are not the same value, remove single color
+		for (const auto& col : m_VertexColor) {
+			if (col != m_VertexColor.front()) {
+				EnumsHelper::Rm(saveflags, VertexSaveFlags::SingleColor);
+				break;
+			}
+		}
+		for (const auto& col : m_VertexSpecularColor) {
+			if (col != m_VertexSpecularColor.front()) {
+				EnumsHelper::Rm(saveflags, VertexSaveFlags::SingleSpecularColor);
+				break;
+			}
+		}
+
+		// if normal not changed, and position is not generated, we should consider whether we need save normal (step into if)
+		if (!EnumsHelper::Has(m_Flags, EnumsHelper::Merge({ VxMath::VXMESH_FLAGS::VXMESH_NORMAL_CHANGED, VxMath::VXMESH_FLAGS::VXMESH_PROCEDURALPOS }))) {
+			// MARK: we should build face normal first
+			// then we build vertex normal like BuildNormals.
+			// then, we compare the difference between the generated normals and user specified normals, by simply using operator- (userNml - generatedNml) and abs the result.
+			// then we accumulate these difference, by simply adding them together.
+			// then we div the accumulation by the count of vertex, we got a normalized accumulated difference.
+			// we compare its length with 0.001. if is length is lower than 0.001, it prove that the difference is enough small and we can skip normal save.
+			// othersize we should save normal one by one.
+
+			BuildFaceNormals();
+
+			// init generated nml list first
+			XContainer::XArray<VxMath::VxVector3> generated(m_VertexCount, VxMath::VxVector3());
+			// and accumulated for each normal
+			for (CKDWORD fid = 0; fid < m_FaceCount; ++fid) {
+				generated[m_FaceIndices[fid * 3]] += m_FaceOthers[fid].m_Normal;
+				generated[m_FaceIndices[fid * 3 + 1]] += m_FaceOthers[fid].m_Normal;
+				generated[m_FaceIndices[fid * 3 + 2]] += m_FaceOthers[fid].m_Normal;
+			}
+
+			// init accumulated difference vector first
+			VxMath::VxVector3 accnml;
+			// accumulate difference
+			for (CKDWORD vid = 0; vid < m_VertexCount; ++vid) {
+				// normalize generated normal first
+				generated[vid].Normalized();
+				// get diff by distance
+				VxMath::VxVector3 diff = m_VertexNormal[vid] - generated[vid];
+				// abs the diff and add into accumulated diff
+				VxMath::NSVxVector::Abs(diff);
+				accnml += diff;
+			}
+			
+			// div by vertex count and compare its length
+			accnml /= static_cast<CKFLOAT>(m_VertexCount);
+			if (accnml.Length() > 0.001f) {
+				// too large difference, we need save normal
+				EnumsHelper::Rm(saveflags, VertexSaveFlags::NoNormal);
+			}
+
+		}
+
+		return saveflags;
 	}
 
 	void CKMesh::BuildNormals() {
@@ -393,9 +527,9 @@ namespace LibCmo::CK2::ObjImpls {
 
 		// iterate all face and add face normal to each point's normal
 		for (CKDWORD fid = 0; fid < m_FaceCount; ++fid) {
-			m_VertexNormal[m_FaceIndices[fid * 3]] += m_Faces[fid].m_Normal;
-			m_VertexNormal[m_FaceIndices[fid * 3 + 1]] += m_Faces[fid].m_Normal;
-			m_VertexNormal[m_FaceIndices[fid * 3 + 2]] += m_Faces[fid].m_Normal;
+			m_VertexNormal[m_FaceIndices[fid * 3]] += m_FaceOthers[fid].m_Normal;
+			m_VertexNormal[m_FaceIndices[fid * 3 + 1]] += m_FaceOthers[fid].m_Normal;
+			m_VertexNormal[m_FaceIndices[fid * 3 + 2]] += m_FaceOthers[fid].m_Normal;
 		}
 
 		// then normalize all vertex normal
@@ -420,7 +554,7 @@ namespace LibCmo::CK2::ObjImpls {
 			nml.Normalized();
 
 			// assign it
-			m_Faces[fid].m_Normal = nml;
+			m_FaceOthers[fid].m_Normal = nml;
 		}
 	}
 
@@ -439,10 +573,6 @@ namespace LibCmo::CK2::ObjImpls {
 		m_VertexUV.resize(count);
 		m_VertexColor.resize(count, 0xFFFFFFFF);
 		m_VertexSpecularColor.resize(count, 0x00000000);
-		m_VertexWeight.resize(count, 0.0f);
-
-		// notify mtl channels refresh its custom uv
-		SyncVertexCountToMtlChannel();
 	}
 
 	VxMath::VxVector3* CKMesh::GetVertexPositions() {
@@ -463,10 +593,6 @@ namespace LibCmo::CK2::ObjImpls {
 
 	CKDWORD* CKMesh::GetVertexSpecularColors() {
 		return m_VertexSpecularColor.data();
-	}
-
-	CKFLOAT* CKMesh::GetVertexWeights() {
-		return m_VertexWeight.data();
 	}
 
 #pragma endregion
@@ -498,7 +624,7 @@ namespace LibCmo::CK2::ObjImpls {
 		m_FaceCount = count;
 		m_FaceIndices.resize(count * 3, 0);
 		m_FaceMtlIndex.resize(count, 0);
-		m_Faces.resize(count);
+		m_FaceOthers.resize(count);
 	}
 
 	CKWORD* CKMesh::GetFaceIndices() {
@@ -511,12 +637,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 	VxMath::VxVector3* CKMesh::GetFaceNormals(CKDWORD& stride) {
 		stride = CKSizeof(FaceData_t);
-		return &m_Faces.data()->m_Normal;
-	}
-
-	CKWORD* CKMesh::GetFaceChannelMasks(CKDWORD& stride) {
-		stride = CKSizeof(FaceData_t);
-		return &m_Faces.data()->m_ChannelMask;
+		return &m_FaceOthers.data()->m_Normal;
 	}
 
 #pragma endregion
@@ -537,89 +658,5 @@ namespace LibCmo::CK2::ObjImpls {
 	}
 
 #pragma endregion
-
-#pragma region Mtl Channel Section
-
-	CKDWORD CKMesh::GetMtlChannelCount() const {
-		return m_MtlChannelCount;
-	}
-
-	void CKMesh::SetMtlChannelCount(CKDWORD count) {
-		// backup old count
-		CKDWORD oldcount = m_MtlChannelCount;
-
-		// set and resize
-		m_MtlChannelCount = count;
-		m_MaterialChannels.resize(count);
-
-		// sync mask to each face.
-		// each face accept all mask in default
-		SyncMtlChannelToFaceMask(oldcount, count);
-	}
-
-	CKMaterial** CKMesh::GetMtlChannelMaterials(CKDWORD& stride) {
-		stride = CKSizeof(MaterialChannel_t);
-		return &m_MaterialChannels.data()->m_Material;
-	}
-
-	VxMath::VXBLEND_MODE* CKMesh::GetMtlChannelSourceBlends(CKDWORD& stride) {
-		stride = CKSizeof(MaterialChannel_t);
-		return &m_MaterialChannels.data()->m_SourceBlend;
-	}
-
-	VxMath::VXBLEND_MODE* CKMesh::GetMtlChannelDestBlends(CKDWORD& stride) {
-		stride = CKSizeof(MaterialChannel_t);
-		return &m_MaterialChannels.data()->m_DestBlend;
-	}
-
-	VxMath::VxVector2* CKMesh::GetMtlChannelCustomUVs(CKDWORD idx) {
-		if (idx >= m_MtlChannelCount) return nullptr;
-		return m_MaterialChannels[idx].m_CustomUV.data();
-	}
-
-	VxMath::VXCHANNEL_FLAGS CKMesh::GetMtlChannelFlags(CKDWORD idx) const {
-		if (idx >= m_MtlChannelCount) return static_cast<VxMath::VXCHANNEL_FLAGS>(0);
-		return m_MaterialChannels[idx].m_Flags;
-	}
-
-	void CKMesh::SetMtlChannelFlags(CKDWORD idx, VxMath::VXCHANNEL_FLAGS flags) {
-		if (idx >= m_MtlChannelCount) return;
-		m_MaterialChannels[idx].m_Flags = flags;
-		
-		// refresh self custom uv
-		SyncVertexCountToMtlChannel();
-	}
-
-	void CKMesh::SyncVertexCountToMtlChannel() {
-		for (auto& channel : m_MaterialChannels) {
-			if (!EnumsHelper::Has(channel.m_Flags, VxMath::VXCHANNEL_FLAGS::VXCHANNEL_SAMEUV)) {
-				channel.m_CustomUV.resize(m_VertexCount);
-			} else {
-				channel.m_CustomUV.clear();
-			}
-		}
-	}
-
-	void CKMesh::SyncMtlChannelToFaceMask(CKDWORD oldsize, CKDWORD newsize) {
-		// use oldsize and newsize to build mask
-		if (oldsize == newsize) return;
-
-		CKWORD mask = 0xFFFF;
-		if (oldsize > newsize) {
-			// channels shrinks
-			// set already removed bits to 1
-			mask = static_cast<CKWORD>(~(0xFFFF << newsize));
-		} else {
-			// channels expand
-			// set new added bits to 1
-			mask = static_cast<CKWORD>(~(0xFFFF << oldsize));
-		}
-		for (auto& face : m_Faces) {
-			face.m_ChannelMask |= mask;
-		}
-	}
-
-#pragma endregion
-
 
 }

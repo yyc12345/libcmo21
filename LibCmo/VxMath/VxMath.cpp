@@ -1,6 +1,6 @@
 #include "VxMath.hpp"
+#include <cmath>
 #include "stb_image_resize.h"
-
 
 namespace LibCmo::VxMath {
 
@@ -147,6 +147,12 @@ namespace LibCmo::VxMath {
 				lhs.z * rhs.x - lhs.x * rhs.z,
 				lhs.x * rhs.y - lhs.y * rhs.x
 			);
+		}
+
+		void Abs(VxVector3& lhs) {
+			lhs.x = std::fabs(lhs.x);
+			lhs.y = std::fabs(lhs.y);
+			lhs.z = std::fabs(lhs.z);
 		}
 
 	}
