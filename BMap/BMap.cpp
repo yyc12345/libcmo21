@@ -230,6 +230,8 @@ namespace BMap {
 				cache.emplace_back(encodings[i]);
 		}
 		m_Context->SetEncoding(cache);
+		// set default texture save mode is external
+		m_Context->SetGlobalImagesSaveOptions(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_EXTERNAL);
 	}
 
 	BMFile::~BMFile() {

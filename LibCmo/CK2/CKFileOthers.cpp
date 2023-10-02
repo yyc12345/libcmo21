@@ -262,7 +262,7 @@ namespace LibCmo::CK2 {
 
 	CKFileWriter::~CKFileWriter() {}
 
-	bool LibCmo::CK2::CKFileWriter::InternalObjectAdder(ObjImpls::CKObject * obj, CKDWORD flags) {
+	bool CKFileWriter::InternalObjectAdder(ObjImpls::CKObject * obj, CKDWORD flags) {
 		if (obj == nullptr) return false;
 
 		// check whether is saved.
