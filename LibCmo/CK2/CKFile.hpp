@@ -240,7 +240,27 @@ namespace LibCmo::CK2 {
 		CKERROR Save(CKSTRING u8_filename);
 
 	protected:
-		bool m_Done;
+		/**
+		 * @brief A helper function to check whether given file can be written.
+		 * @param filename[in] The name of file to be wriiten
+		 * @return CKERROR::CK_OK if can write.
+		*/
+		CKERROR PrepareFile(CKSTRING filename);
+		/**
+		 * @brief Internal used Object Adder.
+		 * 
+		 * This function is used by AddSavedObject() and Copy from reader constructor.
+		 * This function accept a object pointer, and try adding them.
+		 * And set m_IncludedFiles and m_ObjectsHashTable properly.
+		 * 
+		 * @param obj The pointer to added object.
+		 * @param flags The flag used when saving this object.
+		 * @return True if success.
+		*/
+		bool InternalObjectAdder(ObjImpls::CKObject* obj, CKDWORD flags = CK_STATESAVE_ALL);
+
+	protected:
+		bool m_Done;	/**< True if this writer is already written into file. A written CKFileWriter can no be written again. */
 		/**
 		 * @brief True if this writer is not allowed to add objects.
 		 * @remark
@@ -268,8 +288,6 @@ namespace LibCmo::CK2 {
 		XContainer::XHashTable<CK_ID, CKDWORD> m_ObjectsHashTable; /**< A Object ID to save index hash table. */
 		XContainer::XBitArray m_AlreadySavedMask; /**< Field recording saved object id. If this object is saved, set m_AlreadySavedMask[id] to true. Also used to check whether object already is in save list. */
 		CKFileInfo m_FileInfo; /**< Headers summary */
-
-		CKERROR PrepareFile(CKSTRING filename);
 
 		CKContext* m_Ctx;
 		CKFileVisitor m_Visitor;

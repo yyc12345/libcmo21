@@ -130,7 +130,7 @@ namespace LibCmo::CK2::ObjImpls {
 			CKBYTE* rawbuf = static_cast<CKBYTE*>(buf.get());
 			
 			// reserve length data
-			CKDWORD* reservedBufSize = reinterpret_cast<CKDWORD*>(rawbuf);
+			CKDWORD* reservedBufDwordSize = reinterpret_cast<CKDWORD*>(rawbuf);
 			rawbuf += CKSizeof(CKDWORD);
 
 			// write vertex position
@@ -188,7 +188,7 @@ namespace LibCmo::CK2::ObjImpls {
 			CKDWORD realConsumedSize = rawbuf - static_cast<CKBYTE*>(buf.get());
 			// assign to reserved length field
 			// length also include length indicator it self
-			*reservedBufSize = realConsumedSize;
+			*reservedBufDwordSize = realConsumedSize / CKSizeof(CKDWORD);
 			// notify buffer real consumed size
 			buf.get_deleter().SetConsumedSize(realConsumedSize);
 

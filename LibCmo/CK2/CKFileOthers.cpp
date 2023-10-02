@@ -244,34 +244,16 @@ namespace LibCmo::CK2 {
 
 #pragma region Deep Assign
 
-			// copy object and calc max id
-			CK_ID maxid = 0;
+			// call internal object adder one by one
 			for (const auto& item : reader->GetFileObjects()) {
 				CKFileObject obj;
 
 				// skip if invalid
 				if (item.ObjPtr == nullptr) continue;
 
-				// set obj ptr
-				obj.ObjPtr = item.ObjPtr;
-
-				// set other data
-				obj.ObjectId = obj.ObjPtr->GetID();
-				obj.ObjectCid = obj.ObjPtr->GetClassID();
-				obj.Data = nullptr;	// blank statechunk
-				obj.SaveFlags = CK_STATESAVE_ALL;
-				XContainer::NSXString::FromCKSTRING(obj.Name, obj.ObjPtr->GetName());
-
-				// update max id
-				maxid = std::max(maxid, obj.ObjectId);
-
-				// insert
-				m_FileObjects.emplace_back(std::move(obj));
-
+				// try add
+				InternalObjectAdder(item.ObjPtr);
 			}
-
-			// set max id
-			m_SaveIDMax = maxid;
 
 #pragma endregion
 
@@ -280,8 +262,7 @@ namespace LibCmo::CK2 {
 
 	CKFileWriter::~CKFileWriter() {}
 
-	bool CKFileWriter::AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags) {
-		if (m_Done || m_DisableAddingObject) return false;
+	bool LibCmo::CK2::CKFileWriter::InternalObjectAdder(ObjImpls::CKObject * obj, CKDWORD flags) {
 		if (obj == nullptr) return false;
 
 		// check whether is saved.
@@ -306,11 +287,19 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
+	bool CKFileWriter::AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags) {
+		if (m_Done || m_DisableAddingObject) return false;
+
+		// call internal adder
+		return InternalObjectAdder(obj, flags);
+	}
+
 	bool CKFileWriter::AddSavedObjects(const XContainer::XObjectPointerArray& objarray, CKDWORD flags) {
 		if (m_Done || m_DisableAddingObject) return false;
 		
 		bool ret = true;
 		for (auto obj : objarray) {
+			// call AddSavedObject one by one
 			if (!AddSavedObject(obj, flags)) {
 				ret = false;
 			}

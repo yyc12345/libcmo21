@@ -324,8 +324,6 @@ namespace Unvirt::StructFormatter {
 		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\tColors\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD));
 		PrintPointer(obj->GetVertexSpecularColors());
 		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\tSpecularColors\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD));
-		PrintPointer(obj->GetVertexWeights());
-		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\tWeights\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKFLOAT));
 		
 		// face data
 		fputs("== Face ==\n", stdout);
