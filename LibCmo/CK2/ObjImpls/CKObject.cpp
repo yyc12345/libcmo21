@@ -56,6 +56,7 @@ namespace LibCmo::CK2::ObjImpls {
 			chunk->WriteIdentifier(CK_STATESAVEFLAGS_OBJECT::CK_STATESAVE_OBJECTHIDDEN);
 		}
 
+		chunk->SetClassId(CK_CLASSID::CKCID_OBJECT);
 		return true;
 	}
 

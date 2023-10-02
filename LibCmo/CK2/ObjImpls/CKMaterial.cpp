@@ -47,7 +47,91 @@ namespace LibCmo::CK2::ObjImpls {
 	bool CKMaterial::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
 		bool suc = CKBeObject::Save(chunk, file, flags);
 		if (!suc) return false;
+		
+		// save main data
+		{
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_MATERIAL::CK_STATESAVE_MATDATA);
 
+			// 4 basic color and some power
+			CKDWORD col;
+			col = m_Diffuse.ToARGB();
+			chunk->WriteStruct(col);
+			col = m_Ambient.ToARGB();
+			chunk->WriteStruct(col);
+			col = m_Specular.ToARGB();
+			chunk->WriteStruct(col);
+			col = m_Emissive.ToARGB();
+			chunk->WriteStruct(col);
+
+			chunk->WriteStruct(m_SpecularPower);
+			
+			// write main texture
+			chunk->WriteObjectPointer(m_Textures[0]);
+
+			// misc data
+			chunk->WriteStruct(m_TextureBorderColor);
+
+			// write mix data 1
+			// construct mix data, see Read for more info about this mix data
+			CKDWORD mixdata = 0;
+			mixdata |= static_cast<CKDWORD>(m_TextureAddressMode) & 0xF;
+			mixdata <<= 4;
+			mixdata |= static_cast<CKDWORD>(m_FillMode) & 0xF;
+			mixdata <<= 4;
+			mixdata |= static_cast<CKDWORD>(m_ShadeMode) & 0xF;
+			mixdata <<= 4;
+			mixdata |= static_cast<CKDWORD>(m_DestBlend) & 0xF;
+			mixdata <<= 4;
+			mixdata |= static_cast<CKDWORD>(m_SourceBlend) & 0xF;
+			mixdata <<= 4;
+			mixdata |= static_cast<CKDWORD>(m_TextureMagMode) & 0xF;
+			mixdata <<= 4;
+			mixdata |= static_cast<CKDWORD>(m_TextureMinMode) & 0xF;
+			mixdata <<= 4;
+			mixdata |= static_cast<CKDWORD>(m_TextureBlendMode) & 0xF;
+			// write it
+			chunk->WriteStruct(mixdata);
+
+			// write mix data 2
+			// construct it first, see Read for more info about this mix data
+			mixdata = 0;
+			mixdata |= static_cast<CKDWORD>(m_AlphaRef) & 0xFF;
+			mixdata <<= 8;
+			mixdata |= static_cast<CKDWORD>(m_AlphaFunc) & 0xFF;
+			mixdata <<= 8;
+			mixdata |= static_cast<CKDWORD>(m_ZFunc) & 0xFF;
+			mixdata <<= 8;
+			// sub mix flags
+			CKDWORD mixflags = 0;
+			if (m_EnableTwoSided) mixflags |= 0b1;
+			if (m_EnableZWrite) mixflags |= 0b10;
+			if (m_EnablePerspectiveCorrection) mixflags |= 0b100;
+			if (m_EnableAlphaBlend) mixflags |= 0b1000;
+			if (m_EnableAlphaTest) mixflags |= 0b10000;
+			// merge into mix data
+			mixdata |= mixflags & 0xFF;
+			// write it
+			chunk->WriteStruct(mixdata);
+
+		}
+
+		// write effect and extra texture.
+		// it seems that extra textures only available when a valid effect existing
+		if (m_Effect != VxMath::VX_EFFECT::VXEFFECT_NONE) {
+			// we only support no-parameter effect, write it
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_MATERIAL::CK_STATESAVE_MATDATA3);
+			chunk->WriteStruct(m_Effect);
+
+			// if have extra textures, write it
+			if (m_Textures[1] != nullptr || m_Textures[2] != nullptr || m_Textures[3] != nullptr) {
+				chunk->WriteIdentifier(CK_STATESAVEFLAGS_MATERIAL::CK_STATESAVE_MATDATA2);
+				chunk->WriteObjectPointer(m_Textures[1]);
+				chunk->WriteObjectPointer(m_Textures[2]);
+				chunk->WriteObjectPointer(m_Textures[3]);
+			}
+		}
+
+		chunk->SetClassId(CK_CLASSID::CKCID_MATERIAL);
 		return true;
 	}
 
@@ -147,9 +231,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 		// single effect
 		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MATERIAL::CK_STATESAVE_MATDATA3)) {
-			CKDWORD data;
-			chunk->ReadStruct(data);
-			m_Effect = static_cast<VxMath::VX_EFFECT>(data);
+			chunk->ReadStruct(m_Effect);
 		}
 
 		// effect with parameter
@@ -163,9 +245,7 @@ namespace LibCmo::CK2::ObjImpls {
 			chunk->ReadObjectID(paramid);
 
 			// read effect self
-			CKDWORD data;
-			chunk->ReadStruct(data);
-			m_Effect = static_cast<VxMath::VX_EFFECT>(data);
+			chunk->ReadStruct(m_Effect);
 		}
 
 		return true;

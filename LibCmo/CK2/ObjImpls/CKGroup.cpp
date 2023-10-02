@@ -36,7 +36,8 @@ namespace LibCmo::CK2::ObjImpls {
 	bool CKGroup::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
 		bool suc = CKBeObject::Save(chunk, file, flags);
 		if (!suc) return false;
-
+		
+		chunk->SetClassId(CK_CLASSID::CKCID_GROUP);
 		return true;
 	}
 

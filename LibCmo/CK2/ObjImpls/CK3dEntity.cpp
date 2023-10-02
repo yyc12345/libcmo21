@@ -85,6 +85,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 		}
 
+		chunk->SetClassId(CK_CLASSID::CKCID_3DENTITY);
 		return true;
 	}
 

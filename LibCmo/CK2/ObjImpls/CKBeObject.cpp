@@ -15,7 +15,8 @@ namespace LibCmo::CK2::ObjImpls {
 	bool CKBeObject::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
 		bool suc = CKSceneObject::Save(chunk, file, flags);
 		if (!suc) return false;
-
+		
+		chunk->SetClassId(CK_CLASSID::CKCID_BEOBJECT);
 		return true;
 	}
 
