@@ -37,6 +37,12 @@ namespace LibCmo::CK2::ObjImpls {
 		bool suc = CKBeObject::Save(chunk, file, flags);
 		if (!suc) return false;
 		
+		// write grouped object
+		{
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_GROUP::CK_STATESAVE_GROUPALL);
+			chunk->WriteXObjectPointerArray(m_ObjectArray);
+		}
+
 		chunk->SetClassId(CK_CLASSID::CKCID_GROUP);
 		return true;
 	}
