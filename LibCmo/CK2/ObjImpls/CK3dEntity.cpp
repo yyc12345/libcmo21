@@ -35,6 +35,56 @@ namespace LibCmo::CK2::ObjImpls {
 		bool suc = CKRenderObject::Save(chunk, file, flags);
 		if (!suc) return false;
 
+		// write associated mesh data
+		if (m_CurrentMesh != nullptr || m_PotentialMeshes.size() != 0) {
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_3DENTITY::CK_STATESAVE_MESHS);
+
+			// write current mesh
+			chunk->WriteObjectPointer(m_CurrentMesh);
+
+			// write potential meshes
+			chunk->WriteXObjectPointerArray(m_PotentialMeshes);
+		}
+
+		// write core entity data
+		{
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_3DENTITY::CK_STATESAVE_3DENTITYNDATA);
+
+			// regulate self flag again
+			// MARK: originally we should check parent here.
+			// but we do not support parent and hierarchy feature, so we simply remove flag
+			EnumsHelper::Rm(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PARENTVALID);
+			// MARK: originally we should check grouped into CKPlace here.
+			// but we do not support CKPlace, so we simply remove this flag
+			EnumsHelper::Rm(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PLACEVALID);
+			// check z-order, if not zero, save it
+			if (m_ZOrder != 0) {
+				EnumsHelper::Add(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_ZORDERVALID);
+			} else {
+				EnumsHelper::Rm(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_ZORDERVALID);
+			}
+
+			// write 2 flags
+			chunk->WriteStruct(m_3dEntityFlags);
+			chunk->WriteStruct(m_MoveableFlags);
+
+			// write world matrix
+			chunk->WriteStruct(reinterpret_cast<const VxMath::VxVector3*>(&m_WorldMatrix[0]));
+			chunk->WriteStruct(reinterpret_cast<const VxMath::VxVector3*>(&m_WorldMatrix[1]));
+			chunk->WriteStruct(reinterpret_cast<const VxMath::VxVector3*>(&m_WorldMatrix[2]));
+			chunk->WriteStruct(reinterpret_cast<const VxMath::VxVector3*>(&m_WorldMatrix[3]));
+
+			// MARK: because we do not support Parent and CKPlace,
+			// and the IDA code also instruct that no need to write any data if no Parent or CKPlace.
+			// so we skip the Parent and CKPlace writing
+
+			// write z-order
+			if (m_ZOrder != 0) {
+				chunk->WriteStruct(m_ZOrder);
+			}
+
+		}
+
 		return true;
 	}
 

@@ -48,6 +48,14 @@ namespace LibCmo::CK2::ObjImpls {
 	void CKObject::PreSave(CKFileVisitor* file, CKDWORD flags) {}
 
 	bool CKObject::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
+		if (EnumsHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE)) {
+			// if hierarchy hidden
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_OBJECT::CK_STATESAVE_OBJECTHIERAHIDDEN);
+		} else if (!EnumsHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE)) {
+			// if really hidden
+			chunk->WriteIdentifier(CK_STATESAVEFLAGS_OBJECT::CK_STATESAVE_OBJECTHIDDEN);
+		}
+
 		return true;
 	}
 
