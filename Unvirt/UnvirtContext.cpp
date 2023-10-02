@@ -154,6 +154,7 @@ namespace Unvirt::Context {
 		LibCmo::CK2::CKStartUp();
 		m_Ctx = new LibCmo::CK2::CKContext();
 		m_Ctx->SetOutputCallback(std::bind(&UnvirtContext::PrintContextMsg, this, std::placeholders::_1));
+		m_Ctx->SetGlobalImagesSaveOptions(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_EXTERNAL);
 	}
 
 	UnvirtContext::~UnvirtContext() {

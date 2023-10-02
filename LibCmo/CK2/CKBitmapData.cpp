@@ -653,8 +653,10 @@ namespace LibCmo::CK2 {
 	}
 
 	void CKBitmapData::SetCubeMap(bool is_cube) {
+		// MARK: originally we should resize solot to 6 exactly.
+		// but we decide split the flag settings and slot. 
+		// User should set slot count manually.
 		if (is_cube) {
-			SetSlotCount(6);
 			EnumsHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
 		} else {
 			EnumsHelper::Rm(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
@@ -694,7 +696,11 @@ namespace LibCmo::CK2 {
 	}
 
 	void CKBitmapData::SetTransparentColor(CKDWORD col) {
-		SetTransparent(true);
+		// MARK: originally, we should set CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT for m_BitmapFlags.
+		// but in CKTexture::Read(), I don't know why Virtools use this fucking design. Virtools split the enable and color data self,
+		// and always write Transparent Color no matter whether Transparent enabled.
+		// so i split transparent enable function and transparent color. User should manually enable transparent if they needed. 
+		// Just set transparent color will not enable transparent automatically.
 		m_TransColor = col;
 	}
 
