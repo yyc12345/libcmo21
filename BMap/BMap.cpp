@@ -28,11 +28,12 @@ namespace BMap {
 		m_ProcVertexs(), m_ProcFaces(), m_ProcDupRemover() {}
 
 	BMMeshTransition::~BMMeshTransition() {}
-
-	void BMMeshTransition::PrepareVertexCount(LibCmo::CKDWORD count) {
-		if (m_IsParsed) return;
+	
+	bool BMMeshTransition::PrepareVertexCount(LibCmo::CKDWORD count) {
+		if (m_IsParsed) return false;
 		m_Vertexs.resize(count);
 		m_IsVertexOK = true;
+		return true;
 	}
 
 	LibCmo::VxMath::VxVector3* BMMeshTransition::PrepareVertex() {
@@ -40,10 +41,11 @@ namespace BMap {
 		return m_Vertexs.data();
 	}
 
-	void BMMeshTransition::PrepareNormalCount(LibCmo::CKDWORD count) {
-		if (m_IsParsed) return;
+	bool BMMeshTransition::PrepareNormalCount(LibCmo::CKDWORD count) {
+		if (m_IsParsed) return false;
 		m_Normals.resize(count);
 		m_IsNormalOK = true;
+		return true;
 	}
 
 	LibCmo::VxMath::VxVector3* BMMeshTransition::PrepareNormal() {
@@ -51,10 +53,11 @@ namespace BMap {
 		return m_Normals.data();
 	}
 
-	void BMMeshTransition::PrepareUVCount(LibCmo::CKDWORD count) {
-		if (m_IsParsed) return;
+	bool BMMeshTransition::PrepareUVCount(LibCmo::CKDWORD count) {
+		if (m_IsParsed) return false;
 		m_UVs.resize(count);
 		m_IsUVOK = true;
+		return true;
 	}
 
 	LibCmo::VxMath::VxVector2* BMMeshTransition::PrepareUV() {
@@ -62,10 +65,11 @@ namespace BMap {
 		return m_UVs.data();
 	}
 
-	void BMMeshTransition::PrepareMtlSlotCount(LibCmo::CKDWORD count) {
-		if (m_IsParsed) return;
+	bool BMMeshTransition::PrepareMtlSlotCount(LibCmo::CKDWORD count) {
+		if (m_IsParsed) return false;
 		m_MtlSlots.resize(count, nullptr);
 		m_IsMtlSlotOK = true;
+		return true;
 	}
 
 	LibCmo::CK2::ObjImpls::CKMaterial** BMMeshTransition::PrepareMtlSlot() {
@@ -73,13 +77,14 @@ namespace BMap {
 		return m_MtlSlots.data();
 	}
 
-	void BMMeshTransition::PrepareFaceCount(LibCmo::CKDWORD count) {
-		if (m_IsParsed) return;
+	bool BMMeshTransition::PrepareFaceCount(LibCmo::CKDWORD count) {
+		if (m_IsParsed) return false;
 		m_FaceVertexs.resize(count * 3);
 		m_FaceNormals.resize(count * 3);
 		m_FaceUVs.resize(count * 3);
 		m_FaceMtlSlotIdxs.resize(count);
 		m_IsFaceOK = true;
+		return true;
 	}
 
 	LibCmo::CKDWORD* BMMeshTransition::PrepareFaceVertexIndices() {
@@ -217,12 +222,12 @@ namespace BMap {
 #pragma region BMfile
 
 	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING encodings[], bool is_reader) :
-		m_IsReader(is_reader), m_IsFailed(false) {
+		m_IsReader(is_reader), m_IsFreezed(false) {
 		m_Context = new LibCmo::CK2::CKContext();
 		// set temp folder and texture folder
 		auto pm = m_Context->GetPathManager();
-		m_IsFailed = m_IsFailed || !pm->AddPath(texture_folder);
-		m_IsFailed = m_IsFailed || !pm->SetTempFolder(temp_folder);
+		m_IsFreezed = m_IsFreezed || !pm->AddPath(texture_folder);
+		m_IsFreezed = m_IsFreezed || !pm->SetTempFolder(temp_folder);
 		// set encoding
 		LibCmo::XContainer::XArray<LibCmo::XContainer::XString> cache;
 		for (LibCmo::CKDWORD i = 0; i < encoding_count; ++i) {
@@ -238,43 +243,54 @@ namespace BMap {
 		delete m_Context;
 	}
 
-	bool BMFile::IsFailed() {
-		return m_IsFailed;
+	bool BMFile::IsFreezed() {
+		return m_IsFreezed;
 	}
 
 	bool BMFile::Load(LibCmo::CKSTRING filename) {
-		return false;
+		if (m_IsFreezed || !m_IsReader) return false;
+		
+		return true;
 	}
 
 	bool BMFile::Save(LibCmo::CKSTRING filename, LibCmo::CKINT compress_level) {
-		return false;
+		if (m_IsFreezed || m_IsReader) return false;
+
+		// set freezed to stop any change again.
+		// aka, only allow save once.
+		m_IsFreezed = true;
+		return true;
 	}
 
-#define VISITOR_IMPL(namepart, cidpart) \
-LibCmo::CKDWORD BMFile::Get ## namepart ## Count() { \
-	if (!m_IsReader) return 0; \
-	return static_cast<LibCmo::CKDWORD>(m_Obj ## namepart ## s.size()); \
-} \
-LibCmo::CK2::ObjImpls::CK ## namepart * BMFile::Get ## namepart (LibCmo::CKDWORD idx) { \
-	if (!m_IsReader || idx >= m_Obj ## namepart ## s.size()) return nullptr; \
-	return m_Obj ## namepart ## s[idx]; \
-} \
-LibCmo::CK2::ObjImpls::CK ## namepart * BMFile::Create ## namepart (LibCmo::CKSTRING name) { \
-	if (m_IsReader) return nullptr; \
-	LibCmo::CK2::ObjImpls::CK ## namepart * obj = static_cast<LibCmo::CK2::ObjImpls::CK ## namepart *>( \
-		m_Context->CreateObject(LibCmo::CK2::CK_CLASSID::CKCID_ ## cidpart, name) \
-		); \
-	if (obj != nullptr) m_Obj ## namepart ## s.emplace_back(obj); \
-	return obj; \
-}
+	LibCmo::CK2::ObjImpls::CKObject* BMFile::GetObjectPtr(LibCmo::CK2::CK_ID objid) {
+		return m_Context->GetObject(objid);;
+	}
 
-	VISITOR_IMPL(Group, GROUP)
-		VISITOR_IMPL(3dObject, 3DOBJECT)
-		VISITOR_IMPL(Mesh, MESH)
-		VISITOR_IMPL(Material, MATERIAL)
-		VISITOR_IMPL(Texture, TEXTURE)
-
-#undef VISITOR_IMPL
+	LibCmo::CKDWORD BMFile::GetGroupCount() { return CommonGetObjectCount(m_ObjGroups); }
+	LibCmo::CK2::CK_ID BMFile::GetGroup(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjGroups, idx); }
+	LibCmo::CK2::CK_ID BMFile::CreateGroup(LibCmo::CKSTRING name) {
+		return CommonCreateObject(m_ObjGroups, LibCmo::CK2::CK_CLASSID::CKCID_GROUP, name);
+	}
+	LibCmo::CKDWORD BMFile::Get3dObjectCount() { return CommonGetObjectCount(m_Obj3dObjects); }
+	LibCmo::CK2::CK_ID BMFile::Get3dObject(LibCmo::CKDWORD idx) { return CommonGetObject(m_Obj3dObjects, idx); }
+	LibCmo::CK2::CK_ID BMFile::Create3dObject(LibCmo::CKSTRING name) {
+		return CommonCreateObject(m_Obj3dObjects, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT, name);
+	}
+	LibCmo::CKDWORD BMFile::GetMeshCount() { return CommonGetObjectCount(m_ObjMeshs); }
+	LibCmo::CK2::CK_ID BMFile::GetMesh(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjMeshs, idx); }
+	LibCmo::CK2::CK_ID BMFile::CreateMesh(LibCmo::CKSTRING name) {
+		return CommonCreateObject(m_ObjMeshs, LibCmo::CK2::CK_CLASSID::CKCID_MESH, name);
+	}
+	LibCmo::CKDWORD BMFile::GetMaterialCount() { return CommonGetObjectCount(m_ObjMaterials); }
+	LibCmo::CK2::CK_ID BMFile::GetMaterial(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjMaterials, idx); }
+	LibCmo::CK2::CK_ID BMFile::CreateMaterial(LibCmo::CKSTRING name) {
+		return CommonCreateObject(m_ObjMaterials, LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL, name);
+	}
+	LibCmo::CKDWORD BMFile::GetTextureCount() { return CommonGetObjectCount(m_ObjTextures); }
+	LibCmo::CK2::CK_ID BMFile::GetTexture(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjTextures, idx); }
+	LibCmo::CK2::CK_ID BMFile::CreateTexture(LibCmo::CKSTRING name) {
+		return CommonCreateObject(m_ObjTextures, LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE, name);
+	}
 
 #pragma endregion
 

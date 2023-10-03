@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include <cinttypes>
+#include <type_traits>
 
 namespace BMap {
 	
@@ -32,15 +33,15 @@ namespace BMap {
 		~BMMeshTransition();
 		LIBCMO_DISABLE_COPY_MOVE(BMMeshTransition);
 
-		void PrepareVertexCount(LibCmo::CKDWORD count);
+		bool PrepareVertexCount(LibCmo::CKDWORD count);
 		LibCmo::VxMath::VxVector3* PrepareVertex();
-		void PrepareNormalCount(LibCmo::CKDWORD count);
+		bool PrepareNormalCount(LibCmo::CKDWORD count);
 		LibCmo::VxMath::VxVector3* PrepareNormal();
-		void PrepareUVCount(LibCmo::CKDWORD count);
+		bool PrepareUVCount(LibCmo::CKDWORD count);
 		LibCmo::VxMath::VxVector2* PrepareUV();
-		void PrepareMtlSlotCount(LibCmo::CKDWORD count);
+		bool PrepareMtlSlotCount(LibCmo::CKDWORD count);
 		LibCmo::CK2::ObjImpls::CKMaterial** PrepareMtlSlot();
-		void PrepareFaceCount(LibCmo::CKDWORD count);
+		bool PrepareFaceCount(LibCmo::CKDWORD count);
 		LibCmo::CKDWORD* PrepareFaceVertexIndices();
 		LibCmo::CKDWORD* PrepareFaceNormalIndices();
 		LibCmo::CKDWORD* PrepareFaceUVIndices();
@@ -78,38 +79,73 @@ namespace BMap {
 		~BMFile();
 		LIBCMO_DISABLE_COPY_MOVE(BMFile);
 
-		bool IsFailed();
+		// ===== help functions ===== 
+
+		/**
+		 * @brief Check whether this instance is freezed.
+		 * @return True if freezed. This instance should be free immediately.
+		*/
+		bool IsFreezed();
 		bool Load(LibCmo::CKSTRING filename);
 		bool Save(LibCmo::CKSTRING filename, LibCmo::CKINT compress_level);
+		LibCmo::CK2::ObjImpls::CKObject* GetObjectPtr(LibCmo::CK2::CK_ID objid);
 
-#define VISITOR_DECL(namepart) \
-LibCmo::CKDWORD Get ## namepart ## Count(); \
-LibCmo::CK2::ObjImpls::CK ## namepart * Get ## namepart (LibCmo::CKDWORD idx); \
-LibCmo::CK2::ObjImpls::CK ## namepart * Create ## namepart (LibCmo::CKSTRING name);
-
-		VISITOR_DECL(Group)
-		VISITOR_DECL(3dObject)
-		VISITOR_DECL(Mesh)
-		VISITOR_DECL(Material)
-		VISITOR_DECL(Texture)
-
-#undef VISITOR_DECL
+		// ===== visitors ===== 
 
 	private:
-		bool m_IsFailed;
+		LibCmo::CKDWORD CommonGetObjectCount(std::vector<LibCmo::CK2::CK_ID>& container) {
+			if (m_IsFreezed || !m_IsReader) return 0;
+			return static_cast<LibCmo::CKDWORD>(container.size());
+		}
+		LibCmo::CK2::CK_ID CommonGetObject(std::vector<LibCmo::CK2::CK_ID>& container, LibCmo::CKDWORD idx) {
+			if (m_IsFreezed || !m_IsReader || idx >= container.size()) return 0;
+			return container[idx];
+		}
+		LibCmo::CK2::CK_ID CommonCreateObject(std::vector<LibCmo::CK2::CK_ID>& container, LibCmo::CK2::CK_CLASSID cid, LibCmo::CKSTRING name) {
+			// only available in writer
+			if (m_IsFreezed || m_IsReader) return 0;
+
+			// try create object and get its pointer
+			LibCmo::CK2::ObjImpls::CKObject* obj = m_Context->CreateObject(cid, name);
+			// check creation validation
+			if (obj == nullptr) return 0;
+
+			// if success, write its id and emplace its id into list
+			LibCmo::CK2::CK_ID objid = obj->GetID();
+			container.emplace_back(objid);
+			return objid;
+		}
+	public:
+		LibCmo::CKDWORD GetGroupCount();
+		LibCmo::CK2::CK_ID GetGroup(LibCmo::CKDWORD idx);
+		LibCmo::CK2::CK_ID CreateGroup(LibCmo::CKSTRING name);
+		LibCmo::CKDWORD Get3dObjectCount();
+		LibCmo::CK2::CK_ID Get3dObject(LibCmo::CKDWORD idx);
+		LibCmo::CK2::CK_ID Create3dObject(LibCmo::CKSTRING name);
+		LibCmo::CKDWORD GetMeshCount();
+		LibCmo::CK2::CK_ID GetMesh(LibCmo::CKDWORD idx);
+		LibCmo::CK2::CK_ID CreateMesh(LibCmo::CKSTRING name);
+		LibCmo::CKDWORD GetMaterialCount();
+		LibCmo::CK2::CK_ID GetMaterial(LibCmo::CKDWORD idx);
+		LibCmo::CK2::CK_ID CreateMaterial(LibCmo::CKSTRING name);
+		LibCmo::CKDWORD GetTextureCount();
+		LibCmo::CK2::CK_ID GetTexture(LibCmo::CKDWORD idx);
+		LibCmo::CK2::CK_ID CreateTexture(LibCmo::CKSTRING name);
+
+	private:
+		/**
+		 * @brief True if all operation of this instance should be rejected.
+		*/
+		bool m_IsFreezed;
 		bool m_IsReader;
 		LibCmo::CK2::CKContext* m_Context;
 
-#define VISITOR_SELF(namepart) \
-std::vector<LibCmo::CK2::ObjImpls::CK ## namepart *> m_Obj ## namepart ## s;
+		std::vector<LibCmo::CK2::CK_ID> m_ObjGroups;
+		std::vector<LibCmo::CK2::CK_ID> m_Obj3dObjects;
+		std::vector<LibCmo::CK2::CK_ID> m_ObjMeshs;
+		std::vector<LibCmo::CK2::CK_ID> m_ObjMaterials;
+		std::vector<LibCmo::CK2::CK_ID> m_ObjTextures;
 
-		VISITOR_SELF(Group)
-		VISITOR_SELF(3dObject)
-		VISITOR_SELF(Mesh)
-		VISITOR_SELF(Material)
-		VISITOR_SELF(Texture)
-
-#undef VISITOR_SELF
 	};
 
 }
