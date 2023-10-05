@@ -116,9 +116,9 @@ LibCmo::CK2::CK_ID BMFile_GetGroup(BMap::BMFile* bmfile, LibCmo::CKDWORD idx) {
 	if (!CheckBMFile(bmfile)) return 0;
 	return bmfile->GetGroup(idx);
 }
-LibCmo::CK2::CK_ID BMFile_CreateGroup(BMap::BMFile* bmfile, LibCmo::CKSTRING name) {
+LibCmo::CK2::CK_ID BMFile_CreateGroup(BMap::BMFile* bmfile) {
 	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->CreateGroup(name);
+	return bmfile->CreateGroup();
 }
 LibCmo::CKDWORD BMFile_Get3dObjectCount(BMap::BMFile* bmfile) {
 	if (!CheckBMFile(bmfile)) return 0;
@@ -128,9 +128,9 @@ LibCmo::CK2::CK_ID BMFile_Get3dObject(BMap::BMFile* bmfile, LibCmo::CKDWORD idx)
 	if (!CheckBMFile(bmfile)) return 0;
 	return bmfile->Get3dObject(idx);
 }
-LibCmo::CK2::CK_ID BMFile_Create3dObject(BMap::BMFile* bmfile, LibCmo::CKSTRING name) {
+LibCmo::CK2::CK_ID BMFile_Create3dObject(BMap::BMFile* bmfile) {
 	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->Create3dObject(name);
+	return bmfile->Create3dObject();
 }
 LibCmo::CKDWORD BMFile_GetMeshCount(BMap::BMFile* bmfile) {
 	if (!CheckBMFile(bmfile)) return 0;
@@ -140,9 +140,9 @@ LibCmo::CK2::CK_ID BMFile_GetMesh(BMap::BMFile* bmfile, LibCmo::CKDWORD idx) {
 	if (!CheckBMFile(bmfile)) return 0;
 	return bmfile->GetMesh(idx);
 }
-LibCmo::CK2::CK_ID BMFile_CreateMesh(BMap::BMFile* bmfile, LibCmo::CKSTRING name) {
+LibCmo::CK2::CK_ID BMFile_CreateMesh(BMap::BMFile* bmfile) {
 	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->CreateMesh(name);
+	return bmfile->CreateMesh();
 }
 LibCmo::CKDWORD BMFile_GetMaterialCount(BMap::BMFile* bmfile) {
 	if (!CheckBMFile(bmfile)) return 0;
@@ -152,9 +152,9 @@ LibCmo::CK2::CK_ID BMFile_GetMaterial(BMap::BMFile* bmfile, LibCmo::CKDWORD idx)
 	if (!CheckBMFile(bmfile)) return 0;
 	return bmfile->GetMaterial(idx);
 }
-LibCmo::CK2::CK_ID BMFile_CreateMaterial(BMap::BMFile* bmfile, LibCmo::CKSTRING name) {
+LibCmo::CK2::CK_ID BMFile_CreateMaterial(BMap::BMFile* bmfile) {
 	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->CreateMaterial(name);
+	return bmfile->CreateMaterial();
 }
 LibCmo::CKDWORD BMFile_GetTextureCount(BMap::BMFile* bmfile) {
 	if (!CheckBMFile(bmfile)) return 0;
@@ -164,9 +164,9 @@ LibCmo::CK2::CK_ID BMFile_GetTexture(BMap::BMFile* bmfile, LibCmo::CKDWORD idx) 
 	if (!CheckBMFile(bmfile)) return 0;
 	return bmfile->GetTexture(idx);
 }
-LibCmo::CK2::CK_ID BMFile_CreateTexture(BMap::BMFile* bmfile, LibCmo::CKSTRING name) {
+LibCmo::CK2::CK_ID BMFile_CreateTexture(BMap::BMFile* bmfile) {
 	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->CreateTexture(name);
+	return bmfile->CreateTexture();
 }
 
 #pragma endregion
@@ -218,7 +218,7 @@ bool BMMeshTrans_PrepareMtlSlotCount(BMap::BMMeshTransition* trans, LibCmo::CKDW
 	if (!CheckBMMeshTrans(trans)) return false;
 	return trans->PrepareMtlSlotCount(count);
 }
-LibCmo::CK2::ObjImpls::CKMaterial** BMMeshTrans_PrepareMtlSlot(BMap::BMMeshTransition* trans) {
+LibCmo::CK2::CK_ID* BMMeshTrans_PrepareMtlSlot(BMap::BMMeshTransition* trans) {
 	if (!CheckBMMeshTrans(trans)) return nullptr;
 	return trans->PrepareMtlSlot();
 }
@@ -246,6 +246,66 @@ bool BMMeshTrans_Parse(BMap::BMMeshTransition* trans, LibCmo::CK2::ObjImpls::CKM
 	if (!CheckBMMeshTrans(trans)) return false;
 	return trans->Parse(write_into_mesh);
 }
+
+#pragma endregion
+
+#pragma region CKObject
+
+LibCmo::CKSTRING BMCKObject_GetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+	auto obj = CheckCKObject<LibCmo::CK2::ObjImpls::CKObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_OBJECT);
+	if (obj == nullptr) return nullptr;
+	return obj->GetName();
+}
+
+bool BMCKObject_SetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKSTRING name) {
+	auto obj = CheckCKObject<LibCmo::CK2::ObjImpls::CKObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_OBJECT);
+	if (obj == nullptr) return false;
+	obj->SetName(name);
+	return true;
+}
+
+#pragma endregion
+
+#pragma region CKGroup
+
+bool BMCKGroup_AddObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK2::CK_ID memberid) {
+	auto obj = CheckCKObject<LibCmo::CK2::ObjImpls::CKGroup*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_GROUP);
+	auto memberobj = CheckCKObject<LibCmo::CK2::ObjImpls::CK3dObject*>(bmfile, memberid, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT);
+	if (obj == nullptr || memberobj == nullptr) return false;
+	
+	return obj->AddObject(memberobj) == LibCmo::CK2::CKERROR::CKERR_OK;
+}
+
+LibCmo::CKDWORD BMCKGroup_GetObjectCount(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+	auto obj = CheckCKObject<LibCmo::CK2::ObjImpls::CKGroup*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_GROUP);
+	if (obj == nullptr) return false;
+	return obj->GetObjectCount();
+}
+
+LibCmo::CK2::CK_ID BMCKGroup_GetObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKDWORD pos) {
+	auto obj = CheckCKObject<LibCmo::CK2::ObjImpls::CKGroup*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_GROUP);
+	if (obj == nullptr) return 0;
+	
+	auto cache = obj->GetObject(pos);
+	if (cache == nullptr) return 0;
+	return cache->GetID();
+}
+
+#pragma endregion
+
+#pragma region CKTexture
+
+#pragma endregion
+
+#pragma region CKMaterial
+
+#pragma endregion
+
+#pragma region CKMesh
+
+#pragma endregion
+
+#pragma region CK3dObject
 
 #pragma endregion
 

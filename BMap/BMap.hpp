@@ -40,7 +40,7 @@ namespace BMap {
 		bool PrepareUVCount(LibCmo::CKDWORD count);
 		LibCmo::VxMath::VxVector2* PrepareUV();
 		bool PrepareMtlSlotCount(LibCmo::CKDWORD count);
-		LibCmo::CK2::ObjImpls::CKMaterial** PrepareMtlSlot();
+		LibCmo::CK2::CK_ID* PrepareMtlSlot();
 		bool PrepareFaceCount(LibCmo::CKDWORD count);
 		LibCmo::CKDWORD* PrepareFaceVertexIndices();
 		LibCmo::CKDWORD* PrepareFaceNormalIndices();
@@ -60,7 +60,7 @@ namespace BMap {
 		std::vector<LibCmo::VxMath::VxVector2> m_UVs;
 		std::vector<LibCmo::CKDWORD> m_FaceVertexs, m_FaceNormals, m_FaceUVs;
 		std::vector<LibCmo::CKDWORD> m_FaceMtlSlotIdxs;
-		std::vector<LibCmo::CK2::ObjImpls::CKMaterial*> m_MtlSlots;
+		std::vector<LibCmo::CK2::CK_ID> m_MtlSlots;
 
 		std::vector<TransitionVertex> m_ProcVertexs;
 		std::vector<TransitionFace> m_ProcFaces;
@@ -101,12 +101,12 @@ namespace BMap {
 			if (m_IsFreezed || !m_IsReader || idx >= container.size()) return 0;
 			return container[idx];
 		}
-		LibCmo::CK2::CK_ID CommonCreateObject(std::vector<LibCmo::CK2::CK_ID>& container, LibCmo::CK2::CK_CLASSID cid, LibCmo::CKSTRING name) {
+		LibCmo::CK2::CK_ID CommonCreateObject(std::vector<LibCmo::CK2::CK_ID>& container, LibCmo::CK2::CK_CLASSID cid) {
 			// only available in writer
 			if (m_IsFreezed || m_IsReader) return 0;
 
 			// try create object and get its pointer
-			LibCmo::CK2::ObjImpls::CKObject* obj = m_Context->CreateObject(cid, name);
+			LibCmo::CK2::ObjImpls::CKObject* obj = m_Context->CreateObject(cid, nullptr);
 			// check creation validation
 			if (obj == nullptr) return 0;
 
@@ -118,19 +118,19 @@ namespace BMap {
 	public:
 		LibCmo::CKDWORD GetGroupCount();
 		LibCmo::CK2::CK_ID GetGroup(LibCmo::CKDWORD idx);
-		LibCmo::CK2::CK_ID CreateGroup(LibCmo::CKSTRING name);
+		LibCmo::CK2::CK_ID CreateGroup();
 		LibCmo::CKDWORD Get3dObjectCount();
 		LibCmo::CK2::CK_ID Get3dObject(LibCmo::CKDWORD idx);
-		LibCmo::CK2::CK_ID Create3dObject(LibCmo::CKSTRING name);
+		LibCmo::CK2::CK_ID Create3dObject();
 		LibCmo::CKDWORD GetMeshCount();
 		LibCmo::CK2::CK_ID GetMesh(LibCmo::CKDWORD idx);
-		LibCmo::CK2::CK_ID CreateMesh(LibCmo::CKSTRING name);
+		LibCmo::CK2::CK_ID CreateMesh();
 		LibCmo::CKDWORD GetMaterialCount();
 		LibCmo::CK2::CK_ID GetMaterial(LibCmo::CKDWORD idx);
-		LibCmo::CK2::CK_ID CreateMaterial(LibCmo::CKSTRING name);
+		LibCmo::CK2::CK_ID CreateMaterial();
 		LibCmo::CKDWORD GetTextureCount();
 		LibCmo::CK2::CK_ID GetTexture(LibCmo::CKDWORD idx);
-		LibCmo::CK2::CK_ID CreateTexture(LibCmo::CKSTRING name);
+		LibCmo::CK2::CK_ID CreateTexture();
 
 	private:
 		/**

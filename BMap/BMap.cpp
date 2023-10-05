@@ -67,12 +67,12 @@ namespace BMap {
 
 	bool BMMeshTransition::PrepareMtlSlotCount(LibCmo::CKDWORD count) {
 		if (m_IsParsed) return false;
-		m_MtlSlots.resize(count, nullptr);
+		m_MtlSlots.resize(count, 0);
 		m_IsMtlSlotOK = true;
 		return true;
 	}
 
-	LibCmo::CK2::ObjImpls::CKMaterial** BMMeshTransition::PrepareMtlSlot() {
+	LibCmo::CK2::CK_ID* BMMeshTransition::PrepareMtlSlot() {
 		if (m_IsParsed || !m_IsMtlSlotOK) return nullptr;
 		return m_MtlSlots.data();
 	}
@@ -209,10 +209,17 @@ namespace BMap {
 		}
 
 		// set mtl slot
+		LibCmo::CK2::CKContext* correspondingCtx = write_into_mesh->GetCKContext();
 		write_into_mesh->SetMaterialSlotCount(mtl_count);
-		auto pMtlSlot = write_into_mesh->GetMaterialSlots();
+		LibCmo::CK2::ObjImpls::CKMaterial** pMtlSlot = write_into_mesh->GetMaterialSlots();
 		for (LibCmo::CKDWORD i = 0; i < mtl_count; ++i) {
-			*(pMtlSlot++) = m_MtlSlots[i];
+			// convert id to CKMaterial* and check its type
+			LibCmo::CK2::ObjImpls::CKObject* mtlptr = correspondingCtx->GetObject(m_MtlSlots[i]);
+			if (mtlptr != nullptr && LibCmo::CK2::CKIsChildClassOf(mtlptr->GetClassID(), LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL)) {
+				*(pMtlSlot++) = static_cast<LibCmo::CK2::ObjImpls::CKMaterial*>(mtlptr);
+			} else {
+				*(pMtlSlot++) = nullptr;
+			}
 		}
 	}
 
@@ -268,29 +275,19 @@ namespace BMap {
 
 	LibCmo::CKDWORD BMFile::GetGroupCount() { return CommonGetObjectCount(m_ObjGroups); }
 	LibCmo::CK2::CK_ID BMFile::GetGroup(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjGroups, idx); }
-	LibCmo::CK2::CK_ID BMFile::CreateGroup(LibCmo::CKSTRING name) {
-		return CommonCreateObject(m_ObjGroups, LibCmo::CK2::CK_CLASSID::CKCID_GROUP, name);
-	}
+	LibCmo::CK2::CK_ID BMFile::CreateGroup() { return CommonCreateObject(m_ObjGroups, LibCmo::CK2::CK_CLASSID::CKCID_GROUP); }
 	LibCmo::CKDWORD BMFile::Get3dObjectCount() { return CommonGetObjectCount(m_Obj3dObjects); }
 	LibCmo::CK2::CK_ID BMFile::Get3dObject(LibCmo::CKDWORD idx) { return CommonGetObject(m_Obj3dObjects, idx); }
-	LibCmo::CK2::CK_ID BMFile::Create3dObject(LibCmo::CKSTRING name) {
-		return CommonCreateObject(m_Obj3dObjects, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT, name);
-	}
+	LibCmo::CK2::CK_ID BMFile::Create3dObject() { return CommonCreateObject(m_Obj3dObjects, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT); }
 	LibCmo::CKDWORD BMFile::GetMeshCount() { return CommonGetObjectCount(m_ObjMeshs); }
 	LibCmo::CK2::CK_ID BMFile::GetMesh(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjMeshs, idx); }
-	LibCmo::CK2::CK_ID BMFile::CreateMesh(LibCmo::CKSTRING name) {
-		return CommonCreateObject(m_ObjMeshs, LibCmo::CK2::CK_CLASSID::CKCID_MESH, name);
-	}
+	LibCmo::CK2::CK_ID BMFile::CreateMesh() { return CommonCreateObject(m_ObjMeshs, LibCmo::CK2::CK_CLASSID::CKCID_MESH); }
 	LibCmo::CKDWORD BMFile::GetMaterialCount() { return CommonGetObjectCount(m_ObjMaterials); }
 	LibCmo::CK2::CK_ID BMFile::GetMaterial(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjMaterials, idx); }
-	LibCmo::CK2::CK_ID BMFile::CreateMaterial(LibCmo::CKSTRING name) {
-		return CommonCreateObject(m_ObjMaterials, LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL, name);
-	}
+	LibCmo::CK2::CK_ID BMFile::CreateMaterial() { return CommonCreateObject(m_ObjMaterials, LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL); }
 	LibCmo::CKDWORD BMFile::GetTextureCount() { return CommonGetObjectCount(m_ObjTextures); }
 	LibCmo::CK2::CK_ID BMFile::GetTexture(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjTextures, idx); }
-	LibCmo::CK2::CK_ID BMFile::CreateTexture(LibCmo::CKSTRING name) {
-		return CommonCreateObject(m_ObjTextures, LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE, name);
-	}
+	LibCmo::CK2::CK_ID BMFile::CreateTexture() { return CommonCreateObject(m_ObjTextures, LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE); }
 
 #pragma endregion
 

@@ -2,6 +2,19 @@
 
 #include "BMap.hpp"
 
+/*
+Design Note:
+
++ We use raw pointer for BMFile and BMMeshTransition
+	- These 2 class do no involve class inheritance so we can safely pass them to this DLL.
+	- These 2 class is not a part of CK core. It is more easy to check them validation. It is enough checking them in a std::set.
++ We use CK_ID as CKObject visitor to ensure the visiting is safe.
+	- We choose CK_ID because checking a valid CK_ID is more easy and cost lower performance than checking a valid CKObject*.
+	- Another reason is that CKObject* relate to class inheritance and need cast. Use CK_ID can leyt them get safe cast in C++, not in other binding languages.
+	- Each CK_ID also should be used with its corresponding BMFile*, because each BMfile* will create a unique CKContext*. CK_ID between different BMFile* is not shared.
+
+*/
+
 #pragma region Init / Dispose
 
 LIBCMO_EXPORT void BMInit();
@@ -18,19 +31,19 @@ LIBCMO_EXPORT bool BMFile_Free(BMap::BMFile* map_file);
 
 LIBCMO_EXPORT LibCmo::CKDWORD BMFile_GetGroupCount(BMap::BMFile* bmfile);
 LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_GetGroup(BMap::BMFile* bmfile, LibCmo::CKDWORD idx);
-LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_CreateGroup(BMap::BMFile* bmfile, LibCmo::CKSTRING name);
+LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_CreateGroup(BMap::BMFile* bmfile);
 LIBCMO_EXPORT LibCmo::CKDWORD BMFile_Get3dObjectCount(BMap::BMFile* bmfile);
 LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_Get3dObject(BMap::BMFile* bmfile, LibCmo::CKDWORD idx);
-LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_Create3dObject(BMap::BMFile* bmfile, LibCmo::CKSTRING name);
+LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_Create3dObject(BMap::BMFile* bmfile);
 LIBCMO_EXPORT LibCmo::CKDWORD BMFile_GetMeshCount(BMap::BMFile* bmfile);
 LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_GetMesh(BMap::BMFile* bmfile, LibCmo::CKDWORD idx);
-LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_CreateMesh(BMap::BMFile* bmfile, LibCmo::CKSTRING name);
+LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_CreateMesh(BMap::BMFile* bmfile);
 LIBCMO_EXPORT LibCmo::CKDWORD BMFile_GetMaterialCount(BMap::BMFile* bmfile);
 LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_GetMaterial(BMap::BMFile* bmfile, LibCmo::CKDWORD idx);
-LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_CreateMaterial(BMap::BMFile* bmfile, LibCmo::CKSTRING name);
+LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_CreateMaterial(BMap::BMFile* bmfile);
 LIBCMO_EXPORT LibCmo::CKDWORD BMFile_GetTextureCount(BMap::BMFile* bmfile);
 LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_GetTexture(BMap::BMFile* bmfile, LibCmo::CKDWORD idx);
-LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_CreateTexture(BMap::BMFile* bmfile, LibCmo::CKSTRING name);
+LIBCMO_EXPORT LibCmo::CK2::CK_ID BMFile_CreateTexture(BMap::BMFile* bmfile);
 
 #pragma endregion
 
@@ -46,13 +59,43 @@ LIBCMO_EXPORT LibCmo::VxMath::VxVector3* BMMeshTrans_PrepareNormal(BMap::BMMeshT
 LIBCMO_EXPORT bool BMMeshTrans_PrepareUVCount(BMap::BMMeshTransition* trans, LibCmo::CKDWORD count);
 LIBCMO_EXPORT LibCmo::VxMath::VxVector2* BMMeshTrans_PrepareUV(BMap::BMMeshTransition* trans);
 LIBCMO_EXPORT bool BMMeshTrans_PrepareMtlSlotCount(BMap::BMMeshTransition* trans, LibCmo::CKDWORD count);
-LIBCMO_EXPORT LibCmo::CK2::ObjImpls::CKMaterial** BMMeshTrans_PrepareMtlSlot(BMap::BMMeshTransition* trans);
+LIBCMO_EXPORT LibCmo::CK2::CK_ID* BMMeshTrans_PrepareMtlSlot(BMap::BMMeshTransition* trans);
 LIBCMO_EXPORT bool BMMeshTrans_PrepareFaceCount(BMap::BMMeshTransition* trans, LibCmo::CKDWORD count);
 LIBCMO_EXPORT LibCmo::CKDWORD* BMMeshTrans_PrepareFaceVertexIndices(BMap::BMMeshTransition* trans);
 LIBCMO_EXPORT LibCmo::CKDWORD* BMMeshTrans_PrepareFaceNormalIndices(BMap::BMMeshTransition* trans);
 LIBCMO_EXPORT LibCmo::CKDWORD* BMMeshTrans_PrepareFaceUVIndices(BMap::BMMeshTransition* trans);
 LIBCMO_EXPORT LibCmo::CKDWORD* BMMeshTrans_PrepareFaceMtlSlot(BMap::BMMeshTransition* trans);
 LIBCMO_EXPORT bool BMMeshTrans_Parse(BMap::BMMeshTransition* trans, LibCmo::CK2::ObjImpls::CKMesh* write_into_mesh);
+
 #pragma endregion
 
+#pragma region CKObject
 
+LIBCMO_EXPORT LibCmo::CKSTRING BMCKObject_GetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
+LIBCMO_EXPORT bool BMCKObject_SetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKSTRING name);
+
+#pragma endregion
+
+#pragma region CKGroup
+
+LIBCMO_EXPORT bool BMCKGroup_AddObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK2::CK_ID memberid);
+LIBCMO_EXPORT LibCmo::CKDWORD BMCKGroup_GetObjectCount(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
+LIBCMO_EXPORT LibCmo::CK2::CK_ID BMCKGroup_GetObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKDWORD pos);
+
+#pragma endregion
+
+#pragma region CKTexture
+
+#pragma endregion
+
+#pragma region CKMaterial
+
+#pragma endregion
+
+#pragma region CKMesh
+
+#pragma endregion
+
+#pragma region CK3dObject
+
+#pragma endregion
