@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BMap.hpp"
+#include <algorithm>
 
 /*
 Design Note:
@@ -71,16 +72,16 @@ LIBCMO_EXPORT bool BMMeshTrans_Parse(BMap::BMMeshTransition* trans, LibCmo::CK2:
 
 #pragma region CKObject
 
-LIBCMO_EXPORT LibCmo::CKSTRING BMCKObject_GetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
-LIBCMO_EXPORT bool BMCKObject_SetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKSTRING name);
+LIBCMO_EXPORT LibCmo::CKSTRING BMObject_GetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
+LIBCMO_EXPORT bool BMObject_SetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKSTRING name);
 
 #pragma endregion
 
 #pragma region CKGroup
 
-LIBCMO_EXPORT bool BMCKGroup_AddObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK2::CK_ID memberid);
-LIBCMO_EXPORT LibCmo::CKDWORD BMCKGroup_GetObjectCount(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
-LIBCMO_EXPORT LibCmo::CK2::CK_ID BMCKGroup_GetObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKDWORD pos);
+LIBCMO_EXPORT bool BMGroup_AddObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK2::CK_ID memberid);
+LIBCMO_EXPORT LibCmo::CKDWORD BMGroup_GetObjectCount(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
+LIBCMO_EXPORT LibCmo::CK2::CK_ID BMGroup_GetObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKDWORD pos);
 
 #pragma endregion
 
@@ -97,5 +98,23 @@ LIBCMO_EXPORT LibCmo::CK2::CK_ID BMCKGroup_GetObject(BMap::BMFile* bmfile, LibCm
 #pragma endregion
 
 #pragma region CK3dObject
+
+// This struct is designed to prevent C4190 warning
+struct CStyleVxMatrix {
+	LibCmo::CKBYTE placeholder[sizeof(LibCmo::VxMath::VxMatrix)];
+	void FromVxMatrix(const LibCmo::VxMath::VxMatrix& mat) {
+		std::memcpy(this, &mat, std::min(sizeof(LibCmo::VxMath::VxMatrix), sizeof(CStyleVxMatrix)));
+	}
+	void ToVxMatrix(LibCmo::VxMath::VxMatrix& mat) {
+		std::memcpy(&mat, this, std::min(sizeof(LibCmo::VxMath::VxMatrix), sizeof(CStyleVxMatrix)));
+	}
+};
+
+LIBCMO_EXPORT CStyleVxMatrix BM3dEntity_GetWorldMatrix(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
+LIBCMO_EXPORT bool BM3dEntity_SetWorldMatrix(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, CStyleVxMatrix mat);
+LIBCMO_EXPORT LibCmo::CK2::CK_ID BM3dEntity_GetCurrentMesh(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
+LIBCMO_EXPORT bool BM3dEntity_SetCurrentMesh(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK2::CK_ID meshid);
+LIBCMO_EXPORT bool BM3dEntity_GetVisivility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
+LIBCMO_EXPORT bool BM3dEntity_SetVisivility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, bool is_visible);
 
 #pragma endregion

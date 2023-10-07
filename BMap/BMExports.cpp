@@ -6,6 +6,12 @@
 
 #pragma region Help & Save Functions
 
+static constexpr const LibCmo::CK2::CK_ID INVALID_CKID = 0;
+static LibCmo::CK2::CK_ID SafeGetID(LibCmo::CK2::ObjImpls::CKObject* obj) {
+	if (obj == nullptr) return INVALID_CKID;
+	else return obj->GetID();
+}
+
 static bool g_IsInited = false;
 static std::set<BMap::BMFile*> g_AllBMFiles = std::set<BMap::BMFile*>();
 static std::set<BMap::BMMeshTransition*> g_AllBMMeshTrans = std::set<BMap::BMMeshTransition*>();
@@ -23,7 +29,7 @@ bool CheckBMMeshTrans(BMap::BMMeshTransition* possible_trans) {
 }
 
 template<class _Ty, std::enable_if_t<std::is_pointer_v<_Ty>, int> = 0>
-_Ty CheckCKObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possible_id, LibCmo::CK2::CK_CLASSID expected_cid) {
+_Ty CheckGeneralObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possible_id, LibCmo::CK2::CK_CLASSID expected_cid) {
 	// check bm file self.
 	if (!CheckBMFile(possible_bmfile)) return nullptr;
 	// check id
@@ -33,6 +39,14 @@ _Ty CheckCKObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possible_id,
 
 	return static_cast<_Ty>(obj);
 }
+
+#define CheckCKObject(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_OBJECT)
+//#define CheckCKBeObject(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKBeObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_BEOBJECT)
+#define CheckCKGroup(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKGroup*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_GROUP)
+#define CheckCK3dObject(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CK3dObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT)
+#define CheckCKMesh(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKMesh*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_MESH)
+#define CheckCKMaterial(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKMaterial*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL)
+#define CheckCKTexture(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKTexture*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE)
 
 #pragma endregion
 
@@ -251,14 +265,14 @@ bool BMMeshTrans_Parse(BMap::BMMeshTransition* trans, LibCmo::CK2::ObjImpls::CKM
 
 #pragma region CKObject
 
-LibCmo::CKSTRING BMCKObject_GetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
-	auto obj = CheckCKObject<LibCmo::CK2::ObjImpls::CKObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_OBJECT);
+LibCmo::CKSTRING BMObject_GetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+	auto obj = CheckCKObject(bmfile, objid);
 	if (obj == nullptr) return nullptr;
 	return obj->GetName();
 }
 
-bool BMCKObject_SetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKSTRING name) {
-	auto obj = CheckCKObject<LibCmo::CK2::ObjImpls::CKObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_OBJECT);
+bool BMObject_SetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKSTRING name) {
+	auto obj = CheckCKObject(bmfile, objid);
 	if (obj == nullptr) return false;
 	obj->SetName(name);
 	return true;
@@ -268,27 +282,25 @@ bool BMCKObject_SetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::
 
 #pragma region CKGroup
 
-bool BMCKGroup_AddObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK2::CK_ID memberid) {
-	auto obj = CheckCKObject<LibCmo::CK2::ObjImpls::CKGroup*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_GROUP);
-	auto memberobj = CheckCKObject<LibCmo::CK2::ObjImpls::CK3dObject*>(bmfile, memberid, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT);
+bool BMGroup_AddObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK2::CK_ID memberid) {
+	auto obj = CheckCKGroup(bmfile, objid);
+	auto memberobj = CheckCK3dObject(bmfile, memberid);
 	if (obj == nullptr || memberobj == nullptr) return false;
 	
 	return obj->AddObject(memberobj) == LibCmo::CK2::CKERROR::CKERR_OK;
 }
 
-LibCmo::CKDWORD BMCKGroup_GetObjectCount(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
-	auto obj = CheckCKObject<LibCmo::CK2::ObjImpls::CKGroup*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_GROUP);
+LibCmo::CKDWORD BMGroup_GetObjectCount(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+	auto obj = CheckCKGroup(bmfile, objid);
 	if (obj == nullptr) return false;
 	return obj->GetObjectCount();
 }
 
-LibCmo::CK2::CK_ID BMCKGroup_GetObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKDWORD pos) {
-	auto obj = CheckCKObject<LibCmo::CK2::ObjImpls::CKGroup*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_GROUP);
+LibCmo::CK2::CK_ID BMGroup_GetObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKDWORD pos) {
+	auto obj = CheckCKGroup(bmfile, objid);
 	if (obj == nullptr) return 0;
 	
-	auto cache = obj->GetObject(pos);
-	if (cache == nullptr) return 0;
-	return cache->GetID();
+	return SafeGetID(obj->GetObject(pos));
 }
 
 #pragma endregion
@@ -306,6 +318,59 @@ LibCmo::CK2::CK_ID BMCKGroup_GetObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID 
 #pragma endregion
 
 #pragma region CK3dObject
+
+CStyleVxMatrix BM3dEntity_GetWorldMatrix(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+	CStyleVxMatrix result;
+	auto obj = CheckCK3dObject(bmfile, objid);
+	if (obj == nullptr) {
+		result.FromVxMatrix(LibCmo::VxMath::VxMatrix());
+	} else {
+		result.FromVxMatrix(obj->GetWorldMatrix());
+	}
+	
+	return result;
+}
+
+bool BM3dEntity_SetWorldMatrix(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, CStyleVxMatrix mat) {
+	auto obj = CheckCK3dObject(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	LibCmo::VxMath::VxMatrix cppmat;
+	mat.ToVxMatrix(cppmat);
+	obj->SetWorldMatrix(cppmat);
+	return true;
+}
+
+LibCmo::CK2::CK_ID BM3dEntity_GetCurrentMesh(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+	auto obj = CheckCK3dObject(bmfile, objid);
+	if (obj == nullptr) return 0;
+
+	return SafeGetID(obj->GetCurrentMesh());
+}
+
+bool BM3dEntity_SetCurrentMesh(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK2::CK_ID meshid) {
+	auto obj = CheckCK3dObject(bmfile, objid);
+	auto meshobj = CheckCKMesh(bmfile, meshid);
+	if (obj == nullptr || meshobj == nullptr) return false;
+
+	obj->SetCurrentMesh(meshobj);
+	return true;
+}
+
+bool BM3dEntity_GetVisivility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+	auto obj = CheckCK3dObject(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	return obj->IsVisible();
+}
+
+bool BM3dEntity_SetVisivility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, bool is_visible) {
+	auto obj = CheckCK3dObject(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	obj->Show(is_visible ? LibCmo::CK2::CK_OBJECT_SHOWOPTION::CKSHOW : LibCmo::CK2::CK_OBJECT_SHOWOPTION::CKHIDE);
+	return true;
+}
 
 #pragma endregion
 
