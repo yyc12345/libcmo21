@@ -174,8 +174,8 @@ LIBCMO_EXPORT bool BMMaterial_SetEmissive(BMPARAM_OBJECT_DECL(bmfile, objid), BM
 LIBCMO_EXPORT bool BMMaterial_GetSpecularPower(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
 LIBCMO_EXPORT bool BMMaterial_SetSpecularPower(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
 
-LIBCMO_EXPORT bool BMMaterial_GetTexture(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_tex));
-LIBCMO_EXPORT bool BMMaterial_SetTexture(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, tex));
+LIBCMO_EXPORT bool BMMaterial_GetTexture(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_texid));
+LIBCMO_EXPORT bool BMMaterial_SetTexture(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, texid));
 LIBCMO_EXPORT bool BMMaterial_GetTextureBorderColor(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_val));
 LIBCMO_EXPORT bool BMMaterial_SetTextureBorderColor(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, val));
 
