@@ -21,6 +21,14 @@ namespace LibCmo::CK2::ObjImpls {
 
 		CKBitmapData& GetUnderlyingData();
 
+		/**
+		 * @brief A wrapper of underlying CKBitmapData::LoadImage. Not only load image, but also set file name.
+		 * @param filename[in] File name of loading image.
+		 * @param slot[in] The slot that image will be loaded into.
+		 * @return True if success.
+		*/
+		bool LoadImage(CKSTRING filename, CKDWORD slot);
+
 		bool IsUseMipmap() const;
 		void UseMipmap(bool isUse);
 		CKDWORD GetMipmapLevel() const;

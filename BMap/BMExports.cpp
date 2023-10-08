@@ -357,14 +357,14 @@ bool BM3dEntity_SetCurrentMesh(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, L
 	return true;
 }
 
-bool BM3dEntity_GetVisivility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+bool BM3dEntity_GetVisibility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
 	return obj->IsVisible();
 }
 
-bool BM3dEntity_SetVisivility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, bool is_visible) {
+bool BM3dEntity_SetVisibility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, bool is_visible) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 

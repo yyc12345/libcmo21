@@ -1,5 +1,7 @@
 #include "CKTexture.hpp"
 #include "../CKStateChunk.hpp"
+#include "../CKContext.hpp"
+#include "../MgrImpls/CKPathManager.hpp"
 
 namespace LibCmo::CK2::ObjImpls {
 
@@ -328,6 +330,24 @@ namespace LibCmo::CK2::ObjImpls {
 
 	CKBitmapData& CKTexture::GetUnderlyingData() {
 		return m_ImageHost;
+	}
+
+	bool CKTexture::LoadImage(CKSTRING filename, CKDWORD slot) {
+		// check file name
+		if (filename == nullptr) return false;
+		// check slot
+		if (slot >= m_ImageHost.GetSlotCount()) return false;
+
+		// resolve file name first
+		XContainer::XString filepath;
+		XContainer::NSXString::FromCKSTRING(filepath, filename);
+		if (!m_Context->GetPathManager()->ResolveFileName(filepath)) return false;
+
+		// try loading image
+		if (!m_ImageHost.LoadImage(XContainer::NSXString::ToCKSTRING(filepath), slot)) return false;
+
+		// sync file name
+		return m_ImageHost.SetSlotFileName(slot, XContainer::NSXString::ToCKSTRING(filepath));
 	}
 
 	bool CKTexture::IsUseMipmap() const {

@@ -560,7 +560,10 @@ namespace LibCmo::CK2 {
 		// get extension of file. then get corresponding reader
 		XContainer::XString ext(filename);
 		m_Context->GetPathManager()->GetExtension(ext);
-		auto reader = DataHandlers::CKBitmapHandler::GetBitmapHandlerWrapper(CKFileExtension(ext.c_str()), CKGUID());
+		auto reader = DataHandlers::CKBitmapHandler::GetBitmapHandlerWrapper(
+			CKFileExtension(ext.c_str()),
+			CKGUID()
+		);
 		if (reader == nullptr) return false;
 
 		// get desc and read data
@@ -621,9 +624,9 @@ namespace LibCmo::CK2 {
 
 	CKSTRING CKBitmapData::GetSlotFileName(CKDWORD slot) const {
 		if (slot >= m_Slots.size()) return nullptr;
-		// return nullptr if no corresponding filename
-		if (m_Slots[slot].m_FileName.empty()) return nullptr;
-		else return m_Slots[slot].m_FileName.c_str();
+
+		// return nullptr if corresponding filename is empty to indicate there is no binding filename
+		return XContainer::NSXString::ToCKSTRING(m_Slots[slot].m_FileName);
 	}
 
 	CKDWORD CKBitmapData::GetWidth() const {

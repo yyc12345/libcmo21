@@ -16,6 +16,14 @@ Design Note:
 
 */
 
+// some macro to help export function define.
+
+#define BMPARAM_FILE_DECL BMap::BMFile* bmfile
+#define BMPARAM_MESHTRANS_DECL BMap::BMMeshTransition* trans
+#define BMPARAM_OBJECT_DECL BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid
+#define BMPARAM_IN(_t, _name) _t _name
+#define BMPARAM_OUT(_t, _name) _t* _name
+
 #pragma region Init / Dispose
 
 LIBCMO_EXPORT void BMInit();
@@ -87,6 +95,13 @@ LIBCMO_EXPORT LibCmo::CK2::CK_ID BMGroup_GetObject(BMap::BMFile* bmfile, LibCmo:
 
 #pragma region CKTexture
 
+LIBCMO_EXPORT bool BMTexture_PrepareSlotCount();
+LIBCMO_EXPORT LibCmo::CKSTRING BMTexture_GetSlotFileName();
+LIBCMO_EXPORT bool BMTexture_LoadImage(LibCmo::CKSTRING filename);
+LIBCMO_EXPORT bool BMTexture_SaveImage(LibCmo::CKSTRING filename);
+LIBCMO_EXPORT LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS BMTexture_GetSaveOptions();
+LIBCMO_EXPORT bool BMTexture_SetSaveOptions(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS saveopt);
+
 #pragma endregion
 
 #pragma region CKMaterial
@@ -114,7 +129,7 @@ LIBCMO_EXPORT CStyleVxMatrix BM3dEntity_GetWorldMatrix(BMap::BMFile* bmfile, Lib
 LIBCMO_EXPORT bool BM3dEntity_SetWorldMatrix(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, CStyleVxMatrix mat);
 LIBCMO_EXPORT LibCmo::CK2::CK_ID BM3dEntity_GetCurrentMesh(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
 LIBCMO_EXPORT bool BM3dEntity_SetCurrentMesh(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK2::CK_ID meshid);
-LIBCMO_EXPORT bool BM3dEntity_GetVisivility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
-LIBCMO_EXPORT bool BM3dEntity_SetVisivility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, bool is_visible);
+LIBCMO_EXPORT bool BM3dEntity_GetVisibility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid);
+LIBCMO_EXPORT bool BM3dEntity_SetVisibility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, bool is_visible);
 
 #pragma endregion
