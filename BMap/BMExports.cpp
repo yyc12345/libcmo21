@@ -41,7 +41,6 @@ _Ty CheckGeneralObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possibl
 }
 
 #define CheckCKObject(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_OBJECT)
-//#define CheckCKBeObject(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKBeObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_BEOBJECT)
 #define CheckCKGroup(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKGroup*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_GROUP)
 #define CheckCK3dObject(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CK3dObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT)
 #define CheckCKMesh(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKMesh*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_MESH)
@@ -50,7 +49,11 @@ _Ty CheckGeneralObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possibl
 
 #pragma endregion
 
-void BMInit() {
+#pragma region Module Init & Dispose
+
+bool BMInit() {
+	if (CheckInited()) return false;
+
 	// register IronPad
 	IronPad::IronPadRegister();
 	// and startup CK environment
@@ -58,9 +61,13 @@ void BMInit() {
 
 	// set init
 	g_IsInited = true;
+
+	return true;
 }
 
-void BMDispose() {
+bool BMDispose() {
+	if (!CheckInited()) return false;
+
 	// free all existed file reader / writer
 	for (auto ptr : g_AllBMFiles) {
 		delete ptr;
@@ -79,42 +86,62 @@ void BMDispose() {
 	LibCmo::CK2::CKShutdown();
 	// unregister iron pad
 	IronPad::IronPadUnregister();
+
+	return true;
 }
+
+#pragma endregion
 
 #pragma region BMFile
 
-BMap::BMFile* BMFile_Load(LibCmo::CKSTRING file_name, LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING encodings[]) {
-	if (!CheckInited()) return nullptr;
+bool BMFile_Load(
+	BMPARAM_IN(LibCmo::CKSTRING, file_name),
+	BMPARAM_IN(LibCmo::CKSTRING, temp_folder),
+	BMPARAM_IN(LibCmo::CKSTRING, texture_folder),
+	BMPARAM_IN(LibCmo::CKDWORD, encoding_count),
+	BMPARAM_IN(LibCmo::CKSTRING*, encodings),
+	BMPARAM_OUT(BMap::BMFile*, out_file)) {
+	if (!CheckInited()) return false;
 
 	// create a now one and try to load data.
 	std::unique_ptr<BMap::BMFile> file(new BMap::BMFile(temp_folder, texture_folder, encoding_count, encodings, false));
-	if (file->IsFreezed()) return nullptr;
-	if (!file->Load(file_name)) return nullptr;
+	if (file->IsFreezed()) return false;
+	if (!file->Load(file_name)) return false;
 
 	// add into list and return
 	g_AllBMFiles.emplace(file.get());
-	return file.release();
+	BMPARAM_OUT_ASSIGN(out_file, file.release());
+	return true;
 }
 
-BMap::BMFile* BMFile_Create(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING encodings[]) {
-	if (!CheckInited()) return nullptr;
+bool BMFile_Create(
+	BMPARAM_IN(LibCmo::CKSTRING, temp_folder),
+	BMPARAM_IN(LibCmo::CKSTRING, texture_folder),
+	BMPARAM_IN(LibCmo::CKDWORD, encoding_count),
+	BMPARAM_IN(LibCmo::CKSTRING*, encodings),
+	BMPARAM_OUT(BMap::BMFile*, out_file)) {
+	if (!CheckInited()) return false;
 
 	// create a now one
 	std::unique_ptr<BMap::BMFile> file(new BMap::BMFile(temp_folder, texture_folder, encoding_count, encodings, false));
-	if (file->IsFreezed()) return nullptr;
+	if (file->IsFreezed()) return false;
 
 	// add into list and return if success
 	g_AllBMFiles.emplace(file.get());
-	return file.release();
+	BMPARAM_OUT_ASSIGN(out_file, file.release());
+	return true;
 }
 
-bool BMFile_Save(BMap::BMFile* map_file, LibCmo::CKSTRING file_name, LibCmo::CKINT compreess_level) {
+bool BMFile_Save(
+	BMPARAM_IN(BMap::BMFile*, map_file),
+	BMPARAM_IN(LibCmo::CKSTRING, file_name),
+	BMPARAM_IN(LibCmo::CKINT, compreess_level)) {
 	if (!CheckBMFile(map_file)) return false;
 
 	return map_file->Save(file_name, compreess_level);
 }
 
-bool BMFile_Free(BMap::BMFile* map_file) {
+bool BMFile_Free(BMPARAM_IN(BMap::BMFile*, map_file)) {
 	if (!CheckBMFile(map_file)) return false;
 
 	g_AllBMFiles.erase(map_file);
@@ -122,81 +149,97 @@ bool BMFile_Free(BMap::BMFile* map_file) {
 	return true;
 }
 
-LibCmo::CKDWORD BMFile_GetGroupCount(BMap::BMFile* bmfile) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->GetGroupCount();
+bool BMFile_GetGroupCount(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_count, bmfile->GetGroupCount());
+	return true;
 }
-LibCmo::CK2::CK_ID BMFile_GetGroup(BMap::BMFile* bmfile, LibCmo::CKDWORD idx) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->GetGroup(idx);
+bool BMFile_GetGroup(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, idx), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->GetGroup(idx));
+	return true;
 }
-LibCmo::CK2::CK_ID BMFile_CreateGroup(BMap::BMFile* bmfile) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->CreateGroup();
+bool BMFile_CreateGroup(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->CreateGroup());
+	return true;
 }
-LibCmo::CKDWORD BMFile_Get3dObjectCount(BMap::BMFile* bmfile) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->Get3dObjectCount();
+bool BMFile_Get3dObjectCount(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_count, bmfile->Get3dObjectCount());
+	return true;
 }
-LibCmo::CK2::CK_ID BMFile_Get3dObject(BMap::BMFile* bmfile, LibCmo::CKDWORD idx) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->Get3dObject(idx);
+bool BMFile_Get3dObject(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, idx), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->Get3dObject(idx));
+	return true;
 }
-LibCmo::CK2::CK_ID BMFile_Create3dObject(BMap::BMFile* bmfile) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->Create3dObject();
+bool BMFile_Create3dObject(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->Create3dObject());
+	return true;
 }
-LibCmo::CKDWORD BMFile_GetMeshCount(BMap::BMFile* bmfile) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->GetMeshCount();
+bool BMFile_GetMeshCount(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_count, bmfile->GetMeshCount());
+	return true;
 }
-LibCmo::CK2::CK_ID BMFile_GetMesh(BMap::BMFile* bmfile, LibCmo::CKDWORD idx) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->GetMesh(idx);
+bool BMFile_GetMesh(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, idx), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->GetMesh(idx));
+	return true;
 }
-LibCmo::CK2::CK_ID BMFile_CreateMesh(BMap::BMFile* bmfile) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->CreateMesh();
+bool BMFile_CreateMesh(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->CreateMesh());
+	return true;
 }
-LibCmo::CKDWORD BMFile_GetMaterialCount(BMap::BMFile* bmfile) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->GetMaterialCount();
+bool BMFile_GetMaterialCount(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_count, bmfile->GetMaterialCount());
+	return true;
 }
-LibCmo::CK2::CK_ID BMFile_GetMaterial(BMap::BMFile* bmfile, LibCmo::CKDWORD idx) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->GetMaterial(idx);
+bool BMFile_GetMaterial(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, idx), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->GetMaterial(idx));
+	return true;
 }
-LibCmo::CK2::CK_ID BMFile_CreateMaterial(BMap::BMFile* bmfile) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->CreateMaterial();
+bool BMFile_CreateMaterial(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->CreateMaterial());
+	return true;
 }
-LibCmo::CKDWORD BMFile_GetTextureCount(BMap::BMFile* bmfile) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->GetTextureCount();
+bool BMFile_GetTextureCount(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_count, bmfile->GetTextureCount());
+	return true;
 }
-LibCmo::CK2::CK_ID BMFile_GetTexture(BMap::BMFile* bmfile, LibCmo::CKDWORD idx) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->GetTexture(idx);
+bool BMFile_GetTexture(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, idx), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->GetTexture(idx));
+	return true;
 }
-LibCmo::CK2::CK_ID BMFile_CreateTexture(BMap::BMFile* bmfile) {
-	if (!CheckBMFile(bmfile)) return 0;
-	return bmfile->CreateTexture();
+bool BMFile_CreateTexture(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->CreateTexture());
+	return true;
 }
 
 #pragma endregion
 
 #pragma region BMMeshTransition
 
-BMap::BMMeshTransition* BMMeshTrans_New() {
-	if (!CheckInited()) return nullptr;
+bool BMMeshTrans_New(BMPARAM_OUT(BMap::BMMeshTransition*, out_trans)) {
+	if (!CheckInited()) return false;
 
 	// create new one, insert and return.
 	auto meshtrans = new BMap::BMMeshTransition();
 	g_AllBMMeshTrans.emplace(meshtrans);
-	return meshtrans;
+	BMPARAM_OUT_ASSIGN(out_trans, meshtrans);
+	return true;
 }
 
-bool BMMeshTrans_Delete(BMap::BMMeshTransition* trans) {
+bool BMMeshTrans_Delete(BMPARAM_IN(BMap::BMMeshTransition*, trans)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 
 	g_AllBMMeshTrans.erase(trans);
@@ -204,59 +247,67 @@ bool BMMeshTrans_Delete(BMap::BMMeshTransition* trans) {
 	return true;
 }
 
-bool BMMeshTrans_PrepareVertexCount(BMap::BMMeshTransition* trans, LibCmo::CKDWORD count) {
+bool BMMeshTrans_PrepareVertexCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CKDWORD, count)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	return trans->PrepareVertexCount(count);
 }
-LibCmo::VxMath::VxVector3* BMMeshTrans_PrepareVertex(BMap::BMMeshTransition* trans) {
-	if (!CheckBMMeshTrans(trans)) return nullptr;
-	return trans->PrepareVertex();
+bool BMMeshTrans_PrepareVertex(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::VxMath::VxVector3*, out_mem)) {
+	if (!CheckBMMeshTrans(trans)) return false;
+	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareVertex());
+	return BMPARAM_OUT_VAL(out_mem) != nullptr;
 }
-bool BMMeshTrans_PrepareNormalCount(BMap::BMMeshTransition* trans, LibCmo::CKDWORD count) {
+bool BMMeshTrans_PrepareNormalCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CKDWORD, count)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	return trans->PrepareNormalCount(count);
 }
-LibCmo::VxMath::VxVector3* BMMeshTrans_PrepareNormal(BMap::BMMeshTransition* trans) {
-	if (!CheckBMMeshTrans(trans)) return nullptr;
-	return trans->PrepareNormal();
+bool BMMeshTrans_PrepareNormal(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::VxMath::VxVector3*, out_mem)) {
+	if (!CheckBMMeshTrans(trans)) return false;
+	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareNormal());
+	return BMPARAM_OUT_VAL(out_mem) != nullptr;
 }
-bool BMMeshTrans_PrepareUVCount(BMap::BMMeshTransition* trans, LibCmo::CKDWORD count) {
+bool BMMeshTrans_PrepareUVCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CKDWORD, count)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	return trans->PrepareUVCount(count);
 }
-LibCmo::VxMath::VxVector2* BMMeshTrans_PrepareUV(BMap::BMMeshTransition* trans) {
-	if (!CheckBMMeshTrans(trans)) return nullptr;
-	return trans->PrepareUV();
+bool BMMeshTrans_PrepareUV(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::VxMath::VxVector2*, out_mem)) {
+	if (!CheckBMMeshTrans(trans)) return false;
+	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareUV());
+	return BMPARAM_OUT_VAL(out_mem) != nullptr;
 }
-bool BMMeshTrans_PrepareMtlSlotCount(BMap::BMMeshTransition* trans, LibCmo::CKDWORD count) {
+bool BMMeshTrans_PrepareMtlSlotCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CKDWORD, count)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	return trans->PrepareMtlSlotCount(count);
 }
-LibCmo::CK2::CK_ID* BMMeshTrans_PrepareMtlSlot(BMap::BMMeshTransition* trans) {
-	if (!CheckBMMeshTrans(trans)) return nullptr;
-	return trans->PrepareMtlSlot();
+bool BMMeshTrans_PrepareMtlSlot(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CK2::CK_ID*, out_mem)) {
+	if (!CheckBMMeshTrans(trans)) return false;
+	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareMtlSlot());
+	return BMPARAM_OUT_VAL(out_mem) != nullptr;
 }
-bool BMMeshTrans_PrepareFaceCount(BMap::BMMeshTransition* trans, LibCmo::CKDWORD count) {
+bool BMMeshTrans_PrepareFaceCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CKDWORD, count)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	return trans->PrepareFaceCount(count);
 }
-LibCmo::CKDWORD* BMMeshTrans_PrepareFaceVertexIndices(BMap::BMMeshTransition* trans) {
-	if (!CheckBMMeshTrans(trans)) return nullptr;
-	return trans->PrepareFaceVertexIndices();
+bool BMMeshTrans_PrepareFaceVertexIndices(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CKDWORD*, out_mem)) {
+	if (!CheckBMMeshTrans(trans)) return false;
+	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareFaceVertexIndices());
+	return BMPARAM_OUT_VAL(out_mem) != nullptr;
 }
-LibCmo::CKDWORD* BMMeshTrans_PrepareFaceNormalIndices(BMap::BMMeshTransition* trans) {
-	if (!CheckBMMeshTrans(trans)) return nullptr;
-	return trans->PrepareFaceNormalIndices();
+bool BMMeshTrans_PrepareFaceNormalIndices(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CKDWORD*, out_mem)) {
+	if (!CheckBMMeshTrans(trans)) return false;
+	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareFaceNormalIndices());
+	return BMPARAM_OUT_VAL(out_mem) != nullptr;
 }
-LibCmo::CKDWORD* BMMeshTrans_PrepareFaceUVIndices(BMap::BMMeshTransition* trans) {
-	if (!CheckBMMeshTrans(trans)) return nullptr;
-	return trans->PrepareFaceUVIndices();
+bool BMMeshTrans_PrepareFaceUVIndices(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CKDWORD*, out_mem)) {
+	if (!CheckBMMeshTrans(trans)) return false;
+	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareFaceUVIndices());
+	return BMPARAM_OUT_VAL(out_mem) != nullptr;
 }
-LibCmo::CKDWORD* BMMeshTrans_PrepareFaceMtlSlot(BMap::BMMeshTransition* trans) {
-	if (!CheckBMMeshTrans(trans)) return nullptr;
-	return trans->PrepareFaceMtlSlot();
+bool BMMeshTrans_PrepareFaceMtlSlot(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CKDWORD*, out_mem)) {
+	if (!CheckBMMeshTrans(trans)) return false;
+	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareFaceMtlSlot());
+	return BMPARAM_OUT_VAL(out_mem) != nullptr;
 }
-bool BMMeshTrans_Parse(BMap::BMMeshTransition* trans, LibCmo::CK2::ObjImpls::CKMesh* write_into_mesh) {
+bool BMMeshTrans_Parse(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CK2::ObjImpls::CKMesh*, write_into_mesh)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	return trans->Parse(write_into_mesh);
 }
@@ -265,15 +316,18 @@ bool BMMeshTrans_Parse(BMap::BMMeshTransition* trans, LibCmo::CK2::ObjImpls::CKM
 
 #pragma region CKObject
 
-LibCmo::CKSTRING BMObject_GetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
-	auto obj = CheckCKObject(bmfile, objid);
-	if (obj == nullptr) return nullptr;
-	return obj->GetName();
-}
-
-bool BMObject_SetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKSTRING name) {
+bool BMObject_GetName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKSTRING, out_name)) {
 	auto obj = CheckCKObject(bmfile, objid);
 	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_name, obj->GetName());
+	return true;
+}
+
+bool BMObject_SetName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKSTRING name)) {
+	auto obj = CheckCKObject(bmfile, objid);
+	if (obj == nullptr) return false;
+
 	obj->SetName(name);
 	return true;
 }
@@ -282,25 +336,28 @@ bool BMObject_SetName(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK
 
 #pragma region CKGroup
 
-bool BMGroup_AddObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK2::CK_ID memberid) {
+bool BMGroup_AddObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID memberid)) {
 	auto obj = CheckCKGroup(bmfile, objid);
 	auto memberobj = CheckCK3dObject(bmfile, memberid);
 	if (obj == nullptr || memberobj == nullptr) return false;
-	
+
 	return obj->AddObject(memberobj) == LibCmo::CK2::CKERROR::CKERR_OK;
 }
 
-LibCmo::CKDWORD BMGroup_GetObjectCount(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+bool BMGroup_GetObjectCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
 	auto obj = CheckCKGroup(bmfile, objid);
 	if (obj == nullptr) return false;
-	return obj->GetObjectCount();
+
+	BMPARAM_OUT_ASSIGN(out_count, obj->GetObjectCount());
+	return true;
 }
 
-LibCmo::CK2::CK_ID BMGroup_GetObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CKDWORD pos) {
+bool BMGroup_GetObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD pos), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_objid)) {
 	auto obj = CheckCKGroup(bmfile, objid);
-	if (obj == nullptr) return 0;
-	
-	return SafeGetID(obj->GetObject(pos));
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_objid, SafeGetID(obj->GetObject(pos)));
+	return true;
 }
 
 #pragma endregion
@@ -319,7 +376,7 @@ LibCmo::CK2::CK_ID BMGroup_GetObject(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID ob
 
 #pragma region CK3dObject
 
-CStyleVxMatrix BM3dEntity_GetWorldMatrix(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+CStyleVxMatrix BM3dEntity_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid)) {
 	CStyleVxMatrix result;
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) {
@@ -327,11 +384,11 @@ CStyleVxMatrix BM3dEntity_GetWorldMatrix(BMap::BMFile* bmfile, LibCmo::CK2::CK_I
 	} else {
 		result.FromVxMatrix(obj->GetWorldMatrix());
 	}
-	
+
 	return result;
 }
 
-bool BM3dEntity_SetWorldMatrix(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, CStyleVxMatrix mat) {
+bool BM3dEntity_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), CStyleVxMatrix mat) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
@@ -341,14 +398,14 @@ bool BM3dEntity_SetWorldMatrix(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, C
 	return true;
 }
 
-LibCmo::CK2::CK_ID BM3dEntity_GetCurrentMesh(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+LibCmo::CK2::CK_ID BM3dEntity_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return 0;
 
 	return SafeGetID(obj->GetCurrentMesh());
 }
 
-bool BM3dEntity_SetCurrentMesh(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, LibCmo::CK2::CK_ID meshid) {
+bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), LibCmo::CK2::CK_ID meshid) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	auto meshobj = CheckCKMesh(bmfile, meshid);
 	if (obj == nullptr || meshobj == nullptr) return false;
@@ -357,14 +414,14 @@ bool BM3dEntity_SetCurrentMesh(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, L
 	return true;
 }
 
-bool BM3dEntity_GetVisibility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid) {
+bool BM3dEntity_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
 	return obj->IsVisible();
 }
 
-bool BM3dEntity_SetVisibility(BMap::BMFile* bmfile, LibCmo::CK2::CK_ID objid, bool is_visible) {
+bool BM3dEntity_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), bool is_visible) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 

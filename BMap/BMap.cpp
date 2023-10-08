@@ -228,7 +228,7 @@ namespace BMap {
 
 #pragma region BMfile
 
-	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING encodings[], bool is_reader) :
+	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING* encodings, bool is_reader) :
 		m_IsReader(is_reader), m_IsFreezed(false) {
 		m_Context = new LibCmo::CK2::CKContext();
 		// set temp folder and texture folder
