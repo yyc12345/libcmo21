@@ -9,19 +9,19 @@
 
 ## Function Declaration
 
-All exported interface functions will always return a bool to indicate whether current operations is successful.  
-The layout of interface functions' parameters is Essential Param -> Input Param -> Out Param.  
-A example is in there: `LIBCMO_EXPORT bool BMSomeFunc(BMPARAM_OBJECT_DECL, BMPARAM_IN(LibCmo::CK2::CK_ID, someobj), BMPARAM_OUT(LibCmo::CKSTRING, out_name))`  
-First param is `BMPARAM_OBJECT_DECL`. It is essential param for this function. In this exmaple, it is the combination of BMFile* and CK_ID. If your provide invalid value for them, the function will failed immediately.  
-Second param is `BMPARAM_IN(LibCmo::CK2::CK_ID, someobj)`. It declare this function accept a Object ID for underlying function calling.  
-Last param is `BMPARAM_OUT(LibCmo::CKSTRING, out_name)`. It is the return value of this function. Only will be filled when this function success.  
+All exported interface functions will always return a bool to indicate whether current operations is successful.
+The layout of interface functions' parameters is Essential Param -> Input Param -> Out Param.
+A example is in there: `LIBCMO_EXPORT bool BMSomeFunc(BMPARAM_OBJECT_DECL, BMPARAM_IN(LibCmo::CK2::CK_ID, someobj), BMPARAM_OUT(LibCmo::CKSTRING, out_name))`
+First param is `BMPARAM_OBJECT_DECL`. It is essential param for this function. In this exmaple, it is the combination of BMFile* and CK_ID. If your provide invalid value for them, the function will failed immediately.
+Second param is `BMPARAM_IN(LibCmo::CK2::CK_ID, someobj)`. It declare this function accept a Object ID for underlying function calling.
+Last param is `BMPARAM_OUT(LibCmo::CKSTRING, out_name)`. It is the return value of this function. Only will be filled when this function success.
 Input Param and Out Param can be multiple. No count limit.
 
 ## CK_ID Interface.
 
-We use CK_ID as CKObject visitor to ensure the visiting is safe.  
-We choose CK_ID because checking a valid CK_ID is more easy and cost lower performance than checking a valid CKObject*.  
-Another reason is that CKObject* relate to class inheritance and need cast. Use CK_ID can leyt them get safe cast in C++, not in other binding languages.  
+We use CK_ID as CKObject visitor to ensure the visiting is safe.
+We choose CK_ID because checking a valid CK_ID is more easy and cost lower performance than checking a valid CKObject*.
+Another reason is that CKObject* relate to class inheritance and need cast. Use CK_ID can leyt them get safe cast in C++, not in other binding languages.
 Each CK_ID also should be used with its corresponding BMFile*, because each BMfile* will create a unique CKContext*. CK_ID between different BMFile* is not shared.
 
 + We use raw pointer for BMFile and BMMeshTransition
@@ -41,8 +41,8 @@ Each CK_ID also should be used with its corresponding BMFile*, because each BMfi
 #define BMPARAM_OBJECT_DECL(_bmfile, _objid) BMap::BMFile* _bmfile, LibCmo::CK2::CK_ID _objid
 /** Declare an input parameter */
 #define BMPARAM_IN(_t, _name) _t _name
-/** 
-Declare an output parameter. 
+/**
+Declare an output parameter.
 A pointer will be added automatically for caller receive it.
 See BMPARAM_OUT_ASSIGN and BMPARAM_OUT_VAL to know how to use output param in function body.
 @remark
@@ -137,25 +137,27 @@ LIBCMO_EXPORT bool BMMeshTrans_Parse(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(L
 #pragma region CKObject
 
 LIBCMO_EXPORT bool BMObject_GetName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKSTRING, out_name));
-LIBCMO_EXPORT bool BMObject_SetName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKSTRING name));
+LIBCMO_EXPORT bool BMObject_SetName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKSTRING, name));
 
 #pragma endregion
 
 #pragma region CKGroup
 
-LIBCMO_EXPORT bool BMGroup_AddObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID memberid));
+LIBCMO_EXPORT bool BMGroup_AddObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, memberid));
 LIBCMO_EXPORT bool BMGroup_GetObjectCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_count));
-LIBCMO_EXPORT bool BMGroup_GetObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD pos), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_objid));
+LIBCMO_EXPORT bool BMGroup_GetObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, pos), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_objid));
 
 #pragma endregion
 
 #pragma region CKTexture
 
-LIBCMO_EXPORT LibCmo::CKSTRING BMTexture_GetFileName();
-LIBCMO_EXPORT bool BMTexture_LoadImage(LibCmo::CKSTRING filename);
-LIBCMO_EXPORT bool BMTexture_SaveImage(LibCmo::CKSTRING filename);
-LIBCMO_EXPORT LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS BMTexture_GetSaveOptions();
-LIBCMO_EXPORT bool BMTexture_SetSaveOptions(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS saveopt);
+LIBCMO_EXPORT bool BMTexture_GetFileName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKSTRING, out_filename));
+LIBCMO_EXPORT bool BMTexture_LoadImage(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKSTRING, filename));
+LIBCMO_EXPORT bool BMTexture_SaveImage(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKSTRING, filename));
+LIBCMO_EXPORT bool BMTexture_GetSaveOptions(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS, out_saveopt));
+LIBCMO_EXPORT bool BMTexture_SetSaveOptions(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS, saveopt));
+LIBCMO_EXPORT bool BMTexture_GetVideoFormat(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VX_PIXELFORMAT, out_vfmt));
+LIBCMO_EXPORT bool BMTexture_SetVideoFormat(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VX_PIXELFORMAT, vfmt));
 
 #pragma endregion
 
@@ -169,22 +171,11 @@ LIBCMO_EXPORT bool BMTexture_SetSaveOptions(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS 
 
 #pragma region CK3dObject
 
-// This struct is designed to prevent C4190 warning
-struct CStyleVxMatrix {
-	LibCmo::CKBYTE placeholder[sizeof(LibCmo::VxMath::VxMatrix)];
-	void FromVxMatrix(const LibCmo::VxMath::VxMatrix& mat) {
-		std::memcpy(this, &mat, std::min(sizeof(LibCmo::VxMath::VxMatrix), sizeof(CStyleVxMatrix)));
-	}
-	void ToVxMatrix(LibCmo::VxMath::VxMatrix& mat) {
-		std::memcpy(&mat, this, std::min(sizeof(LibCmo::VxMath::VxMatrix), sizeof(CStyleVxMatrix)));
-	}
-};
-
-LIBCMO_EXPORT CStyleVxMatrix BM3dEntity_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid));
-LIBCMO_EXPORT bool BM3dEntity_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), CStyleVxMatrix mat);
-LIBCMO_EXPORT LibCmo::CK2::CK_ID BM3dEntity_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid));
-LIBCMO_EXPORT bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), LibCmo::CK2::CK_ID meshid);
-LIBCMO_EXPORT bool BM3dEntity_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid));
-LIBCMO_EXPORT bool BM3dEntity_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), bool is_visible);
+LIBCMO_EXPORT bool BM3dEntity_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxMatrix, out_mat));
+LIBCMO_EXPORT bool BM3dEntity_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxMatrix, mat));
+LIBCMO_EXPORT bool BM3dEntity_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_meshid));
+LIBCMO_EXPORT bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, meshid));
+LIBCMO_EXPORT bool BM3dEntity_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_isVisible));
+LIBCMO_EXPORT bool BM3dEntity_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, is_visible));
 
 #pragma endregion

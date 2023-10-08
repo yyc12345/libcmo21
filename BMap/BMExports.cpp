@@ -324,7 +324,7 @@ bool BMObject_GetName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK
 	return true;
 }
 
-bool BMObject_SetName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKSTRING name)) {
+bool BMObject_SetName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKSTRING, name)) {
 	auto obj = CheckCKObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
@@ -336,7 +336,7 @@ bool BMObject_SetName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKS
 
 #pragma region CKGroup
 
-bool BMGroup_AddObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID memberid)) {
+bool BMGroup_AddObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, memberid)) {
 	auto obj = CheckCKGroup(bmfile, objid);
 	auto memberobj = CheckCK3dObject(bmfile, memberid);
 	if (obj == nullptr || memberobj == nullptr) return false;
@@ -352,7 +352,7 @@ bool BMGroup_GetObjectCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibC
 	return true;
 }
 
-bool BMGroup_GetObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD pos), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_objid)) {
+bool BMGroup_GetObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, pos), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_objid)) {
 	auto obj = CheckCKGroup(bmfile, objid);
 	if (obj == nullptr) return false;
 
@@ -363,6 +363,67 @@ bool BMGroup_GetObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK
 #pragma endregion
 
 #pragma region CKTexture
+
+bool BMTexture_GetFileName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKSTRING, out_filename)) {
+	auto obj = CheckCKTexture(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	if (obj->GetUnderlyingData().GetSlotCount() == 0) return false;
+
+	BMPARAM_OUT_ASSIGN(out_filename, obj->GetUnderlyingData().GetSlotFileName(0));
+	return true;
+}
+
+bool BMTexture_LoadImage(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKSTRING, filename)) {
+	auto obj = CheckCKTexture(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	// resize slot count if needed
+	if (obj->GetUnderlyingData().GetSlotCount() == 0) {
+		obj->GetUnderlyingData().SetSlotCount(1);
+	}
+
+	return obj->LoadImage(filename, 0);
+}
+
+bool BMTexture_SaveImage(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKSTRING, filename)) {
+	auto obj = CheckCKTexture(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	return obj->GetUnderlyingData().SaveImage(filename, 0);
+}
+
+bool BMTexture_GetSaveOptions(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS, out_saveopt)) {
+	auto obj = CheckCKTexture(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_saveopt, obj->GetUnderlyingData().GetSaveOptions());
+	return true;
+}
+
+bool BMTexture_SetSaveOptions(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS, saveopt)) {
+	auto obj = CheckCKTexture(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	obj->GetUnderlyingData().SetSaveOptions(saveopt);
+	return true;
+}
+
+bool BMTexture_GetVideoFormat(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VX_PIXELFORMAT, out_vfmt)) {
+	auto obj = CheckCKTexture(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_vfmt, obj->GetVideoFormat());
+	return true;
+}
+
+bool BMTexture_SetVideoFormat(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VX_PIXELFORMAT, vfmt)) {
+	auto obj = CheckCKTexture(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	obj->SetVideoFormat(vfmt);
+	return true;
+}
 
 #pragma endregion
 
@@ -376,36 +437,31 @@ bool BMGroup_GetObject(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK
 
 #pragma region CK3dObject
 
-CStyleVxMatrix BM3dEntity_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid)) {
-	CStyleVxMatrix result;
-	auto obj = CheckCK3dObject(bmfile, objid);
-	if (obj == nullptr) {
-		result.FromVxMatrix(LibCmo::VxMath::VxMatrix());
-	} else {
-		result.FromVxMatrix(obj->GetWorldMatrix());
-	}
-
-	return result;
-}
-
-bool BM3dEntity_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), CStyleVxMatrix mat) {
+bool BM3dEntity_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxMatrix, out_mat)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
-	LibCmo::VxMath::VxMatrix cppmat;
-	mat.ToVxMatrix(cppmat);
-	obj->SetWorldMatrix(cppmat);
+	BMPARAM_OUT_ASSIGN(out_mat, obj->GetWorldMatrix());
 	return true;
 }
 
-LibCmo::CK2::CK_ID BM3dEntity_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid)) {
+bool BM3dEntity_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxMatrix, mat)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
-	if (obj == nullptr) return 0;
+	if (obj == nullptr) return false;
 
-	return SafeGetID(obj->GetCurrentMesh());
+	obj->SetWorldMatrix(mat);
+	return true;
 }
 
-bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), LibCmo::CK2::CK_ID meshid) {
+bool BM3dEntity_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_meshid)) {
+	auto obj = CheckCK3dObject(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_meshid, SafeGetID(obj->GetCurrentMesh()));
+	return true;
+}
+
+bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, meshid)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	auto meshobj = CheckCKMesh(bmfile, meshid);
 	if (obj == nullptr || meshobj == nullptr) return false;
@@ -414,14 +470,15 @@ bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), LibCmo::CK2::
 	return true;
 }
 
-bool BM3dEntity_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid)) {
+bool BM3dEntity_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_isVisible)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
-	return obj->IsVisible();
+	BMPARAM_OUT_ASSIGN(out_isVisible, obj->IsVisible());
+	return true;
 }
 
-bool BM3dEntity_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), bool is_visible) {
+bool BM3dEntity_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, is_visible)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
