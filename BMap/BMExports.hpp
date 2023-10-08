@@ -163,9 +163,77 @@ LIBCMO_EXPORT bool BMTexture_SetVideoFormat(BMPARAM_OBJECT_DECL(bmfile, objid), 
 
 #pragma region CKMaterial
 
+LIBCMO_EXPORT bool BMMaterial_GetDiffuse(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxColor, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetDiffuse(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxColor, col));
+LIBCMO_EXPORT bool BMMaterial_GetAmbient(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxColor, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetAmbient(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxColor, col));
+LIBCMO_EXPORT bool BMMaterial_GetSpecular(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxColor, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetSpecular(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxColor, col));
+LIBCMO_EXPORT bool BMMaterial_GetEmissive(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxColor, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetEmissive(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxColor, col));
+LIBCMO_EXPORT bool BMMaterial_GetSpecularPower(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetSpecularPower(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+
+LIBCMO_EXPORT bool BMMaterial_GetTexture(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_tex));
+LIBCMO_EXPORT bool BMMaterial_SetTexture(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, tex));
+LIBCMO_EXPORT bool BMMaterial_GetTextureBorderColor(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetTextureBorderColor(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, val));
+
+LIBCMO_EXPORT bool BMMaterial_GetTextureBlendMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXTEXTURE_BLENDMODE, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetTextureBlendMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXTEXTURE_BLENDMODE, val));
+LIBCMO_EXPORT bool BMMaterial_GetTextureMinMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXTEXTURE_FILTERMODE, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetTextureMinMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXTEXTURE_FILTERMODE, val));
+LIBCMO_EXPORT bool BMMaterial_GetTextureMagMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXTEXTURE_FILTERMODE, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetTextureMagMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXTEXTURE_FILTERMODE, val));
+LIBCMO_EXPORT bool BMMaterial_GetTextureAddressMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXTEXTURE_ADDRESSMODE, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetTextureAddressMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXTEXTURE_ADDRESSMODE, val));
+
+LIBCMO_EXPORT bool BMMaterial_GetSourceBlend(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXBLEND_MODE, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetSourceBlend(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXBLEND_MODE, val));
+LIBCMO_EXPORT bool BMMaterial_GetDestBlend(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXBLEND_MODE, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetDestBlend(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXBLEND_MODE, val));
+LIBCMO_EXPORT bool BMMaterial_GetFillMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXFILL_MODE, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetFillMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXFILL_MODE, val));
+LIBCMO_EXPORT bool BMMaterial_GetShadeMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXSHADE_MODE, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetShadeMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXSHADE_MODE, val));
+
+LIBCMO_EXPORT bool BMMaterial_GetAlphaTestEnabled(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetAlphaTestEnabled(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, enabled));
+LIBCMO_EXPORT bool BMMaterial_GetAlphaBlendEnabled(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetAlphaBlendEnabled(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, enabled));
+LIBCMO_EXPORT bool BMMaterial_GetPerspectiveCorrectionEnabled(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetPerspectiveCorrectionEnabled(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, enabled));
+LIBCMO_EXPORT bool BMMaterial_GetZWriteEnabled(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetZWriteEnabled(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, enabled));
+LIBCMO_EXPORT bool BMMaterial_GetTwoSidedEnabled(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetTwoSidedEnabled(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, enabled));
+
+LIBCMO_EXPORT bool BMMaterial_GetAlphaRef(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKBYTE, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetAlphaRef(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKBYTE, val));
+LIBCMO_EXPORT bool BMMaterial_GetAlphaFunc(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXCMPFUNC, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetAlphaFunc(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXCMPFUNC, val));
+LIBCMO_EXPORT bool BMMaterial_GetZFunc(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXCMPFUNC, out_val));
+LIBCMO_EXPORT bool BMMaterial_SetZFunc(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXCMPFUNC, val));
+
 #pragma endregion
 
 #pragma region CKMesh
+
+LIBCMO_EXPORT bool BMMesh_GetVertexCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_count));
+LIBCMO_EXPORT bool BMMesh_SetVertexCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, count));
+LIBCMO_EXPORT bool BMMesh_GetVertexPositions(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxVector3*, out_mem));
+LIBCMO_EXPORT bool BMMesh_GetVertexNormals(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxVector3*, out_mem));
+LIBCMO_EXPORT bool BMMesh_GetVertexUVs(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxVector2*, out_mem));
+
+LIBCMO_EXPORT bool BMMesh_GetFaceCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_count));
+LIBCMO_EXPORT bool BMMesh_SetFaceCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, count));
+LIBCMO_EXPORT bool BMMesh_GetFaceIndices(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKWORD*, out_mem));
+LIBCMO_EXPORT bool BMMesh_GetFaceMaterialSlotIndexs(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKWORD*, out_mem));
+
+LIBCMO_EXPORT bool BMMesh_GetMaterialSlotCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_count));
+LIBCMO_EXPORT bool BMMesh_SetMaterialSlotCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, count));
+LIBCMO_EXPORT bool BMMesh_GetMaterialSlot(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, index), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_mtlid));
+LIBCMO_EXPORT bool BMMesh_SetMaterialSlot(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, index), BMPARAM_IN(LibCmo::CK2::CK_ID, mtlid));
 
 #pragma endregion
 

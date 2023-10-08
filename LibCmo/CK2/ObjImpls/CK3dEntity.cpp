@@ -310,7 +310,9 @@ namespace LibCmo::CK2::ObjImpls {
 
 	void CK3dEntity::SetCurrentMesh(CKMesh* mesh) {
 		m_CurrentMesh = mesh;
-		AddPotentialMesh(mesh);
+		if (mesh != nullptr) {
+			AddPotentialMesh(mesh);
+		}
 	}
 
 #pragma endregion

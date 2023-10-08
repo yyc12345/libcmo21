@@ -83,7 +83,7 @@ namespace LibCmo::CK2::ObjImpls {
 		VxMath::VXMESH_FLAGS m_Flags;
 		CKDWORD m_VertexCount;
 		CKDWORD m_LineCount;
-		CKDWORD m_MtlSlotCount;
+		CKDWORD m_MaterialSlotCount;
 		CKDWORD m_FaceCount;
 
 		XContainer::XArray<VxMath::VxVector3> m_VertexPosition;

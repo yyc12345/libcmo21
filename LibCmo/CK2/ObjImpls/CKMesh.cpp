@@ -12,7 +12,7 @@ namespace LibCmo::CK2::ObjImpls {
 		m_VertexPosition(), m_VertexNormal(), m_VertexUV(),
 		m_VertexColor(), m_VertexSpecularColor(),
 		// init mtl slots
-		m_MtlSlotCount(0),
+		m_MaterialSlotCount(0),
 		m_MaterialSlot(),
 		// init face data
 		m_FaceCount(0),
@@ -577,22 +577,27 @@ namespace LibCmo::CK2::ObjImpls {
 	}
 
 	VxMath::VxVector3* CKMesh::GetVertexPositions() {
+		if (m_VertexCount == 0) return nullptr;
 		return m_VertexPosition.data();
 	}
 
 	VxMath::VxVector3* CKMesh::GetVertexNormals() {
+		if (m_VertexCount == 0) return nullptr;
 		return m_VertexNormal.data();
 	}
 
 	VxMath::VxVector2* CKMesh::GetVertexUVs() {
+		if (m_VertexCount == 0) return nullptr;
 		return m_VertexUV.data();
 	}
 
 	CKDWORD* CKMesh::GetVertexColors() {
+		if (m_VertexCount == 0) return nullptr;
 		return m_VertexColor.data();
 	}
 
 	CKDWORD* CKMesh::GetVertexSpecularColors() {
+		if (m_VertexCount == 0) return nullptr;
 		return m_VertexSpecularColor.data();
 	}
 
@@ -601,15 +606,16 @@ namespace LibCmo::CK2::ObjImpls {
 #pragma region Material Slot Section
 
 	CKDWORD CKMesh::GetMaterialSlotCount() const {
-		return m_MtlSlotCount;
+		return m_MaterialSlotCount;
 	}
 
 	void CKMesh::SetMaterialSlotCount(CKDWORD count) {
-		m_MtlSlotCount = count;
+		m_MaterialSlotCount = count;
 		m_MaterialSlot.resize(count, nullptr);
 	}
 
 	CKMaterial** CKMesh::GetMaterialSlots() {
+		if (m_MaterialSlotCount == 0) return nullptr;
 		return m_MaterialSlot.data();
 	}
 
@@ -629,15 +635,19 @@ namespace LibCmo::CK2::ObjImpls {
 	}
 
 	CKWORD* CKMesh::GetFaceIndices() {
+		if (m_FaceCount == 0) return nullptr;
 		return m_FaceIndices.data();
 	}
 
 	CKWORD* CKMesh::GetFaceMaterialSlotIndexs() {
-		return m_FaceIndices.data();
+		if (m_FaceCount == 0) return nullptr;
+		return m_FaceMtlIndex.data();
 	}
 
 	VxMath::VxVector3* CKMesh::GetFaceNormals(CKDWORD& stride) {
 		stride = CKSizeof(FaceData_t);
+
+		if (m_FaceCount == 0) return nullptr;
 		return &m_FaceOthers.data()->m_Normal;
 	}
 
@@ -655,6 +665,7 @@ namespace LibCmo::CK2::ObjImpls {
 	}
 
 	CKWORD* CKMesh::GetLineIndices() {
+		if (m_LineCount == 0) return nullptr;
 		return m_LineIndices.data();
 	}
 

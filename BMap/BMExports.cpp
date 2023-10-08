@@ -433,6 +433,103 @@ bool BMTexture_SetVideoFormat(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(Lib
 
 #pragma region CKMesh
 
+bool BMMesh_GetVertexCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_count, obj->GetVertexCount());
+	return true;
+}
+bool BMMesh_SetVertexCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, count)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	obj->SetVertexCount(count);
+	return true;
+}
+bool BMMesh_GetVertexPositions(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxVector3*, out_mem)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_mem, obj->GetVertexPositions());
+	return true;
+}
+bool BMMesh_GetVertexNormals(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxVector3*, out_mem)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_mem, obj->GetVertexNormals());
+	return true;
+}
+bool BMMesh_GetVertexUVs(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxVector2*, out_mem)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_mem, obj->GetVertexUVs());
+	return true;
+}
+
+bool BMMesh_GetFaceCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_count, obj->GetFaceCount());
+	return true;
+}
+bool BMMesh_SetFaceCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, count)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	obj->SetFaceCount(count);
+	return true;
+}
+bool BMMesh_GetFaceIndices(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKWORD*, out_mem)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_mem, obj->GetFaceIndices());
+	return true;
+}
+bool BMMesh_GetFaceMaterialSlotIndexs(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKWORD*, out_mem)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_mem, obj->GetFaceMaterialSlotIndexs());
+	return true;
+}
+
+bool BMMesh_GetMaterialSlotCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_count, obj->GetMaterialSlotCount());
+	return true;
+}
+bool BMMesh_SetMaterialSlotCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, count)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	obj->SetMaterialSlotCount(count);
+	return true;
+}
+bool BMMesh_GetMaterialSlot(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, index), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_mtlid)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+	if (index >= obj->GetMaterialSlotCount()) return false;
+
+	BMPARAM_OUT_ASSIGN(out_mtlid, SafeGetID(obj->GetMaterialSlots()[index]));
+	return true;
+}
+bool BMMesh_SetMaterialSlot(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, index), BMPARAM_IN(LibCmo::CK2::CK_ID, mtlid)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	auto mtlobj = CheckCKMaterial(bmfile, mtlid);
+	if (obj == nullptr /*|| mtlobj == nullptr*/) return false;	// allow nullptr assign
+	if (index >= obj->GetMaterialSlotCount()) return false;
+
+	obj->GetMaterialSlots()[index] = mtlobj;
+	return true;
+}
+
 #pragma endregion
 
 #pragma region CK3dObject
@@ -464,7 +561,7 @@ bool BM3dEntity_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(L
 bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, meshid)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	auto meshobj = CheckCKMesh(bmfile, meshid);
-	if (obj == nullptr || meshobj == nullptr) return false;
+	if (obj == nullptr /*|| meshobj == nullptr*/) return false;	//allow nullptr assign
 
 	obj->SetCurrentMesh(meshobj);
 	return true;
