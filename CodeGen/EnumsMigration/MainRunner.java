@@ -57,76 +57,60 @@ public class MainRunner {
 	}
 
 	public static void main(String[] args) throws Exception {
-		OutputStreamWriter fs = null;
-		
+
 		// =========== CKERROR ===========
 		EnumsHelper.Enum_t ckerror = organiseDefines("src/CKError.txt", "CKERROR");
-		fs = CommonHelper.openOutputFile("dest/CKError.hpp");
-		GeneralWriter.writeEnum(fs, ckerror);
-		fs.close();
-		fs = CommonHelper.openOutputFile("dest/CKError.AccVal.hpp");
-		ErrorsWriter.writeAccVals(fs, ckerror);
-		fs.close();
-		
+		GeneralWriter.writeEnum("dest/CKError.hpp", ckerror);
+		GeneralWriter.writePyEnum("dest/CKError.py", ckerror);
+		ErrorsWriter.writeAccVal("dest/CKError.AccVal.hpp", ckerror);
+		GeneralWriter.writePyAccVal("dest/CKError.AccVal.py", ckerror);
+
 		// =========== CK_CLASSID ===========
 		EnumsHelper.Enum_t classid = organiseClassid("src/CK_CLASSID.txt");
-		fs = CommonHelper.openOutputFile("dest/CK_CLASSID.hpp");
-		GeneralWriter.writeEnum(fs, classid);
-		fs.close();
-		fs = CommonHelper.openOutputFile("dest/CK_CLASSID.AccVal.hpp");
-		ClassidWriter.writeAccVals(fs, classid);
-		fs.close();
-		
+		GeneralWriter.writeEnum("dest/CK_CLASSID.hpp", classid);
+		GeneralWriter.writePyEnum("dest/CK_CLASSID.py", classid);
+		ClassidWriter.writeAccVal("dest/CK_CLASSID.AccVal.hpp", classid);
+		GeneralWriter.writePyAccVal("dest/CK_CLASSID.AccVal.py", classid);
+
 		// =========== Define2 ===========
 		// Define2 do not need values.
 		EnumsHelper.EnumCollection_t def2 = getEnumsCollection("src/Defines2.txt");
-		fs = CommonHelper.openOutputFile("dest/CK_CLASSID.hpp");
-		GeneralWriter.writeEnums(fs, def2);
-		fs.close();
-		
+		GeneralWriter.writeEnums("dest/CK_CLASSID.hpp", def2);
+		GeneralWriter.writePyEnums("dest/CK_CLASSID.py", def2);
+
 		// =========== Combined enums ===========
 		EnumsHelper.EnumCollection_t ck2Enums = getEnumsCollection("src/CKEnums.txt"),
 				vxEnums = getEnumsCollection("src/VxEnums.txt");
-		fs = CommonHelper.openOutputFile("dest/CKEnums.hpp");
-		GeneralWriter.writeEnums(fs, ck2Enums);
-		fs.close();
-		fs = CommonHelper.openOutputFile("dest/CKEnums.AccVal.hpp");
-		GeneralWriter.writeAccVals(fs, ck2Enums, CommonHelper.CKParts.CK2);
-		fs.close();
-		fs = CommonHelper.openOutputFile("dest/VxEnums.hpp");
-		GeneralWriter.writeEnums(fs, vxEnums);
-		fs.close();
-		fs = CommonHelper.openOutputFile("dest/VxEnums.AccVal.hpp");
-		GeneralWriter.writeAccVals(fs, vxEnums, CommonHelper.CKParts.VxMath);
-		fs.close();
-		
+		GeneralWriter.writeEnums("dest/CKEnums.hpp", ck2Enums);
+		GeneralWriter.writePyEnums("dest/CKEnums.py", ck2Enums);
+		GeneralWriter.writeAccVals("dest/CKEnums.AccVal.hpp", ck2Enums, CommonHelper.CKParts.CK2);
+		GeneralWriter.writePyAccVals("dest/CKEnums.AccVal.py", ck2Enums);
+		GeneralWriter.writeEnums("dest/VxEnums.hpp", vxEnums);
+		GeneralWriter.writePyEnums("dest/VxEnums.py", vxEnums);
+		GeneralWriter.writeAccVals("dest/VxEnums.AccVal.hpp", vxEnums, CommonHelper.CKParts.VxMath);
+		GeneralWriter.writePyAccVals("dest/VxEnums.AccVal.py", vxEnums);
+
 		// =========== Single enums ===========
 		EnumsHelper.Enum_t single;
-		
+
 		single = organiseDefines("src/CK_STATECHUNK_CHUNKVERSION.txt", "CK_STATECHUNK_CHUNKVERSION");
-		fs = CommonHelper.openOutputFile("dest/CK_STATECHUNK_CHUNKVERSION.hpp");
-		GeneralWriter.writeEnum(fs, single);
-		fs.close();
-		fs = CommonHelper.openOutputFile("dest/CK_STATECHUNK_CHUNKVERSION.AccVal.hpp");
-		GeneralWriter.writeAccVal(fs, single, CommonHelper.CKParts.CK2);
-		fs.close();
+		GeneralWriter.writeEnum("dest/CK_STATECHUNK_CHUNKVERSION.hpp", single);
+		GeneralWriter.writePyEnum("dest/CK_STATECHUNK_CHUNKVERSION.py", single);
+		GeneralWriter.writeAccVal("dest/CK_STATECHUNK_CHUNKVERSION.AccVal.hpp", single, CommonHelper.CKParts.CK2);
+		GeneralWriter.writePyAccVal("dest/CK_STATECHUNK_CHUNKVERSION.AccVal.py", single);
 
 		single = organiseDefines("src/CK_STATECHUNK_DATAVERSION.txt", "CK_STATECHUNK_DATAVERSION");
-		fs = CommonHelper.openOutputFile("dest/CK_STATECHUNK_DATAVERSION.hpp");
-		GeneralWriter.writeEnum(fs, single);
-		fs.close();
-		fs = CommonHelper.openOutputFile("dest/CK_STATECHUNK_DATAVERSION.AccVal.hpp");
-		GeneralWriter.writeAccVal(fs, single, CommonHelper.CKParts.CK2);
-		fs.close();
-		
+		GeneralWriter.writeEnum("dest/CK_STATECHUNK_DATAVERSION.hpp", single);
+		GeneralWriter.writePyEnum("dest/CK_STATECHUNK_DATAVERSION.py", single);
+		GeneralWriter.writeAccVal("dest/CK_STATECHUNK_DATAVERSION.AccVal.hpp", single, CommonHelper.CKParts.CK2);
+		GeneralWriter.writePyAccVal("dest/CK_STATECHUNK_DATAVERSION.AccVal.py", single);
+
 		single = organiseDefines("src/CK_BITMAPDATA_FLAGS.txt", "CK_BITMAPDATA_FLAGS");
-		fs = CommonHelper.openOutputFile("dest/CK_BITMAPDATA_FLAGS.hpp");
-		GeneralWriter.writeEnum(fs, single);
-		fs.close();
-		fs = CommonHelper.openOutputFile("dest/CK_BITMAPDATA_FLAGS.AccVal.hpp");
-		GeneralWriter.writeAccVal(fs, single, CommonHelper.CKParts.CK2);
-		fs.close();
-		
+		GeneralWriter.writeEnum("dest/CK_BITMAPDATA_FLAGS.hpp", single);
+		GeneralWriter.writePyEnum("dest/CK_BITMAPDATA_FLAGS.py", single);
+		GeneralWriter.writeAccVal("dest/CK_BITMAPDATA_FLAGS.AccVal.hpp", single, CommonHelper.CKParts.CK2);
+		GeneralWriter.writePyAccVal("dest/CK_BITMAPDATA_FLAGS.AccVal.py", single);
+
 		// print message.
 		System.out.println("DONE!");
 	}

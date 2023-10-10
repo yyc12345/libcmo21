@@ -5,8 +5,10 @@ import java.util.stream.Collectors;
  * The nameof values writer for CK_CLASSID.
  */
 public class ClassidWriter {
-	public static void writeAccVals(OutputStreamWriter writer, EnumsHelper.Enum_t classids) throws Exception {
-		IndentHelper indent = new IndentHelper(writer);
+
+	public static void writeAccVal(String filename, EnumsHelper.Enum_t classids) throws Exception {
+		OutputStreamWriter writer = CommonHelper.openOutputFile(filename);
+		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.CPP);
 
 		indent.puts("const CkClassidReflectionArray CK_CLASSID {");
 		indent.inc();
@@ -20,5 +22,7 @@ public class ClassidWriter {
 		indent.dec();
 		indent.puts("};");
 
+		writer.close();
 	}
+
 }

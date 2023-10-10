@@ -4,8 +4,9 @@ import java.io.OutputStreamWriter;
  * The nameof values writer for CKERROR
  */
 public class ErrorsWriter {
-	public static void writeAccVals(OutputStreamWriter writer, EnumsHelper.Enum_t errors) throws Exception {
-		IndentHelper indent = new IndentHelper(writer);
+	public static void writeAccVal(String filename, EnumsHelper.Enum_t errors) throws Exception {
+		OutputStreamWriter writer = CommonHelper.openOutputFile(filename);
+		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.CPP);
 
 		indent.puts("const CkErrorReflectionArray CKERROR {");
 		indent.inc();
@@ -20,5 +21,6 @@ public class ErrorsWriter {
 		indent.dec();
 		indent.puts("};");
 
+		writer.close();
 	}
 }

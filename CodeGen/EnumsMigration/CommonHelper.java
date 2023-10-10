@@ -113,6 +113,10 @@ public class CommonHelper {
 	enum CKParts {
 		CK2, VxMath
 	}
+	
+	enum LangType {
+		CPP, Python
+	}
 
 	public static String getCKPartsNamespace(CKParts parts) {
 		switch (parts) {
@@ -187,5 +191,5 @@ public class CommonHelper {
 		// only remove at least 5 continuous star chars.
 		return cmt.replaceAll("\\*{5,}", "");
 	}
-
+	
 }
