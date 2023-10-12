@@ -171,7 +171,7 @@ public class GeneralWriter {
 		// write implements
 		for (EnumsHelper.Enum_t enum_t : prog.mEnums) {
 			// write enum desc header
-			indent.printf("g_Annotation_%s: dict[int, tuple[str, str]] = {", enum_t.mEnumName);
+			indent.printf("g_Annotation_%s: dict[int, AnnotationData] = {", enum_t.mEnumName);
 			indent.inc();
 
 			// write enum desc entries
@@ -181,7 +181,7 @@ public class GeneralWriter {
 					comment = CommonHelper.escapeString(enumEntry_t.mEntryComment);
 				}
 
-				indent.printf("%s.%s.value: (\"%s\", \"%s\", ),", enum_t.mEnumName, enumEntry_t.mEntryName,
+				indent.printf("%s.%s.value: AnnotationData(\"%s\", \"%s\"),", enum_t.mEnumName, enumEntry_t.mEntryName,
 						extractHumanReadableEntryName(enumEntry_t.mEntryName), comment);
 			}
 
