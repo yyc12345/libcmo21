@@ -1,4 +1,5 @@
 import java.io.OutputStreamWriter;
+import java.util.Locale;
 
 /**
  * Generic Enum Writer. Including Data Type Defination and Nameof Values.
@@ -85,8 +86,8 @@ public class GeneralWriter {
 		}
 	}
 
-	public static void writeAccVals(String filename, EnumsHelper.EnumCollection_t prog,
-			CommonHelper.CKParts parts) throws Exception {
+	public static void writeAccVals(String filename, EnumsHelper.EnumCollection_t prog, CommonHelper.CKParts parts)
+			throws Exception {
 		OutputStreamWriter fs = CommonHelper.openOutputFile(filename);
 		writeAccVals(fs, prog, parts);
 		fs.close();
@@ -122,7 +123,8 @@ public class GeneralWriter {
 				if (enumEntry_t.mEntryValue == null) {
 					indent.printf("%s = auto()", enumEntry_t.mEntryName);
 				} else {
-					indent.printf("%s = %s", enumEntry_t.mEntryName, enumEntry_t.mEntryValue);
+					indent.printf("%s = %s", enumEntry_t.mEntryName,
+							CommonHelper.convertToPythonNumber(enumEntry_t.mEntryValue));
 				}
 
 				// write entry comment after member
@@ -152,13 +154,24 @@ public class GeneralWriter {
 		fs.close();
 	}
 
+	private static String extractHumanReadableEntryName(String entry_name) {
+		// remove first part (any content before underline '_')
+		entry_name = entry_name.replaceFirst("^[a-zA-Z0-9]+_", "");
+
+		// lower all chars except first char
+		if (entry_name.length() < 1)
+			return entry_name;
+		else
+			return entry_name.substring(0, 1) + entry_name.substring(1).toLowerCase(Locale.ROOT);
+	}
+
 	public static void writePyAccVals(OutputStreamWriter writer, EnumsHelper.EnumCollection_t prog) throws Exception {
 		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.Python);
 
 		// write implements
 		for (EnumsHelper.Enum_t enum_t : prog.mEnums) {
 			// write enum desc header
-			indent.printf("g_Annotation_%s: dict[int, str] = {", enum_t.mEnumName);
+			indent.printf("g_Annotation_%s: dict[int, tuple[str, str]] = {", enum_t.mEnumName);
 			indent.inc();
 
 			// write enum desc entries
@@ -167,9 +180,9 @@ public class GeneralWriter {
 				if (enumEntry_t.mEntryComment != null) {
 					comment = CommonHelper.escapeString(enumEntry_t.mEntryComment);
 				}
-				
-				indent.printf("%s.%s.value: \"%s\",", enum_t.mEnumName, enumEntry_t.mEntryName,
-						comment);
+
+				indent.printf("%s.%s.value: (\"%s\", \"%s\", ),", enum_t.mEnumName, enumEntry_t.mEntryName,
+						extractHumanReadableEntryName(enumEntry_t.mEntryName), comment);
 			}
 
 			// write enum tail

@@ -4,6 +4,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.antlr.v4.runtime.*;
 
@@ -24,7 +25,7 @@ public class CommonHelper {
 			return null;
 		return tokens.get(0);
 	}
-	
+
 	public static List<Token> getPreChannelTokens(BufferedTokenStream stream, Token token, int channel) {
 		return stream.getHiddenTokensToLeft(token.getTokenIndex(), channel);
 	}
@@ -59,8 +60,7 @@ public class CommonHelper {
 	/**
 	 * Cut multiple comments.
 	 * <p>
-	 * Each comment will be cut the head and tail first.
-	 * And strip all whitespace.
+	 * Each comment will be cut the head and tail first. And strip all whitespace.
 	 * Then join together.
 	 * 
 	 * @param tokens Multiple comments.
@@ -75,7 +75,7 @@ public class CommonHelper {
 			return text + " ";
 		}).collect(Collectors.joining(""));
 	}
-	
+
 	// =========== Number Operations ===========
 
 	/**
@@ -90,6 +90,7 @@ public class CommonHelper {
 
 	/**
 	 * Check whether Altlr captured CKGENERAL_NUM is a hex number.
+	 * 
 	 * @param numstr The captured number.
 	 * @return true if it is hex number.
 	 */
@@ -97,6 +98,18 @@ public class CommonHelper {
 		return numstr.startsWith("0x") || numstr.startsWith("0X");
 	}
 	
+	/**
+	 * Convert accepted string into Python cupported format.
+	 * 
+	 * It actually just remove trail "UL".
+	 * 
+	 * @param numstr The captured number.
+	 * @return The Python style number string.
+	 */
+	public static String convertToPythonNumber(String numstr) {
+		return numstr.replaceFirst("[ulUL]+$", "");
+	}
+
 	/**
 	 * Get underlying type of enum.
 	 * 
@@ -113,7 +126,7 @@ public class CommonHelper {
 	enum CKParts {
 		CK2, VxMath
 	}
-	
+
 	enum LangType {
 		CPP, Python
 	}
@@ -184,6 +197,7 @@ public class CommonHelper {
 
 	/**
 	 * Remove redundent star '*' (at least 5 continuous star chars)
+	 * 
 	 * @param cmt The string provided.
 	 * @return The string processed.
 	 */
@@ -191,5 +205,45 @@ public class CommonHelper {
 		// only remove at least 5 continuous star chars.
 		return cmt.replaceAll("\\*{5,}", "");
 	}
-	
+
+	/**
+	 * Get indent char by style
+	 * 
+	 * @param use_tab Whether indent use Tab, not Space.
+	 * @return The indent chars
+	 */
+	public static String getIndentString(boolean use_tab) {
+		if (use_tab)
+			return "\t";
+		else
+			return "    ";
+	}
+
+	/**
+	 * Re-indent a block of string
+	 * 
+	 * This function will first split block string by line. Then remove all indent
+	 * (strip Tab and Space). At last, re-indent and join each line
+	 * 
+	 * @param block_str    The string provided.
+	 * @param use_tab      Use Tab, not Space as indent chars.
+	 * @param indent_level The level of indent, started by 0.
+	 * @return The re-indent string
+	 */
+	public static String reindentBlockString(String block_str, boolean use_tab, int indent_level) {
+		// pre-create indent string
+		String indentChars = getIndentString(use_tab);
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < indent_level; ++i) {
+			sb.append(indentChars);
+		}
+		String indents = sb.toString();
+
+		// split line
+		return block_str.lines().map((String line) -> {
+			// strip space and tab, then re-indent it.
+			return indents + line.trim();
+		}).collect(Collectors.joining(System.lineSeparator())); // then join with new line breaker and return.
+	}
+
 }

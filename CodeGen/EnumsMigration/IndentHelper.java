@@ -5,22 +5,29 @@ public class IndentHelper {
 		mIndent = 0;
 		mLangType = lang_type;
 		mWriter = writer;
+		
+		// set indent chars
+		switch (mLangType) {
+		case CPP:
+			mIndentChars = CommonHelper.getIndentString(true);
+			break;
+		case Python:
+			mIndentChars = CommonHelper.getIndentString(false);
+			break;
+		default:
+			mIndentChars = "";
+			break;
+		}
 	}
 
 	private int mIndent;
 	private CommonHelper.LangType mLangType;
+	private String mIndentChars;
 	private OutputStreamWriter mWriter;
 
 	private void rawIndent() throws Exception {
 		for (int i = 0; i < mIndent; ++i) {
-			switch (mLangType) {
-			case CPP:
-				mWriter.write("\t");
-				break;
-			case Python:
-				mWriter.write("    ");
-				break;
-			}
+			mWriter.write(mIndentChars);
 		}
 	}
 	
@@ -33,7 +40,7 @@ public class IndentHelper {
 	}
 
 	public void indent() throws Exception {
-		mWriter.write("\n");
+		mWriter.write(System.lineSeparator());
 		rawIndent();
 	}
 
@@ -61,21 +68,19 @@ public class IndentHelper {
 		
 		switch (mLangType) {
 		case CPP:
-			rawIndent();
 			puts("/**");
+			
+			mWriter.write(System.lineSeparator());
+			mWriter.write(CommonHelper.reindentBlockString(comment, true, mIndent));
 
-			puts(comment);
-
-			rawIndent();
 			puts(" */");
 			break;
 		case Python:
-			rawIndent();
 			puts("\"\"\"!");
-			
-			puts(comment);
 
-			rawIndent();
+			mWriter.write(System.lineSeparator());
+			mWriter.write(CommonHelper.reindentBlockString(comment, false, mIndent));
+
 			puts("\"\"\"");
 			break;
 		}
@@ -93,12 +98,13 @@ public class IndentHelper {
 		if (comment == null)
 			return;
 
+		mWriter.write(mIndentChars);
 		switch (mLangType) {
 		case CPP:
-			mWriter.write(String.format("\t/**< %s */", CommonHelper.removeEol(comment)));
+			mWriter.write(String.format("/**< %s */", CommonHelper.removeEol(comment)));
 			break;
 		case Python:
-			mWriter.write(String.format("    ##< %s", CommonHelper.removeEol(comment)));
+			mWriter.write(String.format("##< %s", CommonHelper.removeEol(comment)));
 			break;
 		}
 		
