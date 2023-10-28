@@ -7,8 +7,6 @@ namespace Unvirt::StructFormatter {
 
 #pragma region Assist Functions
 
-#define PRIuSIZET "zu"
-
 	static void PrintCKSTRING(LibCmo::CKSTRING name) {
 		if (name == nullptr) {
 			fputs(UNVIRT_TERMCOL_LIGHT_MAGENTA(("<anonymous>")), stdout);
@@ -39,6 +37,9 @@ namespace Unvirt::StructFormatter {
 	static void PrintBool(bool v) {
 		fputs(v ? "true" : "false", stdout);
 	}
+	static void PrintColorfulBool(bool v) {
+		fputs(v ? UNVIRT_TERMCOL_LIGHT_GREEN(("Yes")) : UNVIRT_TERMCOL_LIGHT_RED(("No")), stdout);
+	}
 	static void PrintColor(const LibCmo::VxMath::VxColor& col) {
 		LibCmo::CKDWORD argb = col.ToARGB();
 		LibCmo::CKDWORD a = (argb & 0xFF000000) >> 24,
@@ -46,9 +47,9 @@ namespace Unvirt::StructFormatter {
 			g = (argb & 0x0000FF00) >> 8,
 			b = (argb & 0x000000FF);
 		fprintf(stdout, "A:%" PRIuCKDWORD " (%.4" PRIfCKFLOAT ") RGB(%" PRIuCKDWORD ", %" PRIuCKDWORD ", %" PRIuCKDWORD ") RGB#%02" PRIxCKDWORD "%02" PRIxCKDWORD "%02" PRIxCKDWORD " RGBA#%02" PRIxCKDWORD "%02" PRIxCKDWORD "%02" PRIxCKDWORD "%02" PRIxCKDWORD,
-			a, col.a, 
-			r, g, b, 
-			r, g, b, 
+			a, col.a,
+			r, g, b,
+			r, g, b,
 			r, g, b, a
 		);
 	}
@@ -61,9 +62,16 @@ namespace Unvirt::StructFormatter {
 		const std::vector<_Ty>& data, size_t page, size_t pageitems,
 		std::function<void()> printHdrFct, std::function<void(size_t, const _Ty&)> printEntryFct) {
 
+		// check page overflow
+		if (page * pageitems >= data.size()) {
+			fputs(UNVIRT_TERMCOL_LIGHT_RED(("Page out of range.\n")), stdout);
+			return;
+		}
+
+		// calc page data
 		size_t fulllen = data.size(),
 			startpos = page * pageitems,
-			fullpage = fulllen / pageitems;
+			fullpage = (fulllen + (pageitems - 1)) / pageitems;	// to solve `fulllen / pageitems` empty page issue. like CKStateChunk::GetCeilDwordSize function (+3 /4 to get DWORD size).
 
 		// print header
 		printHdrFct();
@@ -73,7 +81,7 @@ namespace Unvirt::StructFormatter {
 			printEntryFct(counter, data[counter]);
 		}
 
-		fprintf(stdout, "Page %" PRIuSIZET " of %" PRIuSIZET "\n", page + 1, fullpage + 1);
+		fprintf(stdout, "Page %" PRIuSIZET " of %" PRIuSIZET "\n", page + 1, fullpage);
 	}
 
 #pragma endregion
@@ -214,7 +222,7 @@ namespace Unvirt::StructFormatter {
 		fputs("Transparent Color: ", stdout);
 		PrintColor(bd.GetTransparentColor());
 		fputc('\n', stdout);
-		
+
 		fputs("Bitmap Flags:\n", stdout);
 		fputs(AccessibleValue::GetFlagEnumName(bd.GetBitmapFlags(), AccessibleValue::EnumDesc::CK_BITMAPDATA_FLAGS, "\n").c_str(), stdout);
 		fputc('\n', stdout);
@@ -223,7 +231,7 @@ namespace Unvirt::StructFormatter {
 	static void PrintCKMaterialDetail(LibCmo::CK2::ObjImpls::CKMaterial* obj) {
 		PrintCKBeObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKMaterial\n")), stdout);
-		
+
 		// color
 		fputs("== Color ==\n", stdout);
 
@@ -278,7 +286,7 @@ namespace Unvirt::StructFormatter {
 		fputc('\n', stdout);
 		fprintf(stdout, "Alpha Function: %s\n", AccessibleValue::GetEnumName(obj->GetAlphaFunc(), AccessibleValue::EnumDesc::VXCMPFUNC).c_str());
 		fprintf(stdout, "Alpha Ref Value: %" PRIuCKBYTE "\n", obj->GetAlphaRef());
-		
+
 		// alpha blend
 		fputs("== Alpha Blend ==\n", stdout);
 		fputs("Enabled: ", stdout);
@@ -286,14 +294,14 @@ namespace Unvirt::StructFormatter {
 		fputc('\n', stdout);
 		fprintf(stdout, "Source Blend: %s\n", AccessibleValue::GetEnumName(obj->GetSourceBlend(), AccessibleValue::EnumDesc::VXBLEND_MODE).c_str());
 		fprintf(stdout, "Destination Blend: %s\n", AccessibleValue::GetEnumName(obj->GetDestBlend(), AccessibleValue::EnumDesc::VXBLEND_MODE).c_str());
-		
+
 		// z buffer
 		fputs("== Z-Buffer Write ==\n", stdout);
 		fputs("Enabled: ", stdout);
 		PrintBool(obj->GetZWriteEnabled());
 		fputc('\n', stdout);
 		fprintf(stdout, "Z Compare Function: %s\n", AccessibleValue::GetEnumName(obj->GetZFunc(), AccessibleValue::EnumDesc::VXCMPFUNC).c_str());
-		
+
 		// effect
 		fputs("== Effect ==\n", stdout);
 		fprintf(stdout, "Effect: %s\n", AccessibleValue::GetEnumName(obj->GetEffect(), AccessibleValue::EnumDesc::VX_EFFECT).c_str());
@@ -303,12 +311,12 @@ namespace Unvirt::StructFormatter {
 	static void PrintCKMeshDetail(LibCmo::CK2::ObjImpls::CKMesh* obj) {
 		PrintCKBeObjectDetail(obj);
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKMesh\n")), stdout);
-		
+
 		fputs("== Flags ==\n", stdout);
 		fputs("Mesh Flags:\n", stdout);
 		fputs(AccessibleValue::GetFlagEnumName(obj->GetMeshFlags(), AccessibleValue::EnumDesc::VXMESH_FLAGS, "\n").c_str(), stdout);
 		fputc('\n', stdout);
-		
+
 		// vertex data
 		fputs("== Vertex ==\n", stdout);
 		fprintf(stdout, "Vertex Count: %" PRIuCKDWORD "\n", obj->GetVertexCount());
@@ -324,7 +332,7 @@ namespace Unvirt::StructFormatter {
 		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\tColors\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD));
 		PrintPointer(obj->GetVertexSpecularColors());
 		fprintf(stdout, "\t0x%" PRIxCKDWORD " bytes\tSpecularColors\n", obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD));
-		
+
 		// face data
 		fputs("== Face ==\n", stdout);
 		fprintf(stdout, "Face Count: %" PRIuCKDWORD "\n", obj->GetFaceCount());
@@ -403,64 +411,142 @@ namespace Unvirt::StructFormatter {
 
 	}
 
+#pragma region Object List Printer
+
+	static void PrintObjectListHeader(bool full_detail) {
+		if (full_detail) {
+			fputs("SaveFlags\tOptions\tCK ID\tFile CK ID\tFile Index\tPack Size\tIndex\tType\tCKObject\tCKStateChunk\tName\n", stdout);
+		} else {
+			fputs("Index\tType\tObject\tChunk\tName\n", stdout);
+		}
+	}
+	static void PrintObjectListEntry(const LibCmo::CK2::CKFileObject& obj, const LibCmo::CK2::CKFileInfo& fileinfo, size_t entry_index, bool full_detail) {
+		if (full_detail) {
+			fprintf(stdout, "0x%08" PRIxCKDWORD "\t", obj.SaveFlags);
+			fputs(AccessibleValue::GetEnumName(obj.Options, AccessibleValue::EnumDesc::CK_FO_OPTIONS).c_str(), stdout);
+			fputc('\t', stdout);
+
+			fprintf(stdout, "%" PRIuCKID "\t", obj.CreatedObjectId);
+			fprintf(stdout, "%" PRIuCKID "\t", obj.ObjectId);
+
+			fprintf(stdout, "0x%08" PRIxCKDWORD " (Rel: 0x%08" PRIxCKDWORD ")\t",
+				obj.FileIndex,
+				obj.FileIndex - CKSizeof(LibCmo::CK2::CKRawFileInfo) - fileinfo.Hdr1UnPackSize);
+			fprintf(stdout, "0x%08" PRIxCKDWORD "\t", obj.PackSize);
+
+			fprintf(stdout, "#%" PRIuSIZET "\t", entry_index);
+			fputs(AccessibleValue::GetClassIdName(obj.ObjectCid).c_str(), stdout);
+			fputc('\t', stdout);
+			PrintPointer(obj.ObjPtr);
+			fputc('\t', stdout);
+			PrintPointer(obj.Data);
+			fputc('\t', stdout);
+			PrintCKSTRING(LibCmo::XContainer::NSXString::ToCKSTRING(obj.Name));
+			fputc('\n', stdout);
+		} else {
+			fprintf(stdout, "#%" PRIuSIZET "\t", entry_index);
+			fputs(AccessibleValue::GetClassIdName(obj.ObjectCid).c_str(), stdout);
+			fputc('\t', stdout);
+			PrintColorfulBool(obj.ObjPtr != nullptr);
+			fputc('\t', stdout);
+			PrintColorfulBool(obj.Data != nullptr);
+			fputc('\t', stdout);
+			PrintCKSTRING(LibCmo::XContainer::NSXString::ToCKSTRING(obj.Name));
+			fputc('\n', stdout);
+		}
+	}
 	void PrintObjectList(
 		const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileObject>& ls,
 		const LibCmo::CK2::CKFileInfo& fileinfo,
-		size_t page, size_t pageitems) {
+		size_t page, size_t pageitems,
+		bool full_detail) {
 
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKFileObject\n")), stdout);
 		GeneralPrintList<LibCmo::CK2::CKFileObject>(ls, page, pageitems,
-			[]() -> void {
-				fputs("SaveFlags\tOptions\tCK ID\tFile CK ID\tFile Index\tPack Size\tIndex\tType\tCKObject\tCKStateChunk\tName\n", stdout);
+			[full_detail]() -> void {
+				PrintObjectListHeader(full_detail);
 			},
-			[&fileinfo](size_t index, const LibCmo::CK2::CKFileObject& obj) -> void {
-				fprintf(stdout, "0x%08" PRIxCKDWORD "\t", obj.SaveFlags);
-				fputs(AccessibleValue::GetEnumName(obj.Options, AccessibleValue::EnumDesc::CK_FO_OPTIONS).c_str(), stdout);
-				fputc('\t', stdout);
-
-				fprintf(stdout, "%" PRIuCKID "\t", obj.CreatedObjectId);
-				fprintf(stdout, "%" PRIuCKID "\t", obj.ObjectId);
-
-				fprintf(stdout, "0x%08" PRIxCKDWORD " (Rel: 0x%08" PRIxCKDWORD ")\t",
-					obj.FileIndex,
-					obj.FileIndex - CKSizeof(LibCmo::CK2::CKRawFileInfo) - fileinfo.Hdr1UnPackSize);
-				fprintf(stdout, "0x%08" PRIxCKDWORD "\t", obj.PackSize);
-
-				fprintf(stdout, "#%" PRIuSIZET "\t", index);
-				fputs(AccessibleValue::GetClassIdName(obj.ObjectCid).c_str(), stdout);
-				fputc('\t', stdout);
-				PrintPointer(obj.ObjPtr);
-				fputc('\t', stdout);
-				PrintPointer(obj.Data);
-				fputc('\t', stdout);
-				PrintCKSTRING(LibCmo::XContainer::NSXString::ToCKSTRING(obj.Name));
-				fputc('\n', stdout);
+			[&fileinfo, full_detail](size_t index, const LibCmo::CK2::CKFileObject& obj) -> void {
+				PrintObjectListEntry(obj, fileinfo, index, full_detail);
 			}
 			);
 
 	}
+	void PrintSearchedObjectList(
+		const LibCmo::XContainer::XArray<size_t>& idxls,
+		const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileObject>& ls,
+		const LibCmo::CK2::CKFileInfo& fileinfo,
+		size_t page, size_t pageitems,
+		bool full_detail) {
+		
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKFileObject Searching Result\n")), stdout);
+		GeneralPrintList<size_t>(idxls, page, pageitems,
+			[full_detail]() -> void {
+				PrintObjectListHeader(full_detail);
+			},
+			[&ls, &fileinfo, full_detail](size_t, const size_t& index_to_obj) -> void {
+				// resolve index to real item.
+				// and pass the entry index, not the page index.
+				PrintObjectListEntry(ls[index_to_obj], fileinfo, index_to_obj, full_detail);
+			}
+			);
 
+	}
+	
+#pragma endregion
+
+#pragma region Manager List Printer
+
+	static void PrintManagerListHeader(bool full_detail) {
+		// manager list now do not affected by list style because it is enough short
+		fputs("Index\tCKGUID\tCKStateChunk\n", stdout);
+	}
+	static void PrintManagerListEntry(const LibCmo::CK2::CKFileManagerData& mgr, size_t entry_index, bool full_detail) {
+		// not affected by list style.
+		fprintf(stdout, "#%" PRIuSIZET "\t", entry_index);
+		PrintCKGUID(mgr.Manager);
+		fputc('\t', stdout);
+		PrintPointer(mgr.Data);
+		fputc('\n', stdout);
+	}
 	void PrintManagerList(
 		const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileManagerData>& ls,
-		size_t page, size_t pageitems) {
+		size_t page, size_t pageitems,
+		bool full_detail) {
 
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKFileManager\n")), stdout);
 		GeneralPrintList<LibCmo::CK2::CKFileManagerData>(ls, page, pageitems,
-			[]() -> void {
+			[full_detail]() -> void {
 				// print header
-				fputs("Index\tCKGUID\tCKStateChunk\n", stdout);
+				PrintManagerListHeader(full_detail);
 			},
-			[](size_t index, const LibCmo::CK2::CKFileManagerData& mgr) -> void {
+			[full_detail](size_t index, const LibCmo::CK2::CKFileManagerData& mgr) -> void {
 				// print body
-				fprintf(stdout, "#%" PRIuSIZET "\t", index);
-				PrintCKGUID(mgr.Manager);
-				fputc('\t', stdout);
-				PrintPointer(mgr.Data);
-				fputc('\n', stdout);
+				PrintManagerListEntry(mgr, index, full_detail);
 			}
 			);
 
 	}
+	void PrintSearchedManagerList(
+		const LibCmo::XContainer::XArray<size_t>& idxls,
+		const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileManagerData>& ls,
+		size_t page, size_t pageitems,
+		bool full_detail) {
+		
+		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKFileManager Searching Result\n")), stdout);
+		GeneralPrintList<size_t>(idxls, page, pageitems,
+			[full_detail]() -> void {
+				PrintManagerListHeader(full_detail);
+			},
+			[&ls, full_detail](size_t, const size_t& index_to_mgr) -> void {
+				// resolve index to real one
+				PrintManagerListEntry(ls[index_to_mgr], index_to_mgr, full_detail);
+			}
+			);
+
+	}
+	
+#pragma endregion
 
 	void PrintCKObject(const LibCmo::CK2::ObjImpls::CKObject* obj) {
 		if (obj == nullptr) {
@@ -506,6 +592,7 @@ namespace Unvirt::StructFormatter {
 		}
 
 	}
+
 	void PrintCKBaseManager(const LibCmo::CK2::MgrImpls::CKBaseManager* mgr) {
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKBaseManager\n")), stdout);
 		if (mgr == nullptr) {
@@ -515,6 +602,7 @@ namespace Unvirt::StructFormatter {
 
 		fputs(UNVIRT_TERMCOL_LIGHT_RED(("Not Implemented.\n")), stdout);
 	}
+
 	void PrintCKStateChunk(const LibCmo::CK2::CKStateChunk* chunk) {
 		fputs(UNVIRT_TERMCOL_LIGHT_YELLOW(("CKStateChunk\n")), stdout);
 		if (chunk == nullptr) {

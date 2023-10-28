@@ -204,7 +204,7 @@ namespace IronPad {
 			exception_info.ClientPointers = TRUE;
 			MiniDumpWriteDump(
 				GetCurrentProcess(), GetCurrentProcessId(), hFile,
-				MiniDumpWithFullMemory,
+				MiniDumpNormal,
 				&exception_info,
 				NULL, NULL
 			);

@@ -1,6 +1,7 @@
 #include "UnvirtContext.hpp"
 #include <CK2/MgrImpls/CKPathManager.hpp>
 #include <cstdarg>
+#include <regex>
 
 namespace Unvirt::Context {
 
@@ -8,7 +9,8 @@ namespace Unvirt::Context {
 
 	UnvirtContext::UnvirtContext() :
 		m_Root(), m_Splitter(), m_Help(nullptr),
-		m_PageLen(10u), m_OrderExit(false),
+		m_PageLen(10u), m_ListStyleIsFull(true), m_OrderExit(false),
+		m_SearchPart(SearchPart::None), m_SearchIdxResult(),
 		m_Ctx(nullptr), m_FileReader(nullptr), m_IsShallowRead(true) {
 
 		// create command root
@@ -49,7 +51,7 @@ namespace Unvirt::Context {
 			)
 		)
 		->Then((new CmdHelper::Literal("ls"))
-			->Then((new CmdHelper::Choice("part", { "obj", "mgr"}))
+			->Then((new CmdHelper::Choice("part", { "obj", "mgr", "search"}))
 				->Comment("Which list you want to list.")
 				->Then((new CmdHelper::IntArgument("page", [](int32_t v) -> bool { return v > 0; }))
 					->Comment("The page index. Start with 1.")
@@ -84,12 +86,36 @@ namespace Unvirt::Context {
 				)
 			)
 		)
+		->Then((new CmdHelper::Literal("search"))
+			->Then((new CmdHelper::Choice("part", { "obj", "mgr"}))
+				->Comment("Which list you want to search.")
+				->Then((new CmdHelper::Choice("mode", { "plain", "re"}))
+					->Comment("The search mode. `plain` will search by substring and `re` will do regex search.")
+					->Then((new CmdHelper::StringArgument("text"))
+						->Comment("The text or regex to search.")
+						->Executes(
+							std::bind(&UnvirtContext::ProcSearch, this, std::placeholders::_1),
+							"Search object or manager by text or regex. Please note that the regex have limited UTF8 support and may cause undefined behavior."
+						)
+					)
+				)
+			)
+		)
 		->Then((new CmdHelper::Literal("items"))
 			->Then((new CmdHelper::IntArgument("count", [](int32_t v) -> bool { return v > 0; }))
 				->Comment("The count of items you want to show in one page.")
 				->Executes(
 					std::bind(&UnvirtContext::ProcItems, this, std::placeholders::_1),
 					"Set up how many items should be listed in one page when using 'ls' command."
+				)
+			)
+		)
+		->Then((new CmdHelper::Literal("style"))
+			->Then((new CmdHelper::Choice("level", { "full", "simple"}))
+				->Comment("The amount of showen content.")
+				->Executes(
+					std::bind(&UnvirtContext::ProcStyle, this, std::placeholders::_1),
+					"Change the detail level of showen data in `ls` command."
 				)
 			)
 		)
@@ -173,6 +199,9 @@ namespace Unvirt::Context {
 
 	void UnvirtContext::ClearDocument() {
 		if (m_FileReader == nullptr) return;
+		// clear search result
+		m_SearchPart = SearchPart::None;
+		m_SearchIdxResult.clear();
 		// delete reader
 		delete m_FileReader;
 		m_FileReader = nullptr;
@@ -185,6 +214,14 @@ namespace Unvirt::Context {
 		if (msg != nullptr) {
 			fprintf(stdout, UNVIRT_TERMCOL_LIGHT_YELLOW(("[CKContext] ")) "%s\n", msg);
 		}
+	}
+	
+	void UnvirtContext::PrintCommonInfo(const char* u8_fmt, ...) {
+		va_list argptr;
+		va_start(argptr, u8_fmt);
+		std::vfprintf(stdout, u8_fmt, argptr);
+		va_end(argptr);
+		std::fputc('\n', stdout);
 	}
 
 	void UnvirtContext::PrintCommonError(const char* u8_fmt, ...) {
@@ -321,7 +358,7 @@ namespace Unvirt::Context {
 			return;
 		}
 
-		// get page
+		// get 0 based page (-1)
 		size_t page = *amap->Get<CmdHelper::IntArgument::vType>("page") - 1;
 
 		// show list
@@ -329,21 +366,55 @@ namespace Unvirt::Context {
 			case 0:
 			{
 				// obj list
-				if (page * m_PageLen >= m_FileReader->GetFileObjects().size()) {
-					PrintCommonError("Page out of range.");
-					return;
-				}
-				Unvirt::StructFormatter::PrintObjectList(m_FileReader->GetFileObjects(), m_FileReader->GetFileInfo(), page, this->m_PageLen);
+				Unvirt::StructFormatter::PrintObjectList(
+					m_FileReader->GetFileObjects(), 
+					m_FileReader->GetFileInfo(), 
+					page, this->m_PageLen,
+					m_ListStyleIsFull
+				);
 				break;
 			}
 			case 1:
 			{
 				// mgr list
-				if (page * m_PageLen >= m_FileReader->GetManagersData().size()) {
-					PrintCommonError("Page out of range.");
-					return;
+				Unvirt::StructFormatter::PrintManagerList(
+					m_FileReader->GetManagersData(), 
+					page, this->m_PageLen,
+					m_ListStyleIsFull
+				);
+				break;
+			}
+			case 2:
+			{
+				// search list
+				switch (m_SearchPart) {
+					case SearchPart::None:
+					{
+						PrintCommonError("No search result to list.");
+						break;
+					}
+					case SearchPart::Object:
+					{
+						Unvirt::StructFormatter::PrintSearchedObjectList(
+							m_SearchIdxResult,
+							m_FileReader->GetFileObjects(),
+							m_FileReader->GetFileInfo(),
+							page, this->m_PageLen,
+							m_ListStyleIsFull
+						);
+						break;
+					}
+					case SearchPart::Manager:
+					{
+						Unvirt::StructFormatter::PrintSearchedManagerList(
+							m_SearchIdxResult,
+							m_FileReader->GetManagersData(),
+							page, this->m_PageLen,
+							m_ListStyleIsFull
+						);
+						break;
+					}
 				}
-				Unvirt::StructFormatter::PrintManagerList(m_FileReader->GetManagersData(), page, this->m_PageLen);
 				break;
 			}
 		}
@@ -376,7 +447,8 @@ namespace Unvirt::Context {
 					PrintCommonError("Index out of range.");
 					return;
 				}
-				PrintCommonError("WIP function.");
+				// todo: finish manager display
+				PrintCommonError("Not supported now.");
 				//Unvirt::StructFormatter::PrintCKBaseManager(m_FileReader->GetManagersData()[index].Data);
 				break;
 			}
@@ -416,9 +488,108 @@ namespace Unvirt::Context {
 		}
 	}
 
+	void UnvirtContext::ProcSearch(const CmdHelper::ArgumentsMap* amap) {
+		// check pre-requirement
+		if (!HasOpenedFile()) {
+			PrintCommonError("No loaded file.");
+			return;
+		}
+
+		// get search text
+		std::string search_text(*amap->Get<CmdHelper::StringArgument::vType>("text"));
+	
+		// analyse search mode
+		std::function<bool(const LibCmo::XContainer::XString&)> search_fct = [](const LibCmo::XContainer::XString&) -> bool { return false; };
+		switch (*amap->Get<CmdHelper::Choice::vType>("mode")) {
+			case 0:
+			{
+				// plain mode
+				search_fct = [&search_text](const LibCmo::XContainer::XString& cmp) -> bool {
+					return cmp.find(search_text) != std::string::npos;
+				};
+				break;
+			}
+			case 1:
+			{
+				// regex mode
+				
+				// try construct regex
+				std::regex re;
+				try {
+					re = std::regex(search_text, std::regex_constants::ECMAScript);
+				} catch (const std::regex_error& e) {
+					PrintCommonError("Invalid regular expressions: %s", e.what());
+					return;
+				}
+
+				// use copy ctor capture to input regex
+				// because re will be freed when exiting this switch.
+				search_fct = [re](const LibCmo::XContainer::XString& cmp) -> bool {
+					return std::regex_search(cmp, re);
+				};
+				break;
+			}
+		}
+
+		// start search
+		switch (*amap->Get<CmdHelper::Choice::vType>("part")) {
+			case 0:
+			{
+				// object
+				m_SearchPart = SearchPart::Object;
+				m_SearchIdxResult.clear();
+
+				size_t counter = 0;
+				for (const auto& obj : m_FileReader->GetFileObjects()) {
+					if (search_fct(obj.Name)) {
+						m_SearchIdxResult.emplace_back(counter);
+					}
+					++counter;
+				}
+
+				break;
+			}
+			case 1:
+			{
+				// manager
+				m_SearchPart = SearchPart::Manager;
+				m_SearchIdxResult.clear();
+				PrintCommonError("Not supported now.");
+				// todo: remove this return when fixing manager searching.
+				return;
+				break;
+			}
+		}
+
+		// report search result
+		if (m_SearchIdxResult.empty()) {
+			PrintCommonInfo("Search done, but no result.");
+		} else {
+			PrintCommonInfo("Search done with %" PRIuSIZET " results. Use `ls search` to check them.", m_SearchIdxResult.size());
+		}
+	}
+
 	void UnvirtContext::ProcItems(const CmdHelper::ArgumentsMap* amap) {
 		// assign
 		m_PageLen = *amap->Get<CmdHelper::IntArgument::vType>("count");
+	}
+
+	void UnvirtContext::ProcStyle(const CmdHelper::ArgumentsMap* amap) {
+		// set list style level
+		switch (*amap->Get<CmdHelper::Choice::vType>("level")) {
+			case 0:
+			{
+				// full level
+				m_ListStyleIsFull = true;
+				break;
+			}
+			case 1:
+			{
+				// simple level
+				m_ListStyleIsFull = false;
+				break;
+			}
+		}
 	}
 
 	void UnvirtContext::ProcEncoding(const CmdHelper::ArgumentsMap* amap) {
