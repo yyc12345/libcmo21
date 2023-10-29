@@ -242,8 +242,11 @@ namespace BMap {
 				cache.emplace_back(encodings[i]);
 		}
 		m_Context->SetEncoding(cache);
+
 		// set default texture save mode is external
 		m_Context->SetGlobalImagesSaveOptions(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_EXTERNAL);
+		// set default file write mode is whole compressed
+		m_Context->SetFileWriteMode(LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED);
 	}
 
 	BMFile::~BMFile() {
@@ -257,16 +260,83 @@ namespace BMap {
 	bool BMFile::Load(LibCmo::CKSTRING filename) {
 		if (m_IsFreezed || !m_IsReader) return false;
 		
+		// create temp ckfile and load
+		LibCmo::CK2::CKFileReader reader(m_Context);
+		LibCmo::CK2::CKERROR err = reader.DeepLoad(filename);
+
+		// detect error
+		if (err != LibCmo::CK2::CKERROR::CKERR_OK) {
+			// failed. clear document and return false
+			m_Context->ClearAll();
+			return false;
+		}
+
+		// sync data list to our list
+		m_ObjGroups.clear();
+		m_Obj3dObjects.clear();
+		m_ObjMeshs.clear();
+		m_ObjMaterials.clear();
+		m_ObjTextures.clear();
+		for (const auto& fileobj : reader.GetFileObjects()) {
+			if (fileobj.ObjPtr == nullptr) continue;
+
+			switch (fileobj.ObjectCid) {
+				case LibCmo::CK2::CK_CLASSID::CKCID_GROUP:
+					m_ObjGroups.emplace_back(fileobj.CreatedObjectId);
+					break;
+				case LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT:
+					m_Obj3dObjects.emplace_back(fileobj.CreatedObjectId);
+					break;
+				case LibCmo::CK2::CK_CLASSID::CKCID_MESH:
+					m_ObjMeshs.emplace_back(fileobj.CreatedObjectId);
+					break;
+				case LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL:
+					m_ObjMaterials.emplace_back(fileobj.CreatedObjectId);
+					break;
+				case LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE:
+					m_ObjTextures.emplace_back(fileobj.CreatedObjectId);
+					break;
+			}
+		}
+
 		return true;
 	}
 
 	bool BMFile::Save(LibCmo::CKSTRING filename, LibCmo::CKINT compress_level) {
 		if (m_IsFreezed || m_IsReader) return false;
 
+		// create temp writer
+		LibCmo::CK2::CKFileWriter writer(m_Context);
+
+		// fill object data
+		for (const auto& id : m_ObjGroups) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+		for (const auto& id : m_Obj3dObjects) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+		for (const auto& id : m_ObjMeshs) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+		for (const auto& id : m_ObjMaterials) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+		for (const auto& id : m_ObjTextures) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+
+		// set compress level
+		m_Context->SetCompressionLevel(compress_level);
+
+		// save to file and detect error
+		LibCmo::CK2::CKERROR err = writer.Save(filename);
+
 		// set freezed to stop any change again.
 		// aka, only allow save once.
 		m_IsFreezed = true;
-		return true;
+
+		// return with error detect.
+		return err == LibCmo::CK2::CKERROR::CKERR_OK;
 	}
 
 	LibCmo::CK2::ObjImpls::CKObject* BMFile::GetObjectPtr(LibCmo::CK2::CK_ID objid) {

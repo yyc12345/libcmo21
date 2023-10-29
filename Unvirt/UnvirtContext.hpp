@@ -4,9 +4,7 @@
 #include "StructFormatter.hpp"
 #include "CmdHelper.hpp"
 
-#include <VTAll.hpp>
-#include <CK2/CKContext.hpp>
-#include <CK2/CKFile.hpp>
+#include <VTUserAll.hpp>
 
 #include <cstdio>
 #include <iostream>

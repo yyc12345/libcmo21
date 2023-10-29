@@ -9,6 +9,7 @@ Use VTAll.hpp for project internal including.
 #include "VTAll.hpp"
 #include "CK2/CKContext.hpp"
 #include "CK2/CKStateChunk.hpp"
+#include "CK2/CKFile.hpp"
 
 // Data handlers
 #include "CK2/DataHandlers/CKBitmapHandler.hpp"

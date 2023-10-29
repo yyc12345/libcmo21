@@ -617,6 +617,43 @@ namespace Unvirt::Context {
 	void Unvirt::Context::UnvirtContext::ProcTest(const CmdHelper::ArgumentsMap* amap) {
 #if defined(LIBCMO_BUILD_DEBUG)
 		// MARK: Add the debug code here.
+		
+		// todo: temporaryly write Transparent Column Fixer code.
+		// move to independent app in future.
+		
+		// check pre-requirement
+		if (!HasOpenedFile()) {
+			PrintCommonError("No loaded file.");
+			return;
+		}
+		if (!m_IsShallowRead) {
+			PrintCommonError("Transparent Column Fixer only accept shallow loaded file.");
+			return;
+		}
+
+		// iterate objects
+		LibCmo::CKDWORD expcode = static_cast<LibCmo::CKDWORD>(LibCmo::CK2::CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_TEXONLY);
+		LibCmo::CKDWORD modcode = static_cast<LibCmo::CKDWORD>(LibCmo::CK2::CK_STATESAVEFLAGS_TEXTURE::CK_STATESAVE_OLDTEXONLY);
+		for (const auto& cobj : m_FileReader->GetFileObjects()) {
+			if (cobj.ObjectCid == LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE && cobj.Data != nullptr) {
+				LibCmo::CK2::CKFileObject& obj = const_cast<LibCmo::CK2::CKFileObject&>(cobj);
+				obj.Data->StartRead();
+				auto chunkinfo = obj.Data->GetIdentifiersProfile();
+				obj.Data->StopRead();
+
+				// find CK_STATESAVE_TEXONLY and change it to CK_STATESAVE_OLDTEXONLY
+				for (const auto& entry : chunkinfo) {
+					if (entry.m_Identifier == expcode) {
+						LibCmo::CKDWORD* p = static_cast<LibCmo::CKDWORD*>(entry.m_DataPtr);
+						p -= 2;
+
+						if (*p == expcode) {
+							*p = modcode;
+						}
+					}
+				}
+			}
+		}
 
 #else
 		PrintCommonError("Test command only available in Debug mode.");

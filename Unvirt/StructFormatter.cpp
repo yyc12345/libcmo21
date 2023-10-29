@@ -122,7 +122,7 @@ namespace Unvirt::StructFormatter {
 
 		LibCmo::CKDWORD count = obj->GetObjectCount();
 		fprintf(stdout, "Group Object Count: %" PRIuCKDWORD "\n", count);
-		fputs("Id\tType\tObject Pointer\tName\n", stdout);
+		fputs("CKID\tType\tObject\tName\n", stdout);
 		for (LibCmo::CKDWORD i = 0; i < count; ++i) {
 			LibCmo::CK2::ObjImpls::CKBeObject* beobj = obj->GetObject(i);
 
