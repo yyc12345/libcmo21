@@ -127,22 +127,40 @@ namespace IronPad {
 
 		// ========== CORE DUMP ==========
 		// prepare frame. setup correct fields
+		// references: 
+		// https://github.com/rust-lang/backtrace-rs/blob/9ed25b581cfd2ee60e5a3b9054fd023bf6dced90/src/backtrace/dbghelp.rs
+		// https://sourceforge.net/p/predef/wiki/Architectures/
 		DWORD machine_type = 0;
 		STACKFRAME64 frame;
 		memset(&frame, 0, sizeof(frame));
 #if defined(_M_IX86) || defined(__i386__)
+		// x86
 		machine_type = IMAGE_FILE_MACHINE_I386;
 		frame.AddrPC.Offset = context->Eip;
 		frame.AddrStack.Offset = context->Esp;
 		frame.AddrFrame.Offset = context->Ebp;
-#elif defined(_M_IX64) || defined(__amd64__)
+#elif defined(_M_AMD64) || defined(__amd64__)
+		// amd64
 		machine_type = IMAGE_FILE_MACHINE_AMD64;
 		frame.AddrPC.Offset = context->Rip;
 		frame.AddrStack.Offset = context->Rsp;
 		frame.AddrFrame.Offset = context->Rbp;
+#elif defined(_M_ARM) || defined(__arm__)
+		// arm (32bit)
+		machine_type = IMAGE_FILE_MACHINE_ARMNT;
+		frame.AddrPC.Offset = context->Pc;
+		frame.AddrStack.Offset = context->Sp;
+		frame.AddrFrame.Offset = context->R11;
+#elif defined(_M_ARM64) || defined(__aarch64__)
+		// arm64
+		machine_type = IMAGE_FILE_MACHINE_ARM64;
+		frame.AddrPC.Offset = context->Pc;
+		frame.AddrStack.Offset = context->Sp;
+		frame.AddrFrame.Offset = context->DUMMYUNIONNAME.DUMMYSTRUCTNAME.Fp;
 #else
 #error "Unsupported platform"
 		//IA-64 anybody?
+
 #endif
 		frame.AddrPC.Mode = AddrModeFlat;
 		frame.AddrStack.Mode = AddrModeFlat;
@@ -259,7 +277,7 @@ namespace IronPad {
 						const char* op =
 							rec->ExceptionInformation[0] == 0 ? "read" :
 							rec->ExceptionInformation[0] == 1 ? "written" : "executed";
-						fprintf(fs, "The data at memory address 0x%08x could not be %s.\n",
+						fprintf(fs, "The data at memory address 0x%016" PRIxPTR " could not be %s.\n",
 							rec->ExceptionInformation[1], op);
 					}
 				}

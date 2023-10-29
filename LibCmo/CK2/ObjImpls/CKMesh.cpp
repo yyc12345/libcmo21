@@ -185,7 +185,7 @@ namespace LibCmo::CK2::ObjImpls {
 			}
 
 			// calc real consumed size
-			CKDWORD realConsumedSize = rawbuf - static_cast<CKBYTE*>(buf.get());
+			CKDWORD realConsumedSize = static_cast<CKDWORD>(rawbuf - static_cast<CKBYTE*>(buf.get()));
 			// assign to reserved length field
 			// length also include length indicator it self
 			*reservedBufDwordSize = realConsumedSize / CKSizeof(CKDWORD);
