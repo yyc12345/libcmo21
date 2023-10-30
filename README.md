@@ -1,6 +1,7 @@
 # libcmo21
 
-The Library for CMO File Read/Write. Also the Minimalist Virtools Environment.
+The Library for CMO (also accept NMO, VMO and NMS) File Read/Write. Also the Minimalist Virtools Environment.  
+Write with one Library and Load Virtools File Everywhere.
 
 ## Status
 
@@ -43,9 +44,9 @@ There are 3 lists which indicate our accept guideline.
 
 These features will be accepted as soon as possible.
 
-* The bug fix of Virtools file reader.
+* The bug fix of any existing code.
 * Class layout, `Load()` functions of following `CKObject` based classes.
-  - `CK3dEntity`
+  - None
 * Class layout, and `LoadData()` functions of following `CKBaseManager` based classes.
   - `CKAttributeManager`
 
@@ -53,8 +54,8 @@ These features will be accepted as soon as possible.
 
 These features are in plan, but not urge to merge.
 
-* The `CK_ID` remap system of Reader & Writer.
-* Any Save functions.
+* The `CK_ID` remap system of Reader.
+* CK3dEntity hierarchy system.
 * Other CK classes implementations.
 * Non-Virtools 2.1 implementations.
 

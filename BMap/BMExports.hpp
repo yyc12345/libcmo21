@@ -130,7 +130,7 @@ LIBCMO_EXPORT bool BMMeshTrans_PrepareFaceVertexIndices(BMPARAM_MESHTRANS_DECL(t
 LIBCMO_EXPORT bool BMMeshTrans_PrepareFaceNormalIndices(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CKDWORD*, out_mem));
 LIBCMO_EXPORT bool BMMeshTrans_PrepareFaceUVIndices(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CKDWORD*, out_mem));
 LIBCMO_EXPORT bool BMMeshTrans_PrepareFaceMtlSlot(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CKDWORD*, out_mem));
-LIBCMO_EXPORT bool BMMeshTrans_Parse(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CK2::ObjImpls::CKMesh*, write_into_mesh));
+LIBCMO_EXPORT bool BMMeshTrans_Parse(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(BMap::BMFile*, bmfile), BMPARAM_IN(LibCmo::CK2::CK_ID, objid));
 
 #pragma endregion
 

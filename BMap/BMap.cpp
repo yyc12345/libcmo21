@@ -107,12 +107,16 @@ namespace BMap {
 		return m_FaceVertexs.data();
 	}
 
-	bool BMMeshTransition::Parse(LibCmo::CK2::ObjImpls::CKMesh* write_into_mesh) {
-		if (m_IsParsed || write_into_mesh == nullptr) return false;
+	bool BMMeshTransition::Parse(BMFile* bmfile, LibCmo::CK2::CK_ID mesh_id) {
+		// check basic status
+		if (m_IsParsed || bmfile == nullptr) return false;
 		if (!m_IsVertexOK || !m_IsNormalOK || !m_IsUVOK || !m_IsFaceOK || !m_IsMtlSlotOK) return false;
-		m_IsParsed = true;
+		// check pointer assign
+		LibCmo::CK2::ObjImpls::CKObject* writing_mesh = bmfile->GetObjectPtr(mesh_id);
+		if (writing_mesh == nullptr || writing_mesh->GetClassID() != LibCmo::CK2::CK_CLASSID::CKCID_MESH) return false;
 
 		// do parse
+		m_IsParsed = true;
 		DoRealParse();
 
 		// check vertex overflow
@@ -125,7 +129,7 @@ namespace BMap {
 		}
 
 		// apply to mesh
-		ApplyToMesh(write_into_mesh);
+		ApplyToMesh(bmfile, static_cast<LibCmo::CK2::ObjImpls::CKMesh*>(writing_mesh));
 
 		return true;
 	}
@@ -139,7 +143,7 @@ namespace BMap {
 
 		// iterate face
 		for (size_t faceid = 0; faceid < face_size; ++faceid) {
-			LibCmo::CKDWORD idx[3];
+			LibCmo::CKDWORD idx[3] { 0, 0, 0 };
 			for (int j = 0; j < 3; ++j) {
 				// create one first
 				TransitionVertex tvec(
@@ -163,7 +167,7 @@ namespace BMap {
 		}
 	}
 
-	void BMMeshTransition::ApplyToMesh(LibCmo::CK2::ObjImpls::CKMesh* write_into_mesh) {
+	void BMMeshTransition::ApplyToMesh(BMFile* bmfile, LibCmo::CK2::ObjImpls::CKMesh* write_into_mesh) {
 		LibCmo::CKDWORD vec_count = static_cast<LibCmo::CKDWORD>(m_ProcVertexs.size()),
 			face_count = static_cast<LibCmo::CKDWORD>(m_ProcFaces.size()),
 			mtl_count = static_cast<LibCmo::CKDWORD>(m_MtlSlots.size());
@@ -209,13 +213,12 @@ namespace BMap {
 		}
 
 		// set mtl slot
-		LibCmo::CK2::CKContext* correspondingCtx = write_into_mesh->GetCKContext();
 		write_into_mesh->SetMaterialSlotCount(mtl_count);
 		LibCmo::CK2::ObjImpls::CKMaterial** pMtlSlot = write_into_mesh->GetMaterialSlots();
 		for (LibCmo::CKDWORD i = 0; i < mtl_count; ++i) {
 			// convert id to CKMaterial* and check its type
-			LibCmo::CK2::ObjImpls::CKObject* mtlptr = correspondingCtx->GetObject(m_MtlSlots[i]);
-			if (mtlptr != nullptr && LibCmo::CK2::CKIsChildClassOf(mtlptr->GetClassID(), LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL)) {
+			LibCmo::CK2::ObjImpls::CKObject* mtlptr = bmfile->GetObjectPtr(m_MtlSlots[i]);
+			if (mtlptr != nullptr && mtlptr->GetClassID() == LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL) {
 				*(pMtlSlot++) = static_cast<LibCmo::CK2::ObjImpls::CKMaterial*>(mtlptr);
 			} else {
 				*(pMtlSlot++) = nullptr;
@@ -228,13 +231,13 @@ namespace BMap {
 
 #pragma region BMfile
 
-	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING* encodings, bool is_reader) :
-		m_IsReader(is_reader), m_IsFreezed(false) {
+	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING* encodings, bool is_loader) :
+		m_IsInitError(false), m_IsLoader(is_loader), m_HasLoaded(false), m_HasSaved(false), m_Context(nullptr) {
 		m_Context = new LibCmo::CK2::CKContext();
 		// set temp folder and texture folder
 		auto pm = m_Context->GetPathManager();
-		m_IsFreezed = m_IsFreezed || !pm->AddPath(texture_folder);
-		m_IsFreezed = m_IsFreezed || !pm->SetTempFolder(temp_folder);
+		m_IsInitError = m_IsInitError || !pm->AddPath(texture_folder);
+		m_IsInitError = m_IsInitError || !pm->SetTempFolder(temp_folder);
 		// set encoding
 		LibCmo::XContainer::XArray<LibCmo::XContainer::XString> cache;
 		for (LibCmo::CKDWORD i = 0; i < encoding_count; ++i) {
@@ -253,12 +256,8 @@ namespace BMap {
 		delete m_Context;
 	}
 
-	bool BMFile::IsFreezed() {
-		return m_IsFreezed;
-	}
-
 	bool BMFile::Load(LibCmo::CKSTRING filename) {
-		if (m_IsFreezed || !m_IsReader) return false;
+		if (!CanExecLoad()) return false;
 		
 		// create temp ckfile and load
 		LibCmo::CK2::CKFileReader reader(m_Context);
@@ -299,11 +298,12 @@ namespace BMap {
 			}
 		}
 
+		m_HasLoaded = true;
 		return true;
 	}
 
 	bool BMFile::Save(LibCmo::CKSTRING filename, LibCmo::CKINT compress_level) {
-		if (m_IsFreezed || m_IsReader) return false;
+		if (!CanExecSave()) return false;
 
 		// create temp writer
 		LibCmo::CK2::CKFileWriter writer(m_Context);
@@ -331,16 +331,9 @@ namespace BMap {
 		// save to file and detect error
 		LibCmo::CK2::CKERROR err = writer.Save(filename);
 
-		// set freezed to stop any change again.
-		// aka, only allow save once.
-		m_IsFreezed = true;
-
 		// return with error detect.
+		m_HasSaved = true;
 		return err == LibCmo::CK2::CKERROR::CKERR_OK;
-	}
-
-	LibCmo::CK2::ObjImpls::CKObject* BMFile::GetObjectPtr(LibCmo::CK2::CK_ID objid) {
-		return m_Context->GetObject(objid);;
 	}
 
 	LibCmo::CKDWORD BMFile::GetGroupCount() { return CommonGetObjectCount(m_ObjGroups); }

@@ -105,7 +105,7 @@ bool BMFile_Load(
 
 	// create a now one and try to load data.
 	std::unique_ptr<BMap::BMFile> file(new BMap::BMFile(temp_folder, texture_folder, encoding_count, encodings, false));
-	if (file->IsFreezed()) return false;
+	if (file->IsInitError()) return false;
 	if (!file->Load(file_name)) return false;
 
 	// add into list and return
@@ -124,7 +124,7 @@ bool BMFile_Create(
 
 	// create a now one
 	std::unique_ptr<BMap::BMFile> file(new BMap::BMFile(temp_folder, texture_folder, encoding_count, encodings, false));
-	if (file->IsFreezed()) return false;
+	if (file->IsInitError()) return false;
 
 	// add into list and return if success
 	g_AllBMFiles.emplace(file.get());
@@ -307,9 +307,10 @@ bool BMMeshTrans_PrepareFaceMtlSlot(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(L
 	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareFaceMtlSlot());
 	return BMPARAM_OUT_VAL(out_mem) != nullptr;
 }
-bool BMMeshTrans_Parse(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CK2::ObjImpls::CKMesh*, write_into_mesh)) {
+bool BMMeshTrans_Parse(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(BMap::BMFile*, bmfile), BMPARAM_IN(LibCmo::CK2::CK_ID, objid)) {
 	if (!CheckBMMeshTrans(trans)) return false;
-	return trans->Parse(write_into_mesh);
+	if (!CheckBMFile(bmfile)) return false;
+	return trans->Parse(bmfile, objid);
 }
 
 #pragma endregion
