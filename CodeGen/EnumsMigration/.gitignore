@@ -1,3 +1,7 @@
+# ===== Result =====
+dest/*
+!dest/*.gitkeep
+
 # Antlr output
 *.interp
 *.tokens

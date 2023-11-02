@@ -7,16 +7,6 @@ out/
 temp/
 .vscode/
 
-CodeGen/*.hpp
-CodeGen/*.cpp
-CodeGen/EnumsMigration/dest/*.hpp
-CodeGen/EnumsMigration/dest/*.cpp
-CodeGen/EnumsMigration/dest/*.py
-
-Tools/*.bin
-Tools/*.obj
-Tools/*.mtl
-
 ## CMake Banned
 CMakeLists.txt.user
 CMakeCache.txt
