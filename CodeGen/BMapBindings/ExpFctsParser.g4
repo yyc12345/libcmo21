@@ -16,6 +16,6 @@ fctArg
     ;
 
 varType
-    : EXPFCTS_IDENTIFIER ('::' EXPFCTS_IDENTIFIER)* '*'? 
+    : EXPFCTS_IDENTIFIER ('::' EXPFCTS_IDENTIFIER)* '*'* 
     ;
 

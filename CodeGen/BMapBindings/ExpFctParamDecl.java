@@ -3,10 +3,12 @@ public class ExpFctParamDecl {
 	
 	public VariableType mVarType;
 	public String mVarName;
+	public boolean mIsInput;
 	
-	public ExpFctParamDecl(VariableType vtype, String vname) {
-		mVarType = vtype;
-		mVarName = vname;
+	public ExpFctParamDecl() {
+		mVarType = new VariableType();
+		mVarName = "";
+		mIsInput = true;
 	}
 	
 }

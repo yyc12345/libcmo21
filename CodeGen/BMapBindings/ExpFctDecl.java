@@ -6,9 +6,9 @@ public class ExpFctDecl {
 	public VariableType mFctRetType;
 	public Vector<ExpFctParamDecl> mFctParams;
 	
-	public ExpFctDecl(String fct_name, VariableType ret_type) {
-		mFctName = fct_name;
-		mFctRetType = ret_type;
+	public ExpFctDecl() {
+		mFctName = "";
+		mFctRetType = new VariableType();
 		mFctParams = new Vector<ExpFctParamDecl>();
 	}
 	
