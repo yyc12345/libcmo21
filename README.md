@@ -45,10 +45,6 @@ There are 3 lists which indicate our accept guideline.
 These features will be accepted as soon as possible.
 
 * The bug fix of any existing code.
-* Class layout, `Load()` functions of following `CKObject` based classes.
-  - None
-* Class layout, and `LoadData()` functions of following `CKBaseManager` based classes.
-  - `CKAttributeManager`
 
 ### Not Urgent Features
 

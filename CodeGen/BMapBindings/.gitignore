@@ -2,6 +2,9 @@
 *.interp
 *.tokens
 
+ExpFctsLexer*.java
+ExpFctsParser*.java
+
 # ===== Python =====
 # Byte-compiled / optimized / DLL files
 __pycache__/
