@@ -33,7 +33,14 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 
 	@Override
 	public void exitFctDecl(ExpFctsParser.FctDeclContext ctx) {
+		// set name
 		mCurrentFct.mFctName = ctx.EXPFCTS_IDENTIFIER().getText();
+		// check return type
+		if (!mCurrentFct.mFctRetType.isValid() || mCurrentFct.mFctRetType.isPointer()
+				|| !mCurrentFct.mFctRetType.getBaseType().equals("bool"))
+			throw new IllegalArgumentException("invalid interface function return type. must be bool.");
+		
+		// add into list
 		mFctList.add(mCurrentFct);
 		mCurrentFct = null;
 	}
@@ -42,6 +49,7 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 	public void exitFctArgFileDecl(ExpFctsParser.FctArgFileDeclContext ctx) {
 		ExpFctParamDecl decl = new ExpFctParamDecl();
 		decl.mVarName = ctx.EXPFCTS_IDENTIFIER().getText();
+		decl.mVarDesc = "The pointer to corresponding BMFile.";
 		decl.mIsInput = true;
 		decl.mVarType.fromCType("BMap::BMFile*");
 		mCurrentFct.mFctParams.add(decl);
@@ -51,6 +59,7 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 	public void exitFctArgMeshTransDecl(ExpFctsParser.FctArgMeshTransDeclContext ctx) {
 		ExpFctParamDecl decl = new ExpFctParamDecl();
 		decl.mVarName = ctx.EXPFCTS_IDENTIFIER().getText();
+		decl.mVarDesc = "The pointer to corresponding BMMeshTransition.";
 		decl.mIsInput = true;
 		decl.mVarType.fromCType("BMap::BMMeshTransition*");
 		mCurrentFct.mFctParams.add(decl);
@@ -60,12 +69,14 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 	public void exitFctArgObjDecl(ExpFctsParser.FctArgObjDeclContext ctx) {
 		ExpFctParamDecl first_decl = new ExpFctParamDecl();
 		first_decl.mVarName = ctx.EXPFCTS_IDENTIFIER(0).getText();
+		first_decl.mVarDesc = "The pointer to corresponding BMFile.";
 		first_decl.mIsInput = true;
 		first_decl.mVarType.fromCType("BMap::BMFile*");
 		mCurrentFct.mFctParams.add(first_decl);
 
 		ExpFctParamDecl second_decl = new ExpFctParamDecl();
 		second_decl.mVarName = ctx.EXPFCTS_IDENTIFIER(1).getText();
+		second_decl.mVarDesc = "The CKID of object you accessing.";
 		second_decl.mIsInput = true;
 		second_decl.mVarType.fromCType("LibCmo::CK2::CK_ID");
 		mCurrentFct.mFctParams.add(second_decl);
@@ -80,7 +91,7 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 	public void exitFctArgParamIn(ExpFctsParser.FctArgParamInContext ctx) {
 		mCurrentParam.mVarName = ctx.EXPFCTS_IDENTIFIER().getText();
 		mCurrentParam.mIsInput = true;
-		
+
 		mCurrentFct.mFctParams.add(mCurrentParam);
 		mCurrentParam = null;
 	}
@@ -95,8 +106,8 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 		mCurrentParam.mVarName = ctx.EXPFCTS_IDENTIFIER().getText();
 		mCurrentParam.mIsInput = false;
 		// set to its pointer type
-		//mCurrentParam.mVarType = mCurrentParam.mVarType.getPointerOfThis();
-		
+		// mCurrentParam.mVarType = mCurrentParam.mVarType.getPointerOfThis();
+
 		mCurrentFct.mFctParams.add(mCurrentParam);
 		mCurrentParam = null;
 	}
@@ -110,7 +121,7 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 		if (ctx.EXPFCTS_STAR() != null) {
 			ctype += String.join("", Collections.nCopies(ctx.EXPFCTS_STAR().size(), "*"));
 		}
-		
+
 		if (!mCurrentFct.mFctRetType.isValid()) {
 			// fill function ret type first
 			mCurrentFct.mFctRetType.fromCType(ctype);

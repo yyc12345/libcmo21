@@ -20,7 +20,7 @@ public class VariableType {
 	}
 
 	private VariableType(Vector<String> base_type, int pointer_level) {
-		mBaseType.addAll(base_type);
+		mBaseType = (Vector<String>) base_type.clone();
 		mPointerLevel = pointer_level;
 	}
 
@@ -62,6 +62,10 @@ public class VariableType {
 
 	public boolean isPointer() {
 		return mPointerLevel != 0;
+	}
+	
+	public int getPointerLevel() {
+		return mPointerLevel;
 	}
 
 	public boolean isValid() {
