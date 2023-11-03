@@ -6,17 +6,25 @@ bm_CKSTRING = ctypes.c_char_p
 bm_CKSTRING_p = ctypes.POINTER(bm_CKSTRING)
 bm_CKDWORD = ctypes.c_uint32
 bm_CKDWORD_p = ctypes.POINTER(bm_CKDWORD)
+bm_CKDWORD_pp = ctypes.POINTER(bm_CKDWORD_p)
 bm_CKWORD = ctypes.c_uint16
 bm_CKWORD_p = ctypes.POINTER(bm_CKWORD)
+bm_CKWORD_pp = ctypes.POINTER(bm_CKWORD_p)
 bm_CKID = ctypes.c_uint32
 bm_CKID_p = ctypes.POINTER(bm_CKID)
+bm_CKID_pp = ctypes.POINTER(bm_CKID_p)
 bm_CKFLOAT = ctypes.c_float
 bm_CKFLOAT_p = ctypes.POINTER(bm_CKFLOAT)
-bm_CKINT = types.c_int32
+bm_CKINT = ctypes.c_int32
+bm_CKBYTE = ctypes.c_uint8
+bm_CKBYTE_p = ctypes.POINTER(bm_CKBYTE)
 
 bm_enum = bm_CKDWORD
+bm_enum_p = ctypes.POINTER(bm_enum)
 bm_bool = ctypes.c_bool
+bm_bool_p = ctypes.POINTER(bm_bool)
 bm_void_p = ctypes.c_void_p
+bm_void_pp = ctypes.POINTER(ctypes.c_void_p)
 
 class bm_VxVector2(ctypes.Structure):
     _fields_ = [
@@ -24,6 +32,7 @@ class bm_VxVector2(ctypes.Structure):
         ('y', bm_CKFLOAT),
     ]
 bm_VxVector2_p = ctypes.POINTER(bm_VxVector2)
+bm_VxVector2_pp = ctypes.POINTER(bm_VxVector2_p)
 class bm_VxVector3(ctypes.Structure):
     _fields_ = [
         ('x', bm_CKFLOAT),
@@ -31,11 +40,19 @@ class bm_VxVector3(ctypes.Structure):
         ('z', bm_CKFLOAT),
     ]
 bm_VxVector3_p = ctypes.POINTER(bm_VxVector3)
-
+class bm_VxColor(ctypes.Structure):
+    _fields_ = [
+        ('r', bm_CKFLOAT),
+        ('g', bm_CKFLOAT),
+        ('b', bm_CKFLOAT),
+        ('a', bm_CKFLOAT),
+    ]
+bm_VxColor_p = ctypes.POINTER(bm_VxColor)
 class bm_VxMatrix(ctypes.Structure):
     _fields_ = list(
         (f'i{idx}', bm_CKFLOAT) for idx in range(16)
     )
+bm_VxMatrix_p = ctypes.POINTER(bm_VxMatrix)
 
 #endregion
 
@@ -52,10 +69,10 @@ except:
 def is_bmap_available() -> bool:
     return _g_BMapModule is not None
 
-def _create_bmap_func(fct_name: str, fct_params: list) -> None:
+def _create_bmap_func(fct_name: str, fct_params: list[ctypes._CData]) -> ctypes._FuncPointer:
     if _g_BMapModule is None: return None
     
-    cache = getattr(_g_BMapModule, fct_name)
+    cache: ctypes._FuncPointer = getattr(_g_BMapModule, fct_name)
     cache.argtypes = fct_params
     cache.restype = bm_bool
     return cache

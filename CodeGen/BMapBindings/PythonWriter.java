@@ -13,6 +13,7 @@ public class PythonWriter {
 		Map<String, String> cache = new HashMap<String, String>();
 		cache.put("CKSTRING", "CKSTRING");
 		cache.put("CKDWORD", "CKDWORD");
+		cache.put("CKWORD", "CKWORD");
 		cache.put("CKINT", "CKINT");
 		cache.put("bool", "bool");
 		cache.put("CKFLOAT", "CKFLOAT");
@@ -60,6 +61,11 @@ public class PythonWriter {
 		CommonHelper.writeSnippet(writer, "snippets/header.py");
 
 		// write function decls
+		
+		helper.puts("");
+		helper.puts("#region Function Defines");
+		helper.puts("");
+		
 		for (ExpFctDecl fctdecl : data) {
 			// write annotation
 			// function name
@@ -79,6 +85,10 @@ public class PythonWriter {
 					.stream().map(value -> pythonTypeGetter(value)).collect(Collectors.joining(", ")));
 		}
 
+		helper.puts("");
+		helper.puts("#endregion");
+		helper.puts("");
+		
 		writer.close();
 	}
 

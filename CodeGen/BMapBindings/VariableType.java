@@ -73,7 +73,7 @@ public class VariableType {
 	}
 
 	public VariableType getPointerOfThis() {
-		return new VariableType(mBaseType, mPointerLevel);
+		return new VariableType(mBaseType, mPointerLevel + 1);
 	}
 
 }
