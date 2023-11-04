@@ -2,6 +2,12 @@ import ctypes, os
 
 #region Type Defines
 
+class BMapException(Exception):
+    """
+    The exception thrown by BMap bindings.
+    """
+    pass
+
 bm_CKSTRING = ctypes.c_char_p
 bm_CKSTRING_p = ctypes.POINTER(bm_CKSTRING)
 bm_CKDWORD = ctypes.c_uint32
@@ -69,12 +75,18 @@ except:
 def is_bmap_available() -> bool:
     return _g_BMapModule is not None
 
-def _create_bmap_func(fct_name: str, fct_params: list[ctypes._CData]) -> ctypes._FuncPointer:
+def _bmap_error_check(result: bm_bool, func, args):
+    if not bm_bool.value:
+        raise BMapException("BMap operation failed.")
+    return result
+
+def _create_bmap_func(fct_name: str, fct_params: list[ctypes._SimpleCData]) -> ctypes._CFuncPtr:
     if _g_BMapModule is None: return None
     
-    cache: ctypes._FuncPointer = getattr(_g_BMapModule, fct_name)
+    cache: ctypes._CFuncPtr = getattr(_g_BMapModule, fct_name)
     cache.argtypes = fct_params
     cache.restype = bm_bool
+    cache.errcheck = _bmap_error_check
     return cache
 
 #endregion
