@@ -1,8 +1,9 @@
 import ctypes, typing, atexit
-from . import bmap, virtools_types
+import bmap, virtools_types
 
 #region Basic Class Defines
 
+g_InvalidPtr: bmap.bm_void_p = bmap.bm_void_p(0)
 g_InvalidCKID: int = 0
 g_BMapEncoding: str = "utf-8"
 
@@ -10,16 +11,19 @@ class _AbstractPointer():
     __mRawPointer: int
 
     def __init__(self, raw_pointer: bmap.bm_void_p):
-        if raw_pointer.value is None:
-            self.__mRawPointer = 0
-        else:
-            self.__mRawPointer = raw_pointer.value
+        self._set_pointer(raw_pointer)
 
     def _is_valid(self) -> bool:
         return self.__mRawPointer != 0
 
     def _get_pointer(self) -> bmap.bm_void_p:
         return bmap.bm_void_p(self.__mRawPointer)
+    
+    def _set_pointer(self, raw_pointer: bmap.bm_void_p):
+        if raw_pointer.value is None:
+            self.__mRawPointer = 0
+        else:
+            self.__mRawPointer = raw_pointer.value
 
     def __eq__(self, obj: object) -> bool:
         if isinstance(obj, self.__class__):
@@ -83,54 +87,6 @@ because these resources are sotred in BMFileReader, BMFileWriter, and BMMeshTran
 We just provide them as a visitor.
 """
 
-class BMFileReader(_AbstractPointer):
-    def __init__(self, file_name: str, temp_folder: str, texture_folder: str, encodings: tuple[str]):
-        pass
-
-    def __enter__(self):
-        return self
-    
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.dispose()
-    
-    def dispose(self) -> None:
-        if self.is_valid():
-            bmap.BMFile_Free(self._get_pointer())
-    
-class BMFileWriter(_AbstractPointer):
-    def __init__(self, temp_folder: str, texture_folder: str, encodings: tuple[str]):
-        pass
-
-    def __enter__(self):
-        return self
-    
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.dispose()
-    
-    def save(self, file_name: str, compress_level: int) -> None:
-        pass
-
-    def dispose(self) -> None:
-        if self.is_valid():
-            bmap.BMFile_Free(self._get_pointer())
-    
-class BMMeshTrans(_AbstractPointer):
-    def __init__(self):
-        ptr: bmap.bm_void_p = bmap.bm_void_p()
-        bmap.BMMeshTrans_New(ctypes.byref(ptr))
-        _AbstractPointer.__init__(ptr)
-        
-    def __enter__(self):
-        return self
-    
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.dispose()
-    
-    def dispose(self) -> None:
-        if self.is_valid():
-            bmap.BMMeshTrans_Delete(self._get_pointer())
-    
-
 class BMObject(_AbstractCKObject):
     def get_name(self) -> str | None:
         name: bmap.bm_CKSTRING = bmap.bm_CKSTRING()
@@ -147,9 +103,6 @@ class BMObject(_AbstractCKObject):
         else:
             name = bmap.bm_CKSTRING(name.encode(g_BMapEncoding))
         bmap.BMObject_SetName(self._get_pointer(), self._get_ckid(), name)
-
-class BMGroup(BMObject):
-    pass
 
 class BMTexture(BMObject):
     pass
@@ -198,4 +151,116 @@ class BM3dObject(BMObject):
         visb: bmap.bm_bool = bmap.bm_bool(visb_)
         bmap.BM3dObject_SetVisibility(self._get_pointer(), self._get_ckid(), visb)
 
+class BMGroup(BMObject):
+    pass
+
+class BMFileReader(_AbstractPointer):
+    def __init__(self, file_name_: str, temp_folder_: str, texture_folder_: str, encodings_: tuple[str]):
+        # create param
+        file_name: bmap.bm_CKSTRING = bmap.bm_CKSTRING(file_name_.encode(g_BMapEncoding))
+        temp_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(temp_folder_.encode(g_BMapEncoding))
+        texture_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(texture_folder_.encode(g_BMapEncoding))
+        encoding_count: bmap.bm_CKDWORD = bmap.bm_CKDWORD(len(encodings_))
+        encodings: ctypes.Array = (bmap.bm_CKSTRING * len(encodings_))(
+            *(strl.encode(g_BMapEncoding) for strl in encodings_)
+        )
+        out_file: bmap.bm_void_p = bmap.bm_void_p()
+
+        # exec
+        bmap.BMFile_Load(
+            file_name, temp_folder, texture_folder, encoding_count, encodings,
+            ctypes.byref(out_file)
+        )
+
+        # init self
+        _AbstractPointer.__init__(self, out_file)
+
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.dispose()
+    
+    def dispose(self) -> None:
+        if self._is_valid():
+            bmap.BMFile_Free(self._get_pointer())
+            self._set_pointer(g_InvalidPtr)
+
+    def iterate_groups(self) -> typing.Iterator[BMGroup]:
+        csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
+        bmap.BMFile_GetGroupCount(self._get_pointer(), ctypes.byref(csize))
+
+        cidx: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
+        retid: bmap.bm_CKID = bmap.bm_CKID()
+        for i in range(csize.value):
+            cidx.value = i
+            bmap.BMFile_GetGroup(self._get_pointer(), cidx, ctypes.byref(retid))
+            yield BMGroup(self._get_pointer(), retid)
+    
+    def iterate_3dobjects(self) -> typing.Iterator[BM3dObject]:
+        csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
+        bmap.BMFile_Get3dObjectCount(self._get_pointer(), ctypes.byref(csize))
+
+        cidx: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
+        retid: bmap.bm_CKID = bmap.bm_CKID()
+        for i in range(csize.value):
+            cidx.value = i
+            bmap.BMFile_Get3dObject(self._get_pointer(), cidx, ctypes.byref(retid))
+            yield BM3dObject(self._get_pointer(), retid)
+    
+class BMFileWriter(_AbstractPointer):
+    def __init__(self, temp_folder_: str, texture_folder_: str, encodings_: tuple[str]):
+        # create param
+        temp_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(temp_folder_.encode(g_BMapEncoding))
+        texture_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(texture_folder_.encode(g_BMapEncoding))
+        encoding_count: bmap.bm_CKDWORD = bmap.bm_CKDWORD(len(encodings_))
+        encodings: ctypes.Array = (bmap.bm_CKSTRING * len(encodings_))(
+            *(strl.encode(g_BMapEncoding) for strl in encodings_)
+        )
+        out_file: bmap.bm_void_p = bmap.bm_void_p()
+
+        # exec
+        bmap.BMFile_Create(
+            temp_folder, texture_folder, encoding_count, encodings,
+            ctypes.byref(out_file)
+        )
+
+        # init self
+        _AbstractPointer.__init__(self, out_file)
+
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.dispose()
+    
+    def save(self, file_name_: str, compress_level_: int) -> None:
+        # create param
+        file_name: bmap.bm_CKSTRING = bmap.bm_CKSTRING(file_name_.encode(g_BMapEncoding))
+        compress_level: bmap.bm_CKINT = bmap.bm_CKINT(compress_level_)
+        # exec
+        bmap.BMFile_Save(self._get_pointer(), file_name, compress_level)
+
+    def dispose(self) -> None:
+        if self._is_valid():
+            bmap.BMFile_Free(self._get_pointer())
+            self._set_pointer(g_InvalidPtr)
+    
+class BMMeshTrans(_AbstractPointer):
+    def __init__(self):
+        ptr: bmap.bm_void_p = bmap.bm_void_p()
+        bmap.BMMeshTrans_New(ctypes.byref(ptr))
+        _AbstractPointer.__init__(self, ptr)
+        
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.dispose()
+    
+    def dispose(self) -> None:
+        if self._is_valid():
+            bmap.BMMeshTrans_Delete(self._get_pointer())
+            self._set_pointer(g_InvalidPtr)
+    
 #endregion

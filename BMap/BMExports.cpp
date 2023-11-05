@@ -35,7 +35,7 @@ _Ty CheckGeneralObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possibl
 	// check id
 	LibCmo::CK2::ObjImpls::CKObject* obj = possible_bmfile->GetObjectPtr(possible_id);
 	// check id validation and class id
-	if (obj == nullptr || LibCmo::CK2::CKIsChildClassOf(obj->GetClassID(), expected_cid)) return nullptr;
+	if (obj == nullptr || !LibCmo::CK2::CKIsChildClassOf(obj->GetClassID(), expected_cid)) return nullptr;
 
 	return static_cast<_Ty>(obj);
 }
@@ -104,7 +104,7 @@ bool BMFile_Load(
 	if (!CheckInited()) return false;
 
 	// create a now one and try to load data.
-	std::unique_ptr<BMap::BMFile> file(new BMap::BMFile(temp_folder, texture_folder, encoding_count, encodings, false));
+	std::unique_ptr<BMap::BMFile> file(new BMap::BMFile(temp_folder, texture_folder, encoding_count, encodings, true));
 	if (file->IsInitError()) return false;
 	if (!file->Load(file_name)) return false;
 
