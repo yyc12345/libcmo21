@@ -55,7 +55,9 @@ class _AbstractCKObject(_AbstractPointer):
         
     def __hash__(self) -> int:
         return hash((self.__mRawPointer, self.__mCKID))
-    
+
+TCKObj = typing.TypeVar('TCKObj', bound = _AbstractCKObject)
+
 #endregion
 
 #region Valid Check, Init and Dispose
@@ -152,8 +154,23 @@ class BM3dObject(BMObject):
         bmap.BM3dObject_SetVisibility(self._get_pointer(), self._get_ckid(), visb)
 
 class BMGroup(BMObject):
-    pass
+    def add_object(self, member: BM3dObject) -> None:
+        bmap.BMGroup_AddObject(self._get_pointer(), self._get_ckid(), member._get_ckid())
 
+    def iterate_objects(self) -> typing.Iterator[BM3dObject]:
+        # get count
+        csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
+        bmap.BMGroup_GetObjectCount(self._get_pointer(), self._get_ckid(), ctypes.byref(csize))
+
+        # iterate list
+        cidx: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
+        retid: bmap.bm_CKID = bmap.bm_CKID()
+        for i in range(csize.value):
+            cidx.value = i
+            bmap.BMGroup_GetObject(self._get_pointer(), self._get_ckid(), cidx, ctypes.byref(retid))
+            # return visitor
+            yield BM3dObject(self._get_pointer(), retid)
+            
 class BMFileReader(_AbstractPointer):
     def __init__(self, file_name_: str, temp_folder_: str, texture_folder_: str, encodings_: tuple[str]):
         # create param
@@ -186,27 +203,57 @@ class BMFileReader(_AbstractPointer):
             bmap.BMFile_Free(self._get_pointer())
             self._set_pointer(g_InvalidPtr)
 
-    def iterate_groups(self) -> typing.Iterator[BMGroup]:
+    def __iterate_ckobjects(self, 
+        class_type: type[TCKObj],
+        count_getter: typing.Callable[[bmap.bm_void_p, bmap.bm_CKDWORD_p], bool],
+        obj_getter: typing.Callable[[bmap.bm_void_p, bmap.bm_CKDWORD, bmap.bm_CKID_p], bool]) -> typing.Iterator[TCKObj]:
+        # get size first
         csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
-        bmap.BMFile_GetGroupCount(self._get_pointer(), ctypes.byref(csize))
+        count_getter(self._get_pointer(), ctypes.byref(csize))
 
+        # iterate list
         cidx: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
         retid: bmap.bm_CKID = bmap.bm_CKID()
         for i in range(csize.value):
             cidx.value = i
-            bmap.BMFile_GetGroup(self._get_pointer(), cidx, ctypes.byref(retid))
-            yield BMGroup(self._get_pointer(), retid)
+            obj_getter(self._get_pointer(), cidx, ctypes.byref(retid))
+            # yield return constructed obj visitor
+            yield class_type(self._get_pointer(), retid)
+
+    def iterate_textures(self) -> typing.Iterator[BMTexture]:
+        return self.__iterate_ckobjects(
+            BMTexture,
+            bmap.BMFile_GetTextureCount,
+            bmap.BMFile_GetTexture
+        )
+    
+    def iterate_materials(self) -> typing.Iterator[BMMaterial]:
+        return self.__iterate_ckobjects(
+            BMMaterial,
+            bmap.BMFile_GetMaterialCount,
+            bmap.BMFile_GetMaterial
+        )
+    
+    def iterate_meshs(self) -> typing.Iterator[BMMesh]:
+        return self.__iterate_ckobjects(
+            BMMesh,
+            bmap.BMFile_GetMeshCount,
+            bmap.BMFile_GetMesh
+        )
     
     def iterate_3dobjects(self) -> typing.Iterator[BM3dObject]:
-        csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
-        bmap.BMFile_Get3dObjectCount(self._get_pointer(), ctypes.byref(csize))
-
-        cidx: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
-        retid: bmap.bm_CKID = bmap.bm_CKID()
-        for i in range(csize.value):
-            cidx.value = i
-            bmap.BMFile_Get3dObject(self._get_pointer(), cidx, ctypes.byref(retid))
-            yield BM3dObject(self._get_pointer(), retid)
+        return self.__iterate_ckobjects(
+            BM3dObject,
+            bmap.BMFile_Get3dObjectCount,
+            bmap.BMFile_Get3dObject
+        )
+    
+    def iterate_groups(self) -> typing.Iterator[BMGroup]:
+        return self.__iterate_ckobjects(
+            BMGroup,
+            bmap.BMFile_GetGroupCount,
+            bmap.BMFile_GetGroup
+        )
     
 class BMFileWriter(_AbstractPointer):
     def __init__(self, temp_folder_: str, texture_folder_: str, encodings_: tuple[str]):
@@ -245,6 +292,46 @@ class BMFileWriter(_AbstractPointer):
         if self._is_valid():
             bmap.BMFile_Free(self._get_pointer())
             self._set_pointer(g_InvalidPtr)
+
+    def __create_ckobject(self, 
+        class_type: type[TCKObj],
+        creator: typing.Callable[[bmap.bm_void_p, bmap.bm_CKID_p], bool]) -> TCKObj:
+        # prepare id container
+        retid: bmap.bm_CKID = bmap.bm_CKID()
+        # create new one
+        creator(self._get_pointer(), ctypes.byref(retid))
+        # return visitor
+        return class_type(self._get_pointer(), retid)
+
+    def create_texture(self) -> BMTexture:
+        self.__create_ckobject(
+            BMTexture,
+            bmap.BMFile_CreateTexture
+        )
+    
+    def create_material(self) -> BMMaterial:
+        self.__create_ckobject(
+            BMMaterial,
+            bmap.BMFile_CreateMaterial
+        )
+    
+    def create_mesh(self) -> BMMesh:
+        self.__create_ckobject(
+            BMMesh,
+            bmap.BMFile_CreateMesh
+        )
+    
+    def create_3dobject(self) -> BM3dObject:
+        self.__create_ckobject(
+            BM3dObject,
+            bmap.BMFile_Create3dObject
+        )
+    
+    def create_group(self) -> BMGroup:
+        self.__create_ckobject(
+            BMGroup,
+            bmap.BMFile_CreateGroup
+        )
     
 class BMMeshTrans(_AbstractPointer):
     def __init__(self):
