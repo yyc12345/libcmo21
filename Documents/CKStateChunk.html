@@ -161,15 +161,16 @@
                     <tr>
                         <td><code>uint32 m_Identifier</code></td>
                         <td><code>uint32 m_NextIdentifier</code></td>
-                        <td><code>variable[] m_Payload</code></td>
+                        <td><code>uint32[] m_Payload</code></td>
                     </tr>
                 </table>
                 <p>
                     A single identifier area.<br />
                     m_Identifier is the unique magic word of this identifier area for CKStateChunk locating this area.<br />
-                    m_NextIdentifier point to the m_Identifier in next identifier area.<br />
+                    m_NextIdentifier is a relative pointer. It point to the m_Identifier in next identifier area and is relative to the start of core data.<br />
+                    Thus, the size of each identifier area can be simply computed by the absolute diff to adjacent m_NextIdentifier (<code>*m_pData[pos] - pos</code>)<br />
                     m_Payload is the data of this identifier area and can be read or written by various CKStateChunk read write functions.<br />
-                    The size of each identifier area can be simply computed by the diff of m_NextIdentifier (<code>*m_pData[pos] - pos</code>)
+                    The minimum block size of m_Payload is uint32. It mean that all data must be aligned to uint32 boundary when saving.
                 </p>
             </td>
             <td>

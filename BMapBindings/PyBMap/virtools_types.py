@@ -82,6 +82,13 @@ class VxColor():
         self.g = VxColor._clamp_factor(self.g)
         self.b = VxColor._clamp_factor(self.b)
 
+ConstVxMatrix = tuple[
+    float, float, float, float,
+    float, float, float, float,
+    float, float, float, float,
+    float, float, float, float
+]
+
 class VxMatrix():
     """
     The Matrix representation.
@@ -108,6 +115,22 @@ class VxMatrix():
         self.__mData[1][1] = 1.0
         self.__mData[2][2] = 1.0
         self.__mData[3][3] = 1.0
+
+    def from_const(self, cm: ConstVxMatrix) -> None:
+        (
+            self.__mData[0][0], self.__mData[0][1], self.__mData[0][2], self.__mData[0][3],
+            self.__mData[1][0], self.__mData[1][1], self.__mData[1][2], self.__mData[1][3],
+            self.__mData[2][0], self.__mData[2][1], self.__mData[2][2], self.__mData[2][3],
+            self.__mData[3][0], self.__mData[3][1], self.__mData[3][2], self.__mData[3][3]
+        ) = cm
+
+    def to_const(self) -> ConstVxMatrix:
+        return (
+            self.__mData[0][0], self.__mData[0][1], self.__mData[0][2], self.__mData[0][3],
+            self.__mData[1][0], self.__mData[1][1], self.__mData[1][2], self.__mData[1][3],
+            self.__mData[2][0], self.__mData[2][1], self.__mData[2][2], self.__mData[2][3],
+            self.__mData[3][0], self.__mData[3][1], self.__mData[3][2], self.__mData[3][3]
+        )
 
 class VXTEXTURE_BLENDMODE(enum.IntEnum):
     """!

@@ -239,11 +239,11 @@ LIBCMO_EXPORT bool BMMesh_SetMaterialSlot(BMPARAM_OBJECT_DECL(bmfile, objid), BM
 
 #pragma region CK3dObject
 
-LIBCMO_EXPORT bool BM3dEntity_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxMatrix, out_mat));
-LIBCMO_EXPORT bool BM3dEntity_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxMatrix, mat));
-LIBCMO_EXPORT bool BM3dEntity_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_meshid));
-LIBCMO_EXPORT bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, meshid));
-LIBCMO_EXPORT bool BM3dEntity_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_isVisible));
-LIBCMO_EXPORT bool BM3dEntity_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, is_visible));
+LIBCMO_EXPORT bool BM3dObject_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxMatrix, out_mat));
+LIBCMO_EXPORT bool BM3dObject_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxMatrix, mat));
+LIBCMO_EXPORT bool BM3dObject_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_meshid));
+LIBCMO_EXPORT bool BM3dObject_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, meshid));
+LIBCMO_EXPORT bool BM3dObject_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_isVisible));
+LIBCMO_EXPORT bool BM3dObject_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, is_visible));
 
 #pragma endregion

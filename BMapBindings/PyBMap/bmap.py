@@ -76,7 +76,7 @@ def is_bmap_available() -> bool:
     return _g_BMapModule is not None
 
 def _bmap_error_check(result: bm_bool, func, args):
-    if not bm_bool.value:
+    if not result:
         raise BMapException("BMap operation failed.")
     return result
 
@@ -714,42 +714,42 @@ BMMesh_GetMaterialSlot = _create_bmap_func('BMMesh_GetMaterialSlot', [bm_void_p,
 #  @param mtlid[in] Type: LibCmo::CK2::CK_ID. 
 #  @return True if no error, otherwise False.
 BMMesh_SetMaterialSlot = _create_bmap_func('BMMesh_SetMaterialSlot', [bm_void_p, bm_CKID, bm_CKDWORD, bm_CKID])
-## BM3dEntity_GetWorldMatrix
+## BM3dObject_GetWorldMatrix
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param out_mat[out] Type: LibCmo::VxMath::VxMatrix. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BM3dEntity_GetWorldMatrix = _create_bmap_func('BM3dEntity_GetWorldMatrix', [bm_void_p, bm_CKID, bm_VxMatrix_p])
-## BM3dEntity_SetWorldMatrix
+BM3dObject_GetWorldMatrix = _create_bmap_func('BM3dObject_GetWorldMatrix', [bm_void_p, bm_CKID, bm_VxMatrix_p])
+## BM3dObject_SetWorldMatrix
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param mat[in] Type: LibCmo::VxMath::VxMatrix. 
 #  @return True if no error, otherwise False.
-BM3dEntity_SetWorldMatrix = _create_bmap_func('BM3dEntity_SetWorldMatrix', [bm_void_p, bm_CKID, bm_VxMatrix])
-## BM3dEntity_GetCurrentMesh
+BM3dObject_SetWorldMatrix = _create_bmap_func('BM3dObject_SetWorldMatrix', [bm_void_p, bm_CKID, bm_VxMatrix])
+## BM3dObject_GetCurrentMesh
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param out_meshid[out] Type: LibCmo::CK2::CK_ID. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BM3dEntity_GetCurrentMesh = _create_bmap_func('BM3dEntity_GetCurrentMesh', [bm_void_p, bm_CKID, bm_CKID_p])
-## BM3dEntity_SetCurrentMesh
+BM3dObject_GetCurrentMesh = _create_bmap_func('BM3dObject_GetCurrentMesh', [bm_void_p, bm_CKID, bm_CKID_p])
+## BM3dObject_SetCurrentMesh
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param meshid[in] Type: LibCmo::CK2::CK_ID. 
 #  @return True if no error, otherwise False.
-BM3dEntity_SetCurrentMesh = _create_bmap_func('BM3dEntity_SetCurrentMesh', [bm_void_p, bm_CKID, bm_CKID])
-## BM3dEntity_GetVisibility
+BM3dObject_SetCurrentMesh = _create_bmap_func('BM3dObject_SetCurrentMesh', [bm_void_p, bm_CKID, bm_CKID])
+## BM3dObject_GetVisibility
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param out_isVisible[out] Type: bool. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BM3dEntity_GetVisibility = _create_bmap_func('BM3dEntity_GetVisibility', [bm_void_p, bm_CKID, bm_bool_p])
-## BM3dEntity_SetVisibility
+BM3dObject_GetVisibility = _create_bmap_func('BM3dObject_GetVisibility', [bm_void_p, bm_CKID, bm_bool_p])
+## BM3dObject_SetVisibility
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param is_visible[in] Type: bool. 
 #  @return True if no error, otherwise False.
-BM3dEntity_SetVisibility = _create_bmap_func('BM3dEntity_SetVisibility', [bm_void_p, bm_CKID, bm_bool])
+BM3dObject_SetVisibility = _create_bmap_func('BM3dObject_SetVisibility', [bm_void_p, bm_CKID, bm_bool])
 
 #endregion
 

@@ -76,7 +76,7 @@ def is_bmap_available() -> bool:
     return _g_BMapModule is not None
 
 def _bmap_error_check(result: bm_bool, func, args):
-    if not bm_bool.value:
+    if not result:
         raise BMapException("BMap operation failed.")
     return result
 

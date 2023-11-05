@@ -820,7 +820,7 @@ bool BMMesh_SetMaterialSlot(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCm
 
 #pragma region CK3dObject
 
-bool BM3dEntity_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxMatrix, out_mat)) {
+bool BM3dObject_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxMatrix, out_mat)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
@@ -828,7 +828,7 @@ bool BM3dEntity_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(L
 	return true;
 }
 
-bool BM3dEntity_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxMatrix, mat)) {
+bool BM3dObject_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxMatrix, mat)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
@@ -836,7 +836,7 @@ bool BM3dEntity_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(Li
 	return true;
 }
 
-bool BM3dEntity_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_meshid)) {
+bool BM3dObject_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_meshid)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
@@ -844,7 +844,7 @@ bool BM3dEntity_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(L
 	return true;
 }
 
-bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, meshid)) {
+bool BM3dObject_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, meshid)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	auto meshobj = CheckCKMesh(bmfile, meshid);
 	if (obj == nullptr /*|| meshobj == nullptr*/) return false;	//allow nullptr assign
@@ -853,7 +853,7 @@ bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(Li
 	return true;
 }
 
-bool BM3dEntity_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_isVisible)) {
+bool BM3dObject_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_isVisible)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
@@ -861,7 +861,7 @@ bool BM3dEntity_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bo
 	return true;
 }
 
-bool BM3dEntity_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, is_visible)) {
+bool BM3dObject_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, is_visible)) {
 	auto obj = CheckCK3dObject(bmfile, objid);
 	if (obj == nullptr) return false;
 
