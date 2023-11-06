@@ -107,7 +107,39 @@ class BMObject(_AbstractCKObject):
         bmap.BMObject_SetName(self._get_pointer(), self._get_ckid(), name)
 
 class BMTexture(BMObject):
-    pass
+    def get_file_name(self) -> str | None:
+        filename: bmap.bm_CKSTRING = bmap.bm_CKSTRING()
+        bmap.BMTexture_GetFileName(self._get_pointer(), self._get_ckid(), ctypes.byref(filename))
+        if filename.value is None:
+            return None
+        else:
+            return filename.value.decode(g_BMapEncoding)
+
+    def load_image(self, filepath: str) -> None:
+        filename: bmap.bm_CKSTRING = bmap.bm_CKSTRING(filepath.encode(g_BMapEncoding))
+        bmap.BMTexture_LoadImage(self._get_pointer(), self._get_ckid(), filename)
+
+    def save_image(self, filepath: str) -> None:
+        filename: bmap.bm_CKSTRING = bmap.bm_CKSTRING(filepath.encode(g_BMapEncoding))
+        bmap.BMTexture_SaveImage(self._get_pointer(), self._get_ckid(), filename)
+
+    def get_save_options(self) -> virtools_types.CK_TEXTURE_SAVEOPTIONS:
+        opt: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMTexture_GetSaveOptions(self._get_pointer(), self._get_ckid(), ctypes.byref(opt))
+        return virtools_types.CK_TEXTURE_SAVEOPTIONS(opt.value)
+
+    def set_save_options(self, opt_: virtools_types.CK_TEXTURE_SAVEOPTIONS) -> None:
+        opt: bmap.bm_enum = bmap.bm_enum(opt_.value)
+        bmap.BMTexture_SetSaveOptions(self._get_pointer(), self._get_ckid(), opt)
+
+    def get_video_format(self) -> virtools_types.VX_PIXELFORMAT:
+        fmt: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMTexture_GetVideoFormat(self._get_pointer(), self._get_ckid(), ctypes.byref(fmt))
+        return virtools_types.VX_PIXELFORMAT(fmt.value)
+
+    def set_video_format(self, fmt_: virtools_types.VX_PIXELFORMAT) -> None:
+        fmt: bmap.bm_enum = bmap.bm_enum(fmt_.value)
+        bmap.BMTexture_SetVideoFormat(self._get_pointer(), self._get_ckid(), fmt)
 
 class BMMaterial(BMObject):
     pass
@@ -116,16 +148,18 @@ class BMMesh(BMObject):
     pass
 
 class BM3dObject(BMObject):
-    def get_world_matrix(self) -> virtools_types.ConstVxMatrix:
+    def get_world_matrix(self) -> virtools_types.VxMatrix:
         mat: bmap.bm_VxMatrix = bmap.bm_VxMatrix()
         bmap.BM3dObject_GetWorldMatrix(self._get_pointer(), self._get_ckid(), ctypes.byref(mat))
         # use cast & pointer to get matrix data conveniently
         flat: bmap.bm_CKFLOAT_p = ctypes.cast(ctypes.byref(mat), bmap.bm_CKFLOAT_p)
-        return tuple(flat[i] for i in range(16))
+        ret: virtools_types.VxMatrix = virtools_types.VxMatrix()
+        ret.from_const(tuple(flat[i] for i in range(16)))
+        return ret
 
-    def set_world_matrix(self, mat: virtools_types.ConstVxMatrix) -> None:
+    def set_world_matrix(self, mat: virtools_types.VxMatrix) -> None:
         # star syntax expand the tuple as the argument.
-        mat: bmap.bm_VxMatrix = bmap.bm_VxMatrix(*mat)
+        mat: bmap.bm_VxMatrix = bmap.bm_VxMatrix(*(mat.to_const()))
         bmap.BM3dObject_SetWorldMatrix(self._get_pointer(), self._get_ckid(), mat)
 
     def get_current_mesh(self) -> BMMesh | None:
@@ -157,15 +191,18 @@ class BMGroup(BMObject):
     def add_object(self, member: BM3dObject) -> None:
         bmap.BMGroup_AddObject(self._get_pointer(), self._get_ckid(), member._get_ckid())
 
-    def iterate_objects(self) -> typing.Iterator[BM3dObject]:
-        # get count
+    def get_object_count(self) -> int:
         csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
         bmap.BMGroup_GetObjectCount(self._get_pointer(), self._get_ckid(), ctypes.byref(csize))
+        return csize.value
+
+    def iterate_objects(self) -> typing.Iterator[BM3dObject]:
+        csize: int = self.get_object_count()
 
         # iterate list
         cidx: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
         retid: bmap.bm_CKID = bmap.bm_CKID()
-        for i in range(csize.value):
+        for i in range(csize):
             cidx.value = i
             bmap.BMGroup_GetObject(self._get_pointer(), self._get_ckid(), cidx, ctypes.byref(retid))
             # return visitor
@@ -203,23 +240,31 @@ class BMFileReader(_AbstractPointer):
             bmap.BMFile_Free(self._get_pointer())
             self._set_pointer(g_InvalidPtr)
 
+    def __get_ckobject_count(self,
+        count_getter: typing.Callable[[bmap.bm_void_p, bmap.bm_CKDWORD_p], bool]) -> int:
+        # get size
+        csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
+        count_getter(self._get_pointer(), ctypes.byref(csize))
+        return csize.value
+
     def __iterate_ckobjects(self, 
         class_type: type[TCKObj],
         count_getter: typing.Callable[[bmap.bm_void_p, bmap.bm_CKDWORD_p], bool],
         obj_getter: typing.Callable[[bmap.bm_void_p, bmap.bm_CKDWORD, bmap.bm_CKID_p], bool]) -> typing.Iterator[TCKObj]:
         # get size first
-        csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
-        count_getter(self._get_pointer(), ctypes.byref(csize))
+        csize: int = self.__get_ckobject_count(count_getter)
 
         # iterate list
         cidx: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
         retid: bmap.bm_CKID = bmap.bm_CKID()
-        for i in range(csize.value):
+        for i in range(csize):
             cidx.value = i
             obj_getter(self._get_pointer(), cidx, ctypes.byref(retid))
             # yield return constructed obj visitor
             yield class_type(self._get_pointer(), retid)
 
+    def get_texture_count(self) -> int:
+        return self.__get_ckobject_count(bmap.BMFile_GetTextureCount)
     def iterate_textures(self) -> typing.Iterator[BMTexture]:
         return self.__iterate_ckobjects(
             BMTexture,
@@ -227,6 +272,8 @@ class BMFileReader(_AbstractPointer):
             bmap.BMFile_GetTexture
         )
     
+    def get_material_count(self) -> int:
+        return self.__get_ckobject_count(bmap.BMFile_GetMaterialCount)
     def iterate_materials(self) -> typing.Iterator[BMMaterial]:
         return self.__iterate_ckobjects(
             BMMaterial,
@@ -234,6 +281,8 @@ class BMFileReader(_AbstractPointer):
             bmap.BMFile_GetMaterial
         )
     
+    def get_mesh_count(self) -> int:
+        return self.__get_ckobject_count(bmap.BMFile_GetMeshCount)
     def iterate_meshs(self) -> typing.Iterator[BMMesh]:
         return self.__iterate_ckobjects(
             BMMesh,
@@ -241,6 +290,8 @@ class BMFileReader(_AbstractPointer):
             bmap.BMFile_GetMesh
         )
     
+    def get_3dobject_count(self) -> int:
+        return self.__get_ckobject_count(bmap.BMFile_Get3dObjectCount)
     def iterate_3dobjects(self) -> typing.Iterator[BM3dObject]:
         return self.__iterate_ckobjects(
             BM3dObject,
@@ -248,6 +299,8 @@ class BMFileReader(_AbstractPointer):
             bmap.BMFile_Get3dObject
         )
     
+    def get_group_count(self) -> int:
+        return self.__get_ckobject_count(bmap.BMFile_GetGroupCount)
     def iterate_groups(self) -> typing.Iterator[BMGroup]:
         return self.__iterate_ckobjects(
             BMGroup,
@@ -349,5 +402,114 @@ class BMMeshTrans(_AbstractPointer):
         if self._is_valid():
             bmap.BMMeshTrans_Delete(self._get_pointer())
             self._set_pointer(g_InvalidPtr)
+
+    def parse(self, bmfile: BMFileWriter, objmesh: BMMesh) -> None:
+        bmap.BMMeshTrans_Parse(self._get_pointer(), bmfile._get_pointer(), objmesh._get_ckid())
+
+    def prepare_vertex(self, count: int, itor: typing.Iterator[virtools_types.VxVector3]) -> None:
+        # prepare count first
+        csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD(count)
+        bmap.BMMeshTrans_PrepareVertexCount(self._get_pointer(), csize)
+        # get raw pointer and conv to float ptr for convenient visit
+        raw_vector: bmap.bm_VxVector3_p = bmap.bm_VxVector3_p()
+        bmap.BMMeshTrans_PrepareVertex(self._get_pointer(), ctypes.byref(raw_vector))
+        raw_float: bmap.bm_CKFLOAT_p = ctypes.cast(raw_vector, bmap.bm_CKFLOAT_p)
+        # iterate iterator and set
+        idx: int = 0
+        for _ in range(count):
+            uservector: virtools_types.VxVector3 = next(itor)
+            raw_float[idx] = uservector.x
+            raw_float[idx + 1] = uservector.y
+            raw_float[idx + 2] = uservector.z
+            idx += 3
     
+    def prepare_normal(self, count: int, itor: typing.Iterator[virtools_types.VxVector3]) -> None:
+        csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD(count)
+        bmap.BMMeshTrans_PrepareNormalCount(self._get_pointer(), csize)
+        
+        raw_vector: bmap.bm_VxVector3_p = bmap.bm_VxVector3_p()
+        bmap.BMMeshTrans_PrepareNormal(self._get_pointer(), ctypes.byref(raw_vector))
+        raw_float: bmap.bm_CKFLOAT_p = ctypes.cast(raw_vector, bmap.bm_CKFLOAT_p)
+        
+        idx: int = 0
+        for _ in range(count):
+            uservector: virtools_types.VxVector3 = next(itor)
+            raw_float[idx] = uservector.x
+            raw_float[idx + 1] = uservector.y
+            raw_float[idx + 2] = uservector.z
+            idx += 3
+    
+    def prepare_uv(self, count: int, itor: typing.Iterator[virtools_types.VxVector2]) -> None:
+        csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD(count)
+        bmap.BMMeshTrans_PrepareUVCount(self._get_pointer(), csize)
+        
+        raw_vector: bmap.bm_VxVector2_p = bmap.bm_VxVector2_p()
+        bmap.BMMeshTrans_PrepareUV(self._get_pointer(), ctypes.byref(raw_vector))
+        raw_float: bmap.bm_CKFLOAT_p = ctypes.cast(raw_vector, bmap.bm_CKFLOAT_p)
+        
+        idx: int = 0
+        for _ in range(count):
+            uservector: virtools_types.VxVector2 = next(itor)
+            raw_float[idx] = uservector.x
+            raw_float[idx + 1] = uservector.y
+            idx += 2
+    
+    def prepare_mtl_slot(self, count: int, itor: typing.Iterator[BMMaterial | None]) -> None:
+        csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD(count)
+        bmap.BMMeshTrans_PrepareMtlSlotCount(self._get_pointer(), csize)
+        
+        raw_ckid: bmap.bm_CKID_p = bmap.bm_CKID_p()
+        bmap.BMMeshTrans_PrepareMtlSlot(self._get_pointer(), ctypes.byref(raw_ckid))
+        
+        idx: int = 0
+        for _ in range(count):
+            usermtl: BMMaterial = next(itor)
+            if usermtl is None:
+                raw_ckid[idx] = g_InvalidCKID
+            else:
+                raw_ckid[idx] = usermtl._get_ckid().value
+            idx += 1
+    
+    def prepare_face(self,
+        count: int,
+        vec_idx: typing.Iterator[int],
+        nml_idx: typing.Iterator[int],
+        uv_idx: typing.Iterator[int],
+        mtl_idx: typing.Iterator[int]) -> None:
+        """
+        The count of `vec_idx`, `nml_idx`, `uv_idx` must equal with `3 * count`.
+        And `mtl_idx`'s length must equal with `count`.
+        """
+        # prepare face size
+        csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD(count)
+        bmap.BMMeshTrans_PrepareFaceCount(self._get_pointer(), csize)
+
+        # get 4 raw pointer for following assign
+        raw_vec_idx: bmap.bm_CKDWORD_p = bmap.bm_CKDWORD_p()
+        raw_nml_idx: bmap.bm_CKDWORD_p = bmap.bm_CKDWORD_p()
+        raw_uv_idx: bmap.bm_CKDWORD_p = bmap.bm_CKDWORD_p()
+        raw_mtl_idx: bmap.bm_CKDWORD_p = bmap.bm_CKDWORD_p()
+        bmap.BMMeshTrans_PrepareFaceVertexIndices(self._get_pointer(), ctypes.byref(raw_vec_idx))
+        bmap.BMMeshTrans_PrepareFaceNormalIndices(self._get_pointer(), ctypes.byref(raw_nml_idx))
+        bmap.BMMeshTrans_PrepareFaceUVIndices(self._get_pointer(), ctypes.byref(raw_uv_idx))
+        bmap.BMMeshTrans_PrepareFaceMtlSlot(self._get_pointer(), ctypes.byref(raw_mtl_idx))
+
+        # iterate and assign
+        idx3: int = 0
+        idx1: int = 0
+        for _ in range(count):
+            raw_vec_idx[idx3] = next(vec_idx)
+            raw_vec_idx[idx3 + 1] = next(vec_idx)
+            raw_vec_idx[idx3 + 2] = next(vec_idx)
+            raw_nml_idx[idx3] = next(nml_idx)
+            raw_nml_idx[idx3 + 1] = next(nml_idx)
+            raw_nml_idx[idx3 + 2] = next(nml_idx)
+            raw_uv_idx[idx3] = next(uv_idx)
+            raw_uv_idx[idx3 + 1] = next(uv_idx)
+            raw_uv_idx[idx3 + 2] = next(uv_idx)
+            idx3 += 3
+
+            raw_mtl_idx[idx1] = next(mtl_idx)
+            idx1 += 1
+
 #endregion
