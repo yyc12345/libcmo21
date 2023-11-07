@@ -205,7 +205,194 @@ class BMTexture(BMObject):
         bmap.BMTexture_SetVideoFormat(self._get_pointer(), self._get_ckid(), fmt)
 
 class BMMaterial(BMObject):
-    pass
+    def _set_vxcolor(self,
+        setter_: typing.Callable[[bmap.bm_void_p, bmap.bm_CKID, bmap.bm_VxColor], bool],
+        col_: virtools_types.VxColor) -> None:
+        # set to raw color
+        col: bmap.bm_VxColor = bmap.bm_VxColor()
+        col.r = col_.r
+        col.g = col_.g
+        col.b = col_.b
+        col.a = col_.a
+        # assign
+        setter_(self._get_pointer(), self._get_ckid(), col)
+    def _get_vxcolor(self,
+        getter_: typing.Callable[[bmap.bm_void_p, bmap.bm_CKID, bmap.bm_VxColor_p], bool]) -> virtools_types.VxColor:
+        # get raw color
+        col: bmap.bm_VxColor = bmap.bm_VxColor()
+        getter_(self._get_pointer(), self._get_ckid(), ctypes.byref(col))
+        # get from raw color
+        ret: virtools_types.VxColor = virtools_types.VxColor()
+        ret.r = col.r
+        ret.g = col.g
+        ret.b = col.b
+        ret.a = col.a
+        return ret
+    
+    def get_diffuse(self) -> virtools_types.VxColor:
+        return self._get_vxcolor(bmap.BMMaterial_GetDiffuse)
+    def set_diffuse(self, col: virtools_types.VxColor) -> None:
+        self._set_vxcolor(bmap.BMMaterial_SetDiffuse, col)
+    def get_ambient(self) -> virtools_types.VxColor:
+        return self._get_vxcolor(bmap.BMMaterial_GetAmbient)
+    def set_ambient(self, col: virtools_types.VxColor) -> None:
+        self._set_vxcolor(bmap.BMMaterial_SetAmbient, col)
+    def get_specular(self) -> virtools_types.VxColor:
+        return self._get_vxcolor(bmap.BMMaterial_GetSpecular)
+    def set_specular(self, col: virtools_types.VxColor) -> None:
+        self._set_vxcolor(bmap.BMMaterial_SetSpecular, col)
+    def get_emissive(self) -> virtools_types.VxColor:
+        return self._get_vxcolor(bmap.BMMaterial_GetEmissive)
+    def set_emissive(self, col: virtools_types.VxColor) -> None:
+        self._set_vxcolor(bmap.BMMaterial_SetEmissive, col)
+
+    def get_specular_power(self) -> float:
+        power: bmap.bm_CKFLOAT = bmap.bm_CKFLOAT()
+        bmap.BMMaterial_GetSpecularPower(self._get_pointer(), self._get_ckid(), ctypes.byref(power))
+        return power.value
+    def set_specular_power(self, power_: float) -> None:
+        power: bmap.bm_CKFLOAT = bmap.bm_CKFLOAT(power_)
+        bmap.BMMaterial_SetSpecularPower(self._get_pointer(), self._get_ckid(), power)
+        
+    def get_texture(self) -> BMTexture | None:
+        objid: bmap.bm_CKID = bmap.bm_CKID()
+        bmap.BMMaterial_GetTexture(self._get_pointer(), self._get_ckid(), ctypes.byref(objid))
+        if objid.value == g_InvalidCKID:
+            return None
+        else:
+            return BMTexture(self._get_pointer(), objid)
+        
+    def set_texture(self, tex_: BMTexture | None) -> None:
+        objid: bmap.bm_CKID = bmap.bm_CKID(g_InvalidCKID)
+        if tex_ is not None:
+            objid.value = tex_._get_ckid()
+        bmap.BMMaterial_SetTexture(self._get_pointer(), self._get_ckid(), objid)
+
+    def get_texture_border_color(self) -> virtools_types.VxColor:
+        col: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
+        bmap.BMMaterial_GetTextureBorderColor(self._get_pointer(), self._get_ckid(), ctypes.byref(col))
+        ret: virtools_types.VxColor = virtools_types.VxColor()
+        ret.from_dword(col.value)
+        return ret
+    def set_texture_border_color(self, col_: virtools_types.VxColor) -> None:
+        col: bmap.bm_CKDWORD = bmap.bm_CKDWORD(col_.to_dword())
+        bmap.BMMaterial_SetTextureBorderColor(self._get_pointer(), self._get_ckid(), col)
+
+    def get_texture_blend_mode(self) -> virtools_types.VXTEXTURE_BLENDMODE:
+        data: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMMaterial_GetTextureBlendMode(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return virtools_types.VXTEXTURE_BLENDMODE(data.value)
+    def set_texture_blend_mode(self, data_: virtools_types.VXTEXTURE_BLENDMODE) -> None:
+        data: bmap.bm_enum = bmap.bm_enum(data_.value)
+        bmap.BMMaterial_SetTextureBlendMode(self._get_pointer(), self._get_ckid(), data)
+    def get_texture_min_mode(self) -> virtools_types.VXTEXTURE_FILTERMODE:
+        data: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMMaterial_GetTextureMinMode(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return virtools_types.VXTEXTURE_FILTERMODE(data.value)
+    def set_texture_min_mode(self, data_: virtools_types.VXTEXTURE_FILTERMODE) -> None:
+        data: bmap.bm_enum = bmap.bm_enum(data_.value)
+        bmap.BMMaterial_SetTextureMinMode(self._get_pointer(), self._get_ckid(), data)
+    def get_texture_mag_mode(self) -> virtools_types.VXTEXTURE_FILTERMODE:
+        data: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMMaterial_GetTextureMagMode(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return virtools_types.VXTEXTURE_FILTERMODE(data.value)
+    def set_texture_mag_mode(self, data_: virtools_types.VXTEXTURE_FILTERMODE) -> None:
+        data: bmap.bm_enum = bmap.bm_enum(data_.value)
+        bmap.BMMaterial_SetTextureMagMode(self._get_pointer(), self._get_ckid(), data)
+    def get_texture_address_mode(self) -> virtools_types.VXTEXTURE_ADDRESSMODE:
+        data: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMMaterial_GetTextureAddressMode(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return virtools_types.VXTEXTURE_ADDRESSMODE(data.value)
+    def set_texture_address_mode(self, data_: virtools_types.VXTEXTURE_ADDRESSMODE) -> None:
+        data: bmap.bm_enum = bmap.bm_enum(data_.value)
+        bmap.BMMaterial_SetTextureAddressMode(self._get_pointer(), self._get_ckid(), data)
+    def get_source_blend(self) -> virtools_types.VXBLEND_MODE:
+        data: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMMaterial_GetSourceBlend(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return virtools_types.VXBLEND_MODE(data.value)
+    def set_source_blend(self, data_: virtools_types.VXBLEND_MODE) -> None:
+        data: bmap.bm_enum = bmap.bm_enum(data_.value)
+        bmap.BMMaterial_SetSourceBlend(self._get_pointer(), self._get_ckid(), data)
+    def get_dest_blend(self) -> virtools_types.VXBLEND_MODE:
+        data: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMMaterial_GetDestBlend(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return virtools_types.VXBLEND_MODE(data.value)
+    def set_dest_blend(self, data_: virtools_types.VXBLEND_MODE) -> None:
+        data: bmap.bm_enum = bmap.bm_enum(data_.value)
+        bmap.BMMaterial_SetDestBlend(self._get_pointer(), self._get_ckid(), data)
+    def get_fill_mode(self) -> virtools_types.VXFILL_MODE:
+        data: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMMaterial_GetFillMode(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return virtools_types.VXFILL_MODE(data.value)
+    def set_fill_mode(self, data_: virtools_types.VXFILL_MODE) -> None:
+        data: bmap.bm_enum = bmap.bm_enum(data_.value)
+        bmap.BMMaterial_SetFillMode(self._get_pointer(), self._get_ckid(), data)
+    def get_shade_mode(self) -> virtools_types.VXSHADE_MODE:
+        data: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMMaterial_GetShadeMode(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return virtools_types.VXSHADE_MODE(data.value)
+    def set_shade_mode(self, data_: virtools_types.VXSHADE_MODE) -> None:
+        data: bmap.bm_enum = bmap.bm_enum(data_.value)
+        bmap.BMMaterial_SetShadeMode(self._get_pointer(), self._get_ckid(), data)
+
+    def get_alpha_test_enabled(self) -> bool:
+        data: bmap.bm_bool = bmap.bm_bool()
+        bmap.BMMaterial_GetAlphaTestEnabled(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return data.value
+    def set_alpha_test_enabled(self, data_: bool) -> None:
+        data: bmap.bm_bool = bmap.bm_bool(data_)
+        bmap.BMMaterial_SetAlphaTestEnabled(self._get_pointer(), self._get_ckid(), data)
+    def get_alpha_blend_enabled(self) -> bool:
+        data: bmap.bm_bool = bmap.bm_bool()
+        bmap.BMMaterial_GetAlphaBlendEnabled(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return data.value
+    def set_alpha_blend_enabled(self, data_: bool) -> None:
+        data: bmap.bm_bool = bmap.bm_bool(data_)
+        bmap.BMMaterial_SetAlphaBlendEnabled(self._get_pointer(), self._get_ckid(), data)
+    def get_perspective_correction_enabled(self) -> bool:
+        data: bmap.bm_bool = bmap.bm_bool()
+        bmap.BMMaterial_GetPerspectiveCorrectionEnabled(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return data.value
+    def set_perspective_correction_enabled(self, data_: bool) -> None:
+        data: bmap.bm_bool = bmap.bm_bool(data_)
+        bmap.BMMaterial_SetPerspectiveCorrectionEnabled(self._get_pointer(), self._get_ckid(), data)
+    def get_z_write_enabled(self) -> bool:
+        data: bmap.bm_bool = bmap.bm_bool()
+        bmap.BMMaterial_GetZWriteEnabled(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return data.value
+    def set_z_write_enabled(self, data_: bool) -> None:
+        data: bmap.bm_bool = bmap.bm_bool(data_)
+        bmap.BMMaterial_SetZWriteEnabled(self._get_pointer(), self._get_ckid(), data)
+    def get_two_sided_enabled(self) -> bool:
+        data: bmap.bm_bool = bmap.bm_bool()
+        bmap.BMMaterial_GetTwoSidedEnabled(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return data.value
+    def set_two_sided_enabled(self, data_: bool) -> None:
+        data: bmap.bm_bool = bmap.bm_bool(data_)
+        bmap.BMMaterial_SetTwoSidedEnabled(self._get_pointer(), self._get_ckid(), data)
+
+    def get_alpha_ref(self) -> int:
+        data: bmap.bm_CKBYTE = bmap.bm_CKBYTE()
+        bmap.BMMaterial_GetAlphaRef(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return data.value
+    def set_alpha_ref(self, data_: int):
+        data: bmap.bm_CKBYTE = bmap.bm_CKBYTE(data_)
+        bmap.BMMaterial_SetAlphaRef(self._get_pointer(), self._get_ckid(), data)
+        
+    def get_alpha_func(self) -> virtools_types.VXCMPFUNC:
+        data: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMMaterial_GetAlphaFunc(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return virtools_types.VXCMPFUNC(data.value)
+    def set_alpha_func(self, data_: virtools_types.VXCMPFUNC) -> None:
+        data: bmap.bm_enum = bmap.bm_enum(data_.value)
+        bmap.BMMaterial_SetAlphaFunc(self._get_pointer(), self._get_ckid(), data)
+    def get_z_func(self) -> virtools_types.VXCMPFUNC:
+        data: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMMaterial_GetZFunc(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
+        return virtools_types.VXCMPFUNC(data.value)
+    def set_z_func(self, data_: virtools_types.VXCMPFUNC) -> None:
+        data: bmap.bm_enum = bmap.bm_enum(data_.value)
+        bmap.BMMaterial_SetZFunc(self._get_pointer(), self._get_ckid(), data)
 
 class BMMesh(BMObject):
     def get_vertex_count(self) -> int:
@@ -338,11 +525,9 @@ class BM3dObject(BMObject):
             return BMMesh(self._get_pointer(), ckid)
 
     def set_current_mesh(self, mesh: BMMesh | None) -> None:
-        ckid: bmap.bm_CKID
-        if mesh is None:
-            ckid = bmap.bm_CKID(g_InvalidCKID)
-        else:
-            ckid = bmap.bm_CKID(mesh._get_ckid())
+        ckid: bmap.bm_CKID = bmap.bm_CKID(g_InvalidCKID)
+        if mesh is not None:
+            ckid.value = mesh._get_ckid()
         bmap.BM3dObject_SetCurrentMesh(self._get_pointer(), self._get_ckid(), ckid)
 
     def get_visibility(self) -> bool:

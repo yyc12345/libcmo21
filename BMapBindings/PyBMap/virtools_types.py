@@ -63,7 +63,7 @@ class VxColor():
     r: float
     g: float
     b: float
-    def __init__(self, _r: float, _g: float, _b: float, _a: float = 1.0):
+    def __init__(self, _r: float = 0.0, _g: float = 0.0, _b: float = 0.0, _a: float = 1.0):
         self.r = _r
         self.g = _g
         self.b = _b
@@ -84,6 +84,30 @@ class VxColor():
         (self.r, self.g, self.b) = val
         self.a = 1.0
         self.regulate()
+
+    def from_dword(self, val: int) -> None:
+        self.b = float(val & 0xFF) / 255.0
+        val >>= 8
+        self.g = float(val & 0xFF) / 255.0
+        val >>= 8
+        self.r = float(val & 0xFF) / 255.0
+        val >>= 8
+        self.a = float(val & 0xFF) / 255.0
+        val >>= 8
+        
+    def to_dword(self) -> int:
+        # regulate self
+        self.regulate()
+        # construct value
+        val: int = 0
+        val |= int(self.a * 255)
+        val <<= 8
+        val |= int(self.r * 255)
+        val <<= 8
+        val |= int(self.g * 255)
+        val <<= 8
+        val |= int(self.b * 255)
+        return val
 
     def clone(self):
         return VxColor(self.r, self.g, self.b, self.a)
