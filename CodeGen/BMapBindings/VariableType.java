@@ -67,6 +67,10 @@ public class VariableType {
 	public int getPointerLevel() {
 		return mPointerLevel;
 	}
+	
+	public Vector<String> getBaseTypeHierarchy() {
+		return (Vector<String>) mBaseType.clone();
+	}
 
 	public boolean isValid() {
 		return mBaseType.size() != 0;

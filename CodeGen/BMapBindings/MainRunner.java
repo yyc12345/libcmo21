@@ -26,6 +26,7 @@ public class MainRunner {
 		Vector<ExpFctDecl> result = worker.getResult();
 		PythonWriter.writePythonCode(result);
 		CSharpWriter.writeCSharpCode(result);
+		JsonWriter.writeJson(result);
 		
 		// print message.
 		System.out.println("DONE!");
