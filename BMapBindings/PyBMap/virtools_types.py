@@ -34,6 +34,24 @@ class VxVector3():
     def to_const(self) -> ConstVxVector3:
         return (self.x, self.y, self.z)
 
+ConstCKFaceIndices = tuple[int, int, int]
+
+class CKFaceIndices():
+    i1: int
+    i2: int
+    i3: int
+
+    def __init__(self, i1_: int = 0, i2_: int = 0, i3_: int = 0):
+        self.i1 = i1_
+        self.i2 = i2_
+        self.i3 = i3_
+
+    def from_const(self, cv: ConstCKFaceIndices) -> None:
+        (self.i1, self.i2, self.i3) = cv
+
+    def to_const(self) -> ConstCKFaceIndices:
+        return (self.i1, self.i2, self.i3)
+
 ConstVxColorRGBA = tuple[float, float, float, float]
 ConstVxColorRGB = tuple[float, float, float]
 
