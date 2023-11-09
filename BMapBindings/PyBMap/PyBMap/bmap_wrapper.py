@@ -1,5 +1,5 @@
 import ctypes, typing, atexit
-import bmap, virtools_types
+from . import bmap, virtools_types
 
 #region Basic Class & Constant Defines
 
