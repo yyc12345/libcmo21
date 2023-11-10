@@ -46,6 +46,7 @@ class bm_VxVector3(ctypes.Structure):
         ('z', bm_CKFLOAT),
     ]
 bm_VxVector3_p = ctypes.POINTER(bm_VxVector3)
+bm_VxVector3_pp = ctypes.POINTER(bm_VxVector3_p)
 class bm_VxColor(ctypes.Structure):
     _fields_ = [
         ('r', bm_CKFLOAT),
@@ -223,7 +224,7 @@ BMMeshTrans_PrepareVertexCount = _create_bmap_func('BMMeshTrans_PrepareVertexCou
 #  @param trans[in] Type: BMap::BMMeshTransition*. The pointer to corresponding BMMeshTransition.
 #  @param out_mem[out] Type: LibCmo::VxMath::VxVector3*. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BMMeshTrans_PrepareVertex = _create_bmap_func('BMMeshTrans_PrepareVertex', [bm_void_p, bm_VxVector2_pp])
+BMMeshTrans_PrepareVertex = _create_bmap_func('BMMeshTrans_PrepareVertex', [bm_void_p, bm_VxVector3_pp])
 ## BMMeshTrans_PrepareNormalCount
 #  @param trans[in] Type: BMap::BMMeshTransition*. The pointer to corresponding BMMeshTransition.
 #  @param count[in] Type: LibCmo::CKDWORD. 
@@ -233,7 +234,7 @@ BMMeshTrans_PrepareNormalCount = _create_bmap_func('BMMeshTrans_PrepareNormalCou
 #  @param trans[in] Type: BMap::BMMeshTransition*. The pointer to corresponding BMMeshTransition.
 #  @param out_mem[out] Type: LibCmo::VxMath::VxVector3*. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BMMeshTrans_PrepareNormal = _create_bmap_func('BMMeshTrans_PrepareNormal', [bm_void_p, bm_VxVector2_pp])
+BMMeshTrans_PrepareNormal = _create_bmap_func('BMMeshTrans_PrepareNormal', [bm_void_p, bm_VxVector3_pp])
 ## BMMeshTrans_PrepareUVCount
 #  @param trans[in] Type: BMap::BMMeshTransition*. The pointer to corresponding BMMeshTransition.
 #  @param count[in] Type: LibCmo::CKDWORD. 
@@ -651,13 +652,13 @@ BMMesh_SetVertexCount = _create_bmap_func('BMMesh_SetVertexCount', [bm_void_p, b
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param out_mem[out] Type: LibCmo::VxMath::VxVector3*. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BMMesh_GetVertexPositions = _create_bmap_func('BMMesh_GetVertexPositions', [bm_void_p, bm_CKID, bm_VxVector2_pp])
+BMMesh_GetVertexPositions = _create_bmap_func('BMMesh_GetVertexPositions', [bm_void_p, bm_CKID, bm_VxVector3_pp])
 ## BMMesh_GetVertexNormals
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param out_mem[out] Type: LibCmo::VxMath::VxVector3*. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BMMesh_GetVertexNormals = _create_bmap_func('BMMesh_GetVertexNormals', [bm_void_p, bm_CKID, bm_VxVector2_pp])
+BMMesh_GetVertexNormals = _create_bmap_func('BMMesh_GetVertexNormals', [bm_void_p, bm_CKID, bm_VxVector3_pp])
 ## BMMesh_GetVertexUVs
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.

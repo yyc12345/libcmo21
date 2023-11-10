@@ -48,13 +48,15 @@ class _AbstractCKObject(_AbstractPointer):
         return bmap.bm_CKID(self.__mCKID)
 
     def __eq__(self, obj: object) -> bool:
+        if not _AbstractPointer.__eq__(self, obj): return False
+
         if isinstance(obj, self.__class__):
-            return obj.__mRawPointer == self.__mRawPointer and obj.__mCKID == self.__mCKID
+            return obj.__mCKID == self.__mCKID
         else:
             return False
         
     def __hash__(self) -> int:
-        return hash((self.__mRawPointer, self.__mCKID))
+        return hash((_AbstractPointer.__hash__(self), self.__mCKID))
 
 #endregion
 
@@ -119,6 +121,7 @@ def _ckfaceindices_iterator(pindices: bmap.bm_CKDWORD_p, count: int) -> typing.I
         ret.i2 = pindices[idx + 1]
         ret.i3 = pindices[idx + 2]
         idx += 3
+        yield ret
 
 #endregion
 
@@ -429,7 +432,7 @@ class BMMesh(BMObject):
     def get_vertex_uvs(self) -> typing.Iterator[virtools_types.VxVector2]:
         raw_vector: bmap.bm_VxVector2_p = bmap.bm_VxVector2_p()
         bmap.BMMesh_GetVertexUVs(self._get_pointer(), self._get_ckid(), ctypes.byref(raw_vector))
-        _vxvector2_iterator(raw_vector, self.get_vertex_count())
+        return _vxvector2_iterator(raw_vector, self.get_vertex_count())
 
     def set_vertex_uvs(self, itor: typing.Iterator[virtools_types.VxVector2]) -> None:
         raw_vector: bmap.bm_VxVector2_p = bmap.bm_VxVector2_p()
@@ -457,13 +460,13 @@ class BMMesh(BMObject):
 
     def get_face_material_slot_indexs(self) -> typing.Iterator[int]:
         raw_idx: bmap.bm_CKWORD_p = bmap.bm_CKWORD_p()
-        bmap.BMMesh_GetFaceIndices(self._get_pointer(), self._get_ckid(), ctypes.byref(raw_idx))
+        bmap.BMMesh_GetFaceMaterialSlotIndexs(self._get_pointer(), self._get_ckid(), ctypes.byref(raw_idx))
         for i in range(self.get_face_count()):
             yield raw_idx[i]
 
     def set_face_material_slot_indexs(self, itor: typing.Iterator[int]) -> None:
         raw_idx: bmap.bm_CKWORD_p = bmap.bm_CKWORD_p()
-        bmap.BMMesh_GetFaceIndices(self._get_pointer(), self._get_ckid(), ctypes.byref(raw_idx))
+        bmap.BMMesh_GetFaceMaterialSlotIndexs(self._get_pointer(), self._get_ckid(), ctypes.byref(raw_idx))
         for i in range(self.get_face_count()):
             raw_idx[i] = next(itor)
 

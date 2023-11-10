@@ -21,7 +21,7 @@ public class PythonWriter {
 		cache.put("CK_ID", "CKID");
 		cache.put("BMFile", "void");
 		cache.put("BMMeshTransition", "void");
-		cache.put("VxVector3", "VxVector2");
+		cache.put("VxVector3", "VxVector3");
 		cache.put("VxVector2", "VxVector2");
 		cache.put("VxColor", "VxColor");
 		cache.put("VxMatrix", "VxMatrix");

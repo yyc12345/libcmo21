@@ -46,6 +46,7 @@ class bm_VxVector3(ctypes.Structure):
         ('z', bm_CKFLOAT),
     ]
 bm_VxVector3_p = ctypes.POINTER(bm_VxVector3)
+bm_VxVector3_pp = ctypes.POINTER(bm_VxVector3_p)
 class bm_VxColor(ctypes.Structure):
     _fields_ = [
         ('r', bm_CKFLOAT),
