@@ -192,7 +192,8 @@ namespace LibCmo::CK2::DataHandlers {
 		delete[] data;
 		std::fclose(fs);
 
-		return ret == 0;
+		// ret is 0 mean failed.
+		return ret != 0;
 	}
 	static CKDWORD StbSaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, SaveOperation oper) {
 		if (write_image == nullptr) return 0;
@@ -215,6 +216,7 @@ namespace LibCmo::CK2::DataHandlers {
 		delete ctx;
 		delete[] data;
 
+		// ret is 0 mean failed. return zero size.
 		if (ret == 0) return 0;
 		else return expected;
 	}
