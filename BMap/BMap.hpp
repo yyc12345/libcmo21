@@ -8,9 +8,11 @@
 
 namespace BMap {
 	
+	using NakedOutputCallback = void(*)(LibCmo::CKSTRING);
+
 	class BMFile {
 	public:
-		BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING* encodings, bool is_reader);
+		BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, NakedOutputCallback raw_callback, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING* encodings, bool is_reader);
 		~BMFile();
 		LIBCMO_DISABLE_COPY_MOVE(BMFile);
 

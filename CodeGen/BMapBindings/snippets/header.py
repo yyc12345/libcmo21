@@ -32,6 +32,8 @@ bm_bool_p = ctypes.POINTER(bm_bool)
 bm_void_p = ctypes.c_void_p
 bm_void_pp = ctypes.POINTER(ctypes.c_void_p)
 
+bm_callback = ctypes.CFUNCTYPE(None, bm_CKSTRING)
+
 class bm_VxVector2(ctypes.Structure):
     _fields_ = [
         ('x', bm_CKFLOAT),

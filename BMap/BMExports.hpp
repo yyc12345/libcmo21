@@ -74,6 +74,7 @@ LIBCMO_EXPORT bool BMFile_Load(
 	BMPARAM_IN(LibCmo::CKSTRING, file_name),
 	BMPARAM_IN(LibCmo::CKSTRING, temp_folder),
 	BMPARAM_IN(LibCmo::CKSTRING, texture_folder),
+	BMPARAM_IN(BMap::NakedOutputCallback, raw_callback),
 	BMPARAM_IN(LibCmo::CKDWORD, encoding_count),
 	BMPARAM_IN(LibCmo::CKSTRING*, encodings),
 	BMPARAM_OUT(BMap::BMFile*, out_file)
@@ -81,6 +82,7 @@ LIBCMO_EXPORT bool BMFile_Load(
 LIBCMO_EXPORT bool BMFile_Create(
 	BMPARAM_IN(LibCmo::CKSTRING, temp_folder),
 	BMPARAM_IN(LibCmo::CKSTRING, texture_folder),
+	BMPARAM_IN(BMap::NakedOutputCallback, raw_callback),
 	BMPARAM_IN(LibCmo::CKDWORD, encoding_count),
 	BMPARAM_IN(LibCmo::CKSTRING*, encodings),
 	BMPARAM_OUT(BMap::BMFile*, out_file)
@@ -218,6 +220,9 @@ LIBCMO_EXPORT bool BMMaterial_SetZFunc(BMPARAM_OBJECT_DECL(bmfile, objid), BMPAR
 #pragma endregion
 
 #pragma region CKMesh
+
+LIBCMO_EXPORT bool BMMesh_GetLitMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXMESH_LITMODE, out_mode));
+LIBCMO_EXPORT bool BMMesh_SetLitMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXMESH_LITMODE, mode));
 
 LIBCMO_EXPORT bool BMMesh_GetVertexCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_count));
 LIBCMO_EXPORT bool BMMesh_SetVertexCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, count));

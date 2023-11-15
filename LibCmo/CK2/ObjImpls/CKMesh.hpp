@@ -38,6 +38,11 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		void CleanMesh();
 		VxMath::VXMESH_FLAGS GetMeshFlags() const;
+		void SetMeshFlags(VxMath::VXMESH_FLAGS flags);
+		VxMath::VXMESH_LITMODE GetLitMode() const;
+		void SetLitMode(VxMath::VXMESH_LITMODE mode);
+		VxMath::VXTEXTURE_WRAPMODE GetWrapMode() const;
+		void SetWrapMode(VxMath::VXTEXTURE_WRAPMODE mode);
 	protected:
 		VertexSaveFlags GenerateSaveFlags();
 		void BuildNormals();

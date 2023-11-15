@@ -304,3 +304,15 @@ class VXCMPFUNC(enum.IntEnum):
     VXCMP_NOTEQUAL = 6  ##< Accept if value if different than current value.
     VXCMP_GREATEREQUAL = 7  ##< Accept if value if greater or equal current value.
     VXCMP_ALWAYS = 8  ##< Always accept the test.
+    
+class VXMESH_LITMODE(enum.IntEnum):
+    """!
+    {filename:VXMESH_LITMODE}
+    Summary: Mesh lighting options
+    
+    Remarks:
+    + The VXMESH_LITMODE is used by CKMesh::SetLitMode to specify how lighting is done.
+    See Also: CKMaterial,CKMesh
+    """
+    VX_PRELITMESH = 0    ##< Lighting use color information store with vertices 
+    VX_LITMESH = 1    ##< Lighting is done by renderer using normals and face material information. 

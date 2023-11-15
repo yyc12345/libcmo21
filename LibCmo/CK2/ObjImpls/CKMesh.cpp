@@ -433,6 +433,64 @@ namespace LibCmo::CK2::ObjImpls {
 		return m_Flags;
 	}
 
+	void CKMesh::SetMeshFlags(VxMath::VXMESH_FLAGS flags) {
+		// set value
+		m_Flags = flags;
+
+		// sync visibility to CKObject layer.
+		if (EnumsHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_VISIBLE)) {
+			EnumsHelper::Add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+		} else {
+			EnumsHelper::Rm(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+		}
+	}
+
+	VxMath::VXMESH_LITMODE CKMesh::GetLitMode() const {
+		if (EnumsHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PRELITMODE)) {
+			return VxMath::VXMESH_LITMODE::VX_PRELITMESH;
+		} else {
+			return VxMath::VXMESH_LITMODE::VX_LITMESH;
+		}
+	}
+
+	void CKMesh::SetLitMode(VxMath::VXMESH_LITMODE mode) {
+		switch (mode) {
+			case VxMath::VXMESH_LITMODE::VX_PRELITMESH:
+				EnumsHelper::Add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PRELITMODE);
+				break;
+			case VxMath::VXMESH_LITMODE::VX_LITMESH:
+				EnumsHelper::Rm(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PRELITMODE);
+				break;
+		}
+	}
+
+	VxMath::VXTEXTURE_WRAPMODE CKMesh::GetWrapMode() const {
+		VxMath::VXTEXTURE_WRAPMODE ret = VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_NONE;
+
+		if (EnumsHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPU)) {
+			EnumsHelper::Add(ret, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_U);
+		}
+		if (EnumsHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPV)) {
+			EnumsHelper::Add(ret, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_V);
+		}
+
+		return ret;
+	}
+
+	void CKMesh::SetWrapMode(VxMath::VXTEXTURE_WRAPMODE mode) {
+		if (EnumsHelper::Has(mode, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_U)) {
+			EnumsHelper::Add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPU);
+		} else {
+			EnumsHelper::Rm(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPU);
+		}
+
+		if (EnumsHelper::Has(mode, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_V)) {
+			EnumsHelper::Add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPV);
+		} else {
+			EnumsHelper::Rm(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPV);
+		}
+	}
+
 	CKMesh::VertexSaveFlags CKMesh::GenerateSaveFlags() {
 		// set to initial status
 		VertexSaveFlags saveflags = EnumsHelper::Merge({

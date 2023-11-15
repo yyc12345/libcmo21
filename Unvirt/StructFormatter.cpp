@@ -316,6 +316,12 @@ namespace Unvirt::StructFormatter {
 		fputs("Mesh Flags:\n", stdout);
 		fputs(AccessibleValue::GetFlagEnumName(obj->GetMeshFlags(), AccessibleValue::EnumDesc::VXMESH_FLAGS, "\n").c_str(), stdout);
 		fputc('\n', stdout);
+		fputs("Lit Mode: ", stdout);
+		fputs(AccessibleValue::GetEnumName(obj->GetLitMode(), AccessibleValue::EnumDesc::VXMESH_LITMODE).c_str(), stdout);
+		fputc('\n', stdout);
+		fputs("Wrap Mode: ", stdout);
+		fputs(AccessibleValue::GetEnumName(obj->GetWrapMode(), AccessibleValue::EnumDesc::VXTEXTURE_WRAPMODE).c_str(), stdout);
+		fputc('\n', stdout);
 
 		// vertex data
 		fputs("== Vertex ==\n", stdout);

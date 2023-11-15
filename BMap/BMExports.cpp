@@ -98,13 +98,14 @@ bool BMFile_Load(
 	BMPARAM_IN(LibCmo::CKSTRING, file_name),
 	BMPARAM_IN(LibCmo::CKSTRING, temp_folder),
 	BMPARAM_IN(LibCmo::CKSTRING, texture_folder),
+	BMPARAM_IN(BMap::NakedOutputCallback, raw_callback),
 	BMPARAM_IN(LibCmo::CKDWORD, encoding_count),
 	BMPARAM_IN(LibCmo::CKSTRING*, encodings),
 	BMPARAM_OUT(BMap::BMFile*, out_file)) {
 	if (!CheckInited()) return false;
 
 	// create a now one and try to load data.
-	std::unique_ptr<BMap::BMFile> file(new BMap::BMFile(temp_folder, texture_folder, encoding_count, encodings, true));
+	std::unique_ptr<BMap::BMFile> file(new BMap::BMFile(temp_folder, texture_folder, raw_callback, encoding_count, encodings, true));
 	if (file->IsInitError()) return false;
 	if (!file->Load(file_name)) return false;
 
@@ -117,13 +118,14 @@ bool BMFile_Load(
 bool BMFile_Create(
 	BMPARAM_IN(LibCmo::CKSTRING, temp_folder),
 	BMPARAM_IN(LibCmo::CKSTRING, texture_folder),
+	BMPARAM_IN(BMap::NakedOutputCallback, raw_callback),
 	BMPARAM_IN(LibCmo::CKDWORD, encoding_count),
 	BMPARAM_IN(LibCmo::CKSTRING*, encodings),
 	BMPARAM_OUT(BMap::BMFile*, out_file)) {
 	if (!CheckInited()) return false;
 
 	// create a now one
-	std::unique_ptr<BMap::BMFile> file(new BMap::BMFile(temp_folder, texture_folder, encoding_count, encodings, false));
+	std::unique_ptr<BMap::BMFile> file(new BMap::BMFile(temp_folder, texture_folder, raw_callback, encoding_count, encodings, false));
 	if (file->IsInitError()) return false;
 
 	// add into list and return if success
@@ -718,6 +720,21 @@ bool BMMaterial_SetZFunc(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::
 #pragma endregion
 
 #pragma region CKMesh
+
+LIBCMO_EXPORT bool BMMesh_GetLitMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXMESH_LITMODE, out_mode)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_mode, obj->GetLitMode());
+	return true;
+}
+LIBCMO_EXPORT bool BMMesh_SetLitMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXMESH_LITMODE, mode)) {
+	auto obj = CheckCKMesh(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	obj->SetLitMode(mode);
+	return true;
+}
 
 bool BMMesh_GetVertexCount(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
 	auto obj = CheckCKMesh(bmfile, objid);

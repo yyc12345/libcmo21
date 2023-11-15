@@ -231,13 +231,23 @@ namespace BMap {
 
 #pragma region BMfile
 
-	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING* encodings, bool is_loader) :
+	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, NakedOutputCallback raw_callback, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING* encodings, bool is_loader) :
 		m_IsInitError(false), m_IsLoader(is_loader), m_HasLoaded(false), m_HasSaved(false), m_Context(nullptr) {
 		m_Context = new LibCmo::CK2::CKContext();
+		// binding callback with lambda wrapper.
+		// check whether callback is nullptr.
+		m_IsInitError = m_IsInitError || (raw_callback == nullptr);
+		if (raw_callback != nullptr) {
+			m_Context->SetOutputCallback([raw_callback](LibCmo::CKSTRING strl) -> void {
+				raw_callback(strl);
+			});
+		}
+
 		// set temp folder and texture folder
 		auto pm = m_Context->GetPathManager();
 		m_IsInitError = m_IsInitError || !pm->AddPath(texture_folder);
 		m_IsInitError = m_IsInitError || !pm->SetTempFolder(temp_folder);
+
 		// set encoding
 		LibCmo::XContainer::XArray<LibCmo::XContainer::XString> cache;
 		for (LibCmo::CKDWORD i = 0; i < encoding_count; ++i) {

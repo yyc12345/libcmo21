@@ -32,6 +32,8 @@ bm_bool_p = ctypes.POINTER(bm_bool)
 bm_void_p = ctypes.c_void_p
 bm_void_pp = ctypes.POINTER(ctypes.c_void_p)
 
+bm_callback = ctypes.CFUNCTYPE(None, bm_CKSTRING)
+
 class bm_VxVector2(ctypes.Structure):
     _fields_ = [
         ('x', bm_CKFLOAT),
@@ -104,19 +106,21 @@ BMDispose = _create_bmap_func('BMDispose', [])
 #  @param file_name[in] Type: LibCmo::CKSTRING. 
 #  @param temp_folder[in] Type: LibCmo::CKSTRING. 
 #  @param texture_folder[in] Type: LibCmo::CKSTRING. 
+#  @param raw_callback[in] Type: BMap::NakedOutputCallback. 
 #  @param encoding_count[in] Type: LibCmo::CKDWORD. 
 #  @param encodings[in] Type: LibCmo::CKSTRING*. 
 #  @param out_file[out] Type: BMap::BMFile*. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BMFile_Load = _create_bmap_func('BMFile_Load', [bm_CKSTRING, bm_CKSTRING, bm_CKSTRING, bm_CKDWORD, bm_CKSTRING_p, bm_void_pp])
+BMFile_Load = _create_bmap_func('BMFile_Load', [bm_CKSTRING, bm_CKSTRING, bm_CKSTRING, bm_callback, bm_CKDWORD, bm_CKSTRING_p, bm_void_pp])
 ## BMFile_Create
 #  @param temp_folder[in] Type: LibCmo::CKSTRING. 
 #  @param texture_folder[in] Type: LibCmo::CKSTRING. 
+#  @param raw_callback[in] Type: BMap::NakedOutputCallback. 
 #  @param encoding_count[in] Type: LibCmo::CKDWORD. 
 #  @param encodings[in] Type: LibCmo::CKSTRING*. 
 #  @param out_file[out] Type: BMap::BMFile*. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BMFile_Create = _create_bmap_func('BMFile_Create', [bm_CKSTRING, bm_CKSTRING, bm_CKDWORD, bm_CKSTRING_p, bm_void_pp])
+BMFile_Create = _create_bmap_func('BMFile_Create', [bm_CKSTRING, bm_CKSTRING, bm_callback, bm_CKDWORD, bm_CKSTRING_p, bm_void_pp])
 ## BMFile_Save
 #  @param map_file[in] Type: BMap::BMFile*. 
 #  @param file_name[in] Type: LibCmo::CKSTRING. 
@@ -635,6 +639,18 @@ BMMaterial_GetZFunc = _create_bmap_func('BMMaterial_GetZFunc', [bm_void_p, bm_CK
 #  @param val[in] Type: LibCmo::VxMath::VXCMPFUNC. 
 #  @return True if no error, otherwise False.
 BMMaterial_SetZFunc = _create_bmap_func('BMMaterial_SetZFunc', [bm_void_p, bm_CKID, bm_enum])
+## BMMesh_GetLitMode
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param out_mode[out] Type: LibCmo::VxMath::VXMESH_LITMODE. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMMesh_GetLitMode = _create_bmap_func('BMMesh_GetLitMode', [bm_void_p, bm_CKID, bm_enum_p])
+## BMMesh_SetLitMode
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param mode[in] Type: LibCmo::VxMath::VXMESH_LITMODE. 
+#  @return True if no error, otherwise False.
+BMMesh_SetLitMode = _create_bmap_func('BMMesh_SetLitMode', [bm_void_p, bm_CKID, bm_enum])
 ## BMMesh_GetVertexCount
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.

@@ -7,6 +7,17 @@ g_InvalidPtr: bmap.bm_void_p = bmap.bm_void_p(0)
 g_InvalidCKID: int = 0
 g_BMapEncoding: str = "utf-8"
 
+def python_callback(strl: bytes):
+    """
+    The Python type callback for BMFile.
+    Simply add a prefix when output.
+    Need a convertion before passing to BMFile.
+    """
+    # the passing value is bytes, not bmap.bm_CKSTRING.
+    # i think Python do a auto convertion here.
+    if strl is not None:
+        print(f'[PyBMap] {strl.decode(g_BMapEncoding)}')
+
 class _AbstractPointer():
     __mRawPointer: int
 
@@ -398,6 +409,16 @@ class BMMaterial(BMObject):
         bmap.BMMaterial_SetZFunc(self._get_pointer(), self._get_ckid(), data)
 
 class BMMesh(BMObject):
+
+    def get_lit_mode(self) -> virtools_types.VXMESH_LITMODE:
+        mode: bmap.bm_enum = bmap.bm_enum()
+        bmap.BMMesh_GetLitMode(self._get_pointer(), self._get_ckid(), ctypes.byref(mode))
+        return virtools_types.VXMESH_LITMODE(mode.value)
+    
+    def set_lit_mode(self, mode: virtools_types.VXMESH_LITMODE) -> None:
+        mode: bmap.bm_enum = bmap.bm_enum(mode.value)
+        bmap.BMMesh_SetLitMode(self._get_pointer(), self._get_ckid(), mode)
+
     def get_vertex_count(self) -> int:
         count: bmap.bm_CKDWORD = bmap.bm_CKDWORD()
         bmap.BMMesh_GetVertexCount(self._get_pointer(), self._get_ckid(), ctypes.byref(count))
@@ -569,6 +590,7 @@ class BMFileReader(_AbstractPointer):
         file_name: bmap.bm_CKSTRING = bmap.bm_CKSTRING(file_name_.encode(g_BMapEncoding))
         temp_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(temp_folder_.encode(g_BMapEncoding))
         texture_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(texture_folder_.encode(g_BMapEncoding))
+        raw_callback: bmap.bm_callback = bmap.bm_callback(python_callback)
         encoding_count: bmap.bm_CKDWORD = bmap.bm_CKDWORD(len(encodings_))
         encodings: ctypes.Array = (bmap.bm_CKSTRING * len(encodings_))(
             *(strl.encode(g_BMapEncoding) for strl in encodings_)
@@ -576,7 +598,8 @@ class BMFileReader(_AbstractPointer):
         out_file: bmap.bm_void_p = bmap.bm_void_p()
         # exec
         bmap.BMFile_Load(
-            file_name, temp_folder, texture_folder, encoding_count, encodings,
+            file_name, temp_folder, texture_folder, raw_callback,
+            encoding_count, encodings,
             ctypes.byref(out_file)
         )
         # init self
@@ -666,6 +689,7 @@ class BMFileWriter(_AbstractPointer):
         # create param
         temp_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(temp_folder_.encode(g_BMapEncoding))
         texture_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(texture_folder_.encode(g_BMapEncoding))
+        raw_callback: bmap.bm_callback = bmap.bm_callback(python_callback)
         encoding_count: bmap.bm_CKDWORD = bmap.bm_CKDWORD(len(encodings_))
         encodings: ctypes.Array = (bmap.bm_CKSTRING * len(encodings_))(
             *(strl.encode(g_BMapEncoding) for strl in encodings_)
@@ -673,7 +697,8 @@ class BMFileWriter(_AbstractPointer):
         out_file: bmap.bm_void_p = bmap.bm_void_p()
         # exec
         bmap.BMFile_Create(
-            temp_folder, texture_folder, encoding_count, encodings,
+            temp_folder, texture_folder, raw_callback,
+            encoding_count, encodings,
             ctypes.byref(out_file)
         )
         # init self

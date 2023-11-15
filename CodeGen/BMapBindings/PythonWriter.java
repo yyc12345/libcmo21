@@ -19,6 +19,7 @@ public class PythonWriter {
 		cache.put("CKFLOAT", "CKFLOAT");
 		cache.put("CKBYTE", "CKBYTE");
 		cache.put("CK_ID", "CKID");
+		cache.put("NakedOutputCallback", "callback");
 		cache.put("BMFile", "void");
 		cache.put("BMMeshTransition", "void");
 		cache.put("VxVector3", "VxVector3");
@@ -34,6 +35,7 @@ public class PythonWriter {
 		cache.put("VXFILL_MODE", "enum");
 		cache.put("VXSHADE_MODE", "enum");
 		cache.put("VXCMPFUNC", "enum");
+		cache.put("VXMESH_LITMODE", "enum");
 		return Collections.unmodifiableMap(cache);
 	}
 

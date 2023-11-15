@@ -96,6 +96,7 @@ namespace Unvirt {
 			extern const GeneralReflectionArray<LibCmo::VxMath::VX_EFFECT> VX_EFFECT;
 			extern const GeneralReflectionArray<LibCmo::VxMath::VX_MOVEABLE_FLAGS> VX_MOVEABLE_FLAGS;
 			extern const GeneralReflectionArray<LibCmo::VxMath::VXMESH_FLAGS> VXMESH_FLAGS;
+			extern const GeneralReflectionArray<LibCmo::VxMath::VXMESH_LITMODE> VXMESH_LITMODE;
 			extern const GeneralReflectionArray<LibCmo::VxMath::VXTEXTURE_WRAPMODE> VXTEXTURE_WRAPMODE;
 		}
 
