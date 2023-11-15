@@ -5,9 +5,12 @@ namespace LibCmo::CK2::ObjImpls {
 
 	CKObject::CKObject(CKContext* ctx, CK_ID ckid, CKSTRING name) :
 		m_ID(ckid),
-		m_Name(name),
+		m_Name(),
 		m_Context(ctx),
-		m_ObjectFlags(CK_OBJECT_FLAGS::CK_PARAMETERIN_DISABLED) {}
+		m_ObjectFlags(CK_OBJECT_FLAGS::CK_PARAMETERIN_DISABLED) {
+		// set name with possible nullptr.
+		XContainer::NSXString::FromCKSTRING(m_Name, name);
+	}
 
 	CKObject::~CKObject() {}
 

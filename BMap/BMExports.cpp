@@ -371,8 +371,6 @@ bool BMTexture_GetFileName(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCm
 	auto obj = CheckCKTexture(bmfile, objid);
 	if (obj == nullptr) return false;
 
-	if (obj->GetUnderlyingData().GetSlotCount() == 0) return false;
-
 	BMPARAM_OUT_ASSIGN(out_filename, obj->GetUnderlyingData().GetSlotFileName(0));
 	return true;
 }
