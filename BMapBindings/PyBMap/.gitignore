@@ -1,6 +1,9 @@
 # my ban
 *.dll
 *.pdb
+*.so
+*.dylib
+*.bin
 testbench.py
 
 # Byte-compiled / optimized / DLL files

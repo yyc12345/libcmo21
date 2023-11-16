@@ -1,4 +1,4 @@
-import ctypes, os
+import ctypes, os, sys
 
 #region Type Defines
 
@@ -67,10 +67,21 @@ bm_VxMatrix_p = ctypes.POINTER(bm_VxMatrix)
 
 #region BMap Loader
 
+_g_BMapLibName: str
+
+if sys.platform.startswith('win32') or sys.platform.startswith('cygwin'):
+    _g_BMapLibName = "BMap.dll"
+elif sys.platform.startswith('linux') or sys.platform.startswith('freebsd'):
+    _g_BMapLibName = "BMap.so"
+elif sys.platform.startswith('darwin'):
+    _g_BMapLibName = "BMap.dylib"
+else:
+    _g_BMapLibName = "BMap.bin"
+
 _g_BMapModule: ctypes.CDLL = None
 try:
     _g_BMapModule = ctypes.cdll.LoadLibrary(
-        os.path.join(os.path.dirname(__file__), "BMap.dll")
+        os.path.join(os.path.dirname(__file__), _g_BMapLibName)
     )
 except:
     _g_BMapModule = None
