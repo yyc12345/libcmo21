@@ -35,7 +35,8 @@ def GetTmplOperOffset(sname: str, svars: tuple[str]) -> str:
 \t\t\t{sp.join(map(lambda x: f'case {x}: return {svars[x]};', range(len(svars))))}
 \t\t\tdefault: return {svars[0]};
 \t\t}}
-\t}}\tconst CKFLOAT& operator[](size_t i) const {{
+\t}}
+\tconst CKFLOAT& operator[](size_t i) const {{
 \t\tswitch (i) {{
 \t\t\t{sp.join(map(lambda x: f'case {x}: return {svars[x]};', range(len(svars))))}
 \t\t\tdefault: return {svars[0]};

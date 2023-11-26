@@ -36,7 +36,8 @@ namespace LibCmo::VxMath {
 				case 1: return y;
 				default: return x;
 			}
-		}	const CKFLOAT& operator[](size_t i) const {
+		}
+		const CKFLOAT& operator[](size_t i) const {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
@@ -120,7 +121,8 @@ namespace LibCmo::VxMath {
 				case 2: return z;
 				default: return x;
 			}
-		}	const CKFLOAT& operator[](size_t i) const {
+		}
+		const CKFLOAT& operator[](size_t i) const {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
@@ -211,7 +213,8 @@ namespace LibCmo::VxMath {
 				case 3: return w;
 				default: return x;
 			}
-		}	const CKFLOAT& operator[](size_t i) const {
+		}
+		const CKFLOAT& operator[](size_t i) const {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
