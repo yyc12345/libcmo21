@@ -8,7 +8,7 @@
 #endif
  
 // Debug IronPad used. Force enable IronPad.
-#define IRONPAD_ENABLED 1
+//#define IRONPAD_ENABLED 1
 
 namespace IronPad {
 

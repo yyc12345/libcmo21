@@ -7,7 +7,7 @@ namespace LibCmo::CK2::ObjImpls {
 		m_ID(ckid),
 		m_Name(),
 		m_Context(ctx),
-		m_ObjectFlags(CK_OBJECT_FLAGS::CK_PARAMETERIN_DISABLED) {
+		m_ObjectFlags(CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE) {
 		// set name with possible nullptr.
 		XContainer::NSXString::FromCKSTRING(m_Name, name);
 	}

@@ -175,10 +175,15 @@ namespace LibCmo::CK2 {
 			hdrparser->Write(&obj.FileIndex);
 
 			if (XContainer::NSXString::ToCKSTRING(obj.Name) != nullptr) {
+				// if have name, write it
 				m_Ctx->GetNativeString(obj.Name, name_conv);
 				CKDWORD namelen = static_cast<CKDWORD>(name_conv.size());
 				hdrparser->Write(&namelen);
 				hdrparser->Write(name_conv.data(), namelen);
+			} else {
+				// otherwise, write 0 to indicate no name
+				CKDWORD namelen = 0;
+				hdrparser->Write(&namelen);
 			}
 		}
 

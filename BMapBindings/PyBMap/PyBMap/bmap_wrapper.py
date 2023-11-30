@@ -279,7 +279,7 @@ class BMMaterial(BMObject):
     def set_texture(self, tex_: BMTexture | None) -> None:
         objid: bmap.bm_CKID = bmap.bm_CKID(g_InvalidCKID)
         if tex_ is not None:
-            objid.value = tex_._get_ckid()
+            objid = tex_._get_ckid()
         bmap.BMMaterial_SetTexture(self._get_pointer(), self._get_ckid(), objid)
 
     def get_texture_border_color(self) -> virtools_types.VxColor:
@@ -521,7 +521,7 @@ class BMMesh(BMObject):
             if mtlobj is None:
                 mtlid.value = g_InvalidCKID
             else:
-                mtlid.value = mtlobj._get_ckid()
+                mtlid = mtlobj._get_ckid()
             # set
             bmap.BMMesh_SetMaterialSlot(self._get_pointer(), self._get_ckid(), idx, mtlid)
 
@@ -551,7 +551,7 @@ class BM3dObject(BMObject):
     def set_current_mesh(self, mesh: BMMesh | None) -> None:
         ckid: bmap.bm_CKID = bmap.bm_CKID(g_InvalidCKID)
         if mesh is not None:
-            ckid.value = mesh._get_ckid()
+            ckid = mesh._get_ckid()
         bmap.BM3dObject_SetCurrentMesh(self._get_pointer(), self._get_ckid(), ckid)
 
     def get_visibility(self) -> bool:
@@ -733,31 +733,31 @@ class BMFileWriter(_AbstractPointer):
         return class_type(self._get_pointer(), retid)
 
     def create_texture(self) -> BMTexture:
-        self.__create_ckobject(
+        return self.__create_ckobject(
             BMTexture,
             bmap.BMFile_CreateTexture
         )
     
     def create_material(self) -> BMMaterial:
-        self.__create_ckobject(
+        return self.__create_ckobject(
             BMMaterial,
             bmap.BMFile_CreateMaterial
         )
     
     def create_mesh(self) -> BMMesh:
-        self.__create_ckobject(
+        return self.__create_ckobject(
             BMMesh,
             bmap.BMFile_CreateMesh
         )
     
     def create_3dobject(self) -> BM3dObject:
-        self.__create_ckobject(
+        return self.__create_ckobject(
             BM3dObject,
             bmap.BMFile_Create3dObject
         )
     
     def create_group(self) -> BMGroup:
-        self.__create_ckobject(
+        return self.__create_ckobject(
             BMGroup,
             bmap.BMFile_CreateGroup
         )

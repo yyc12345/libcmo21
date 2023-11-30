@@ -131,7 +131,7 @@ namespace LibCmo::CK2 {
 					parser->Read(name_conv.data(), namelen);
 					m_Ctx->GetUtf8String(name_conv, fileobj.Name);
 				} else {
-					fileobj.Name.clear();
+					XContainer::NSXString::FromCKSTRING(fileobj.Name, nullptr);
 				}
 			}
 		}
