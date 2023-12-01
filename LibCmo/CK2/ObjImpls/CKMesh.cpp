@@ -22,8 +22,8 @@ namespace LibCmo::CK2::ObjImpls {
 		m_LineIndices(),
 		// init flags
 		m_Flags(EnumsHelper::Merge({
-			VxMath::VXMESH_FLAGS::VXMESH_FORCETRANSPARENCY,
-			VxMath::VXMESH_FLAGS::VXMESH_HASTRANSPARENCY
+			VxMath::VXMESH_FLAGS::VXMESH_VISIBLE,
+			VxMath::VXMESH_FLAGS::VXMESH_RENDERCHANNELS
 		})) {
 		// set visible in default
 		EnumsHelper::Add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
@@ -53,14 +53,25 @@ namespace LibCmo::CK2::ObjImpls {
 		}
 
 		// write material slots
-		if (GetMaterialSlotCount() != 0) {
+		// MARK: due to virtools shit implement, we must make sure there is at least one material channel existed.
+		// so if the material slot is empty, we write a mullptr slot for it.
+		{
 			chunk->WriteIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHMATERIALS);
-			chunk->WriteStruct(GetMaterialSlotCount());
 
-			for (auto& mtlSlot : m_MaterialSlot) {
-				// write object id
-				chunk->WriteObjectPointer(mtlSlot);
-				// MARK: write a zero? idk what the fuck it is.
+			if (GetMaterialSlotCount() != 0) {
+				// write real slots
+				chunk->WriteStruct(GetMaterialSlotCount());
+				for (auto& mtlSlot : m_MaterialSlot) {
+					// write object id
+					chunk->WriteObjectPointer(mtlSlot);
+					// MARK: write a zero? idk what the fuck it is.
+					chunk->WriteStruct(static_cast<CKDWORD>(0));
+				}
+			} else {
+				// write fake one like real one
+				chunk->WriteStruct(static_cast<CKDWORD>(1));
+				// write id and blank
+				chunk->WriteObjectPointer(nullptr);
 				chunk->WriteStruct(static_cast<CKDWORD>(0));
 			}
 		}

@@ -115,7 +115,11 @@ def _vxvector2_iterator(pvector: bmap.bm_VxVector2_p, count: int) -> typing.Iter
         idx += 2
         yield ret
       
-def _ckfaceindices_assigner(pindices: bmap.bm_CKDWORD_p, count: int, itor: typing.Iterator[virtools_types.CKFaceIndices]) -> None:
+# bmap.bm_CKWORD_p | bmap.bm_CKDWORD_p is just a type hint
+# wo do not need distinguish them in code. 
+# because the type of pindices is decided by runtime.
+
+def _ckfaceindices_assigner(pindices: bmap.bm_CKWORD_p | bmap.bm_CKDWORD_p, count: int, itor: typing.Iterator[virtools_types.CKFaceIndices]) -> None:
     idx: int = 0
     for _ in range(count):
         userindices: virtools_types.CKFaceIndices = next(itor)
@@ -124,7 +128,7 @@ def _ckfaceindices_assigner(pindices: bmap.bm_CKDWORD_p, count: int, itor: typin
         pindices[idx + 2] = userindices.i3
         idx += 3
 
-def _ckfaceindices_iterator(pindices: bmap.bm_CKDWORD_p, count: int) -> typing.Iterator[virtools_types.CKFaceIndices]:
+def _ckfaceindices_iterator(pindices: bmap.bm_CKWORD_p | bmap.bm_CKDWORD_p, count: int) -> typing.Iterator[virtools_types.CKFaceIndices]:
     ret: virtools_types.CKFaceIndices = virtools_types.CKFaceIndices()
     idx: int = 0
     for _ in range(count):
@@ -175,12 +179,12 @@ class BMObject(_AbstractCKObject):
         else:
             return name.value.decode(g_BMapEncoding)
 
-    def set_name(self, name: str | None) -> None:
+    def set_name(self, name_: str | None) -> None:
         name: bmap.bm_CKSTRING
-        if name is None:
+        if name_ is None:
             name = bmap.bm_CKSTRING(0)
         else:
-            name = bmap.bm_CKSTRING(name.encode(g_BMapEncoding))
+            name = bmap.bm_CKSTRING(name_.encode(g_BMapEncoding))
         bmap.BMObject_SetName(self._get_pointer(), self._get_ckid(), name)
 
 class BMTexture(BMObject):
@@ -415,8 +419,8 @@ class BMMesh(BMObject):
         bmap.BMMesh_GetLitMode(self._get_pointer(), self._get_ckid(), ctypes.byref(mode))
         return virtools_types.VXMESH_LITMODE(mode.value)
     
-    def set_lit_mode(self, mode: virtools_types.VXMESH_LITMODE) -> None:
-        mode: bmap.bm_enum = bmap.bm_enum(mode.value)
+    def set_lit_mode(self, mode_: virtools_types.VXMESH_LITMODE) -> None:
+        mode: bmap.bm_enum = bmap.bm_enum(mode_.value)
         bmap.BMMesh_SetLitMode(self._get_pointer(), self._get_ckid(), mode)
 
     def get_vertex_count(self) -> int:
@@ -535,9 +539,9 @@ class BM3dObject(BMObject):
         ret.from_const(tuple(flat[i] for i in range(16)))
         return ret
 
-    def set_world_matrix(self, mat: virtools_types.VxMatrix) -> None:
+    def set_world_matrix(self, mat_: virtools_types.VxMatrix) -> None:
         # star syntax expand the tuple as the argument.
-        mat: bmap.bm_VxMatrix = bmap.bm_VxMatrix(*(mat.to_const()))
+        mat: bmap.bm_VxMatrix = bmap.bm_VxMatrix(*(mat_.to_const()))
         bmap.BM3dObject_SetWorldMatrix(self._get_pointer(), self._get_ckid(), mat)
 
     def get_current_mesh(self) -> BMMesh | None:
@@ -819,7 +823,7 @@ class BMMeshTrans(_AbstractPointer):
         
         idx: int = 0
         for _ in range(count):
-            usermtl: BMMaterial = next(itor)
+            usermtl: BMMaterial | None = next(itor)
             if usermtl is None:
                 raw_ckid[idx] = g_InvalidCKID
             else:

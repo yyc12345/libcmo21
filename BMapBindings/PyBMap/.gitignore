@@ -1,4 +1,5 @@
 # my ban
+.vscode/
 *.dll
 *.pdb
 *.so

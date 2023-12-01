@@ -94,17 +94,17 @@ namespace BMap {
 
 	LibCmo::CKDWORD* BMMeshTransition::PrepareFaceNormalIndices() {
 		if (m_IsParsed || !m_IsFaceOK) return nullptr;
-		return m_FaceVertexs.data();
+		return m_FaceNormals.data();
 	}
 
 	LibCmo::CKDWORD* BMMeshTransition::PrepareFaceUVIndices() {
 		if (m_IsParsed || !m_IsFaceOK) return nullptr;
-		return m_FaceVertexs.data();
+		return m_FaceUVs.data();
 	}
 
 	LibCmo::CKDWORD* BMMeshTransition::PrepareFaceMtlSlot() {
 		if (m_IsParsed || !m_IsFaceOK) return nullptr;
-		return m_FaceVertexs.data();
+		return m_FaceMtlSlotIdxs.data();
 	}
 
 	bool BMMeshTransition::Parse(BMFile* bmfile, LibCmo::CK2::CK_ID mesh_id) {
@@ -148,8 +148,8 @@ namespace BMap {
 				// create one first
 				TransitionVertex tvec(
 					m_Vertexs[m_FaceVertexs[faceid * 3 + j]],
-					m_Normals[m_FaceVertexs[faceid * 3 + j]],
-					m_UVs[m_FaceVertexs[faceid * 3 + j]]
+					m_Normals[m_FaceNormals[faceid * 3 + j]],
+					m_UVs[m_FaceUVs[faceid * 3 + j]]
 				);
 
 				// try insert it

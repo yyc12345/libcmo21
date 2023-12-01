@@ -256,7 +256,7 @@ bool BMMeshTrans_PrepareVertexCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(Li
 bool BMMeshTrans_PrepareVertex(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::VxMath::VxVector3*, out_mem)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareVertex());
-	return BMPARAM_OUT_VAL(out_mem) != nullptr;
+	return true;
 }
 bool BMMeshTrans_PrepareNormalCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CKDWORD, count)) {
 	if (!CheckBMMeshTrans(trans)) return false;
@@ -265,7 +265,7 @@ bool BMMeshTrans_PrepareNormalCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(Li
 bool BMMeshTrans_PrepareNormal(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::VxMath::VxVector3*, out_mem)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareNormal());
-	return BMPARAM_OUT_VAL(out_mem) != nullptr;
+	return true;
 }
 bool BMMeshTrans_PrepareUVCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CKDWORD, count)) {
 	if (!CheckBMMeshTrans(trans)) return false;
@@ -274,7 +274,7 @@ bool BMMeshTrans_PrepareUVCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo
 bool BMMeshTrans_PrepareUV(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::VxMath::VxVector2*, out_mem)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareUV());
-	return BMPARAM_OUT_VAL(out_mem) != nullptr;
+	return true;
 }
 bool BMMeshTrans_PrepareMtlSlotCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CKDWORD, count)) {
 	if (!CheckBMMeshTrans(trans)) return false;
@@ -283,7 +283,7 @@ bool BMMeshTrans_PrepareMtlSlotCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(L
 bool BMMeshTrans_PrepareMtlSlot(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CK2::CK_ID*, out_mem)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareMtlSlot());
-	return BMPARAM_OUT_VAL(out_mem) != nullptr;
+	return true;
 }
 bool BMMeshTrans_PrepareFaceCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibCmo::CKDWORD, count)) {
 	if (!CheckBMMeshTrans(trans)) return false;
@@ -292,22 +292,22 @@ bool BMMeshTrans_PrepareFaceCount(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(LibC
 bool BMMeshTrans_PrepareFaceVertexIndices(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CKDWORD*, out_mem)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareFaceVertexIndices());
-	return BMPARAM_OUT_VAL(out_mem) != nullptr;
+	return true;
 }
 bool BMMeshTrans_PrepareFaceNormalIndices(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CKDWORD*, out_mem)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareFaceNormalIndices());
-	return BMPARAM_OUT_VAL(out_mem) != nullptr;
+	return true;
 }
 bool BMMeshTrans_PrepareFaceUVIndices(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CKDWORD*, out_mem)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareFaceUVIndices());
-	return BMPARAM_OUT_VAL(out_mem) != nullptr;
+	return true;
 }
 bool BMMeshTrans_PrepareFaceMtlSlot(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_OUT(LibCmo::CKDWORD*, out_mem)) {
 	if (!CheckBMMeshTrans(trans)) return false;
 	BMPARAM_OUT_ASSIGN(out_mem, trans->PrepareFaceMtlSlot());
-	return BMPARAM_OUT_VAL(out_mem) != nullptr;
+	return true;
 }
 bool BMMeshTrans_Parse(BMPARAM_MESHTRANS_DECL(trans), BMPARAM_IN(BMap::BMFile*, bmfile), BMPARAM_IN(LibCmo::CK2::CK_ID, objid)) {
 	if (!CheckBMMeshTrans(trans)) return false;
