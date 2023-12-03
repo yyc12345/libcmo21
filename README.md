@@ -73,4 +73,5 @@ This project require:
 * iconv (non-Windows system required)
 
 It can be compiled on Windows via sln file. You should set up `LibRef.props` when using sln file to build this project on Windows.  
-You also can use CMake file to compile this project on Linux or anything else platform. However CMake may not be updated in time because I develop this project on Windows frequently.
+You also can use CMake file to compile this project on Linux or anything else platform. However CMake may not be updated in time because I develop this project on Windows frequently.  
+You may need use this command to configure CMake: `cmake .. -DSTB_IMAGE_PATH="/path/to/stb-image" -DCMAKE_BUILD_TYPE=Release`

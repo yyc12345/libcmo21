@@ -135,9 +135,11 @@ BMFile_Create = _create_bmap_func('BMFile_Create', [bm_CKSTRING, bm_CKSTRING, bm
 ## BMFile_Save
 #  @param map_file[in] Type: BMap::BMFile*. 
 #  @param file_name[in] Type: LibCmo::CKSTRING. 
+#  @param texture_save_opt[in] Type: LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS. 
+#  @param use_compress[in] Type: bool. 
 #  @param compreess_level[in] Type: LibCmo::CKINT. 
 #  @return True if no error, otherwise False.
-BMFile_Save = _create_bmap_func('BMFile_Save', [bm_void_p, bm_CKSTRING, bm_CKINT])
+BMFile_Save = _create_bmap_func('BMFile_Save', [bm_void_p, bm_CKSTRING, bm_enum, bm_bool, bm_CKINT])
 ## BMFile_Free
 #  @param map_file[in] Type: BMap::BMFile*. 
 #  @return True if no error, otherwise False.

@@ -28,7 +28,7 @@ namespace BMap {
 		m_ProcVertexs(), m_ProcFaces(), m_ProcDupRemover() {}
 
 	BMMeshTransition::~BMMeshTransition() {}
-	
+
 	bool BMMeshTransition::PrepareVertexCount(LibCmo::CKDWORD count) {
 		if (m_IsParsed) return false;
 		m_Vertexs.resize(count);
@@ -240,7 +240,7 @@ namespace BMap {
 		if (raw_callback != nullptr) {
 			m_Context->SetOutputCallback([raw_callback](LibCmo::CKSTRING strl) -> void {
 				raw_callback(strl);
-			});
+				});
 		}
 
 		// set temp folder and texture folder
@@ -268,7 +268,7 @@ namespace BMap {
 
 	bool BMFile::Load(LibCmo::CKSTRING filename) {
 		if (!CanExecLoad()) return false;
-		
+
 		// create temp ckfile and load
 		LibCmo::CK2::CKFileReader reader(m_Context);
 		LibCmo::CK2::CKERROR err = reader.DeepLoad(filename);
@@ -312,7 +312,7 @@ namespace BMap {
 		return true;
 	}
 
-	bool BMFile::Save(LibCmo::CKSTRING filename, LibCmo::CKINT compress_level) {
+	bool BMFile::Save(LibCmo::CKSTRING filename, LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS texture_save_opt, bool use_compress, LibCmo::CKINT compress_level) {
 		if (!CanExecSave()) return false;
 
 		// create temp writer
@@ -335,8 +335,15 @@ namespace BMap {
 			writer.AddSavedObject(m_Context->GetObject(id));
 		}
 
+		// set global texture save mode
+		m_Context->SetGlobalImagesSaveOptions(texture_save_opt);
 		// set compress level
-		m_Context->SetCompressionLevel(compress_level);
+		if (use_compress) {
+			m_Context->SetFileWriteMode(LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED);
+			m_Context->SetCompressionLevel(compress_level);
+		} else {
+			m_Context->SetFileWriteMode(LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED);
+		}
 
 		// save to file and detect error
 		LibCmo::CK2::CKERROR err = writer.Save(filename);

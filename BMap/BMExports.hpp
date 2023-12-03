@@ -90,6 +90,8 @@ LIBCMO_EXPORT bool BMFile_Create(
 LIBCMO_EXPORT bool BMFile_Save(
 	BMPARAM_IN(BMap::BMFile*, map_file),
 	BMPARAM_IN(LibCmo::CKSTRING, file_name),
+	BMPARAM_IN(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS, texture_save_opt), 
+	BMPARAM_IN(bool, use_compress),
 	BMPARAM_IN(LibCmo::CKINT, compreess_level)
 );
 LIBCMO_EXPORT bool BMFile_Free(

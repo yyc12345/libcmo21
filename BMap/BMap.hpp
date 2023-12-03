@@ -70,7 +70,7 @@ namespace BMap {
 
 	public:
 		bool Load(LibCmo::CKSTRING filename);
-		bool Save(LibCmo::CKSTRING filename, LibCmo::CKINT compress_level);
+		bool Save(LibCmo::CKSTRING filename, LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS texture_save_opt, bool use_compress, LibCmo::CKINT compress_level);
 
 		LibCmo::CK2::ObjImpls::CKObject* GetObjectPtr(LibCmo::CK2::CK_ID objid) {
 			return m_Context->GetObject(objid);;

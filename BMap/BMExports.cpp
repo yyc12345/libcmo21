@@ -137,10 +137,12 @@ bool BMFile_Create(
 bool BMFile_Save(
 	BMPARAM_IN(BMap::BMFile*, map_file),
 	BMPARAM_IN(LibCmo::CKSTRING, file_name),
+	BMPARAM_IN(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS, texture_save_opt), 
+	BMPARAM_IN(bool, use_compress),
 	BMPARAM_IN(LibCmo::CKINT, compreess_level)) {
 	if (!CheckBMFile(map_file)) return false;
 
-	return map_file->Save(file_name, compreess_level);
+	return map_file->Save(file_name, texture_save_opt, use_compress, compreess_level);
 }
 
 bool BMFile_Free(BMPARAM_IN(BMap::BMFile*, map_file)) {

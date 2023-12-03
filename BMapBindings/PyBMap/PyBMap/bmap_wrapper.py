@@ -713,12 +713,14 @@ class BMFileWriter(_AbstractPointer):
     def __exit__(self, exc_type, exc_value, traceback):
         self.dispose()
     
-    def save(self, file_name_: str, compress_level_: int) -> None:
+    def save(self, file_name_: str, texture_save_opt_: virtools_types.CK_TEXTURE_SAVEOPTIONS, use_compress_: bool, compress_level_: int) -> None:
         # create param
         file_name: bmap.bm_CKSTRING = bmap.bm_CKSTRING(file_name_.encode(g_BMapEncoding))
+        texture_save_opt: bmap.bm_enum = bmap.bm_enum(texture_save_opt_.value)
+        use_compress: bmap.bm_bool = bmap.bm_bool(use_compress_)
         compress_level: bmap.bm_CKINT = bmap.bm_CKINT(compress_level_)
         # exec
-        bmap.BMFile_Save(self._get_pointer(), file_name, compress_level)
+        bmap.BMFile_Save(self._get_pointer(), file_name, texture_save_opt, use_compress, compress_level)
 
     def dispose(self) -> None:
         if self._is_valid():
