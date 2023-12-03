@@ -9,9 +9,14 @@ namespace LibCmo::CK2::DataHandlers {
 	/*
 	 ABGR8888 is format used by std image.
 	 The data is placed in buffer with RGBA order, so the format is ABGR.
+	 BGR888 also is non-alpha format used by std image.
+	 The data is placed in buffer with RGB order, so the format is BGR.
 	 ARGB8888 is Virtools standard.
 	 The data is placed in buffer with BGRA order.
 	*/
+
+	// MARK: for std-image size, we use `n * CKSizeof(CKBYTE)` to calc offset.
+	// for virtools size, we use `VxMath::VxImageDescEx::ColorFactorSize` and `VxMath::VxImageDescEx::PixelSize` to calc offset.
 
 	static void ABGRToARGB(CKDWORD count, const void* _abgr, void* _argb) {
 		const CKBYTE* abgr = static_cast<const CKBYTE*>(_abgr);
@@ -22,8 +27,8 @@ namespace LibCmo::CK2::DataHandlers {
 			argb + (2u * VxMath::VxImageDescEx::ColorFactorSize),
 			VxMath::VxImageDescEx::PixelSize,
 			VxMath::VxImageDescEx::ColorFactorSize,
-			abgr + (0u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize
+			abgr + (0u * CKSizeof(CKBYTE)),
+			4u * CKSizeof(CKBYTE)
 		);
 		// copy G
 		VxMath::VxCopyStructure(
@@ -31,8 +36,8 @@ namespace LibCmo::CK2::DataHandlers {
 			argb + (1u * VxMath::VxImageDescEx::ColorFactorSize),
 			VxMath::VxImageDescEx::PixelSize,
 			VxMath::VxImageDescEx::ColorFactorSize,
-			abgr + (1u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize
+			abgr + (1u * CKSizeof(CKBYTE)),
+			4u * CKSizeof(CKBYTE)
 		);
 		// copy B
 		VxMath::VxCopyStructure(
@@ -40,8 +45,8 @@ namespace LibCmo::CK2::DataHandlers {
 			argb + (0u * VxMath::VxImageDescEx::ColorFactorSize),
 			VxMath::VxImageDescEx::PixelSize,
 			VxMath::VxImageDescEx::ColorFactorSize,
-			abgr + (2u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize
+			abgr + (2u * CKSizeof(CKBYTE)),
+			4u * CKSizeof(CKBYTE)
 		);
 		// copy A
 		VxMath::VxCopyStructure(
@@ -49,8 +54,8 @@ namespace LibCmo::CK2::DataHandlers {
 			argb + (3u * VxMath::VxImageDescEx::ColorFactorSize),
 			VxMath::VxImageDescEx::PixelSize,
 			VxMath::VxImageDescEx::ColorFactorSize,
-			abgr + (3u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize
+			abgr + (3u * CKSizeof(CKBYTE)),
+			4u * CKSizeof(CKBYTE)
 		);
 	}
 
@@ -60,8 +65,8 @@ namespace LibCmo::CK2::DataHandlers {
 		// copy R
 		VxMath::VxCopyStructure(
 			count,
-			abgr + (0u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize,
+			abgr + (0u * CKSizeof(CKBYTE)),
+			4u * CKSizeof(CKBYTE),
 			VxMath::VxImageDescEx::ColorFactorSize,
 			argb + (2u * VxMath::VxImageDescEx::ColorFactorSize),
 			VxMath::VxImageDescEx::PixelSize
@@ -69,8 +74,8 @@ namespace LibCmo::CK2::DataHandlers {
 		// copy G
 		VxMath::VxCopyStructure(
 			count,
-			abgr + (1u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize,
+			abgr + (1u * CKSizeof(CKBYTE)),
+			4u * CKSizeof(CKBYTE),
 			VxMath::VxImageDescEx::ColorFactorSize,
 			argb + (1u * VxMath::VxImageDescEx::ColorFactorSize),
 			VxMath::VxImageDescEx::PixelSize
@@ -78,8 +83,8 @@ namespace LibCmo::CK2::DataHandlers {
 		// copy B
 		VxMath::VxCopyStructure(
 			count,
-			abgr + (2u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize,
+			abgr + (2u * CKSizeof(CKBYTE)),
+			4u * CKSizeof(CKBYTE),
 			VxMath::VxImageDescEx::ColorFactorSize,
 			argb + (0u * VxMath::VxImageDescEx::ColorFactorSize),
 			VxMath::VxImageDescEx::PixelSize
@@ -87,12 +92,45 @@ namespace LibCmo::CK2::DataHandlers {
 		// copy A
 		VxMath::VxCopyStructure(
 			count,
-			abgr + (3u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize,
+			abgr + (3u * CKSizeof(CKBYTE)),
+			4u * CKSizeof(CKBYTE),
 			VxMath::VxImageDescEx::ColorFactorSize,
 			argb + (3u * VxMath::VxImageDescEx::ColorFactorSize),
 			VxMath::VxImageDescEx::PixelSize
 		);
+	}
+
+	static void ARGBToBGR(CKDWORD count, const void* _argb, void* _bgr) {
+		const CKBYTE* argb = static_cast<const CKBYTE*>(_argb);
+		CKBYTE* bgr = static_cast<CKBYTE*>(_bgr);
+		// copy R
+		VxMath::VxCopyStructure(
+			count,
+			bgr + (0u * CKSizeof(CKBYTE)),
+			3u * CKSizeof(CKBYTE),
+			VxMath::VxImageDescEx::ColorFactorSize,
+			argb + (2u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize
+		);
+		// copy G
+		VxMath::VxCopyStructure(
+			count,
+			bgr + (1u * CKSizeof(CKBYTE)),
+			3u * CKSizeof(CKBYTE),
+			VxMath::VxImageDescEx::ColorFactorSize,
+			argb + (1u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize
+		);
+		// copy B
+		VxMath::VxCopyStructure(
+			count,
+			bgr + (2u * CKSizeof(CKBYTE)),
+			3u * CKSizeof(CKBYTE),
+			VxMath::VxImageDescEx::ColorFactorSize,
+			argb + (0u * VxMath::VxImageDescEx::ColorFactorSize),
+			VxMath::VxImageDescEx::PixelSize
+		);
+		// skip A factor
 	}
 
 	static bool StbReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) {
@@ -128,7 +166,7 @@ namespace LibCmo::CK2::DataHandlers {
 			&x, &y, &channels_in_file, 4	// 4 == RGBA8888
 		);
 		if (data == nullptr) return false;
-		
+
 		// create read image
 		read_image->CreateImage(static_cast<CKDWORD>(x), static_cast<CKDWORD>(y));
 
@@ -169,22 +207,33 @@ namespace LibCmo::CK2::DataHandlers {
 	}
 
 	using SaveOperation = std::function<int(stbi_write_func*, void*, int, int, int, const void*)>;
-	static bool StbSaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, SaveOperation oper) {
+	static bool StbSaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, bool save_alpha, SaveOperation oper) {
 		if (u8filename == nullptr || write_image == nullptr) return false;
 		if (!write_image->IsValid()) return false;
 		FILE* fs = EncodingHelper::U8FOpen(u8filename, "wb");
 		if (fs == nullptr) return false;
 
-		// allocate buffer and convert data from ARGB to RGBA
-		CKBYTE* data = new CKBYTE[write_image->GetImageSize()];
-		ARGBToABGR(write_image->GetPixelCount(), write_image->GetImage(), data);
+		// allocate buffer and convert data from ARGB to RGBA or RGB
+		CKBYTE* data = nullptr;
+		int channel_count = 0;
+		if (save_alpha) {
+			// save with alpha
+			data = new CKBYTE[CKSizeof(CKBYTE) * 4u * write_image->GetWidth() * write_image->GetHeight()];
+			ARGBToABGR(write_image->GetPixelCount(), write_image->GetImage(), data);
+			channel_count = 4;
+		} else {
+			// save without alpha
+			data = new CKBYTE[CKSizeof(CKBYTE) * 3u * write_image->GetWidth() * write_image->GetHeight()];
+			ARGBToBGR(write_image->GetPixelCount(), write_image->GetImage(), data);
+			channel_count = 3;
+		}
 
 		// write data
 		FileSaveContext* ctx = new FileSaveContext(fs);
 		int ret = oper(
 			&FileWriteFunction, ctx,
 			static_cast<int>(write_image->GetWidth()), static_cast<int>(write_image->GetHeight()),
-			4, data	// 4 == RGBA8888
+			channel_count, data	// 4 == RGBA8888
 		);
 
 		// free data
@@ -195,20 +244,31 @@ namespace LibCmo::CK2::DataHandlers {
 		// ret is 0 mean failed.
 		return ret != 0;
 	}
-	static CKDWORD StbSaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, SaveOperation oper) {
+	static CKDWORD StbSaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, bool save_alpha, SaveOperation oper) {
 		if (write_image == nullptr) return 0;
 		if (!write_image->IsValid()) return 0;
 
-		// allocate buffer and convert data from ARGB to RGBA
-		CKBYTE* data = new CKBYTE[write_image->GetImageSize()];
-		ARGBToABGR(write_image->GetPixelCount(), write_image->GetImage(), data);
+		// allocate buffer and convert data from ARGB to RGBA or RGB
+		CKBYTE* data = nullptr;
+		int channel_count = 0;
+		if (save_alpha) {
+			// save with alpha
+			data = new CKBYTE[CKSizeof(CKBYTE) * 4u * write_image->GetWidth() * write_image->GetHeight()];
+			ARGBToABGR(write_image->GetPixelCount(), write_image->GetImage(), data);
+			channel_count = 4;
+		} else {
+			// save without alpha
+			data = new CKBYTE[CKSizeof(CKBYTE) * 3u * write_image->GetWidth() * write_image->GetHeight()];
+			ARGBToBGR(write_image->GetPixelCount(), write_image->GetImage(), data);
+			channel_count = 3;
+		}
 
 		// write data
 		MemorySaveContext* ctx = new MemorySaveContext(memory);
 		int ret = oper(
 			&MemoryWriteFunction, ctx,
 			static_cast<int>(write_image->GetWidth()), static_cast<int>(write_image->GetHeight()),
-			4, data	// 4 == RGBA8888
+			channel_count, data	// 4 == RGBA8888
 		);
 
 		// free data
@@ -220,7 +280,7 @@ namespace LibCmo::CK2::DataHandlers {
 		if (ret == 0) return 0;
 		else return expected;
 	}
-	
+
 #pragma endregion
 
 #pragma region CKBitmapBMPHandler
@@ -244,15 +304,19 @@ namespace LibCmo::CK2::DataHandlers {
 		return StbReadMemory(memory, size, read_image);
 	}
 
+	// MARK: when stb-image writing bmp file with alpha channel, it will create a very rare bmp file supporting alpha channel.
+	// this format is not supported by virtools and will result blank image.
+	// so we create an alpha option to forcely change channel count to 3 (RGB) then the bmp writer can work normally.
+
 	bool CKBitmapBMPHandler::SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {
-		return StbSaveFile(u8filename, write_image,
+		return StbSaveFile(u8filename, write_image, false,	// bmp do not support alpha
 			[&codec_param](stbi_write_func* func, void* context, int w, int h, int comp, const void* data) -> int {
 				return stbi_write_bmp_to_func(func, context, w, h, comp, data);
 			});
 	}
 
 	CKDWORD CKBitmapBMPHandler::SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {
-		return StbSaveMemory(memory, write_image,
+		return StbSaveMemory(memory, write_image, false,	// bmp do not support alpha
 			[&codec_param](stbi_write_func* func, void* context, int w, int h, int comp, const void* data) -> int {
 				return stbi_write_bmp_to_func(func, context, w, h, comp, data);
 			});
@@ -265,8 +329,8 @@ namespace LibCmo::CK2::DataHandlers {
 #pragma endregion
 
 #pragma region CKBitmapTGAHandler
-	
-	static const CKBitmapProperties g_TGAProperties(CKGUID(0x585C7216u,  0x33302657u), "Tga");
+
+	static const CKBitmapProperties g_TGAProperties(CKGUID(0x585C7216u, 0x33302657u), "Tga");
 
 	CKBitmapTGAHandler::CKBitmapTGAHandler() :
 		CKBitmapHandler() {}
@@ -286,14 +350,14 @@ namespace LibCmo::CK2::DataHandlers {
 	}
 
 	bool CKBitmapTGAHandler::SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {
-		return StbSaveFile(u8filename, write_image,
+		return StbSaveFile(u8filename, write_image, false,	// tga support alpha
 			[&codec_param](stbi_write_func* func, void* context, int w, int h, int comp, const void* data) -> int {
 				return stbi_write_tga_to_func(func, context, w, h, comp, data);
 			});
 	}
 
 	CKDWORD CKBitmapTGAHandler::SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {
-		return StbSaveMemory(memory, write_image,
+		return StbSaveMemory(memory, write_image, false,	// tga support alpha
 			[&codec_param](stbi_write_func* func, void* context, int w, int h, int comp, const void* data) -> int {
 				return stbi_write_tga_to_func(func, context, w, h, comp, data);
 			});
@@ -304,7 +368,7 @@ namespace LibCmo::CK2::DataHandlers {
 	}
 
 #pragma endregion
-	
+
 #pragma region General Getter Freer
 
 	static CKBitmapHandler* FindHandlerByExt(const CKFileExtension& ext) {
@@ -325,7 +389,7 @@ namespace LibCmo::CK2::DataHandlers {
 		// check ext first
 		handler = FindHandlerByExt(ext);
 		if (handler != nullptr) return handler;
-		
+
 		// check guid
 		handler = FindHandlerByGuid(guid);
 		if (handler != nullptr) return handler;
