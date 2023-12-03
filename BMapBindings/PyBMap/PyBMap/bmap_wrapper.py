@@ -7,7 +7,7 @@ g_InvalidPtr: bmap.bm_void_p = bmap.bm_void_p(0)
 g_InvalidCKID: int = 0
 g_BMapEncoding: str = "utf-8"
 
-def python_callback(strl: bytes):
+def _python_callback(strl: bytes):
     """
     The Python type callback for BMFile.
     Simply add a prefix when output.
@@ -17,6 +17,7 @@ def python_callback(strl: bytes):
     # i think Python do a auto convertion here.
     if strl is not None:
         print(f'[PyBMap] {strl.decode(g_BMapEncoding)}')
+_g_RawCallback: bmap.bm_callback = bmap.bm_callback(_python_callback)
 
 class _AbstractPointer():
     __mRawPointer: int
@@ -594,7 +595,6 @@ class BMFileReader(_AbstractPointer):
         file_name: bmap.bm_CKSTRING = bmap.bm_CKSTRING(file_name_.encode(g_BMapEncoding))
         temp_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(temp_folder_.encode(g_BMapEncoding))
         texture_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(texture_folder_.encode(g_BMapEncoding))
-        raw_callback: bmap.bm_callback = bmap.bm_callback(python_callback)
         encoding_count: bmap.bm_CKDWORD = bmap.bm_CKDWORD(len(encodings_))
         encodings: ctypes.Array = (bmap.bm_CKSTRING * len(encodings_))(
             *(strl.encode(g_BMapEncoding) for strl in encodings_)
@@ -602,7 +602,7 @@ class BMFileReader(_AbstractPointer):
         out_file: bmap.bm_void_p = bmap.bm_void_p()
         # exec
         bmap.BMFile_Load(
-            file_name, temp_folder, texture_folder, raw_callback,
+            file_name, temp_folder, texture_folder, _g_RawCallback,
             encoding_count, encodings,
             ctypes.byref(out_file)
         )
@@ -693,7 +693,6 @@ class BMFileWriter(_AbstractPointer):
         # create param
         temp_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(temp_folder_.encode(g_BMapEncoding))
         texture_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(texture_folder_.encode(g_BMapEncoding))
-        raw_callback: bmap.bm_callback = bmap.bm_callback(python_callback)
         encoding_count: bmap.bm_CKDWORD = bmap.bm_CKDWORD(len(encodings_))
         encodings: ctypes.Array = (bmap.bm_CKSTRING * len(encodings_))(
             *(strl.encode(g_BMapEncoding) for strl in encodings_)
@@ -701,7 +700,7 @@ class BMFileWriter(_AbstractPointer):
         out_file: bmap.bm_void_p = bmap.bm_void_p()
         # exec
         bmap.BMFile_Create(
-            temp_folder, texture_folder, raw_callback,
+            temp_folder, texture_folder, _g_RawCallback,
             encoding_count, encodings,
             ctypes.byref(out_file)
         )

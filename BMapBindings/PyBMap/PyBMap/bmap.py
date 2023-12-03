@@ -78,7 +78,7 @@ elif sys.platform.startswith('darwin'):
 else:
     _g_BMapLibName = "BMap.bin"
 
-_g_BMapModule: ctypes.CDLL = None
+_g_BMapModule: ctypes.CDLL | None = None
 try:
     _g_BMapModule = ctypes.cdll.LoadLibrary(
         os.path.join(os.path.dirname(__file__), _g_BMapLibName)

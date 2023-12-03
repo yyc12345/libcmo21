@@ -264,7 +264,8 @@ namespace LibCmo::CK2 {
 		XContainer::XString result;
 		int count = std::vsnprintf(nullptr, 0, fmt, argptr);
 		result.resize(count);
-		int write_result = std::vsnprintf(result.data(), count, fmt, argptr);
+		// count + 1 for NUL terminator. but we don't need allocate space for it (resize with count). let it write into the reserved tail of std::string.
+		int write_result = std::vsnprintf(result.data(), count + 1, fmt, argptr);
 
 		if (write_result < 0 || write_result > count) return;
 
