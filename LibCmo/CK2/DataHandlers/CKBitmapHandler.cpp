@@ -368,18 +368,124 @@ namespace LibCmo::CK2::DataHandlers {
 	}
 
 #pragma endregion
+	
+#pragma region CKBitmapJPGHandler
+
+	// MARK: this GUID is gotten from Virtools 3.5 Plugins.
+	static const CKBitmapProperties g_JPGProperties(CKGUID(0x4AE51AC4u, 0x04587D76u), "jpg");
+	// MARK: this quality is gotten from default value of virtools.
+	constexpr int g_JPGDefaultQuality = 75;
+
+	CKBitmapJPGHandler::CKBitmapJPGHandler() :
+		CKBitmapHandler() {}
+
+	CKBitmapJPGHandler::~CKBitmapJPGHandler() {}
+
+	const CKBitmapProperties& CKBitmapJPGHandler::GetBitmapDefaultProperties() {
+		return g_JPGProperties;
+	}
+
+	bool CKBitmapJPGHandler::ReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) {
+		return StbReadFile(u8filename, read_image);
+	}
+
+	bool CKBitmapJPGHandler::ReadMemory(const void* memory, CKDWORD size, VxMath::VxImageDescEx* read_image) {
+		return StbReadMemory(memory, size, read_image);
+	}
+
+	bool CKBitmapJPGHandler::SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {
+		return StbSaveFile(u8filename, write_image, false,	// jpg do not support alpha
+			[&codec_param](stbi_write_func* func, void* context, int w, int h, int comp, const void* data) -> int {
+				return stbi_write_jpg_to_func(func, context, w, h, comp, data, g_JPGDefaultQuality);
+			});
+	}
+
+	CKDWORD CKBitmapJPGHandler::SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {
+		return StbSaveMemory(memory, write_image, false,	// jpg do not support alpha
+			[&codec_param](stbi_write_func* func, void* context, int w, int h, int comp, const void* data) -> int {
+				return stbi_write_jpg_to_func(func, context, w, h, comp, data, g_JPGDefaultQuality);
+			});
+	}
+
+	bool CKBitmapJPGHandler::CanSaveAlpha() {
+		return false;
+	}
+
+#pragma endregion
+	
+#pragma region CKBitmapPNGHandler
+
+	// MARK: this GUID is gotten from Virtools 3.5 Plugins.
+	static const CKBitmapProperties g_PNGProperties(CKGUID(0x02D45C7Bu, 0x4AAC16ECu), "png");
+	// MARK: this is compress level gotten from default value of virtools.
+	constexpr int g_PNGDefaultCompressLevel = 3;
+	
+	/**
+	 * @brief A helper function to get stride parameter passed to png writer.
+	 * @param width[in] The width given by general stb writer wrapper.
+	 * @param comp[in] The comp given by general stb writer wrapper.
+	 * @return The stride data passed to real stb writer.
+	*/
+	static int StbPngStrideGetter(int width, int comp) {
+		return width * comp;
+	}
+
+	CKBitmapPNGHandler::CKBitmapPNGHandler() :
+		CKBitmapHandler() {}
+
+	CKBitmapPNGHandler::~CKBitmapPNGHandler() {}
+
+	const CKBitmapProperties& CKBitmapPNGHandler::GetBitmapDefaultProperties() {
+		return g_PNGProperties;
+	}
+
+	bool CKBitmapPNGHandler::ReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) {
+		return StbReadFile(u8filename, read_image);
+	}
+
+	bool CKBitmapPNGHandler::ReadMemory(const void* memory, CKDWORD size, VxMath::VxImageDescEx* read_image) {
+		return StbReadMemory(memory, size, read_image);
+	}
+
+	bool CKBitmapPNGHandler::SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {
+		return StbSaveFile(u8filename, write_image, false,	// png support alpha
+			[&codec_param](stbi_write_func* func, void* context, int w, int h, int comp, const void* data) -> int {
+				// set default compress level
+				stbi_write_png_compression_level = g_PNGDefaultCompressLevel;
+				// write data
+				return stbi_write_png_to_func(func, context, w, h, comp, data, StbPngStrideGetter(w, comp));
+			});
+	}
+
+	CKDWORD CKBitmapPNGHandler::SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) {
+		return StbSaveMemory(memory, write_image, false,	// png support alpha
+			[&codec_param](stbi_write_func* func, void* context, int w, int h, int comp, const void* data) -> int {
+				stbi_write_png_compression_level = g_PNGDefaultCompressLevel;
+				return stbi_write_png_to_func(func, context, w, h, comp, data, StbPngStrideGetter(w, comp));
+			});
+	}
+
+	bool CKBitmapPNGHandler::CanSaveAlpha() {
+		return true;
+	}
+
+#pragma endregion
 
 #pragma region General Getter Freer
 
 	static CKBitmapHandler* FindHandlerByExt(const CKFileExtension& ext) {
 		if (ext == g_BMPProperties.m_Ext) return new CKBitmapBMPHandler();
 		if (ext == g_TGAProperties.m_Ext) return new CKBitmapTGAHandler();
+		if (ext == g_JPGProperties.m_Ext) return new CKBitmapJPGHandler();
+		if (ext == g_PNGProperties.m_Ext) return new CKBitmapPNGHandler();
 		return nullptr;
 	}
 
 	static CKBitmapHandler* FindHandlerByGuid(const CKGUID& guid) {
 		if (guid == g_BMPProperties.m_ReaderGuid) return new CKBitmapBMPHandler();
 		if (guid == g_TGAProperties.m_ReaderGuid) return new CKBitmapTGAHandler();
+		if (guid == g_JPGProperties.m_ReaderGuid) return new CKBitmapJPGHandler();
+		if (guid == g_PNGProperties.m_ReaderGuid) return new CKBitmapPNGHandler();
 		return nullptr;
 	}
 

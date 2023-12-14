@@ -129,5 +129,37 @@ namespace LibCmo::CK2::DataHandlers {
 		virtual bool CanSaveAlpha() override;
 
 	};
+	
+	class CKBitmapJPGHandler : public CKBitmapHandler {
+	public:
+		CKBitmapJPGHandler();
+		virtual ~CKBitmapJPGHandler();
+		LIBCMO_DISABLE_COPY_MOVE(CKBitmapJPGHandler);
+
+		static const CKBitmapProperties& GetBitmapDefaultProperties();
+
+		virtual bool ReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) override;
+		virtual bool ReadMemory(const void* memory, CKDWORD size, VxMath::VxImageDescEx* read_image) override;
+		virtual bool SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
+		virtual CKDWORD SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
+		virtual bool CanSaveAlpha() override;
+
+	};
+
+	class CKBitmapPNGHandler : public CKBitmapHandler {
+	public:
+		CKBitmapPNGHandler();
+		virtual ~CKBitmapPNGHandler();
+		LIBCMO_DISABLE_COPY_MOVE(CKBitmapPNGHandler);
+
+		static const CKBitmapProperties& GetBitmapDefaultProperties();
+
+		virtual bool ReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) override;
+		virtual bool ReadMemory(const void* memory, CKDWORD size, VxMath::VxImageDescEx* read_image) override;
+		virtual bool SaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
+		virtual CKDWORD SaveMemory(void* memory, const VxMath::VxImageDescEx* write_image, const CKBitmapProperties& codec_param) override;
+		virtual bool CanSaveAlpha() override;
+
+	};
 
 }
