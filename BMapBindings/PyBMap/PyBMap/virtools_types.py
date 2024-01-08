@@ -188,7 +188,7 @@ class VX_PIXELFORMAT(enum.IntEnum):
     """!
     Pixel format types.
     """
-    UNKNOWN_PF = 0    ##< Unknown pixel format 
+    #UNKNOWN_PF = 0    ##< Unknown pixel format 
     _32_ARGB8888 = 1    ##< 32-bit ARGB pixel format with alpha 
     _32_RGB888 = 2    ##< 32-bit RGB pixel format without alpha 
     _24_RGB888 = 3    ##< 24-bit RGB pixel format 

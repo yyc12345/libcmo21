@@ -1,4 +1,4 @@
-import ctypes, os, sys
+import ctypes, os, sys, typing
 
 #region Type Defines
 
@@ -89,15 +89,15 @@ except:
 def is_bmap_available() -> bool:
     return _g_BMapModule is not None
 
-def _bmap_error_check(result: bm_bool, func, args):
+def _bmap_error_check(result: bool, func, args):
     if not result:
         raise BMapException("BMap operation failed.")
     return result
 
-def _create_bmap_func(fct_name: str, fct_params: list[ctypes._SimpleCData]) -> ctypes._CFuncPtr:
+def _create_bmap_func(fct_name: str, fct_params: list[typing.Any]) -> typing.Callable[..., bm_bool]:
     if _g_BMapModule is None: return None
     
-    cache: ctypes._CFuncPtr = getattr(_g_BMapModule, fct_name)
+    cache: typing.Callable[..., bm_bool] = getattr(_g_BMapModule, fct_name)
     cache.argtypes = fct_params
     cache.restype = bm_bool
     cache.errcheck = _bmap_error_check
