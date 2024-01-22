@@ -1,12 +1,18 @@
-# my ban
+# -------------------- Personal --------------------
+# Ignore VSCode
 .vscode/
+
+# Ignore binary BMap stuff
 *.dll
 *.pdb
 *.so
 *.dylib
 *.bin
+
+# Ignore testbench file.
 testbench.py
 
+# -------------------- Python --------------------
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

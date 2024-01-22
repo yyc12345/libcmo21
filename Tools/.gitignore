@@ -1,5 +1,4 @@
-# Result
-
+# Ignore test used 3d Object
 *.bin
 *.obj
 *.mtl
