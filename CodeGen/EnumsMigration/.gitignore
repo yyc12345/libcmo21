@@ -2,7 +2,7 @@
 dest/*
 !dest/*.gitkeep
 
-# Antlr output
+# ===== ANTLR Output =====
 *.interp
 *.tokens
 
@@ -10,6 +10,7 @@ CKGeneralLexer*.java
 CKEnumsParser*.java
 CKDefinesParser*.java
 
+# ===== Eclipse Java =====
 # Eclipse projects
 .classpath
 .project

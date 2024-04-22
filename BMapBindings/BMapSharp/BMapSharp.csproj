@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    
+    <PackageId>BMapSharp</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>yyc12345</Authors>
+    <Company>BearKidsTeam</Company>
+  </PropertyGroup>
+
+</Project>

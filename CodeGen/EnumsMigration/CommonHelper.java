@@ -4,7 +4,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.antlr.v4.runtime.*;
 
@@ -110,17 +109,6 @@ public class CommonHelper {
 		return numstr.replaceFirst("[ulUL]+$", "");
 	}
 
-	/**
-	 * Get underlying type of enum.
-	 * 
-	 * @param canUnsigned The parameter stored in Enum_t that indiccate whether this
-	 *                    enum can use unsigned int as its underlying type.
-	 * @return The string form of its underlying type.
-	 */
-	public static String getEnumUnderlyingType(boolean canUnsigned) {
-		return canUnsigned ? "CKDWORD" : "CKINT";
-	}
-
 	// =========== Parts ===========
 
 	enum CKParts {
@@ -128,7 +116,7 @@ public class CommonHelper {
 	}
 
 	enum LangType {
-		CPP, Python
+		Cpp, Python, CSharp
 	}
 
 	public static String getCKPartsNamespace(CKParts parts) {

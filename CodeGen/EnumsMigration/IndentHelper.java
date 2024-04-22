@@ -8,7 +8,8 @@ public class IndentHelper {
 		
 		// set indent chars
 		switch (mLangType) {
-		case CPP:
+		case Cpp:
+		case CSharp:
 			mIndentChars = CommonHelper.getIndentString(true);
 			break;
 		case Python:
@@ -67,7 +68,8 @@ public class IndentHelper {
 			return;
 		
 		switch (mLangType) {
-		case CPP:
+		case Cpp:
+		case CSharp:
 			puts("/**");
 			
 			mWriter.write(System.lineSeparator());
@@ -100,7 +102,8 @@ public class IndentHelper {
 
 		mWriter.write(mIndentChars);
 		switch (mLangType) {
-		case CPP:
+		case Cpp:
+		case CSharp:
 			mWriter.write(String.format("/**< %s */", CommonHelper.removeEol(comment)));
 			break;
 		case Python:
