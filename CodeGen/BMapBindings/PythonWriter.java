@@ -39,19 +39,29 @@ public class PythonWriter {
 		return Collections.unmodifiableMap(cache);
 	}
 
-	public static String pythonTypeGetter(ExpFctParamDecl paramdecl) {
+	private static String pythonTypeGetter(ExpFctParamDecl paramdecl) throws IllegalArgumentException {
 		VariableType vt = paramdecl.mVarType;
 		if (!paramdecl.mIsInput) {
 			vt = vt.getPointerOfThis();
 		}
 
+		// create string builder for build final type string
 		StringBuilder sb = new StringBuilder();
+		// add type prefix
 		sb.append("bm_");
-		sb.append(g_CppTypeMap.get(vt.getBaseType()));
+		// try getting cpp type from base type
+		String cpp_type = g_CppTypeMap.get(vt.getBaseType());
+		if (cpp_type == null) {
+			throw new IllegalArgumentException("Unexpected type: " + vt.toCType());
+		}
+		// assign cpp type
+		sb.append(cpp_type);
+		// add pointer suffix
 		if (vt.isPointer()) {
 			sb.append("_");
 			sb.append(String.join("", Collections.nCopies(vt.getPointerLevel(), "p")));
 		}
+		// return built type string.
 		return sb.toString();
 	}
 
@@ -63,11 +73,11 @@ public class PythonWriter {
 		CommonHelper.writeSnippet(writer, "snippets/header.py");
 
 		// write function decls
-		
+
 		helper.puts("");
 		helper.puts("#region Function Defines");
 		helper.puts("");
-		
+
 		for (ExpFctDecl fctdecl : data) {
 			// write annotation
 			// function name
@@ -90,7 +100,7 @@ public class PythonWriter {
 		helper.puts("");
 		helper.puts("#endregion");
 		helper.puts("");
-		
+
 		writer.close();
 	}
 

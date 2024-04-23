@@ -13,9 +13,9 @@ This project welcome everyone's contribution, except the employee of Dassault, w
 The aim of this project is creating a universal library which can read / write CMO files or any other Virtools files without any Virtools dependencies.  
 This project will not link any original Virtools dynamic library. So this project can be ported to any platform if the compiler supports.  
 This project only involving specific Virtools version, 2.1. Other Virtools versions are not considered by this project.  
-This project is based on reverse work of CK2.dll, VxMath.dll and CK2_3D.dll. The program [unvirt](https://aluigi.altervista.org/papers.htm#unvirt) created by Luigi Auriemma, which is licensed by GPL-v2, also help my work.
+This project is based on reverse work of `CK2.dll`, `VxMath.dll` and `CK2_3D.dll`. The program [unvirt](https://aluigi.altervista.org/papers.htm#unvirt) created by Luigi Auriemma, which is licensed by GPL-v2, also help my work.
 
-**The difference between this project and other Virtools libraries, is that we are not focusing on re-creating the whole Virtools engine. We only focus on the Virtools files RW, and we only just implement a minimalist Virtools environment for achieving this.**
+**The difference between this project and other Virtools libraries (e.g. [doyaGu/CK2](https://github.com/doyaGu/CK2)), is that we are not focusing on re-creating the whole Virtools engine. We only focus on the Virtools files RW, and we only just implement a minimalist Virtools environment for achieving this.**
 
 ## Goals
 
@@ -66,7 +66,7 @@ These features explicitly will not be merged.
 
 This project require:
 
-* The compiler supporting C++20
+* The compiler supporting C++ 20
 * Littile-endian architecture system.
 * zlib
 * [stb](https://github.com/nothings/stb) (For image read / write)
