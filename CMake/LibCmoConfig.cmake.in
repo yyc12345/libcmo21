@@ -1,0 +1,7 @@
+
+@PACKAGE_INIT@
+
+# Include targets file
+include("${CMAKE_CURRENT_LIST_DIR}/LibCmoTargets.cmake")
+
+check_required_components(LibCmo)

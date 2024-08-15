@@ -1,2 +1,4 @@
-*.fods        eol=lf
-
+Doxyfile.in eol=lf
+*.bat       eol=crlf
+*.sh        eol=lf
+*.fods      eol=lf

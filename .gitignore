@@ -5,9 +5,10 @@
 *.nms
 *.vmo
 
-# Ignore temporary folders
-/out/
-/temp/
+# Ignore temporary Visual Studio files and folders
+temp/
+out/
+CMakeSettings.json
 
 # -------------------- VSCode --------------------
 .vscode/
