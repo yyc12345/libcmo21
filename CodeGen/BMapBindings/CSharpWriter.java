@@ -219,9 +219,7 @@ public class CSharpWriter {
 		for (ExpFctDecl fctdecl : data) {
 			// write annotation
 			// summary (just plain function name)
-			helper.puts("/// <summary>");
-			helper.printf("/// %s", fctdecl.mFctName);
-			helper.puts("/// </summary>");
+			helper.printf("/// <summary>%s</summary>", fctdecl.mFctName);
 			// parameter list
 			for (ExpFctParamDecl paramdecl : fctdecl.mFctParams) {
 				helper.printf("/// <param name=\"%s\">Type: %s. %s%s</param>", paramdecl.mVarName,
@@ -231,7 +229,7 @@ public class CSharpWriter {
 			// return value
 			helper.puts("/// <returns>True if no error, otherwise False.</returns>");
 
-			// write real declaration
+			// write real function declaration
 			// first, write DllImportAttribute
 			helper.printf(
 					"[DllImport(g_DllName, EntryPoint = \"%s\", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]",
