@@ -6,7 +6,7 @@ configure_file(
 )
 
 # Add custom target
-add_custom_target (LibCmoDocuments
+add_custom_target (NeMoDocuments
     doxygen ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generating LibCmo documentation" VERBATIM

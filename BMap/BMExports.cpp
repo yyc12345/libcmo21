@@ -721,14 +721,14 @@ bool BMMaterial_SetZFunc(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::
 
 #pragma region CKMesh
 
-LIBCMO_EXPORT bool BMMesh_GetLitMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXMESH_LITMODE, out_mode)) {
+bool BMMesh_GetLitMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXMESH_LITMODE, out_mode)) {
 	auto obj = CheckCKMesh(bmfile, objid);
 	if (obj == nullptr) return false;
 
 	BMPARAM_OUT_ASSIGN(out_mode, obj->GetLitMode());
 	return true;
 }
-LIBCMO_EXPORT bool BMMesh_SetLitMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXMESH_LITMODE, mode)) {
+bool BMMesh_SetLitMode(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXMESH_LITMODE, mode)) {
 	auto obj = CheckCKMesh(bmfile, objid);
 	if (obj == nullptr) return false;
 
