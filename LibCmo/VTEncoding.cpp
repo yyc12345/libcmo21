@@ -216,6 +216,7 @@ namespace LibCmo::EncodingHelper {
 		{ u8"u8", u8"utf_8" },
 		{ u8"utf", u8"utf_8" },
 		{ u8"utf8", u8"utf_8" },
+		{ u8"utf-8", u8"utf_8" },
 		{ u8"cp65001", u8"utf_8" },
 	};
 
@@ -235,8 +236,9 @@ namespace LibCmo::EncodingHelper {
 	}
 
 #if YYCC_OS == YYCC_OS_WINDOWS
-	
-	static const std::map<std::u8string, UINT> c_WinCPMap {	
+
+	static const std::map<std::u8string, UINT> c_WinCPMap {
+		{ u8"ascii", static_cast<UINT>(437u) },
 		{ u8"big5", static_cast<UINT>(950u) },
 		{ u8"cp037", static_cast<UINT>(037u) },
 		{ u8"cp437", static_cast<UINT>(437u) },
@@ -273,10 +275,13 @@ namespace LibCmo::EncodingHelper {
 		{ u8"cp1256", static_cast<UINT>(1256u) },
 		{ u8"cp1257", static_cast<UINT>(1257u) },
 		{ u8"cp1258", static_cast<UINT>(1258u) },
+		{ u8"euc_jp", static_cast<UINT>(20932u) },
 		{ u8"euc_kr", static_cast<UINT>(51949u) },
+		{ u8"gb2312", static_cast<UINT>(936u) },
 		{ u8"gbk", static_cast<UINT>(936u) },
 		{ u8"gb18030", static_cast<UINT>(54936u) },
 		{ u8"hz", static_cast<UINT>(52936u) },
+		{ u8"iso2022_jp", static_cast<UINT>(50220u) },
 		{ u8"iso2022_kr", static_cast<UINT>(50225u) },
 		{ u8"latin_1", static_cast<UINT>(28591u) },
 		{ u8"iso8859_2", static_cast<UINT>(28592u) },
@@ -312,7 +317,7 @@ namespace LibCmo::EncodingHelper {
 	}
 
 #else
-	
+
 	static const std::map<std::u8string, std::string> c_IconvMap {
 		{ u8"ascii", "ASCII" },
 		{ u8"big5", "BIG5" },
@@ -335,7 +340,8 @@ namespace LibCmo::EncodingHelper {
 		{ u8"cp1258", "CP1258" },
 		{ u8"euc_jp", "EUC-JP" },
 		{ u8"euc_kr", "EUC-KR" },
-		{ u8"gbk", "CP936" },
+		{ u8"gb2312", "CP936" },
+		{ u8"gbk", "GBK" },
 		{ u8"gb18030", "GB18030" },
 		{ u8"hz", "HZ" },
 		{ u8"iso2022_jp", "ISO-2022-JP" },

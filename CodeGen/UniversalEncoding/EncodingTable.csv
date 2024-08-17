@@ -1,5 +1,5 @@
 Encoding	Alias	Code Page	Iconv Identifier
-ascii	646, us-ascii		ASCII
+ascii	646, us-ascii	437	ASCII
 big5	big5-tw, csbig5	950	BIG5
 big5hkscs	big5-hkscs, hkscs		BIG5-HKSCS
 cp037	IBM037, IBM039	037	
@@ -42,15 +42,15 @@ cp1255	windows-1255	1255	CP1255
 cp1256	windows-1256	1256	CP1256
 cp1257	windows-1257	1257	CP1257
 cp1258	windows-1258	1258	CP1258
-euc_jp	eucjp, ujis, u-jis		EUC-JP
+euc_jp	eucjp, ujis, u-jis	20932	EUC-JP
 euc_jis_2004	jisx0213, eucjis2004		
 euc_jisx0213	eucjisx0213		
 euc_kr	euckr, korean, ksc5601, ks_c-5601, ks_c-5601-1987, ksx1001, ks_x-1001	51949	EUC-KR
-gb2312	chinese, csiso58gb231280, euc-cn, euccn, eucgb2312-cn, gb2312-1980, gb2312-80, iso-ir-58		
-gbk	936, cp936, ms936	936	CP936
+gb2312	chinese, csiso58gb231280, euc-cn, euccn, eucgb2312-cn, gb2312-1980, gb2312-80, iso-ir-58	936	CP936
+gbk	936, cp936, ms936	936	GBK
 gb18030	gb18030-2000	54936	GB18030
 hz	hzgb, hz-gb, hz-gb-2312	52936	HZ
-iso2022_jp	csiso2022jp, iso2022jp, iso-2022-jp		ISO-2022-JP
+iso2022_jp	csiso2022jp, iso2022jp, iso-2022-jp	50220	ISO-2022-JP
 iso2022_jp_1	iso2022jp-1, iso-2022-jp-1		ISO-2022-JP-1
 iso2022_jp_2	iso2022jp-2, iso-2022-jp-2		ISO-2022-JP-2
 iso2022_jp_2004	iso2022jp-2004, iso-2022-jp-2004		
@@ -94,5 +94,5 @@ utf_16	U16, utf16		UTF16
 utf_16_be	UTF-16BE		UTF-16BE
 utf_16_le	UTF-16LE		UTF-16LE
 utf_7	U7, unicode-1-1-utf-7	65000	UTF-7
-utf_8	U8, UTF, utf8, cp65001	65001	UTF-8
+utf_8	U8, UTF, utf8, utf-8, cp65001	65001	UTF-8
 utf_8_sig			

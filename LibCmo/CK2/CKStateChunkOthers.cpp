@@ -101,7 +101,7 @@ namespace LibCmo::CK2 {
 
 #pragma region Self Used Data Struct
 
-	void CKStateChunk::LockedReadBufferDeleter::operator()(LIBCMO_UNUSED const void* buf) {
+	void CKStateChunk::LockedReadBufferDeleter::operator()(const void* /*buf*/) {
 		if (m_Host == nullptr) return;
 		m_Host->UnLockReadBuffer(m_ConsumedSize);
 	}
@@ -110,7 +110,7 @@ namespace LibCmo::CK2 {
 		m_ConsumedSize = newsize;
 	}
 	
-	void CKStateChunk::LockedWriteBufferDeleter::operator()(LIBCMO_UNUSED const void* buf) {
+	void CKStateChunk::LockedWriteBufferDeleter::operator()(const void* /*buf*/) {
 		if (m_Host == nullptr) return;
 		m_Host->UnLockWriteBuffer(m_ConsumedSize);
 	}

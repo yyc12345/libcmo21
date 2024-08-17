@@ -290,7 +290,7 @@ namespace LibCmo::VxMath {
 
 	struct VxQuaternion {
 		CKFLOAT x, y, z, w;
-		VxQuaternion() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {} // set your custom init.
+		VxQuaternion() : x(0.0f), y(0.0f), z(0.0f), w(1.0f) {} // set your custom init.
 		VxQuaternion(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z, CKFLOAT _w) : x(_x), y(_y), z(_z), w(_w) {}
 		YYCC_DEF_CLS_COPY_MOVE(VxQuaternion);
 		CKFLOAT& operator[](size_t i) {
@@ -318,7 +318,7 @@ namespace LibCmo::VxMath {
 
 	struct VxColor {
 		CKFLOAT r, g, b, a;
-		VxColor() : r(0.0f), g(0.0f), b(0.0f), a(0.0f) {} // set your custom init.
+		VxColor() : r(0.0f), g(0.0f), b(0.0f), a(1.0f) {} // set your custom init.
 		VxColor(CKFLOAT _r, CKFLOAT _g, CKFLOAT _b, CKFLOAT _a) : r(_r), g(_g), b(_b), a(_a) {}
 		VxColor(CKDWORD argb) { FromARGB(argb); }
 		YYCC_DEF_CLS_COPY_MOVE(VxColor);

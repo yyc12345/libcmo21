@@ -1,3 +1,4 @@
+import os
 
 def GetTmplDecl(svars: tuple[str]) -> str:
     return f'CKFLOAT {", ".join(svars)};'
@@ -151,7 +152,11 @@ struct {sname} {{
 #{GetTmplOperAssignMove(sname, svars)}
 
 if __name__ == '__main__':
-    with open('VxTypes.hpp', 'w', encoding='utf-8') as fs:
+    # get file path
+    self_path: str = os.path.dirname(__file__)
+    cpp_file: str = os.path.join(self_path, 'VxTypes.hpp')
+    # generate files
+    with open(cpp_file, 'w', encoding='utf-8') as fs:
         fs.write(GetTmplVector('VxVector2', ('x', 'y', )))
         fs.write(GetTmplVector('VxVector3', ('x', 'y', 'z', )))
         fs.write(GetTmplVector('VxVector4', ('x', 'y', 'z', 'w', )))

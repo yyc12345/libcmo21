@@ -323,12 +323,12 @@ namespace LibCmo::CK2 {
 
 	CKFileVisitor::CKFileVisitor(CKFileReader* reader) :
 		m_IsReader(true), m_Reader(reader), m_Writer(nullptr), m_Ctx(reader->m_Ctx) {
-		if (reader == nullptr) LIBCMO_PANIC("Reader is nullptr.");
+		if (reader == nullptr) throw LogicException("Reader is nullptr.");
 	}
 
 	CKFileVisitor::CKFileVisitor(CKFileWriter* writer) :
 		m_IsReader(false), m_Reader(nullptr), m_Writer(writer), m_Ctx(writer->m_Ctx) {
-		if (writer == nullptr) LIBCMO_PANIC("Writer is nullptr.");
+		if (writer == nullptr) throw LogicException("Writer is nullptr.");
 	}
 
 	CKFileVisitor::CKFileVisitor(const CKFileVisitor& rhs) :

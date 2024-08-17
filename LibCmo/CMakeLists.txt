@@ -87,7 +87,7 @@ PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 PRIVATE
-	YYCC::YYCCommonplace
+    YYCC::YYCCommonplace
 	ZLIB::ZLIB
 	stb::stb-image
 	$<$<NOT:$<BOOL:${WIN32}>>:Iconv::Iconv>
@@ -108,7 +108,7 @@ PROPERTIES
     CXX_EXTENSION OFF
 )
 target_compile_definitions(LibCmo
-# LibCmo build type
+# Expose LibCmo build type
 PUBLIC
 	"$<$<CONFIG:Debug>:LIBCMO_BUILD_DEBUG>"
 	"$<$<CONFIG:Release,RelWithDebInfo,MinSize>:LIBCMO_BUILD_RELEASE>"

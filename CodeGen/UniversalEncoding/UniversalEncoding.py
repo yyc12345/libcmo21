@@ -1,5 +1,6 @@
 import typing
 import io
+import os
 
 class LanguageToken:
     m_Name: str
@@ -48,8 +49,13 @@ def write_iconv_map(fs: io.TextIOWrapper, data: tuple[LanguageToken, ...]) -> No
     fs.write('};\n')
 
 if __name__ == '__main__':
-    with open('EncodingTable.csv', 'r', encoding='utf-8') as fr:
-        with open('UEncodingTable.cpp', 'w', encoding='utf-8') as fw:
+    # get file path
+    self_path: str = os.path.dirname(__file__)
+    csv_file: str = os.path.join(self_path, 'EncodingTable.csv')
+    cpp_file: str = os.path.join(self_path, 'EncodingTable.cpp')
+    # process files
+    with open(csv_file, 'r', encoding='utf-8') as fr:
+        with open(cpp_file, 'w', encoding='utf-8') as fw:
             data = extract_data(fr)
             token = extract_token(data)
             write_alias_map(fw, token)

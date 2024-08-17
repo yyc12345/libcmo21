@@ -56,7 +56,7 @@ namespace LibCmo::CK2 {
 				m_Host(host), m_ConsumedSize(init_size) {}
 			YYCC_DEF_CLS_COPY_MOVE(LockedReadBufferDeleter);
 
-			void operator()(LIBCMO_UNUSED const void* buf);
+			void operator()(const void* /*buf*/);
 			void SetConsumedSize(CKDWORD newsize);
 		private:
 			CKStateChunk* m_Host;
@@ -70,7 +70,7 @@ namespace LibCmo::CK2 {
 				m_Host(host), m_ConsumedSize(init_size) {}
 			YYCC_DEF_CLS_COPY_MOVE(LockedWriteBufferDeleter);
 
-			void operator()(LIBCMO_UNUSED const void* buf);
+			void operator()(const void* /*buf*/);
 			void SetConsumedSize(CKDWORD newsize);
 		private:
 			CKStateChunk* m_Host;
