@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VTAll.hpp"
+#include "../../VTInternal.hpp"
 #include "CKBeObject.hpp"
 #include <array>
 
@@ -10,7 +10,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKMaterial(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKMaterial();
-		LIBCMO_DISABLE_COPY_MOVE(CKMaterial);
+		YYCC_DEL_CLS_COPY_MOVE(CKMaterial);
 
 		virtual CK_CLASSID GetClassID(void) override {
 			return CK_CLASSID::CKCID_MATERIAL;

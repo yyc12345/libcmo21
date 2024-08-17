@@ -1,6 +1,6 @@
 #pragma once
 
-#include <VTUserAll.hpp>
+#include <VTAll.hpp>
 #include <vector>
 #include <cstdint>
 #include <cinttypes>
@@ -14,7 +14,7 @@ namespace BMap {
 	public:
 		BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, NakedOutputCallback raw_callback, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING* encodings, bool is_reader);
 		~BMFile();
-		LIBCMO_DISABLE_COPY_MOVE(BMFile);
+		YYCC_DEL_CLS_COPY_MOVE(BMFile);
 
 		// ===== safe visit functions ===== 
 
@@ -154,7 +154,7 @@ namespace BMap {
 	public:
 		BMMeshTransition();
 		~BMMeshTransition();
-		LIBCMO_DISABLE_COPY_MOVE(BMMeshTransition);
+		YYCC_DEL_CLS_COPY_MOVE(BMMeshTransition);
 
 		bool PrepareVertexCount(LibCmo::CKDWORD count);
 		LibCmo::VxMath::VxVector3* PrepareVertex();

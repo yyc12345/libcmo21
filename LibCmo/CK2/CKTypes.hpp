@@ -16,22 +16,22 @@ namespace LibCmo {
 	// So we declare them in LibCmo, not LibCmo::CK2 to make sure every module can use it.
 
 	/**
-	 * @brief General Const String Type. Encoding Unrelated.
+	 * @brief General constant UTF8 string type.
 	*/
-	using CKSTRING = const char*;
+	using CKSTRING = const char8_t*;
 	/**
 	 * @brief Changeble CKSTRING.
 	 * @see CKSTRING
 	*/
-	using CKMUTSTRING = char*;
+	using CKMUTSTRING = char8_t*;
 	/**
-	 * @brief The Representation of Single Character (1 byte). Encoding Unrelated.
-	 * @remark
-	 * + Only used with string process.
-	 * + For memory representation and moving, use CKBYTE instead.
+	 * @brief The representation of single UTF8 code unit (1 byte).
+	 * @remarks
+	 * \li Only used with string process.
+	 * \li For memory representation and moving, use CKBYTE instead.
 	 * @see CKBYTE
 	*/
-	using CKCHAR = char;
+	using CKCHAR = char8_t;
 
 	/**
 	 * @brief Always Represent a Byte (1 byte, unsigned). Platform Independent.
@@ -58,8 +58,8 @@ namespace LibCmo {
 	/**
 	 * @brief The Int type used in LibCmo.
 	 * @remark
-	 * + All 'int' type in original Virtools SDK should be replaced with CKINT in this project if needed.
-	 * + This type also can be seen as the equvalent of signed CKDWORD.
+	 * \i All \c int type in original Virtools SDK should be replaced with CKINT in this project if needed.
+	 * \li This type also can be seen as the equvalent of signed CKDWORD.
 	 * @see CKDWORD
 	*/
 	using CKINT = int32_t;
@@ -76,15 +76,15 @@ namespace LibCmo {
 	/**
 	 * @brief Represent a x86 Platform Pointer.
 	 * @remark
-	 * + This type only can be used when replacing pointer in old Virtools struct / class.
-	 * + Due to Virtools shitty design, in some cases we need read data with x86 memory layout from file.
+	 * \li This type only can be used when replacing pointer in old Virtools struct / class.
+	 * \li Due to Virtools shitty design, in some cases we need read data with x86 memory layout from file.
 	 * So we use this type to replace native pointer in struct existed in Virtools SDK to make sure this 
 	 * program can run perfectly on x64 and more architectures.
-	 * + A example can be found in CKTexture::Load().
+	 * \li A example usage can be found in CK2::ObjImpls::CKTexture::Load().
 	*/
 	using CKPTR = uint32_t;
 	
-	// Format constants for the std::fprintf family of functions
+	// Format macro for \c std::printf family of functions
 
 #define PRI_CKSTRING "s"
 #define PRI_CKCHAR "c"
@@ -113,11 +113,12 @@ namespace LibCmo {
 
 #define PRIxCKPTR PRIx32
 #define PRIXCKPTR PRIX32
-
-	/*
-	The convenient sizeof which return CKDWORD, not size_t.
+	
+	/**
+	 * @brief The convenient sizeof macro which return \c CKDWORD instead of \c size_t.
+	 * This is usually used in LibCmo because LibCmo use \c CKDWORD, not \c size_t everywhere.
 	*/
-#define CKSizeof(_Ty) (static_cast<LibCmo::CKDWORD>(sizeof(_Ty)))
+#define CKSizeof(_Ty) (static_cast<::LibCmo::CKDWORD>(sizeof(_Ty)))
 
 }
 
@@ -126,17 +127,17 @@ namespace LibCmo {
 namespace LibCmo::CK2 {
 
 	/**
-	@brief Unique Identifier for all Objects instanciated in a given CKContext
-	@remarks
-	+ Each instance of CKObject and derived classes are automatically given a global unique
-	ID at creation time. This ID can be accessed through the CKObject::GetID method.
-	It is safer, though a bit slower, to reference object through their global ID than through
-	a direct pointer reference. In any case the referenced object may be deleted even though
-	the client object has a ID for it. The client object should verify that the referenced object
-	still exists when used with the CKGetObject function.
-	+ The global ID for an instance remains unique and unchanged through a application session, but there
-	is no garanty that this ID will be the same when a level is saved and loaded back again.
-	@see CKObject::GetID, CKContext::GetObject
+	 * @brief Unique Identifier for all Objects instanciated in a given CKContext
+	 * @remarks
+	 * \li Each instance of CKObject and derived classes are automatically given a global unique
+	 * ID at creation time. This ID can be accessed through the CKObject::GetID method.
+	 * It is safer, though a bit slower, to reference object through their global ID than through
+	 * a direct pointer reference. In any case the referenced object may be deleted even though
+	 * the client object has a ID for it. The client object should verify that the referenced object
+	 * still exists when used with the CKGetObject function.
+	 * \li The global ID for an instance remains unique and unchanged through a application session, but there
+	 * is no garanty that this ID will be the same when a level is saved and loaded back again.
+	 * @see CKObject::GetID, CKContext::GetObject
 	*/
 	using CK_ID = CKDWORD;
 
@@ -195,14 +196,14 @@ namespace LibCmo::CK2 {
 	};
 
 	/**
-	@brief Per Class Unique Identifier.
-	@remark
-	+ Each class derived from the CKObject class has a unique class ID.
-	+ This ID can be accessed through each instance of these classes, with the
-	CKObject::GetClassID method.
-	+ This class ID is used internally for various matching operations, like matching behaviors on
-	objects, etc..
-	@see CKObject::GetClassID, CKIsChildClassOf, Class Identifiers
+	 * @brief Per Class Unique Identifier.
+	 * @remark
+	 * \li Each class derived from the CKObject class has a unique class ID.
+	 * \li This ID can be accessed through each instance of these classes, with the
+	 * CKObject::GetClassID method.
+	 * \li This class ID is used internally for various matching operations, like matching behaviors on
+	 * objects, etc..
+	 * @see CKObject::GetClassID, CKIsChildClassOf, Class Identifiers
 	*/
 	enum class CK_CLASSID : CKINT {
 		CKCID_OBJECT = 1,
@@ -289,8 +290,10 @@ namespace LibCmo::CK2 {
 #define PRIiCLASSID PRIiCKINT
 
 	// ========== Class List ==========
+	// We declare these classes in there to make sure that
+	// following code can refer their pointer type safely.
+	
 	// Objects and derivated classes
-
 	namespace ObjImpls {
 		class CKObject;
 		class CKInterfaceObjectManager;
@@ -345,7 +348,7 @@ namespace LibCmo::CK2 {
 		class CKGrid;
 	}
 
-	//---- Misc
+	// Misc
 	class CKBehaviorPrototype;
 	class CKMessage;
 	class CK2dCurvePoint;
@@ -362,7 +365,7 @@ namespace LibCmo::CK2 {
 	class CKFileExtension;
 	class CKVertexBuffer;
 
-	//--- Managers
+	// Managers
 	namespace MgrImpls {
 		class CKBaseManager;
 		class CKObjectManager;
@@ -379,13 +382,14 @@ namespace LibCmo::CK2 {
 		class CKPluginManager;
 	}
 
+	// Data Handlers
 	namespace DataHandlers {
 		class CKBitmapHandler;
 		class CKMovieHandler;
 		class CKSoundHandler;
 	}
 
-	//--- Important classes
+	// Important classes
 	class CKContext;
 	class CKStateChunk;
 	class CKFileReader;
@@ -393,22 +397,20 @@ namespace LibCmo::CK2 {
 	class CKFileVisitor;
 
 	/**
-	@brief Global Unique Identifier Struture.
-	@remark
-	+ Guids are used to uniquely identify plugins,operation types, parameter types and behavior prototypes.
-	+ Its defined as
-	```
-	typedef struct CKGUID {
-		union {
-			struct { CKDWORD d1,d2; };
-			CKDWORD d[2];
-			};
-	};
-	```
-	+ Comparison operators are defined so CKGUIDS can be compared with
-	==, != , <, > operators.
-
-	@see Pre-Registred Parameter Types, ParameterOperation Types
+	 * @brief Global Unique Identifier Struture.
+	 * @remark
+	 * \li Guids are used to uniquely identify plugins,operation types, parameter types and behavior prototypes.
+	 * \li Comparison operators are defined so CKGUID can be compared with ==, != , <, > operators.
+	 * \li Its defined as following code
+	 * \code
+	 * typedef struct CKGUID {
+	 * 	union {
+	 * 		struct { CKDWORD d1,d2; };
+	 * 		CKDWORD d[2];
+	 * 		};
+	 * };
+	 * \endcode
+	 * @see Pre-Registred Parameter Types, ParameterOperation Types
 	*/
 	struct CKGUID {
 		CKDWORD d1, d2;

@@ -136,7 +136,7 @@ namespace LibCmo::CK2 {
 			m_ReaderGuid(), m_Ext() {}
 		CKBitmapProperties(const CKGUID& guid, CKSTRING ext) :
 			m_ReaderGuid(guid), m_Ext(ext) {}
-		LIBCMO_DEFAULT_COPY_MOVE(CKBitmapProperties);
+		YYCC_DEF_CLS_COPY_MOVE(CKBitmapProperties);
 
 		CKGUID m_ReaderGuid; /**< CKGUID that uniquely identifies the reader that created this properties structure */
 		CKFileExtension m_Ext; /**< File Extension of the image being described by this structure */

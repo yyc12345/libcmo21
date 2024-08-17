@@ -1,5 +1,5 @@
 #include "../VTUtils.hpp"
-#if defined(LIBCMO_OS_WIN32)
+#if YYCC_OS == YYCC_OS_WINDOWS
 #define ZLIB_WINAPI
 #endif
 #include <zconf.h>
@@ -76,7 +76,10 @@ namespace LibCmo::CK2 {
 		} else {
 			if (str2 == nullptr) return false;
 			else {
-				return std::strcmp(str1, str2) == 0;
+				return std::strcmp(
+					YYCC::EncodingHelper::ToOrdinary(str1),
+					YYCC::EncodingHelper::ToOrdinary(str2)
+				) == 0;
 			}
 		}
 	}
@@ -90,21 +93,21 @@ namespace LibCmo::CK2 {
 			else {
 				// do real cmp
 				size_t i = 0;
-				while (str1[i] != '\0' && str2[i] != '\0') {
+				while (str1[i] != u8'\0' && str2[i] != u8'\0') {
 					if (std::tolower(str1[i]) != std::tolower(str2[i])) return false;
 					++str1;
 					++str2;
 				}
 
 				// !XOR the result, if both of them is zero, return true(1)
-				return !((str1[i] != '\0') ^ (str2[i] != '\0'));
+				return !((str1[i] != u8'\0') ^ (str2[i] != u8'\0'));
 			}
 		}
 	}
 
 	bool CKStrEmpty(CKSTRING strl) {
 		if (strl == nullptr) return true;
-		return strl[0] == '\0';
+		return strl[0] == u8'\0';
 	}
 
 #pragma endregion
@@ -112,7 +115,7 @@ namespace LibCmo::CK2 {
 #pragma region CKClass Registration
 
 	static XContainer::XArray<CKClassDesc> g_CKClassInfo;
-	
+
 	static bool GetClassIdIndex(CK_CLASSID cid, size_t& intcid) {
 		intcid = static_cast<size_t>(cid);
 		if (intcid >= g_CKClassInfo.size()) return false;
@@ -123,7 +126,7 @@ namespace LibCmo::CK2 {
 	void CKClassNeedNotificationFrom(CK_CLASSID listener, CK_CLASSID listenTo) {
 		size_t idxListener, idxListenTo;
 		if (!GetClassIdIndex(listener, idxListener) || !GetClassIdIndex(listenTo, idxListenTo)) return;
-		
+
 		XContainer::NSXBitArray::Set(g_CKClassInfo[idxListener].ToBeNotify, static_cast<CKDWORD>(idxListenTo));
 	}
 
@@ -173,7 +176,7 @@ namespace LibCmo::CK2 {
 
 	CKSTRING CKClassIDToString(CK_CLASSID cid) {
 		const CKClassDesc* desc = CKGetClassDesc(cid);
-		if (desc == nullptr) return "Undefined Type";
+		if (desc == nullptr) return u8"Undefined Type";
 		else return desc->NameFct();
 	}
 
@@ -237,14 +240,14 @@ namespace LibCmo::CK2 {
 	B and BB have the same goods so A can buy his stuff from both of B and BB.
 	This is the first step executed by ComputeParentsNotifyTable().
 	In this step, the function expand existing business relations to all possible business relations (expand to businessman's children)
-	
+
 	Image there is a candy store, C. Because AA still is a kids.
 	So AA want to buy something from C. Now C is in his ToBeNotify.
 	Additionally, A, the parent of AA, force AA to buy something from B, just for A himself.
 	For AA, he does not need want to buy something from B, but his parent A order he to do.
 	This is the second step executed by ComputeParentsNotifyTable().
 	For AA, his parent's relations also need to be merged after he processed his relations with C like I introduced previously.
-	
+
 	Now, AA have a full business list writing all trades he can do.
 	This is represented as CommonToBeNotify.
 	In this time, AA's ToBeNotify only have C, but his CommonToBeNotify have B, BB and C.
@@ -254,7 +257,7 @@ namespace LibCmo::CK2 {
 	Because a full trades list are created from A side.
 	The better solution is just ask the guest: do you want to buy something from me?
 	This operation will fill ToNotify and is implemented at ComputeHierarchyTable().
-	
+
 	At the end of this story,
 	All bussiness man can use ToNofity to see whom they want to sell something to.
 	And all buyer can use CommonToBeNofity to check who they can buy something from.
@@ -267,7 +270,7 @@ namespace LibCmo::CK2 {
 
 		// find direct parent
 		CKClassDesc& parent = g_CKClassInfo[static_cast<size_t>(desc.Parent)];
-		if (!parent.IsValid) LIBCMO_PANIC("No such CK_CLASSID.");
+		if (!parent.IsValid) throw LogicException("No such CK_CLASSID.");
 
 		// if it is not self inheritance, call recursively
 		if (desc.Self != desc.Parent) {
@@ -281,26 +284,26 @@ namespace LibCmo::CK2 {
 
 		// set derivation level
 		desc.DerivationLevel = parent.DerivationLevel + 1;
-		
+
 		// set done
 		desc.Done = true;
 	}
 	static void ComputeParentsNotifyTable(CKClassDesc& desc) {
 		// if it has done, do not process it again.
 		if (desc.Done) return;
-		
+
 		// find direct parent
 		CKClassDesc& parent = g_CKClassInfo[static_cast<size_t>(desc.Parent)];
-		if (!parent.IsValid) LIBCMO_PANIC("No such CK_CLASSID.");
+		if (!parent.IsValid) throw LogicException("No such CK_CLASSID.");
 
 		// if it is not self inheritance, call recursively
 		if (desc.Self != desc.Parent) {
 			ComputeParentsNotifyTable(parent);
 		}
-		
+
 		// add all children of ToBeNofity list
 		for (CKDWORD idx = 0; idx < desc.ToBeNotify.size(); ++idx) {
-			if (!XContainer::NSXBitArray::IsSet(desc.ToBeNotify, idx)) 
+			if (!XContainer::NSXBitArray::IsSet(desc.ToBeNotify, idx))
 				continue;
 
 			CKClassDesc& target = g_CKClassInfo[idx];
@@ -352,7 +355,7 @@ namespace LibCmo::CK2 {
 			if (!item.IsValid || item.RegisterFct == nullptr) continue;
 			item.RegisterFct();
 		}
-		
+
 		// ===== Build Notify Hierarchy =====
 		// set array first
 		for (auto& item : g_CKClassInfo) {
@@ -398,13 +401,13 @@ CKClassRegister(cid, parentCid, \
 	nullptr, \
 	[](CKContext* ctx, CK_ID id, CKSTRING name) -> ObjImpls::CKObject* { return new clsname(ctx, id, name); }, \
 	[](CKContext* ctx, ObjImpls::CKObject* obj) -> void { delete obj; }, \
-	[]() -> CKSTRING { return strName; });
+	[]() -> CKSTRING { return u8 ## strName; });
 #define EasyClassRegWithNotify(clsname, cid, parentCid, strName, notifyCids) \
 CKClassRegister(cid, parentCid, \
 	[]() -> void { NeedNotificationWrapper(cid, notifyCids); }, \
 	[](CKContext* ctx, CK_ID id, CKSTRING name) -> ObjImpls::CKObject* { return new clsname(ctx, id, name); }, \
 	[](CKContext* ctx, ObjImpls::CKObject* obj) -> void { delete obj; }, \
-	[]() -> CKSTRING { return strName; });
+	[]() -> CKSTRING { return u8 ## strName; });
 
 		EasyClassReg(ObjImpls::CKObject, CK_CLASSID::CKCID_OBJECT, CK_CLASSID::CKCID_OBJECT, "Basic Object");
 		EasyClassReg(ObjImpls::CKSceneObject, CK_CLASSID::CKCID_SCENEOBJECT, CK_CLASSID::CKCID_OBJECT, "Scene Object");

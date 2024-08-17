@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VTAll.hpp"
+#include "../../VTInternal.hpp"
 #include "CKBaseManager.hpp"
 #include <filesystem>
 
@@ -10,7 +10,7 @@ namespace LibCmo::CK2::MgrImpls {
 	public:
 		CKPathManager(CKContext* ctx);
 		virtual ~CKPathManager();
-		LIBCMO_DISABLE_COPY_MOVE(CKPathManager);
+		YYCC_DEL_CLS_COPY_MOVE(CKPathManager);
 		
 		/**
 		 * @brief Set the temp folder of current context.

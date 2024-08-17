@@ -1,7 +1,6 @@
 #pragma once
 
 #include <VTAll.hpp>
-#include <CK2/CKFile.hpp>
 
 namespace Unvirt::StructFormatter {
 	

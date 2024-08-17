@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VTAll.hpp"
+#include "../VTInternal.hpp"
 #include <map>
 #include <deque>
 #include <functional>
@@ -21,7 +21,7 @@ namespace LibCmo::CK2 {
 	public:
 		CKContext();
 		~CKContext();
-		LIBCMO_DISABLE_COPY_MOVE(CKContext);
+		YYCC_DEL_CLS_COPY_MOVE(CKContext);
 		
 		// ========== Engine runtime ==========
 	public:

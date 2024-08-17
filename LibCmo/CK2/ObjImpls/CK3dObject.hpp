@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VTAll.hpp"
+#include "../../VTInternal.hpp"
 #include "CK3dEntity.hpp"
 
 namespace LibCmo::CK2::ObjImpls {
@@ -11,7 +11,7 @@ namespace LibCmo::CK2::ObjImpls {
 			CK3dEntity(ctx, ckid, name)
 		{}
 		virtual ~CK3dObject() {}
-		LIBCMO_DISABLE_COPY_MOVE(CK3dObject);
+		YYCC_DEL_CLS_COPY_MOVE(CK3dObject);
 
 		virtual CK_CLASSID GetClassID(void) override { 
 			return CK_CLASSID::CKCID_3DOBJECT; 

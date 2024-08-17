@@ -2,7 +2,7 @@
 
 namespace LibCmo::CK2::MgrImpls {
 
-#if defined(LIBCMO_OS_WIN32)
+#if YYCC_OS == YYCC_OS_WINDOWS
 	static wchar_t g_UniqueFolder[] = L"LibCmo";
 #else
 	static char g_UniqueFolder[] = "LibCmo";

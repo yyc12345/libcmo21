@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../VTAll.hpp"
-#if defined(LIBCMO_OS_WIN32)
+#include "../VTInternal.hpp"
+#if YYCC_OS == YYCC_OS_WINDOWS
 #include <Windows.h>
 // disable annoy macro at the same time
 #undef GetObject
@@ -24,7 +24,7 @@ namespace LibCmo::VxMath {
 	class VxMemoryMappedFile {
 	private:
 
-#if defined(LIBCMO_OS_WIN32)
+#if YYCC_OS == YYCC_OS_WINDOWS
 		HANDLE m_hFile;
 		DWORD m_dwFileSizeLow, m_dwFileSizeHigh;
 		HANDLE m_hFileMapping;

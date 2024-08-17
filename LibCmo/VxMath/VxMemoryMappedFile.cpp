@@ -5,7 +5,7 @@ namespace LibCmo::VxMath {
 
 	VxMemoryMappedFile::VxMemoryMappedFile(CKSTRING u8_filepath) :
 		// init members
-#if defined(LIBCMO_OS_WIN32)
+#if YYCC_OS == YYCC_OS_WINDOWS
 		m_hFile(NULL), m_hFileMapping(NULL), m_hFileMapView(NULL),
 		m_dwFileSizeLow(0), m_dwFileSizeHigh(0),
 #else
@@ -15,14 +15,14 @@ namespace LibCmo::VxMath {
 		m_bIsValid(false), m_pMemoryMappedFileBase(nullptr), m_cbFile(0u) {
 
 		// save file path
-#if defined(LIBCMO_OS_WIN32)
+#if YYCC_OS == YYCC_OS_WINDOWS
 		EncodingHelper::U8PathToStdPath(m_szFilePath, u8_filepath);
 #else
 		this->m_szFilePath = u8_filepath;
 #endif
 
 		// real mapping work
-#if defined(LIBCMO_OS_WIN32)
+#if YYCC_OS == YYCC_OS_WINDOWS
 
 		// open file
 		this->m_hFile = CreateFileW(
@@ -124,7 +124,7 @@ namespace LibCmo::VxMath {
 			m_cbFile = 0;
 			m_pMemoryMappedFileBase = nullptr;
 
-#if defined(LIBCMO_OS_WIN32)
+#if YYCC_OS == YYCC_OS_WINDOWS
 			UnmapViewOfFile(this->m_hFileMapView);
 			CloseHandle(m_hFileMapping);
 			CloseHandle(m_hFile);

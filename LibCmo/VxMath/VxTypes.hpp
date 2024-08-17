@@ -19,29 +19,28 @@ namespace LibCmo::VxMath {
 
 
 	// ========== Class List ==========
-	//--- Important classes
+	// Important classes
 
 	class VxMemoryMappedFile;
 
-	//---- Misc
-	
+	// Misc
 	struct VxVector2 {
 		CKFLOAT x, y;
 		VxVector2() : x(0.0f), y(0.0f) {}
 		VxVector2(CKFLOAT _x, CKFLOAT _y) : x(_x), y(_y) {}
-		LIBCMO_DEFAULT_COPY_MOVE(VxVector2);
+		YYCC_DEF_CLS_COPY_MOVE(VxVector2);
 		CKFLOAT& operator[](size_t i) {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
-				default: return x;
+				default: throw LogicException("Invalid index for VxVector2::operator[].");
 			}
 		}
 		const CKFLOAT& operator[](size_t i) const {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
-				default: return x;
+				default: throw LogicException("Invalid index for VxVector2::operator[].");
 			}
 		}
 		VxVector2& operator+=(const VxVector2& rhs) {
@@ -87,9 +86,6 @@ namespace LibCmo::VxMath {
 		bool operator==(const VxVector2& rhs) const {
 			return (x == rhs.x && y == rhs.y);
 		}
-		bool operator!=(const VxVector2& rhs) const {
-			return !(*this == rhs);
-		}
 		CKFLOAT SquaredLength() const {
 			return (x * x + y * y);
 		}
@@ -113,13 +109,13 @@ namespace LibCmo::VxMath {
 		CKFLOAT x, y, z;
 		VxVector3() : x(0.0f), y(0.0f), z(0.0f) {}
 		VxVector3(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z) : x(_x), y(_y), z(_z) {}
-		LIBCMO_DEFAULT_COPY_MOVE(VxVector3);
+		YYCC_DEF_CLS_COPY_MOVE(VxVector3);
 		CKFLOAT& operator[](size_t i) {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
 				case 2: return z;
-				default: return x;
+				default: throw LogicException("Invalid index for VxVector3::operator[].");
 			}
 		}
 		const CKFLOAT& operator[](size_t i) const {
@@ -127,7 +123,7 @@ namespace LibCmo::VxMath {
 				case 0: return x;
 				case 1: return y;
 				case 2: return z;
-				default: return x;
+				default: throw LogicException("Invalid index for VxVector3::operator[].");
 			}
 		}
 		VxVector3& operator+=(const VxVector3& rhs) {
@@ -177,9 +173,6 @@ namespace LibCmo::VxMath {
 		bool operator==(const VxVector3& rhs) const {
 			return (x == rhs.x && y == rhs.y && z == rhs.z);
 		}
-		bool operator!=(const VxVector3& rhs) const {
-			return !(*this == rhs);
-		}
 		CKFLOAT SquaredLength() const {
 			return (x * x + y * y + z * z);
 		}
@@ -204,14 +197,14 @@ namespace LibCmo::VxMath {
 		CKFLOAT x, y, z, w;
 		VxVector4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
 		VxVector4(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z, CKFLOAT _w) : x(_x), y(_y), z(_z), w(_w) {}
-		LIBCMO_DEFAULT_COPY_MOVE(VxVector4);
+		YYCC_DEF_CLS_COPY_MOVE(VxVector4);
 		CKFLOAT& operator[](size_t i) {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
 				case 2: return z;
 				case 3: return w;
-				default: return x;
+				default: throw LogicException("Invalid index for VxVector4::operator[].");
 			}
 		}
 		const CKFLOAT& operator[](size_t i) const {
@@ -220,7 +213,7 @@ namespace LibCmo::VxMath {
 				case 1: return y;
 				case 2: return z;
 				case 3: return w;
-				default: return x;
+				default: throw LogicException("Invalid index for VxVector4::operator[].");
 			}
 		}
 		VxVector4& operator+=(const VxVector4& rhs) {
@@ -274,9 +267,6 @@ namespace LibCmo::VxMath {
 		bool operator==(const VxVector4& rhs) const {
 			return (x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w);
 		}
-		bool operator!=(const VxVector4& rhs) const {
-			return !(*this == rhs);
-		}
 		CKFLOAT SquaredLength() const {
 			return (x * x + y * y + z * z + w * w);
 		}
@@ -300,32 +290,38 @@ namespace LibCmo::VxMath {
 
 	struct VxQuaternion {
 		CKFLOAT x, y, z, w;
-		VxQuaternion() : x(0.0f), y(0.0f), z(0.0f), w(1.0f) {} // set your custom init.
+		VxQuaternion() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {} // set your custom init.
 		VxQuaternion(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z, CKFLOAT _w) : x(_x), y(_y), z(_z), w(_w) {}
-		LIBCMO_DEFAULT_COPY_MOVE(VxQuaternion);
+		YYCC_DEF_CLS_COPY_MOVE(VxQuaternion);
 		CKFLOAT& operator[](size_t i) {
 			switch (i) {
 				case 0: return x;
 				case 1: return y;
 				case 2: return z;
 				case 3: return w;
-				default: return x;
+				default: throw LogicException("Invalid index for VxQuaternion::operator[].");
+			}
+		}
+		const CKFLOAT& operator[](size_t i) const {
+			switch (i) {
+				case 0: return x;
+				case 1: return y;
+				case 2: return z;
+				case 3: return w;
+				default: throw LogicException("Invalid index for VxQuaternion::operator[].");
 			}
 		}
 		bool operator==(const VxQuaternion& rhs) const {
 			return (x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w);
 		}
-		bool operator!=(const VxQuaternion& rhs) const {
-			return !(*this == rhs);
-		}
 	};
 
 	struct VxColor {
 		CKFLOAT r, g, b, a;
-		VxColor() : r(0.0f), g(0.0f), b(0.0f), a(1.0f) {} // set your custom init.
+		VxColor() : r(0.0f), g(0.0f), b(0.0f), a(0.0f) {} // set your custom init.
 		VxColor(CKFLOAT _r, CKFLOAT _g, CKFLOAT _b, CKFLOAT _a) : r(_r), g(_g), b(_b), a(_a) {}
 		VxColor(CKDWORD argb) { FromARGB(argb); }
-		LIBCMO_DEFAULT_COPY_MOVE(VxColor);
+		YYCC_DEF_CLS_COPY_MOVE(VxColor);
 		void FromARGB(CKDWORD argb) {
 			a = ((argb & 0xFF000000) >> 24) / 255.0f;
 			r = ((argb & 0x00FF0000) >> 16) / 255.0f;
@@ -359,42 +355,42 @@ namespace LibCmo::VxMath {
 				case 1: return g;
 				case 2: return b;
 				case 3: return a;
-				default: return r;
+				default: throw LogicException("Invalid index for VxColor::operator[].");
+			}
+		}
+		const CKFLOAT& operator[](size_t i) const {
+			switch (i) {
+				case 0: return r;
+				case 1: return g;
+				case 2: return b;
+				case 3: return a;
+				default: throw LogicException("Invalid index for VxColor::operator[].");
 			}
 		}
 		bool operator==(const VxColor& rhs) const {
 			return (r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a);
 		}
-		bool operator!=(const VxColor& rhs) const {
-			return !(*this == rhs);
-		}
 	};
 
 	struct VxMatrix {
 		CKFLOAT m_Data[4][4];
-
-		VxMatrix() : m_Data() {
-			ResetToIdentity();
-		}
+		VxMatrix() : m_Data() { ResetToIdentity(); }
 		VxMatrix(CKFLOAT m[4][4]) : m_Data() { std::memcpy(m_Data, m, sizeof(m_Data)); }
-		LIBCMO_DEFAULT_COPY_MOVE(VxMatrix);
+		YYCC_DEF_CLS_COPY_MOVE(VxMatrix);
 		void ResetToIdentity() {
 			std::memset(m_Data, 0, sizeof(m_Data));
 			m_Data[0][0] = m_Data[1][1] = m_Data[2][2] = m_Data[3][3] = 1.0f;
 		}
 		VxVector4& operator[](size_t i) {
-			if (i >= 4) i = 0;
+			if (i >= 4) throw LogicException("Invalid index for VxMatrix::operator[].");
 			return *(reinterpret_cast<VxVector4*>(m_Data) + i);
 		}
 		const VxVector4& operator[](size_t i) const {
-			if (i >= 4) i = 0;
+			if (i >= 4) throw LogicException("Invalid index for VxMatrix::operator[].");
 			return *(reinterpret_cast<const VxVector4*>(m_Data) + i);
 		}
 		bool operator==(const VxMatrix& rhs) const {
 			return std::memcmp(m_Data, rhs.m_Data, sizeof(m_Data)) == 0;
-		}
-		bool operator!=(const VxMatrix& rhs) const {
-			return !(*this == rhs);
 		}
 	};
 
@@ -532,19 +528,19 @@ namespace LibCmo::VxMath {
 			return (m_Width == rhs.m_Width && m_Height == rhs.m_Height);
 		}
 		//	bool IsMaskEqual(const VxImageDescEx& rhs) const {
-	//		return (
-	//			m_RedMask == rhs.m_RedMask &&
-	//			m_GreenMask == rhs.m_GreenMask &&
-	//			m_BlueMask == rhs.m_BlueMask &&
-	//			m_AlphaMask == rhs.m_AlphaMask
-	//			);
-	//	}
+		//		return (
+		//			m_RedMask == rhs.m_RedMask &&
+		//			m_GreenMask == rhs.m_GreenMask &&
+		//			m_BlueMask == rhs.m_BlueMask &&
+		//			m_AlphaMask == rhs.m_AlphaMask
+		//			);
+		//	}
 
-	//public:
-	//	CKDWORD m_RedMask;
-	//	CKDWORD m_GreenMask;
-	//	CKDWORD m_BlueMask;
-	//	CKDWORD m_AlphaMask;
+		//public:
+		//	CKDWORD m_RedMask;
+		//	CKDWORD m_GreenMask;
+		//	CKDWORD m_BlueMask;
+		//	CKDWORD m_AlphaMask;
 
 	protected:
 		CKDWORD m_Width; /**< Width in pixel of the image */

@@ -118,7 +118,7 @@ namespace LibCmo::CK2 {
 			DerivationLevel(0),
 			Parents(), Children(), ToBeNotify(), CommonToBeNotify()
 		{}
-		LIBCMO_DEFAULT_COPY_MOVE(CKClassDesc);
+		YYCC_DEF_CLS_COPY_MOVE(CKClassDesc);
 	};
 
 	// ========== CKClass Registration ==========

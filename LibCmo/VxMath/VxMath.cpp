@@ -1,6 +1,6 @@
 #include "VxMath.hpp"
 #include <cmath>
-#include "stb_image_resize.h"
+#include <stb_image_resize.h>
 
 namespace LibCmo::VxMath {
 

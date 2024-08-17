@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VTAll.hpp"
+#include "../VTInternal.hpp"
 
 namespace LibCmo::XContainer {
 	using XIntArray = XArray<CKINT>;
@@ -40,7 +40,7 @@ namespace LibCmo::CK2 {
 		~CKBufferParser() {
 			if (this->m_NeedManualFree) delete[](this->m_MemBegin);
 		}
-		LIBCMO_DISABLE_COPY_MOVE(CKBufferParser);
+		YYCC_DEL_CLS_COPY_MOVE(CKBufferParser);
 
 		const void* GetPtr(CKINT extraoff = 0) { return (this->m_MemBegin + m_MemPos + extraoff); }
 		void* GetMutablePtr(CKINT extraoff = 0) { return (this->m_MemBegin + m_MemPos + extraoff); }
@@ -97,7 +97,7 @@ namespace LibCmo::CK2 {
 			ObjectCount(0u), ManagerCount(0u), MaxIDSaved(0u), Crc(0u),
 			Hdr1PackSize(0u), Hdr1UnPackSize(0u), DataPackSize(0u), DataUnPackSize(0u) {}
 		~CKFileInfo() {}
-		LIBCMO_DEFAULT_COPY_MOVE(CKFileInfo);
+		YYCC_DEF_CLS_COPY_MOVE(CKFileInfo);
 
 		CKDWORD ProductVersion;	 /**< Virtools Version (Dev/Creation). (CK_VIRTOOLS_VERSION) */
 		CKDWORD ProductBuild; /**< Virtools Build Number. */
@@ -156,7 +156,7 @@ namespace LibCmo::CK2 {
 		CKFilePluginDependencies() :
 			m_PluginCategory(CK_PLUGIN_TYPE::CKPLUGIN_MANAGER_DLL), m_Guids() {}
 		~CKFilePluginDependencies() {}
-		LIBCMO_DEFAULT_COPY_MOVE(CKFilePluginDependencies);
+		YYCC_DEF_CLS_COPY_MOVE(CKFilePluginDependencies);
 
 		CK_PLUGIN_TYPE m_PluginCategory;
 		XContainer::XArray<CKGUID> m_Guids;
@@ -188,7 +188,7 @@ namespace LibCmo::CK2 {
 	public:
 		CKFileReader(CKContext* ctx);
 		~CKFileReader();
-		LIBCMO_DISABLE_COPY_MOVE(CKFileReader);
+		YYCC_DEL_CLS_COPY_MOVE(CKFileReader);
 
 		// ========== Loading ==========
 		CKERROR ShallowLoad(CKSTRING u8_filename);
@@ -229,7 +229,7 @@ namespace LibCmo::CK2 {
 		CKFileWriter(CKContext* ctx);
 		CKFileWriter(CKContext* ctx, CKFileReader* reader, bool is_shallow);
 		~CKFileWriter();
-		LIBCMO_DISABLE_COPY_MOVE(CKFileWriter);
+		YYCC_DEL_CLS_COPY_MOVE(CKFileWriter);
 
 		// ========== Saving Preparing ==========
 		bool AddSavedObject(ObjImpls::CKObject* obj, CKDWORD flags = CK_STATESAVE_ALL);

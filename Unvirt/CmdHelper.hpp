@@ -26,7 +26,7 @@ namespace Unvirt::CmdHelper {
 			mCmdChar(0), mBuffer(nullptr), mResult(nullptr),
 			mState(StateType::NORMAL), mPreState(StateType::NORMAL) {}
 		~CmdSplitter() {}
-		LIBCMO_DISABLE_COPY_MOVE(CmdSplitter);
+		YYCC_DEL_CLS_COPY_MOVE(CmdSplitter);
 
 		std::deque<std::string> Convert(const std::string& u8cmd);
 	protected:
@@ -47,7 +47,7 @@ namespace Unvirt::CmdHelper {
 	public:
 		HelpDocument();
 		~HelpDocument();
-		LIBCMO_DISABLE_COPY_MOVE(HelpDocument);
+		YYCC_DEL_CLS_COPY_MOVE(HelpDocument);
 
 		void Push(const std::string& arg_name, const std::string& arg_desc);
 		void Pop();
@@ -58,7 +58,7 @@ namespace Unvirt::CmdHelper {
 		struct StackItem {
 			StackItem() : m_Name(), m_Desc() {}
 			StackItem(const std::string& name, const std::string& desc) : m_Name(name), m_Desc(desc) {}
-			LIBCMO_DEFAULT_COPY_MOVE(StackItem);
+			YYCC_DEF_CLS_COPY_MOVE(StackItem);
 			std::string m_Name;
 			std::string m_Desc;
 		};
@@ -66,7 +66,7 @@ namespace Unvirt::CmdHelper {
 		struct ResultItem {
 			ResultItem() : m_CmdDesc(), m_ArgDesc() {}
 			ResultItem(const std::string& desc) : m_CmdDesc(desc), m_ArgDesc() {}
-			LIBCMO_DEFAULT_COPY_MOVE(ResultItem);
+			YYCC_DEF_CLS_COPY_MOVE(ResultItem);
 			std::string m_CmdDesc;
 			std::vector<StackItem> m_ArgDesc;
 		};
@@ -82,7 +82,7 @@ namespace Unvirt::CmdHelper {
 	public:
 		AbstractNode();
 		virtual ~AbstractNode();
-		LIBCMO_DISABLE_COPY_MOVE(AbstractNode);
+		YYCC_DEL_CLS_COPY_MOVE(AbstractNode);
 
 		AbstractNode* Then(AbstractNode*);
 		AbstractNode* Executes(ExecutionFct, const char* = nullptr);
@@ -110,7 +110,7 @@ namespace Unvirt::CmdHelper {
 	public:
 		CommandRoot();
 		virtual ~CommandRoot();
-		LIBCMO_DISABLE_COPY_MOVE(CommandRoot);
+		YYCC_DEL_CLS_COPY_MOVE(CommandRoot);
 
 		// Root use special consume and help functions.
 		bool RootConsume(std::deque<std::string>&);
@@ -131,7 +131,7 @@ namespace Unvirt::CmdHelper {
 	public:
 		Literal(const char* words);
 		virtual ~Literal();
-		LIBCMO_DISABLE_COPY_MOVE(Literal);
+		YYCC_DEL_CLS_COPY_MOVE(Literal);
 
 	public:
 		virtual NodeType GetNodeType() override;
@@ -151,7 +151,7 @@ namespace Unvirt::CmdHelper {
 		using vType = size_t;
 		Choice(const char* argname, const std::initializer_list<std::string>& vocabulary);
 		virtual ~Choice();
-		LIBCMO_DISABLE_COPY_MOVE(Choice);
+		YYCC_DEL_CLS_COPY_MOVE(Choice);
 
 		vType* GetIndex();
 
@@ -175,7 +175,7 @@ namespace Unvirt::CmdHelper {
 	public:
 		AbstractArgument(const char* argname);
 		virtual ~AbstractArgument();
-		LIBCMO_DISABLE_COPY_MOVE(AbstractArgument);
+		YYCC_DEL_CLS_COPY_MOVE(AbstractArgument);
 
 		template<class T>
 		T GetData() { 
@@ -208,7 +208,7 @@ namespace Unvirt::CmdHelper {
 		IntArgument(const char* argname, IntLimit limit = nullptr) :
 			AbstractArgument(argname), m_IntLimit(limit) {}
 		virtual ~IntArgument() {}
-		LIBCMO_DISABLE_COPY_MOVE(IntArgument);
+		YYCC_DEL_CLS_COPY_MOVE(IntArgument);
 
 	protected:
 		virtual bool BeginParse(const std::string&) override;
@@ -223,7 +223,7 @@ namespace Unvirt::CmdHelper {
 		StringArgument(const char* argname) : 
 			AbstractArgument(argname) {}
 		virtual ~StringArgument() {}
-		LIBCMO_DISABLE_COPY_MOVE(StringArgument);
+		YYCC_DEL_CLS_COPY_MOVE(StringArgument);
 
 	protected:
 		virtual bool BeginParse(const std::string&) override;
@@ -236,7 +236,7 @@ namespace Unvirt::CmdHelper {
 		EncodingArgument(const char* argname) : 
 			AbstractArgument(argname) {}
 		virtual ~EncodingArgument() {}
-		LIBCMO_DISABLE_COPY_MOVE(EncodingArgument);
+		YYCC_DEL_CLS_COPY_MOVE(EncodingArgument);
 
 	protected:
 		virtual bool BeginParse(const std::string&) override;
@@ -247,7 +247,7 @@ namespace Unvirt::CmdHelper {
 	public:
 		ArgumentsMap() : m_Data() {}
 		~ArgumentsMap() {}
-		LIBCMO_DISABLE_COPY_MOVE(ArgumentsMap);
+		YYCC_DEL_CLS_COPY_MOVE(ArgumentsMap);
 
 		void Add(const std::string& k, AbstractNode* v);
 		void Remove(const std::string& k);

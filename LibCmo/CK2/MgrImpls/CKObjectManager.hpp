@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VTAll.hpp"
+#include "../../VTInternal.hpp"
 #include "CKBaseManager.hpp"
 #include <deque>
 
@@ -10,7 +10,7 @@ namespace LibCmo::CK2::MgrImpls {
 	public:
 		CKObjectManager(CKContext* ctx);
 		virtual ~CKObjectManager();
-		LIBCMO_DISABLE_COPY_MOVE(CKObjectManager);
+		YYCC_DEL_CLS_COPY_MOVE(CKObjectManager);
 
 		// ========== Objects Management ==========
 

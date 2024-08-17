@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VTAll.hpp"
+#include "../../VTInternal.hpp"
 #include "../CKBitmapData.hpp"
 #include "CKBeObject.hpp"
 
@@ -10,7 +10,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKTexture(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKTexture();
-		LIBCMO_DISABLE_COPY_MOVE(CKTexture);
+		YYCC_DEL_CLS_COPY_MOVE(CKTexture);
 
 		virtual CK_CLASSID GetClassID(void) override { 
 			return CK_CLASSID::CKCID_TEXTURE; 

@@ -33,13 +33,13 @@ def GetTmplOperOffset(sname: str, svars: tuple[str]) -> str:
     return f"""\tCKFLOAT& operator[](size_t i) {{
 \t\tswitch (i) {{
 \t\t\t{sp.join(map(lambda x: f'case {x}: return {svars[x]};', range(len(svars))))}
-\t\t\tdefault: return {svars[0]};
+\t\t\tdefault: throw LogicException("Invalid index for {sname}::operator[].");
 \t\t}}
 \t}}
 \tconst CKFLOAT& operator[](size_t i) const {{
 \t\tswitch (i) {{
 \t\t\t{sp.join(map(lambda x: f'case {x}: return {svars[x]};', range(len(svars))))}
-\t\t\tdefault: return {svars[0]};
+\t\t\tdefault: throw LogicException("Invalid index for {sname}::operator[].");
 \t\t}}
 \t}}"""
 
@@ -120,7 +120,7 @@ struct {sname} {{
 \t{GetTmplDecl(svars)}
 \t{GetTmplCtor1(sname, svars)}
 \t{GetTmplCtor2(sname, svars)}
-\tLIBCMO_DEFAULT_COPY_MOVE({sname});
+\tYYCC_DEF_CLS_COPY_MOVE({sname});
 {GetTmplOperOffset(sname, svars)}
 {GetTmplOperAddMinus(sname, svars, '+')}
 {GetTmplOperAddMinus(sname, svars, '-')}
@@ -138,13 +138,13 @@ struct {sname} {{
 \t{GetTmplDecl(svars)}
 \t{GetTmplCtor1(sname, svars)} // set your custom init.
 \t{GetTmplCtor2(sname, svars)}
-\tLIBCMO_DEFAULT_COPY_MOVE({sname});
+\tYYCC_DEF_CLS_COPY_MOVE({sname});
 {GetTmplOperOffset(sname, svars)}
 {GetTmplOperEqual(sname, svars)}
 }};
 """
 
-# use LIBCMO_DEFAULT_COPY_MOVE instead of these outputs.
+# use YYCC_DEF_CLS_COPY_MOVE instead of these outputs.
 #\t{GetTmplCopyCtor(sname, svars)}
 #\t{GetTmplMoveCtor(sname, svars)}
 #{GetTmplOperAssignCopy(sname, svars)}

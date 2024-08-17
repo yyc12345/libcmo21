@@ -1,4 +1,3 @@
-#include <VTUserAll.hpp>
 #include "StructFormatter.hpp"
 #include "AccessibleValue.hpp"
 #include "TerminalHelper.hpp"

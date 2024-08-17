@@ -42,10 +42,10 @@ PUBLIC
 FILE_SET HEADERS
 FILES
     # Asststant header files
-	VTAll.hpp
+	VTInternal.hpp
 	VTEncoding.hpp
-	VTUserAll.hpp
 	VTUtils.hpp
+	VTAll.hpp
 	# CK2
 	CK2/CKDefines.hpp
 	CK2/CKEnums.hpp

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cstdio>
 
-#if defined(LIBCMO_OS_WIN32)
+#if YYCC_OS == YYCC_OS_WINDOWS
 #include <Windows.h>
 #include <cstdio>
 #include <io.h>
@@ -19,7 +19,7 @@ namespace Unvirt {
 		// due to shitty Windows implementations.
 
 		bool EnsureTerminalColor(void) {
-#if defined(LIBCMO_OS_WIN32)
+#if YYCC_OS == YYCC_OS_WINDOWS
 			if (_isatty(_fileno(stdout))) {
 				HANDLE h_output;
 				DWORD dw_mode;
@@ -36,7 +36,7 @@ namespace Unvirt {
 		}
 
 		bool EnsureTerminalEncoding(void) {
-#if defined(LIBCMO_OS_WIN32)
+#if YYCC_OS == YYCC_OS_WINDOWS
 			if (!SetConsoleCP(CP_UTF8)) return false;
 			if (!SetConsoleOutputCP(CP_UTF8)) return false;
 			
@@ -48,7 +48,7 @@ namespace Unvirt {
 
 		void GetCmdLine(std::string& u8cmd) {
 			fputs(UNVIRT_TERMCOL_LIGHT_GREEN(("Unvirt> ")), stdout);
-#if defined(LIBCMO_OS_WIN32)
+#if YYCC_OS == YYCC_OS_WINDOWS
 			std::wstring wcmd;
 			std::getline(std::wcin, wcmd);
 			LibCmo::EncodingHelper::WcharToChar(wcmd, u8cmd, CP_UTF8);

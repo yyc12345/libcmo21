@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VTAll.hpp"
+#include "../VTInternal.hpp"
 
 namespace LibCmo::CK2 {
 
@@ -26,7 +26,7 @@ namespace LibCmo::CK2 {
 		CKBitmapSlot() :
 			m_ImageData(), m_FileName() {}
 		~CKBitmapSlot() {}
-		LIBCMO_DEFAULT_COPY_MOVE(CKBitmapSlot);
+		YYCC_DEF_CLS_COPY_MOVE(CKBitmapSlot);
 
 		VxMath::VxImageDescEx m_ImageData;
 		XContainer::XString m_FileName;
@@ -36,7 +36,7 @@ namespace LibCmo::CK2 {
 	public:
 		CKBitmapData(CKContext* ctx);
 		~CKBitmapData();
-		LIBCMO_DISABLE_COPY_MOVE(CKBitmapData);
+		YYCC_DEL_CLS_COPY_MOVE(CKBitmapData);
 
 #pragma region RW Funcs
 

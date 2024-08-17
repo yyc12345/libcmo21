@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VTAll.hpp"
+#include "../../VTInternal.hpp"
 #include "CKBeObject.hpp"
 
 namespace LibCmo::CK2::ObjImpls {
@@ -19,7 +19,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKMesh(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKMesh();
-		LIBCMO_DISABLE_COPY_MOVE(CKMesh);
+		YYCC_DEL_CLS_COPY_MOVE(CKMesh);
 		
 		virtual CK_CLASSID GetClassID(void) override { 
 			return CK_CLASSID::CKCID_MESH; 

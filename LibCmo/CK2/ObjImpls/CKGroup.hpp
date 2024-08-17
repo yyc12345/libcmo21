@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VTAll.hpp"
+#include "../../VTInternal.hpp"
 #include "CKBeObject.hpp"
 
 namespace LibCmo::CK2::ObjImpls {
@@ -9,7 +9,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKGroup(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKGroup();
-		LIBCMO_DISABLE_COPY_MOVE(CKGroup);
+		YYCC_DEL_CLS_COPY_MOVE(CKGroup);
 		
 		virtual CK_CLASSID GetClassID(void) override { 
 			return CK_CLASSID::CKCID_GROUP; 

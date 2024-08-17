@@ -16,7 +16,7 @@ namespace LibCmo::XContainer {
 	@brief Class representation of a string (an array of character ended by NULL).
 	@remark This class now use std::string.
 	*/
-	using XString = std::string;
+	using XString = std::u8string;
 
 	/**
 	@brief Set of bit flags.

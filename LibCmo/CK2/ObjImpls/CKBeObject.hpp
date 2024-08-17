@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VTAll.hpp"
+#include "../../VTInternal.hpp"
 #include "CKSceneObject.hpp"
 
 namespace LibCmo::CK2::ObjImpls {
@@ -9,7 +9,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKBeObject(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKBeObject();
-		LIBCMO_DISABLE_COPY_MOVE(CKBeObject);
+		YYCC_DEL_CLS_COPY_MOVE(CKBeObject);
 
 		virtual CK_CLASSID GetClassID(void) override { 
 			return CK_CLASSID::CKCID_BEOBJECT; 

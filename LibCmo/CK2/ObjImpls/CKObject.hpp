@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VTAll.hpp"
+#include "../../VTInternal.hpp"
 
 /**
 CKObject virtual functions implementations help
@@ -40,7 +40,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKObject(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKObject();
-		LIBCMO_DISABLE_COPY_MOVE(CKObject);
+		YYCC_DEL_CLS_COPY_MOVE(CKObject);
 
 		CK_ID GetID(void) const;
 		CKSTRING GetName(void) const;

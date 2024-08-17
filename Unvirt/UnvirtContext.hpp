@@ -1,10 +1,10 @@
 #pragma once
+#include <VTAll.hpp>
+
 #include "AccessibleValue.hpp"
 #include "TerminalHelper.hpp"
 #include "StructFormatter.hpp"
 #include "CmdHelper.hpp"
-
-#include <VTUserAll.hpp>
 
 #include <cstdio>
 #include <iostream>
@@ -15,7 +15,7 @@ namespace Unvirt::Context {
 	public:
 		UnvirtContext();
 		~UnvirtContext();
-		LIBCMO_DISABLE_COPY_MOVE(UnvirtContext);
+		YYCC_DEL_CLS_COPY_MOVE(UnvirtContext);
 
 		void Run();
 

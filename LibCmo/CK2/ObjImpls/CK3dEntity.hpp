@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VTAll.hpp"
+#include "../../VTInternal.hpp"
 #include "CKRenderObject.hpp"
 
 namespace LibCmo::CK2::ObjImpls {
@@ -9,7 +9,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CK3dEntity(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CK3dEntity();
-		LIBCMO_DISABLE_COPY_MOVE(CK3dEntity);
+		YYCC_DEL_CLS_COPY_MOVE(CK3dEntity);
 
 		virtual CK_CLASSID GetClassID(void) override { 
 			return CK_CLASSID::CKCID_3DENTITY; 
