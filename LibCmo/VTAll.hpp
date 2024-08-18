@@ -1,20 +1,29 @@
 #pragma once
 
-/*
-This file is provided for user of LibCmo.
-This file should not be included in LibCmo project inside.
-Use VTInternal.hpp for project internal including.
+/**
+ * \file
+ * This header file is exposed to end user.
+ * In end user program, user can only simply include this single header file
+ * to include all necessity about Virtools.
+ * This file is pretty like \c CKAll.h in original Virtools SDK.
+ * 
+ * This file should not be included in LibCmo project inside.
+ * If you want to have initialized LibCmo development environment within this project,
+ * please include VTInternal.hpp instead.
 */
 
+// Include internal header
 #include "VTInternal.hpp"
+
+// CK2 Misc
 #include "CK2/CKContext.hpp"
 #include "CK2/CKStateChunk.hpp"
 #include "CK2/CKFile.hpp"
 
-// Data handlers
+// CK2 Data handlers
 #include "CK2/DataHandlers/CKBitmapHandler.hpp"
 
-// Objects
+// CK2 Objects
 #include "CK2/ObjImpls/CKObject.hpp"
 #include "CK2/ObjImpls/CKSceneObject.hpp"
 #include "CK2/ObjImpls/CKBeObject.hpp"
@@ -26,7 +35,7 @@ Use VTInternal.hpp for project internal including.
 #include "CK2/ObjImpls/CKMaterial.hpp"
 #include "CK2/ObjImpls/CKMesh.hpp"
 
-// Managers
+// CK2 Managers
 #include "CK2/MgrImpls/CKBaseManager.hpp"
 #include "CK2/MgrImpls/CKObjectManager.hpp"
 #include "CK2/MgrImpls/CKPathManager.hpp"
