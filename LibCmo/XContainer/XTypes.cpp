@@ -41,7 +41,7 @@ namespace LibCmo::XContainer {
 		}
 
 		template<bool _Cond>
-		bool GeneralGetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got) {
+		static bool GeneralGetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got) {
 			CKDWORD counter = 0;
 			for (size_t i = 0; i < ba.size(); ++i) {
 				if (ba[i] == _Cond) {
@@ -82,11 +82,11 @@ namespace LibCmo::XContainer {
 	}
 
 	template<class _Ty>
-	constexpr bool GeneralXArrayCheck_TypeCheck() {
+	static constexpr bool GeneralXArrayCheck_TypeCheck() {
 		return std::is_same_v<_Ty, CK2::CK_ID> || std::is_same_v<_Ty, CK2::ObjImpls::CKObject*>;
 	}
 	template<class _Ty, bool _IsPre>
-	bool GeneralXArrayCheck_ItemCheck(const _Ty& item, CK2::CKContext* ctx) {
+	static bool GeneralXArrayCheck_ItemCheck(const _Ty& item, CK2::CKContext* ctx) {
 		static_assert(GeneralXArrayCheck_TypeCheck<_Ty>());
 		if (ctx == nullptr) return false;
 
