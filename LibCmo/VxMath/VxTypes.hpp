@@ -24,6 +24,11 @@ namespace LibCmo::VxMath {
 	class VxMemoryMappedFile;
 
 	// Misc
+
+	/**
+	 * @brief The representation of a Vector in 2 dimensions.
+	 * @see VxVector3
+	*/
 	struct VxVector2 {
 		CKFLOAT x, y;
 		VxVector2() : x(0.0f), y(0.0f) {}
@@ -86,6 +91,10 @@ namespace LibCmo::VxMath {
 		bool operator==(const VxVector2& rhs) const {
 			return (x == rhs.x && y == rhs.y);
 		}
+		auto operator<=>(const VxVector2& rhs) const {
+			if (auto cmp = x <=> rhs.x; cmp != 0) return cmp;
+			return y <=> rhs.y;
+		}
 		CKFLOAT SquaredLength() const {
 			return (x * x + y * y);
 		}
@@ -105,6 +114,9 @@ namespace LibCmo::VxMath {
 		}
 	};
 
+	/**
+	 * @brief The representation of a Vector in 3 dimensions
+	*/
 	struct VxVector3 {
 		CKFLOAT x, y, z;
 		VxVector3() : x(0.0f), y(0.0f), z(0.0f) {}
@@ -173,6 +185,11 @@ namespace LibCmo::VxMath {
 		bool operator==(const VxVector3& rhs) const {
 			return (x == rhs.x && y == rhs.y && z == rhs.z);
 		}
+		auto operator<=>(const VxVector3& rhs) const {
+			if (auto cmp = x <=> rhs.x; cmp != 0) return cmp;
+			if (auto cmp = y <=> rhs.y; cmp != 0) return cmp;
+			return z <=> rhs.z;
+		}
 		CKFLOAT SquaredLength() const {
 			return (x * x + y * y + z * z);
 		}
@@ -193,6 +210,13 @@ namespace LibCmo::VxMath {
 		}
 	};
 
+	/**
+	 * @brief The representation of a Vector of 4 elements (x, y, z, w)
+	 * @details
+	 * VxVector4 is used for 3D transformation when the w component is used for perspective information.
+	 * Most of the methods available for a VxVector3 are also implemented for the VxVector4.
+	 * @see VxVector3
+	*/
 	struct VxVector4 {
 		CKFLOAT x, y, z, w;
 		VxVector4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
@@ -267,6 +291,12 @@ namespace LibCmo::VxMath {
 		bool operator==(const VxVector4& rhs) const {
 			return (x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w);
 		}
+		auto operator<=>(const VxVector4& rhs) const {
+			if (auto cmp = x <=> rhs.x; cmp != 0) return cmp;
+			if (auto cmp = y <=> rhs.y; cmp != 0) return cmp;
+			if (auto cmp = z <=> rhs.z; cmp != 0) return cmp;
+			return w <=> rhs.w;
+		}
 		CKFLOAT SquaredLength() const {
 			return (x * x + y * y + z * z + w * w);
 		}
@@ -288,6 +318,15 @@ namespace LibCmo::VxMath {
 		}
 	};
 
+	/**
+	 * @brief The representation of a quaternion.
+	 * @details
+	 * A Quaternion is defined by 4 floats and is used to represents an orientation in space.
+	 * Its common usage is for interpolation between two orientations through the Slerp() method.
+	 * 
+	 * Quaternions can be converted to VxMatrix or Euler Angles.
+	 * @see VxMatrix, VxVector3
+	*/
 	struct VxQuaternion {
 		CKFLOAT x, y, z, w;
 		VxQuaternion() : x(0.0f), y(0.0f), z(0.0f), w(1.0f) {} // set your custom init.
@@ -314,8 +353,22 @@ namespace LibCmo::VxMath {
 		bool operator==(const VxQuaternion& rhs) const {
 			return (x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w);
 		}
+		auto operator<=>(const VxQuaternion& rhs) const {
+			if (auto cmp = x <=> rhs.x; cmp != 0) return cmp;
+			if (auto cmp = y <=> rhs.y; cmp != 0) return cmp;
+			if (auto cmp = z <=> rhs.z; cmp != 0) return cmp;
+			return w <=> rhs.w;
+		}
 	};
 
+	/**
+	 * @brief The representation of a color through 4 floats.
+	 * @details
+	 * Structure describing a color through 4 floats for each component Red, Green, Blue and Alpha.
+	 * And each factor should be clamped between \c 0.0f and \c 1.0f.
+	 * 
+	 * Most methods are used to construct a VxColor or to convert it to a 32 bit ARGB format.
+	*/
 	struct VxColor {
 		CKFLOAT r, g, b, a;
 		VxColor() : r(0.0f), g(0.0f), b(0.0f), a(1.0f) {} // set your custom init.
@@ -370,10 +423,24 @@ namespace LibCmo::VxMath {
 		bool operator==(const VxColor& rhs) const {
 			return (r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a);
 		}
+		auto operator<=>(const VxColor& rhs) const {
+			if (auto cmp = r <=> rhs.r; cmp != 0) return cmp;
+			if (auto cmp = g <=> rhs.g; cmp != 0) return cmp;
+			if (auto cmp = b <=> rhs.b; cmp != 0) return cmp;
+			return a <=> rhs.a;
+		}
 	};
 
+	/**
+	 * @brief The representation of 4x4 matrix.
+	 * @details
+	 * A 4x4 matrix is defined by 4x4 floats and is used to represents the transformation in space.
+	 * @see VxVector4, VxQuaternion
+	*/
 	struct VxMatrix {
+	private:
 		CKFLOAT m_Data[4][4];
+	public:
 		VxMatrix() : m_Data() { ResetToIdentity(); }
 		VxMatrix(CKFLOAT m[4][4]) : m_Data() { std::memcpy(m_Data, m, sizeof(m_Data)); }
 		YYCC_DEF_CLS_COPY_MOVE(VxMatrix);
@@ -394,38 +461,63 @@ namespace LibCmo::VxMath {
 		}
 	};
 
+	/**
+	 * @brief Structure for storage of strided data.
+	 * @tparam _Ty The data pointer type this class stored.
+	*/
 	template<class _Ty, std::enable_if_t<std::is_pointer_v<_Ty>, int> = 0>
 	class VxStridedData {
 	public:
+		/**
+		 * @brief Create a new viewer for strided data.
+		 * @param[in] ptr The pointer to first data. nullptr is allowed but not suggested.
+		 * @param[in] stride The stride between 2 adjacent data.
+		 * If you set stride to the size of underlying type of pointer,
+		 * this class will degenerate to the visitor of a plain data array.
+		*/
 		VxStridedData(_Ty ptr, CKDWORD stride) :
 			m_Ptr(reinterpret_cast<CKBYTE*>(ptr)),
 			m_Stride(stride) {}
 		~VxStridedData() {}
 
+		/**
+		 * @brief Visitr n-th data with given stride.
+		 * @param[in] idx N-th
+		 * @return The pointer to n-th data.
+		*/
 		_Ty operator[](size_t idx) {
 			return reinterpret_cast<_Ty>(m_Ptr + (m_Stride * idx));
 		}
 
 	private:
-		CKBYTE* m_Ptr;
-		CKDWORD m_Stride;
+		CKBYTE* m_Ptr; /**< The pointer to first data. */
+		CKDWORD m_Stride; /**< The stride between adjacent data. */
 	};
 
 	/**
-	 * VxImageDescEx describe the height, width,
-	 * and etc for image.
+	 * @brief The description of image.
+	 * @details
+	 * VxImageDescEx describe the height, width, and etc for image.
 	 * Also it hold a pointer to raw image data.
 	 * The image data must be 32bit ARGB8888 format.
 	 * Thus the size of Image must be 4 * Width * Height.
-	 * And the image buffer must is in B, G, R, A order because little endian.
+	 * And the image buffer must be in B, G, R, A order because little endian.
 	*/
 	class VxImageDescEx {
 	public:
-		static constexpr CKDWORD ColorFactorSize = 1u;
-		static constexpr CKDWORD PixelSize = ColorFactorSize * 4u;
+		static constexpr CKDWORD ColorFactorSize = 1u; /**< Single color factor (one of ARGB) occpied size in byte. */
+		static constexpr CKDWORD PixelSize = ColorFactorSize * 4u; /**< Single pixel occpied size in byte. */
 	public:
+		/**
+		 * @brief Create a blank (invalid) image.
+		*/
 		VxImageDescEx() :
 			m_Width(0), m_Height(0), m_Image(nullptr) {}
+		/**
+		 * @brief Create a image with given width and height.
+		 * @param[in] width The width of image.
+		 * @param[in] height The height of image.
+		*/
 		VxImageDescEx(CKDWORD width, CKDWORD height) :
 			m_Width(width), m_Height(height), m_Image(nullptr) {
 			CreateImage(width, height);
@@ -471,16 +563,37 @@ namespace LibCmo::VxMath {
 			FreeImage();
 		}
 
+		/**
+		 * @brief Create image with given width and height
+		 * @param[in] Width The width of image.
+		 * @param[in] Height The height of image.
+		 * @remarks
+		 * \li There is no initialization (fill with zero) for this new created image.
+		 * \li Old image will be free first before creating.
+		*/
 		void CreateImage(CKDWORD Width, CKDWORD Height) {
 			FreeImage();
 			m_Width = Width;
 			m_Height = Height;
 			m_Image = new CKBYTE[GetImageSize()];
 		}
-		void CreateImage(CKDWORD Width, CKDWORD Height, void* dataptr) {
+		/**
+		 * @brief Create image with given width, height and data.
+		 * @param[in] Width The width of image.
+		 * @param[in] Height The height of image.
+		 * @param[in] dataptr The pointer to image data.
+		 * @warning
+		 * If the data length pointed by given image pointer is shorter than this image occupied,
+		 * an undefined behavior is raised.
+		 * @remarks Old image will be free first before creating.
+		*/
+		void CreateImage(CKDWORD Width, CKDWORD Height, const void* dataptr) {
 			CreateImage(Width, Height);
 			std::memcpy(m_Image, dataptr, GetImageSize());
 		}
+		/**
+		 * @brief Free current image. Reset this to invalid status.
+		*/
 		void FreeImage() {
 			m_Width = 0;
 			m_Height = 0;
@@ -490,40 +603,75 @@ namespace LibCmo::VxMath {
 			}
 		}
 
+		/**
+		 * @brief Get the allocated memory size of image.
+		 * @return The allocated memory size of image.
+		 * Basically it is image width * height * (single pixel size).
+		*/
 		CKDWORD GetImageSize() const {
 			return static_cast<CKDWORD>(PixelSize * m_Width * m_Height);
 		}
+		/**
+		 * @brief Get a constant pointer to image in memory unit for viewing.
+		 * @return A constant pointer to image in memory unit.
+		*/
 		const CKBYTE* GetImage() const {
 			return m_Image;
 		}
+		/**
+		 * @brief Get a mutable pointer to image in memory unit for modifying.
+		 * @return A mutable pointer to image in memory uint.
+		*/
 		CKBYTE* GetMutableImage() {
 			return m_Image;
 		}
 
+		/**
+		 * @brief Get the full count of pixel in image.
+		 * @return The count of image. Basically it is image width * height.
+		*/
 		CKDWORD GetPixelCount() const {
 			return static_cast<CKDWORD>(m_Width * m_Height);
 		}
+		/**
+		 * @brief Get a constant pointer to image in pixel unit for viewing.
+		 * @return A constant pointer to image in pixel unit.
+		*/
 		const CKDWORD* GetPixels() const {
 			return reinterpret_cast<CKDWORD*>(m_Image);
 		}
+		/**
+		 * @brief Get a mutable pointer to image in pixel uint for modifying.
+		 * @return A mutable pointer to image in pixel uint.
+		*/
 		CKDWORD* GetMutablePixels() {
 			return reinterpret_cast<CKDWORD*>(m_Image);
 		}
 
-		CKDWORD GetWidth() const {
-			return m_Width;
-		}
-		CKDWORD GetHeight() const {
-			return m_Height;
-		}
+		/**
+		 * @brief Get the width of this image in pixel.
+		 * @return The width of this image in pixel.
+		*/
+		CKDWORD GetWidth() const { return m_Width; }
+		/**
+		 * @brief Get the height of this image in pixel.
+		 * @return The height of this image in pixel.
+		*/
+		CKDWORD GetHeight() const { return m_Height; }
 
+		/**
+		 * @brief Check whether this image is valid image for using.
+		 * @details If one of width and height is zero, or underlying image pointer, this image is invalid.
+		 * @return True if it is, otherwise false.
+		*/
 		bool IsValid() const {
-			return (
-				m_Width != 0u &&
-				m_Height != 0u &&
-				m_Image != nullptr
-				);
+			return (m_Width != 0u && m_Height != 0u && m_Image != nullptr);
 		}
+		/**
+		 * @brief Check whether the width and height of this image are equal to another image.
+		 * @param[in] rhs Another image for comparing.
+		 * @return True if their width and height are equal, otherwise false.
+		*/
 		bool IsHWEqual(const VxImageDescEx& rhs) const {
 			return (m_Width == rhs.m_Width && m_Height == rhs.m_Height);
 		}
@@ -545,7 +693,7 @@ namespace LibCmo::VxMath {
 	protected:
 		CKDWORD m_Width; /**< Width in pixel of the image */
 		CKDWORD m_Height; /**< Height in pixel of the image */
-		CKBYTE* m_Image; /**< A pointer point to current processing image */
+		CKBYTE* m_Image; /**< A pointer points to current image in memory */
 	};
 
 }

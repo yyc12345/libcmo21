@@ -128,6 +128,7 @@ struct {sname} {{
 {GetTmplOperMul(sname, svars)}
 {GetTmplOperDiv(sname, svars)}
 {GetTmplOperEqual(sname, svars)}
+{GetTmplOperSpaceship(sname, svars)}
 {GetTmplLength(sname, svars)}
 {GetTmplNormalize(sname, svars)}
 }};
@@ -142,6 +143,7 @@ struct {sname} {{
 \tYYCC_DEF_CLS_COPY_MOVE({sname});
 {GetTmplOperOffset(sname, svars)}
 {GetTmplOperEqual(sname, svars)}
+{GetTmplOperSpaceship(sname, svars)}
 }};
 """
 
