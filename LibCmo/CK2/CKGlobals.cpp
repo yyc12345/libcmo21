@@ -23,41 +23,56 @@
 
 namespace LibCmo::CK2 {
 
-#pragma region Compression utilities
+#pragma region Compression Utilities
 
 	void* CKPackData(const void* Data, CKDWORD size, CKDWORD& NewSize, CKINT compressionlevel) {
-		uLong boundary = compressBound(static_cast<uLong>(size));
-		CKBYTE* DestBuffer = new CKBYTE[boundary];
+		// check argument
+		if (Data == nullptr && size != 0u)
+			throw LogicException("Data passed in CKPackData should not be nullptr.");
 
+		// get boundary and allocate buffer.
+		uLong boundary = compressBound(static_cast<uLong>(size));
+		std::unique_ptr<CKBYTE[]> DestBuffer(new CKBYTE[boundary]);
+
+		// do compress
 		uLongf _destLen = static_cast<uLongf>(boundary);
 		if (compress2(
-			reinterpret_cast<Bytef*>(DestBuffer), &_destLen,
+			reinterpret_cast<Bytef*>(DestBuffer.get()), &_destLen,
 			static_cast<const Bytef*>(Data), static_cast<uLong>(size),
 			static_cast<int>(compressionlevel)) != Z_OK) {
-			NewSize = 0;
-			delete[] DestBuffer;
+			// failed
+			NewSize = 0u;
 			return nullptr;
 		}
 
 		NewSize = static_cast<CKDWORD>(_destLen);
-		return DestBuffer;
+		return DestBuffer.release();
 	}
 
 	void* CKUnPackData(CKDWORD DestSize, const void* SrcBuffer, CKDWORD SrcSize) {
-		CKBYTE* DestBuffer = new CKBYTE[DestSize];
+		// check argument
+		if (SrcBuffer == nullptr && SrcSize != 0u)
+			throw LogicException("Data passed in CKUnPackData should not be nullptr.");
+
+		// allocate buffer
+		std::unique_ptr<CKBYTE[]> DestBuffer(new CKBYTE[DestSize]);
 
 		uLongf cache = DestSize;
 		if (uncompress(
-			reinterpret_cast<Bytef*>(DestBuffer), &cache,
+			reinterpret_cast<Bytef*>(DestBuffer.get()), &cache,
 			static_cast<const Bytef*>(SrcBuffer), static_cast<uLong>(SrcSize)) != Z_OK) {
-			delete[] DestBuffer;
 			return nullptr;
 		}
 
-		return DestBuffer;
+		return DestBuffer.release();
 	}
 
 	CKDWORD CKComputeDataCRC(const void* data, CKDWORD size, CKDWORD PreviousCRC) {
+		// check argument
+		if (data == nullptr && size != 0u)
+			throw LogicException("Data passed in CKComputeDataCRC should not be nullptr.");
+
+		// compute
 		return static_cast<CKDWORD>(adler32(
 			static_cast<uLong>(PreviousCRC),
 			static_cast<const Bytef*>(data),
@@ -69,40 +84,37 @@ namespace LibCmo::CK2 {
 
 #pragma region String Utilities 
 
-	bool CKStrEqual(CKSTRING str1, CKSTRING str2) {
+	template<bool bCaseSenstive>
+	static bool InternalStrEqual(CKSTRING str1, CKSTRING str2) {
 		if (str1 == nullptr) {
 			if (str2 == nullptr) return true;
 			else return false;
 		} else {
 			if (str2 == nullptr) return false;
 			else {
-				return std::strcmp(
-					YYCC::EncodingHelper::ToOrdinary(str1),
-					YYCC::EncodingHelper::ToOrdinary(str2)
-				) == 0;
-			}
-		}
-	}
-
-	bool CKStrEqualI(CKSTRING str1, CKSTRING str2) {
-		if (str1 == nullptr) {
-			if (str2 == nullptr) return true;
-			else return false;
-		} else {
-			if (str2 == nullptr) return false;
-			else {
-				// do real cmp
-				size_t i = 0;
-				while (str1[i] != u8'\0' && str2[i] != u8'\0') {
-					if (std::tolower(str1[i]) != std::tolower(str2[i])) return false;
+				// do real compare
+				while (*str1 != u8'\0' && *str2 != u8'\0') {
+					// compare char
+					if constexpr (bCaseSenstive) {
+						if (*str1 != *str2) return false;
+					} else {
+						if (std::tolower(*str1) != std::tolower(*str2)) return false;
+					}
+					// inc step
 					++str1;
 					++str2;
 				}
 
-				// !XOR the result, if both of them is zero, return true(1)
-				return !((str1[i] != u8'\0') ^ (str2[i] != u8'\0'));
+				// if both of them is zero, return true, otherwise false.
+				return *str1 == u8'\0' && *str2 == u8'\0';
 			}
 		}
+	}
+	bool CKStrEqual(CKSTRING str1, CKSTRING str2) {
+		InternalStrEqual<true>(str1, str2);
+	}
+	bool CKStrEqualI(CKSTRING str1, CKSTRING str2) {
+		InternalStrEqual<false>(str1, str2);
 	}
 
 	bool CKStrEmpty(CKSTRING strl) {
@@ -125,7 +137,8 @@ namespace LibCmo::CK2 {
 
 	void CKClassNeedNotificationFrom(CK_CLASSID listener, CK_CLASSID listenTo) {
 		size_t idxListener, idxListenTo;
-		if (!GetClassIdIndex(listener, idxListener) || !GetClassIdIndex(listenTo, idxListenTo)) return;
+		if (!GetClassIdIndex(listener, idxListener) || !GetClassIdIndex(listenTo, idxListenTo))
+			throw LogicException("Invalid CK_CLASSID in argument.");
 
 		XContainer::NSXBitArray::Set(g_CKClassInfo[idxListener].ToBeNotify, static_cast<CKDWORD>(idxListenTo));
 	}
@@ -170,25 +183,25 @@ namespace LibCmo::CK2 {
 
 	const CKClassDesc* CKGetClassDesc(CK_CLASSID cid) {
 		size_t intcid;
-		if (!GetClassIdIndex(cid, intcid)) return nullptr;
+		if (!GetClassIdIndex(cid, intcid))
+			throw LogicException("Invalid CK_CLASSID.");
 		return &g_CKClassInfo[intcid];
 	}
 
 	CKSTRING CKClassIDToString(CK_CLASSID cid) {
 		const CKClassDesc* desc = CKGetClassDesc(cid);
-		if (desc == nullptr) return u8"Undefined Type";
-		else return desc->NameFct();
+		return desc->NameFct();
 	}
 
 	bool CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent) {
 		size_t intchild, intparent;
-		if (!GetClassIdIndex(child, intchild) || !GetClassIdIndex(parent, intparent)) return false;
+		if (!GetClassIdIndex(child, intchild) || !GetClassIdIndex(parent, intparent))
+			throw LogicException("Invalid CK_CLASSID.");
 		return g_CKClassInfo[intchild].Parents[intparent];
 	}
 
 	CK_CLASSID CKGetParentClassID(CK_CLASSID child) {
 		const CKClassDesc* desc = CKGetClassDesc(child);
-		if (desc == nullptr) return CK_CLASSID::CKCID_OBJECT;
 		return desc->Parent;
 	}
 
@@ -207,7 +220,6 @@ namespace LibCmo::CK2 {
 
 	bool CKIsNeedNotify(CK_CLASSID listener, CK_CLASSID deletedObjCid) {
 		const CKClassDesc* desc = CKGetClassDesc(listener);
-		if (desc == nullptr) return false;
 		return XContainer::NSXBitArray::IsSet(desc->CommonToBeNotify, static_cast<CKDWORD>(deletedObjCid));
 	}
 
@@ -218,8 +230,6 @@ namespace LibCmo::CK2 {
 			if (!XContainer::NSXBitArray::IsSet(delObjCids, static_cast<CKDWORD>(i))) continue;
 
 			const CKClassDesc* desc = CKGetClassDesc(static_cast<CK_CLASSID>(i));
-			if (desc == nullptr) continue;
-
 			XContainer::NSXBitArray::Or(result, desc->ToNotify);
 		}
 
@@ -236,7 +246,7 @@ namespace LibCmo::CK2 {
 	This relation is represented in ToBeNotify, a pure relation without any inhertance hierarchy.
 
 	Ok, now we assume A have children AA, B also have children BB.
-	Because B is a businessman, so his children BB also is a bussinessman.
+	Because B is a businessman, so his children BB also is a businessman.
 	B and BB have the same goods so A can buy his stuff from both of B and BB.
 	This is the first step executed by ComputeParentsNotifyTable().
 	In this step, the function expand existing business relations to all possible business relations (expand to businessman's children)
@@ -429,7 +439,7 @@ CKClassRegister(cid, parentCid, \
 	}
 
 	CKERROR CKShutdown() {
-		// free class indo
+		// free class infos
 		g_CKClassInfo.clear();
 
 		return CKERROR::CKERR_OK;

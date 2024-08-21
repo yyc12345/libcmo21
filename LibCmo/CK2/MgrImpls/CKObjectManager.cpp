@@ -20,7 +20,6 @@ namespace LibCmo::CK2::MgrImpls {
 
 		// get description first
 		const CKClassDesc* desc = CKGetClassDesc(cls);
-		if (desc == nullptr) return nullptr;
 
 		// allocate a CK_ID first
 		CKDWORD decided_off;
@@ -60,12 +59,7 @@ namespace LibCmo::CK2::MgrImpls {
 
 	void CKObjectManager::InternalDestroy(ObjImpls::CKObject* obj) {
 		// find desc by classid
-		// if really we can not find it, we only can delete it directly.
 		const CKClassDesc* desc = CKGetClassDesc(obj->GetClassID());
-		if (desc == nullptr) {
-			delete obj;
-			return;
-		}
 
 		// free it
 		desc->ReleaseFct(m_Context, obj);

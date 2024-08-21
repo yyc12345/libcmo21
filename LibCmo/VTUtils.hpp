@@ -97,7 +97,7 @@ namespace LibCmo {
 		/**
 		 * @brief Reverse given enum flags like performing <TT>~(e)</TT>
 		 * @tparam TEnum Enum type for processing.
-		 * @param[in] il The list of enum flags to be inversed.
+		 * @param[in] e The list of enum flags to be inversed.
 		 * @return The inversed enum flag.
 		*/
 		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>

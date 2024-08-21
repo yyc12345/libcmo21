@@ -50,7 +50,7 @@ namespace LibCmo::CK2 {
 	/**
 	 * @brief The identifier of Virtools file.
 	*/
-	constexpr const CKCHAR CKNEMOFI[] = "Nemo Fi";
+	constexpr const CKCHAR CKNEMOFI[] = u8"Nemo Fi";
 	/**
 	 * @brief Current Version of CK Engine (Day/Month/Year)
 	*/

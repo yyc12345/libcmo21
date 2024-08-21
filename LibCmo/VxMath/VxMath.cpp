@@ -11,7 +11,8 @@ namespace LibCmo::VxMath {
 	}
 
 	void VxCopyStructure(CKDWORD Count, void* Dst, CKDWORD OutStride, CKDWORD SizeSrc, const void* Src, CKDWORD InStride) {
-		if (Dst == nullptr || Src == nullptr) return;
+		if ((Dst == nullptr || Src == nullptr) && Count != 0u)
+			throw LogicException("Source or destination buffer should not be nullptr.");
 
 		CKBYTE* cdst = static_cast<CKBYTE*>(Dst);
 		const CKBYTE* csrc = static_cast<const CKBYTE*>(Src);
@@ -27,8 +28,10 @@ namespace LibCmo::VxMath {
 #pragma region Graphic Utilities
 
 	void VxDoBlit(const VxImageDescEx* origin, VxImageDescEx* dst) {
-		if (dst == nullptr || origin == nullptr) return;
-		if (!dst->IsValid() || !origin->IsValid()) return;
+		if (dst == nullptr || origin == nullptr)
+			throw LogicException("VxImageDescEx* should not be nullptr.");
+		if (!dst->IsValid() || !origin->IsValid())
+			throw LogicException("VxImageDescEx* should not be invalid.");
 
 		// if have same size, directly copy it
 		if (dst->IsHWEqual(*origin)) {
@@ -48,8 +51,10 @@ namespace LibCmo::VxMath {
 	}
 
 	void VxDoBlitUpsideDown(const VxImageDescEx* origin, VxImageDescEx* dst) {
-		if (dst == nullptr || origin == nullptr) return;
-		if (!dst->IsValid() || !origin->IsValid()) return;
+		if (dst == nullptr || origin == nullptr)
+			throw LogicException("VxImageDescEx* should not be nullptr.");
+		if (!dst->IsValid() || !origin->IsValid())
+			throw LogicException("VxImageDescEx* should not be invalid.");
 
 		// if size is not matched, return
 		if (!dst->IsHWEqual(*origin)) {
@@ -99,7 +104,8 @@ namespace LibCmo::VxMath {
 	//}
 
 	void VxDoAlphaBlit(VxImageDescEx* dst_desc, CKBYTE AlphaValue) {
-		if (dst_desc == nullptr) return;
+		if (dst_desc == nullptr || !dst_desc->IsValid())
+			throw LogicException("VxImageDescEx* should not be nullptr or invalid.");
 
 		CKDWORD* pixels = dst_desc->GetMutablePixels();
 		CKDWORD pixelcount = dst_desc->GetPixelCount();
@@ -111,7 +117,10 @@ namespace LibCmo::VxMath {
 	}
 
 	void VxDoAlphaBlit(VxImageDescEx* dst_desc, const CKBYTE* AlphaValues) {
-		if (dst_desc == nullptr) return;
+		if (dst_desc == nullptr || !dst_desc->IsValid() || AlphaValues == nullptr)
+			throw LogicException("VxImageDescEx* should not be nullptr or invalid.");
+		if (AlphaValues == nullptr)
+			throw LogicException("Alpha channel buffer should not be nullptr.");
 		
 		CKDWORD* pixels = dst_desc->GetMutablePixels();
 		CKDWORD pixelcount = dst_desc->GetPixelCount();
