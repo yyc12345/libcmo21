@@ -4,29 +4,34 @@
 namespace LibCmo::VxMath {
 
 	VxMemoryMappedFile::VxMemoryMappedFile(CKSTRING u8_filepath) :
-		// init members
+		// Initialize members
 #if YYCC_OS == YYCC_OS_WINDOWS
+		// Initialize Windows specific.
 		m_hFile(NULL), m_hFileMapping(NULL), m_hFileMapView(NULL),
-		m_dwFileSizeLow(0), m_dwFileSizeHigh(0),
+		m_dwFileSize(),
 #else
+		// Initialize Linux specific.
 		m_hFile(-1), m_offFileSize(0), m_pFileAddr((void*)-1),
 #endif
+		// Initialize common members.
 		m_szFilePath(),
 		m_bIsValid(false), m_pMemoryMappedFileBase(nullptr), m_cbFile(0u) {
 
-		// save file path
-#if YYCC_OS == YYCC_OS_WINDOWS
-		EncodingHelper::U8PathToStdPath(m_szFilePath, u8_filepath);
-#else
-		this->m_szFilePath = u8_filepath;
-#endif
+		// Setup file path first
+		if (u8_filepath == nullptr) return;
+		m_szFilePath = u8_filepath;
 
-		// real mapping work
+		// Do real mapping work according to different platform.
 #if YYCC_OS == YYCC_OS_WINDOWS
 
-		// open file
-		this->m_hFile = CreateFileW(
-			this->m_szFilePath.wstring().c_str(),
+		// Parse file name to wchar_t
+		std::wstring w_filename;
+		if (!YYCC::EncodingHelper::UTF8ToWchar(m_szFilePath, w_filename))
+			return;
+
+		// Open file
+		this->m_hFile = ::CreateFileW(
+			w_filename.c_str(),
 			GENERIC_READ,
 			0,	// do not share
 			NULL,	// no security
@@ -38,14 +43,18 @@ namespace LibCmo::VxMath {
 			return;
 		}
 
-		// get size
-		m_dwFileSizeLow = ::GetFileSize(this->m_hFile, &this->m_dwFileSizeHigh);
-		if (m_dwFileSizeLow == INVALID_FILE_SIZE) {
+		// Get size and check its range.
+		if (!(::GetFileSizeEx(this->m_hFile, &m_dwFileSize))) {
 			CloseHandle(this->m_hFile);
 			return;
 		}
+		if (m_dwFileSize.HighPart != 0) {
+			CloseHandle(this->m_hFile);
+			return;
+		}
+		m_cbFile = m_dwFileSize.LowPart;
 
-		// open mapping
+		// Open mapping
 		this->m_hFileMapping = CreateFileMappingW(
 			this->m_hFile,
 			NULL,	// default security
@@ -58,7 +67,7 @@ namespace LibCmo::VxMath {
 			return;
 		}
 
-		// open map view
+		// Open map view
 		this->m_hFileMapView = MapViewOfFile(
 			this->m_hFileMapping,
 			FILE_MAP_READ,
@@ -69,16 +78,14 @@ namespace LibCmo::VxMath {
 			CloseHandle(m_hFileMapping);
 			CloseHandle(m_hFile);
 		}
-
-		// write member data
+		// Set base address
 		m_pMemoryMappedFileBase = m_hFileMapView;
-		m_cbFile = static_cast<size_t>(static_cast<uint64_t>(m_dwFileSizeLow) | (static_cast<uint64_t>(m_dwFileSizeHigh) << 32));
-
+		
 #else
 		// create file
 		// we do not need provide mode_t, because is served for new created file.
 		// we are opening a existed file.
-		this->m_hFile = open(m_szFilePath.string().c_str(), O_RDONLY);
+		this->m_hFile = open(YYCC::EncodingHelper::ToOrdinary(m_szFilePath.c_str()), O_RDONLY);
 		if (m_hFile == -1) {
 			return;
 		}
@@ -91,8 +98,13 @@ namespace LibCmo::VxMath {
 			close(m_hFile);
 			return;
 		}
-		// setup size
+		// Setup size and check its range
 		this->m_offFileSize = sb.st_size;
+		if (this->m_offFileSize > static_cast<off_t>(std::numeric_limits<CKDWORD>::max())) {
+			close(m_hFile);
+			return;
+		}
+		m_cbFile = static_cast<CKDWORD>(this->m_offFileSize);
 
 		// map file
 		this->m_pFileAddr = mmap(
@@ -107,10 +119,9 @@ namespace LibCmo::VxMath {
 			close(m_hFile);
 			return;
 		}
-
-		// write member data
+		// set base address
 		m_pMemoryMappedFileBase = m_pFileAddr;
-		m_cbFile = static_cast<size_t>(this->m_offFileSize);
+		
 #endif
 
 		// set valid
@@ -135,5 +146,20 @@ namespace LibCmo::VxMath {
 		}
 	}
 
+	const void* VxMemoryMappedFile::GetBase() const {
+		if (!this->IsValid())
+			throw RuntimeException("Try to get file base address on an invalid VxMemoryMappedFile");
+		return this->m_pMemoryMappedFileBase;
+	}
+
+	CKDWORD VxMemoryMappedFile::GetFileSize() const {
+		if (!this->IsValid())
+			throw RuntimeException("Try to get file size on an invalid VxMemoryMappedFile");
+		return this->m_cbFile;
+	}
+
+	bool VxMemoryMappedFile::IsValid() const {
+		return this->m_bIsValid;
+	}
 
 }

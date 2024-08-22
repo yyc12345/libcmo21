@@ -82,6 +82,14 @@ namespace LibCmo::CK2 {
 	 * @remarks nullptr string is seen as empty string.
 	*/
 	bool CKStrEmpty(CKSTRING strl);
+	/**
+	 * @brief Get the length of given string.
+	 * @param[in] strl String for getting length. nullptr is allowed but not suggested.
+	 * @return String length in UTF8 code unit.
+	 * @remarks nullptr string will return 0 instead.
+	 * @exception RuntimeException Raised if the length of string exceed the maximum value of CKDWORD.
+	*/
+	CKDWORD CKStrLen(CKSTRING strl);
 
 	// ========== Class registration utilities ==========
 

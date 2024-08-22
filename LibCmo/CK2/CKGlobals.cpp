@@ -122,6 +122,14 @@ namespace LibCmo::CK2 {
 		return strl[0] == u8'\0';
 	}
 
+	CKDWORD CKStrLen(CKSTRING strl) {
+		if (strl == nullptr) return 0u;
+		size_t len = std::strlen(YYCC::EncodingHelper::ToOrdinary(strl));
+		if (len > static_cast<size_t>(std::numeric_limits<CKDWORD>::max()))
+			throw RuntimeException("Exceed maximum value when cast size_t to CKDWORD.");
+		return static_cast<CKDWORD>(len);
+	}
+
 #pragma endregion
 
 #pragma region CKClass Registration

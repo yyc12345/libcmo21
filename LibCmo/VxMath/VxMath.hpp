@@ -97,15 +97,51 @@ namespace LibCmo::VxMath {
 
 
 	// ========== Patch Section ==========
-
+	
+	/**
+	 * @brief The patch namespace for VxVector-like classes
+	 * @details This namespace provides VxVector-like classes member functions which presented in original Virtools SDK.
+	 * These functions are put in public namespace in original Virtools SDK.
+	 * We just organise them into an unique namespace.
+	*/
 	namespace NSVxVector {
 
+		/**
+		 * @brief Dot product 2 2d vectors.
+		 * @param[in] lhs The left side vector of dot product symbol.
+		 * @param[in] rhs The right side vector of dot product symbol.
+		 * @return The float pointing result of dot product.
+		*/
 		CKFLOAT DotProduct(const VxVector2& lhs, const VxVector2& rhs);
+		/**
+		 * @brief Dot product 2 3d vectors.
+		 * @param[in] lhs The left side vector of dot product symbol.
+		 * @param[in] rhs The right side vector of dot product symbol.
+		 * @return The float pointing result of dot product.
+		*/
 		CKFLOAT DotProduct(const VxVector3& lhs, const VxVector3& rhs);
+		/**
+		 * @brief Dot product 2 4d vectors.
+		 * @param[in] lhs The left side vector of dot product symbol.
+		 * @param[in] rhs The right side vector of dot product symbol.
+		 * @return The float pointing result of dot product.
+		*/
 		CKFLOAT DotProduct(const VxVector4& lhs, const VxVector4& rhs);
 
+		/**
+		 * @brief Cross product 2 3d vectors.
+		 * @param[in] lhs The left side vector of cross product symbol.
+		 * @param[in] rhs The right side vector of cross product symbol.
+		 * @return The 3d vector result of cross product.
+		*/
 		VxVector3 CrossProduct(const VxVector3& lhs, const VxVector3& rhs);
 		
+		/**
+		 * @brief Set all factor in vector to its absolute value.
+		 * @param[in,out] lhs The vector for processing.
+		 * @remarks This function is rarely used.
+		 * Please note this function is not calculate the absolute value of vector.
+		*/
 		void Abs(VxVector3& lhs);
 
 	}
