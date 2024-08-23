@@ -135,7 +135,7 @@ namespace LibCmo::CK2::DataHandlers {
 
 	static bool StbReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) {
 		if (u8filename == nullptr || read_image == nullptr) return false;
-		FILE* fs = EncodingHelper::U8FOpen(u8filename, "rb");
+		FILE* fs = YYCC::IOHelper::UTF8FOpen(u8filename, u8"rb");
 		if (fs == nullptr) return false;
 
 		// read data
@@ -210,7 +210,7 @@ namespace LibCmo::CK2::DataHandlers {
 	static bool StbSaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, bool save_alpha, SaveOperation oper) {
 		if (u8filename == nullptr || write_image == nullptr) return false;
 		if (!write_image->IsValid()) return false;
-		FILE* fs = EncodingHelper::U8FOpen(u8filename, "wb");
+		FILE* fs = YYCC::IOHelper::UTF8FOpen(u8filename, u8"wb");
 		if (fs == nullptr) return false;
 
 		// allocate buffer and convert data from ARGB to RGBA or RGB
@@ -285,7 +285,7 @@ namespace LibCmo::CK2::DataHandlers {
 
 #pragma region CKBitmapBMPHandler
 
-	static const CKBitmapProperties g_BMPProperties(CKGUID(0xBCA97223u, 0x48578BCAu), "Bmp");
+	static const CKBitmapProperties g_BMPProperties(CKGUID(0xBCA97223u, 0x48578BCAu), u8"Bmp");
 
 	CKBitmapBMPHandler::CKBitmapBMPHandler() :
 		CKBitmapHandler() {}
@@ -330,7 +330,7 @@ namespace LibCmo::CK2::DataHandlers {
 
 #pragma region CKBitmapTGAHandler
 
-	static const CKBitmapProperties g_TGAProperties(CKGUID(0x585C7216u, 0x33302657u), "Tga");
+	static const CKBitmapProperties g_TGAProperties(CKGUID(0x585C7216u, 0x33302657u), u8"Tga");
 
 	CKBitmapTGAHandler::CKBitmapTGAHandler() :
 		CKBitmapHandler() {}
@@ -372,7 +372,7 @@ namespace LibCmo::CK2::DataHandlers {
 #pragma region CKBitmapJPGHandler
 
 	// MARK: this GUID is gotten from Virtools 3.5 Plugins.
-	static const CKBitmapProperties g_JPGProperties(CKGUID(0x4AE51AC4u, 0x04587D76u), "jpg");
+	static const CKBitmapProperties g_JPGProperties(CKGUID(0x4AE51AC4u, 0x04587D76u), u8"jpg");
 	// MARK: this quality is gotten from default value of virtools.
 	constexpr int g_JPGDefaultQuality = 75;
 
@@ -416,7 +416,7 @@ namespace LibCmo::CK2::DataHandlers {
 #pragma region CKBitmapPNGHandler
 
 	// MARK: this GUID is gotten from Virtools 3.5 Plugins.
-	static const CKBitmapProperties g_PNGProperties(CKGUID(0x02D45C7Bu, 0x4AAC16ECu), "png");
+	static const CKBitmapProperties g_PNGProperties(CKGUID(0x02D45C7Bu, 0x4AAC16ECu), u8"png");
 	// MARK: this is compress level gotten from default value of virtools.
 	constexpr int g_PNGDefaultCompressLevel = 3;
 	

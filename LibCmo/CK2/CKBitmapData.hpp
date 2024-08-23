@@ -60,48 +60,48 @@ namespace LibCmo::CK2 {
 
 		/**
 		 * @brief Create a black image with full alpha in specified slot.
-		 * @param Width[in] Image width
-		 * @param Height[in] Image height
-		 * @param Slot[in] The slot placing image.
+		 * @param[in] Width Image width
+		 * @param[in] Height Image height
+		 * @param[in] Slot The slot placing image.
 		 * @return True if creating success.
 		*/
 		bool CreateImage(CKDWORD Width, CKDWORD Height, CKDWORD Slot);
 		/**
 		 * @brief Load image into specified slot.
-		 * @param filename[in] The file name of loading image.
-		 * @param slot[in] The slot placing loaded image.
+		 * @param[in] filename The file name of loading image.
+		 * @param[in] slot The slot placing loaded image.
 		 * @return True if load successfully.
 		*/
 		bool LoadImage(CKSTRING filename, CKDWORD slot);
 		/**
 		 * @brief Save image for specified slot.
-		 * @param filename[in] The file name of saving image.
-		 * @param slot[in] The slot will be saved.
-		 * @param isForceThisFmt[in] True to use this class specified format to save image. Otherwise use the format evaluated by the image file name.
+		 * @param[in] filename The file name of saving image.
+		 * @param[in] slot The slot will be saved.
+		 * @param[in] isForceThisFmt True to use this class specified format to save image. Otherwise use the format evaluated by the image file name.
 		 * @return True if success.
 		*/
 		bool SaveImage(CKSTRING filename, CKDWORD slot, bool isForceThisFmt = false);
 		/**
 		 * @brief Get specified slot image descriptor.
-		 * @param slot[in] The slot to get.
+		 * @param[in] slot The slot to get.
 		 * @return The descriptor. nullptr if failed.
 		*/
 		VxMath::VxImageDescEx* GetImageDesc(CKDWORD slot);
 		/**
 		 * @brief Release specified slot image.
-		 * @param slot[in] The slot to free.
+		 * @param[in] slot The slot to free.
 		*/
 		void ReleaseImage(CKDWORD slot);
 
 		/**
 		 * @brief Set associated file name for specified slot.
-		 * @param slot[in] The slot to set.
-		 * @param filename[in] The associated file name.
+		 * @param[in] slot The slot to set.
+		 * @param[in] filename The associated file name.
 		*/
 		bool SetSlotFileName(CKDWORD slot, CKSTRING filename);
 		/**
 		 * @brief Get associated file name for specified slot.
-		 * @param slot[in] The slot to get.
+		 * @param[in] slot The slot to get.
 		 * @return The file name. nullptr if failed.
 		*/
 		CKSTRING GetSlotFileName(CKDWORD slot) const;
@@ -132,7 +132,7 @@ namespace LibCmo::CK2 {
 		void SetSaveOptions(CK_TEXTURE_SAVEOPTIONS opts);
 		/**
 		@brief Enables or disables the color key transparency.
-		@param Transparency[in] TRUE activates transparency, FALSE disables it.
+		@param[in] Transparency TRUE activates transparency, FALSE disables it.
 		@remark
 			+ 0x00000000 (black) is the default transparent color.
 			+ Setting on the transparency and a transparent color automatically 
@@ -149,7 +149,7 @@ namespace LibCmo::CK2 {
 		bool IsTransparent() const;
 		/**
 		@brief Sets the transparent color.
-		@param Color[in] A 32 bit ARGB transparent color.
+		@param[in] Color A 32 bit ARGB transparent color.
 		@remark
 		+ 0x00000000 (black) is the default transparent color.
 		+ Setting on the transparency and a transparent color automatically 
@@ -168,7 +168,7 @@ namespace LibCmo::CK2 {
 		CKDWORD GetTransparentColor() const;
 		/**
 		@brief Sets pick threshold value.
-		@param pt[in] Pick threshold value to be set.
+		@param[in] pt Pick threshold value to be set.
 		@remark
 			+ The pick threshold is used when picking object with 
 			transparent textures.

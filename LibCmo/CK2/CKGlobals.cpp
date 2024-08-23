@@ -111,10 +111,10 @@ namespace LibCmo::CK2 {
 		}
 	}
 	bool CKStrEqual(CKSTRING str1, CKSTRING str2) {
-		InternalStrEqual<true>(str1, str2);
+		return InternalStrEqual<true>(str1, str2);
 	}
 	bool CKStrEqualI(CKSTRING str1, CKSTRING str2) {
-		InternalStrEqual<false>(str1, str2);
+		return InternalStrEqual<false>(str1, str2);
 	}
 
 	bool CKStrEmpty(CKSTRING strl) {

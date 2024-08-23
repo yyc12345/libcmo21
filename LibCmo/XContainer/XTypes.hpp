@@ -18,6 +18,7 @@ namespace LibCmo::XContainer {
 	 * \li This class now is implemented by \c std::u8string.
 	*/
 	using XString = std::u8string;
+	using XOrdinaryString = std::string;
 
 	/**
 	 * @brief The representation of a set of bit flags (memory optimized to reduce occupied size).

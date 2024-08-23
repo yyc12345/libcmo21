@@ -23,7 +23,7 @@ namespace LibCmo::CK2 {
 		if (u8_filename == nullptr) return CKERROR::CKERR_INVALIDPARAMETER;
 		std::unique_ptr<VxMath::VxMemoryMappedFile> mappedFile(new VxMath::VxMemoryMappedFile(u8_filename));
 		if (!mappedFile->IsValid()) {
-			this->m_Ctx->OutputToConsoleEx("Fail to create Memory File for \"%s\".", u8_filename);
+			this->m_Ctx->OutputToConsoleEx(u8"Fail to create Memory File for \"%s\".", u8_filename);
 			return CKERROR::CKERR_INVALIDFILE;
 		}
 
@@ -42,7 +42,7 @@ namespace LibCmo::CK2 {
 		std::unique_ptr<CKBufferParser> parser(new CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
 		parser->SetCursor(ParserPtr->GetCursor());
 
-		XContainer::XString name_conv;
+		std::string name_conv;
 
 		// ========== read header ==========
 		// check header size
@@ -93,7 +93,7 @@ namespace LibCmo::CK2 {
 			gotten_crc = CKComputeDataCRC(parser->GetPtr(), this->m_FileInfo.DataPackSize, gotten_crc);
 
 			if (gotten_crc != this->m_FileInfo.Crc) {
-				this->m_Ctx->OutputToConsole("Virtools file CRC error.");
+				this->m_Ctx->OutputToConsole(u8"Virtools file CRC error.");
 				return CKERROR::CKERR_FILECRCERROR;
 			}
 
@@ -129,7 +129,7 @@ namespace LibCmo::CK2 {
 				if (namelen != 0) {
 					name_conv.resize(namelen);
 					parser->Read(name_conv.data(), namelen);
-					m_Ctx->GetUtf8String(name_conv, fileobj.Name);
+					m_Ctx->GetUTF8String(name_conv, fileobj.Name);
 				} else {
 					XContainer::NSXString::FromCKSTRING(fileobj.Name, nullptr);
 				}
@@ -197,7 +197,7 @@ namespace LibCmo::CK2 {
 		std::unique_ptr<CKBufferParser> parser(new CKBufferParser(ParserPtr->GetBase(), ParserPtr->GetSize(), false));
 		parser->SetCursor(ParserPtr->GetCursor());
 
-		XContainer::XString name_conv;
+		std::string name_conv;
 
 		// ========== compress feature process ==========
 		if (EnumsHelper::Has(this->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
@@ -219,7 +219,7 @@ namespace LibCmo::CK2 {
 				0u
 			);
 			if (gotten_crc != this->m_FileInfo.Crc) {
-				this->m_Ctx->OutputToConsole("Virtools file CRC error.");
+				this->m_Ctx->OutputToConsole(u8"Virtools file CRC error.");
 				return CKERROR::CKERR_FILECRCERROR;
 			}
 
@@ -307,7 +307,7 @@ namespace LibCmo::CK2 {
 				// read filename
 				if (filenamelen != 0) {
 					parser->Read(name_conv.data(), filenamelen);
-					m_Ctx->GetUtf8String(name_conv, file);
+					m_Ctx->GetUTF8String(name_conv, file);
 				}
 
 				// read file body length
@@ -316,12 +316,12 @@ namespace LibCmo::CK2 {
 
 				// read file body
 				XContainer::XString tempfilename = m_Ctx->GetPathManager()->GetTempFilePath(file.c_str());
-				FILE* fp = EncodingHelper::U8FOpen(tempfilename.c_str(), "wb");
+				FILE* fp = YYCC::IOHelper::UTF8FOpen(tempfilename.c_str(), u8"wb");
 				if (fp != nullptr) {
 					std::fwrite(parser->GetPtr(), sizeof(CKBYTE), filebodylen, fp);
 					std::fclose(fp);
 				} else {
-					m_Ctx->OutputToConsoleEx("Fail to open temp file: %s", tempfilename.c_str());
+					m_Ctx->OutputToConsoleEx(u8"Fail to open temp file: %s", tempfilename.c_str());
 				}
 
 				// move to next

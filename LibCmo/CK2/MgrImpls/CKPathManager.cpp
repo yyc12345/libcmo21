@@ -2,20 +2,16 @@
 
 namespace LibCmo::CK2::MgrImpls {
 
-#if YYCC_OS == YYCC_OS_WINDOWS
-	static wchar_t g_UniqueFolder[] = L"LibCmo";
-#else
-	static char g_UniqueFolder[] = "LibCmo";
-#endif
+	static constexpr char8_t g_UniqueFolder[] = u8"LibCmo";
 
 	CKPathManager::CKPathManager(CKContext* ctx) :
-		CKBaseManager(ctx, PATH_MANAGER_GUID, "Path Manager"),
+		CKBaseManager(ctx, PATH_MANAGER_GUID, u8"Path Manager"),
 		m_TempFolder(), m_ExtraPathes() {
 		// preset for temp folder
 		// todo: add current CKContext pointer as the part of temp path.
 		// thus multiple CKContext can work.
 		m_TempFolder = std::filesystem::temp_directory_path();
-		m_TempFolder /= g_UniqueFolder;
+		m_TempFolder /= std::filesystem::path(g_UniqueFolder);
 		std::filesystem::create_directories(m_TempFolder);
 
 	}
@@ -24,8 +20,7 @@ namespace LibCmo::CK2::MgrImpls {
 	bool CKPathManager::SetTempFolder(CKSTRING u8_temp) {
 		if (u8_temp == nullptr) return false;
 
-		std::filesystem::path cache;
-		EncodingHelper::U8PathToStdPath(cache, u8_temp);
+		std::filesystem::path cache(u8_temp);
 		if (std::filesystem::is_directory(cache)) {
 			m_TempFolder = cache;
 			return true;
@@ -35,28 +30,22 @@ namespace LibCmo::CK2::MgrImpls {
 	}
 
 	XContainer::XString CKPathManager::GetTempFolder() {
-		XContainer::XString result;
-		EncodingHelper::StdPathToU8Path(result, this->m_TempFolder);
-		return result;
+		return this->m_TempFolder.u8string();
 	}
 
 	XContainer::XString CKPathManager::GetTempFilePath(CKSTRING u8_filename) {
 		if (u8_filename == nullptr) return XContainer::XString();
 
-		std::filesystem::path stdfilename;
-		EncodingHelper::U8PathToStdPath(stdfilename, u8_filename);
+		std::filesystem::path stdfilename(u8_filename);
 		auto realfile = this->m_TempFolder / stdfilename;
 
-		XContainer::XString result;
-		EncodingHelper::StdPathToU8Path(result, realfile);
-		return result;
+		return realfile.u8string();
 	}
 
 	bool CKPathManager::AddPath(CKSTRING u8path) {
 		if (u8path == nullptr) return false;
 
-		std::filesystem::path newpath;
-		EncodingHelper::U8PathToStdPath(newpath, u8path);
+		std::filesystem::path newpath(u8path);
 		if (std::filesystem::is_directory(newpath)) {
 			m_ExtraPathes.emplace_back(std::move(newpath));
 			return true;
@@ -70,8 +59,7 @@ namespace LibCmo::CK2::MgrImpls {
 	}
 
 	bool CKPathManager::ResolveFileName(XContainer::XString& u8_filename) {
-		std::filesystem::path filepath;
-		EncodingHelper::U8PathToStdPath(filepath, u8_filename.c_str());
+		std::filesystem::path filepath(u8_filename);
 
 		// if it is absolute path, return it directly
 		if (filepath.is_absolute()) {
@@ -81,7 +69,7 @@ namespace LibCmo::CK2::MgrImpls {
 		// test in temp folder
 		auto tempfile = m_TempFolder / filepath;
 		if (std::filesystem::is_regular_file(tempfile)) {
-			EncodingHelper::StdPathToU8Path(u8_filename, tempfile);
+			u8_filename = tempfile.u8string();
 			return true;
 		}
 
@@ -90,7 +78,7 @@ namespace LibCmo::CK2::MgrImpls {
 			auto combinedpath = extrapath / filepath;
 			if (std::filesystem::is_regular_file(combinedpath)) {
 				// this is correct
-				EncodingHelper::StdPathToU8Path(u8_filename, combinedpath);
+				u8_filename = combinedpath.u8string();
 				return true;
 			}
 		}
@@ -100,19 +88,17 @@ namespace LibCmo::CK2::MgrImpls {
 	}
 
 	void CKPathManager::GetFileName(XContainer::XString& u8path) {
-		std::filesystem::path filepath;
-		EncodingHelper::U8PathToStdPath(filepath, u8path.c_str());
+		std::filesystem::path filepath(u8path);
 
 		auto result = filepath.filename();
-		EncodingHelper::StdPathToU8Path(u8path, result);
+		u8path = result.u8string();
 	}
 
 	void CKPathManager::GetExtension(XContainer::XString& u8path) {
-		std::filesystem::path filepath;
-		EncodingHelper::U8PathToStdPath(filepath, u8path.c_str());
+		std::filesystem::path filepath(u8path);
 
 		auto result = filepath.extension();
-		EncodingHelper::StdPathToU8Path(u8path, result);
+		u8path = result.u8string();
 	}
 
 }

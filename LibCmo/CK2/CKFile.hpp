@@ -67,7 +67,6 @@ namespace LibCmo::CK2 {
 		}
 	};
 
-#pragma pack(push)
 #pragma pack(1)
 	struct CKRawFileInfo {
 		CKBYTE NeMo[8];
@@ -87,7 +86,7 @@ namespace LibCmo::CK2 {
 		CKDWORD ProductBuild;
 		CKDWORD Hdr1UnPackSize;
 	};
-#pragma pack(pop)
+#pragma pack()
 
 	class CKFileInfo {
 	public:
@@ -211,7 +210,7 @@ namespace LibCmo::CK2 {
 		// XContainer::XClassArray<XContainer::XIntArray> m_IndexByClassId; /**< List of index in the m_FileObjects table sorted by ClassID */
 		/**
 		 * @brief List of files that should be inserted in the CMO file.
-		 * @remark Each item is just file name, not the full path to file.
+		 * @remarks Each item is just file name, not the full path to file.
 		*/
 		XContainer::XArray<XContainer::XString> m_IncludedFiles;
 		CKFileInfo m_FileInfo; /**< Headers summary */
@@ -242,37 +241,36 @@ namespace LibCmo::CK2 {
 	protected:
 		/**
 		 * @brief A helper function to check whether given file can be written.
-		 * @param filename[in] The name of file to be wriiten
+		 * @param[in] filename The name of file to be wriiten
 		 * @return CKERROR::CK_OK if can write.
 		*/
 		CKERROR PrepareFile(CKSTRING filename);
 		/**
 		 * @brief Internal used Object Adder.
-		 * 
+		 * @details
 		 * This function is used by AddSavedObject() and Copy from reader constructor.
-		 * This function accept a object pointer, and try adding them.
+		 * This function accept an object pointer, and try adding them.
 		 * And set m_IncludedFiles and m_ObjectsHashTable properly.
-		 * 
-		 * @param obj The pointer to added object.
-		 * @param flags The flag used when saving this object.
+		 * @param[in] obj The pointer to added object.
+		 * @param[in] flags The flag used when saving this object.
 		 * @return True if success.
 		*/
 		bool InternalObjectAdder(ObjImpls::CKObject* obj, CKDWORD flags = CK_STATESAVE_ALL);
 
 	protected:
-		bool m_Done;	/**< True if this writer is already written into file. A written CKFileWriter can no be written again. */
+		bool m_Done; /**< True if this writer is already written into file. A written CKFileWriter can no be written again. */
 		/**
 		 * @brief True if this writer is not allowed to add objects.
-		 * @remark
-		 * + This field should be false in default.
-		 * + This field usually be set when importing from reader.
+		 * @remarks
+		 * \li This field should be false in default.
+		 * \li This field usually be set when importing from reader.
 		*/
 		bool m_DisableAddingObject;
 		/**
 		 * @brief True if this writer is not allowed to add files.
-		 * @remark
-		 * + This field should be false in default.
-		 * + This field usually be set when importing from reader.
+		 * @remarks
+		 * \li This field should be false in default.
+		 * \li This field usually be set when importing from reader.
 		*/
 		bool m_DisableAddingFile;
 		
@@ -282,7 +280,7 @@ namespace LibCmo::CK2 {
 		XContainer::XArray<CKFilePluginDependencies> m_PluginsDep;	/**< Plugins dependencies for this file */
 		/**
 		 * @brief List of files that should be inserted in the CMO file.
-		 * @remark Each item is the full path to file.
+		 * @remarks Each item is the full path to file.
 		*/
 		XContainer::XArray<XContainer::XString> m_IncludedFiles;
 		XContainer::XHashTable<CK_ID, CKDWORD> m_ObjectsHashTable; /**< A Object ID to save index hash table. */

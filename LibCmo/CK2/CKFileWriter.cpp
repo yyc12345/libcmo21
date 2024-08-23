@@ -14,7 +14,7 @@ namespace LibCmo::CK2 {
 		if (this->m_Done) return CKERROR::CKERR_CANCELLED;
 
 		// encoding conv helper
-		XContainer::XString name_conv;
+		std::string name_conv;
 
 		// try detect filename legality
 		CKERROR err = PrepareFile(u8_filename);
@@ -89,7 +89,7 @@ namespace LibCmo::CK2 {
 			sumHdrObjSize += 4 * CKSizeof(CKDWORD);
 			if (XContainer::NSXString::ToCKSTRING(obj.Name) != nullptr) {
 				// += Name size
-				m_Ctx->GetNativeString(obj.Name, name_conv);
+				m_Ctx->GetOrdinaryString(obj.Name, name_conv);
 				sumHdrObjSize += static_cast<CKDWORD>(name_conv.size());
 			}
 
@@ -176,7 +176,7 @@ namespace LibCmo::CK2 {
 
 			if (XContainer::NSXString::ToCKSTRING(obj.Name) != nullptr) {
 				// if have name, write it
-				m_Ctx->GetNativeString(obj.Name, name_conv);
+				m_Ctx->GetOrdinaryString(obj.Name, name_conv);
 				CKDWORD namelen = static_cast<CKDWORD>(name_conv.size());
 				hdrparser->Write(&namelen);
 				hdrparser->Write(name_conv.data(), namelen);
@@ -299,7 +299,7 @@ namespace LibCmo::CK2 {
 
 		// ========== Open File & Write Essential Data ==========
 		// open file and test
-		FILE* fs = EncodingHelper::U8FOpen(u8_filename, "wb");
+		FILE* fs = YYCC::IOHelper::UTF8FOpen(u8_filename, u8"wb");
 		if (fs == nullptr) return CKERROR::CKERR_CANTWRITETOFILE;
 		// write small header + header + data
 		std::fwrite(&rawHeader, sizeof(CKRawFileInfo), 1, fs);
@@ -316,7 +316,7 @@ namespace LibCmo::CK2 {
 			m_Ctx->GetPathManager()->GetFileName(filename);
 
 			// write filename
-			m_Ctx->GetNativeString(filename, name_conv);
+			m_Ctx->GetOrdinaryString(filename, name_conv);
 			CKDWORD filenamelen = static_cast<CKDWORD>(name_conv.size());
 			std::fwrite(&filenamelen, sizeof(CKDWORD), 1, fs);
 			std::fwrite(name_conv.data(), sizeof(CKBYTE), filenamelen, fs);
@@ -336,7 +336,7 @@ namespace LibCmo::CK2 {
 				std::fwrite(&filebodylen, sizeof(CKDWORD), 1, fs);
 
 				// report error
-				m_Ctx->OutputToConsoleEx("Fail to open temp file: %" PRI_CKSTRING, fentry.c_str());
+				m_Ctx->OutputToConsoleEx(u8"Fail to open temp file: %" PRI_CKSTRING, fentry.c_str());
 			}
 
 			// release mapped file
@@ -356,7 +356,7 @@ namespace LibCmo::CK2 {
 
 		// try open file to check whether we can write it.
 		CKERROR err;
-		FILE* tryfile = EncodingHelper::U8FOpen(filename, "ab");
+		FILE* tryfile = YYCC::IOHelper::UTF8FOpen(filename, u8"ab");
 		if (tryfile == nullptr) {
 			err = CKERROR::CKERR_CANTWRITETOFILE;
 		} else {

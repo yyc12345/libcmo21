@@ -86,7 +86,7 @@ namespace LibCmo::CK2 {
 			*ppData = this->m_pData + this->m_Parser.m_CurrentPos;
 			return true;
 		} else {
-			m_BindContext->OutputToConsoleEx("CKStateChunk::LockWriteBuffer at buffer pos %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
+			m_BindContext->OutputToConsoleEx(u8"CKStateChunk::LockWriteBuffer at buffer pos %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
 			return false;
 		}
 	}
@@ -100,7 +100,7 @@ namespace LibCmo::CK2 {
 			this->m_Parser.m_CurrentPos += size_in_dword;
 			return true;
 		} else {
-			m_BindContext->OutputToConsoleEx("CKStateChunk::UnLockWriteBuffer at buffer pos %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
+			m_BindContext->OutputToConsoleEx(u8"CKStateChunk::UnLockWriteBuffer at buffer pos %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
 			return false;
 		}
 	}
@@ -137,8 +137,8 @@ namespace LibCmo::CK2 {
 		if (strl == nullptr) return false;
 
 		// convert encoding
-		XContainer::XString cache;
-		m_BindContext->GetNativeString(*strl, cache);
+		std::string cache;
+		m_BindContext->GetOrdinaryString(*strl, cache);
 
 		if (cache.empty()) {
 			// write zero string

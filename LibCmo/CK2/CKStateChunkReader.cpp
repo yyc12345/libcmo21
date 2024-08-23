@@ -71,7 +71,7 @@ namespace LibCmo::CK2 {
 			return true;
 		} else {
 			// failed, report to context
-			m_BindContext->OutputToConsoleEx("CKStateChunk::LockReadBuffer at buffer pos %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
+			m_BindContext->OutputToConsoleEx(u8"CKStateChunk::LockReadBuffer at buffer pos %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
 			return false;
 		}
 	}
@@ -88,7 +88,7 @@ namespace LibCmo::CK2 {
 			return true;
 		} else {
 			// failed, report to context
-			m_BindContext->OutputToConsoleEx("CKStateChunk::UnLockReadBuffer at buffer pos %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
+			m_BindContext->OutputToConsoleEx(u8"CKStateChunk::UnLockReadBuffer at buffer pos %" PRIuCKDWORD ".", this->m_Parser.m_CurrentPos);
 			return false;
 		}
 	}
@@ -140,7 +140,7 @@ namespace LibCmo::CK2 {
 		// MARK: the written string has NULL terminal.
 		// strByteSize also include NULL terminal, 
 		// so we need minus 1 when resizing (not ReadByteData, because we still need read NULL terminal to skip it.)
-		XContainer::XString cache;
+		std::string cache;
 		cache.resize(strByteSize - 1);
 		if (!this->ReadByteData(cache.data(), strByteSize)) {
 			strl->clear();
@@ -148,7 +148,7 @@ namespace LibCmo::CK2 {
 		}
 
 		// convert encoding
-		m_BindContext->GetUtf8String(cache, *strl);
+		m_BindContext->GetUTF8String(cache, *strl);
 		return true;
 	}
 

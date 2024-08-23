@@ -26,7 +26,7 @@ namespace LibCmo::CK2 {
 		m_OutputCallback(nullptr) {
 
 		// setup save format
-		m_GlobalImagesSaveFormat.m_Ext.SetExt("bmp");
+		m_GlobalImagesSaveFormat.m_Ext.SetExt(u8"bmp");
 
 		// setup managers
 		m_ObjectManager = new MgrImpls::CKObjectManager(this);
@@ -42,6 +42,8 @@ namespace LibCmo::CK2 {
 		for (auto& mgrptr : m_ManagerList) {
 			delete mgrptr;
 		}
+		// free encoding
+		this->ClearEncoding();
 	}
 
 #pragma endregion
@@ -252,23 +254,18 @@ namespace LibCmo::CK2 {
 
 	void CKContext::OutputToConsole(CKSTRING str) {
 		if (m_OutputCallback == nullptr) return;
+		if (str == nullptr) return;
 		m_OutputCallback(str);
 	}
 
 	void CKContext::OutputToConsoleEx(CKSTRING fmt, ...) {
 		if (m_OutputCallback == nullptr) return;
+		if (fmt == nullptr) return;
 
 		va_list argptr;
 		va_start(argptr, fmt);
-
 		XContainer::XString result;
-		int count = std::vsnprintf(nullptr, 0, fmt, argptr);
-		result.resize(count);
-		// count + 1 for NUL terminator. but we don't need allocate space for it (resize with count). let it write into the reserved tail of std::string.
-		int write_result = std::vsnprintf(result.data(), count + 1, fmt, argptr);
-
-		if (write_result < 0 || write_result > count) return;
-
+		YYCC::StringHelper::VPrintf(fmt, argptr);
 		va_end(argptr);
 
 		// use c_str(), not XContainer::NSXString::ToCKSTRING because we want make sure this paramter is not nullptr.
@@ -284,48 +281,67 @@ namespace LibCmo::CK2 {
 
 #pragma region Encoding utilities
 
-	void CKContext::GetUtf8String(const XContainer::XString& native_name, XContainer::XString& u8_name) {
-		bool success = false;
+	void CKContext::GetUTF8String(const std::string& native_name, XContainer::XString& u8_name) {
+		bool conv_success = false, has_valid_token = false;
 		for (const auto& token : this->m_NameEncoding) {
-			success = LibCmo::EncodingHelper::GetUtf8VirtoolsName(native_name, u8_name, token);
-			if (success) break;
+			if (token == EncodingHelper::INVALID_ENCODING_TOKEN) continue;
+			has_valid_token = true;
+			conv_success = EncodingHelper::ToUTF8(native_name, u8_name, token);
+			if (conv_success) break;
 		}
-
-		// fallback
-		if (!success) {
-			u8_name = native_name;
-			this->OutputToConsole("Error when converting to UTF8 string.");
+		// fallback if failed.
+		if (!conv_success) {
+			if (!has_valid_token) {
+				throw RuntimeException("Try to get UTF8 string from ordinary string in CKContext but giving empty encoding candidate.");
+			} else {
+				u8_name.clear();
+				this->OutputToConsole(u8"Error when converting to UTF8 string from ordinary string. The string will leave to blank.");
+			}
 		}
 	}
 
-	void CKContext::GetNativeString(const XContainer::XString& u8_name, XContainer::XString& native_name) {
-		bool success = false;
+	void CKContext::GetOrdinaryString(const XContainer::XString& u8_name, std::string& native_name) {
+		bool conv_success = false, has_valid_token = false;
 		for (const auto& token : this->m_NameEncoding) {
-			success = LibCmo::EncodingHelper::GetNativeVirtoolsName(u8_name, native_name, token);
-			if (success) break;
+			if (token == EncodingHelper::INVALID_ENCODING_TOKEN) continue;
+			has_valid_token = true;
+			conv_success = EncodingHelper::ToOrdinary(u8_name, native_name, token);
+			if (conv_success) break;
 		}
-
-		// fallback
-		if (!success) {
-			native_name = u8_name;
-			this->OutputToConsole("Error when converting to native string.");
+		// fallback if failed.
+		if (!conv_success) {
+			if (!has_valid_token) {
+				throw RuntimeException("Try to get ordinary string from UTF8 string in CKContext but giving empty encoding candidate.");
+			} else {
+				native_name.clear();
+				this->OutputToConsole(u8"Error when converting to ordinary string from UTF8 string. The string will leave to blank.");
+			}
 		}
 	}
 
-	void CKContext::SetEncoding(const XContainer::XArray<XContainer::XString>& encoding_series) {
+	void CKContext::SetEncoding(const XContainer::XArray<XContainer::XString>& encoding_seq) {
 		// free all current series
-		for (const auto& encoding : this->m_NameEncoding) {
-			LibCmo::EncodingHelper::DestroyEncodingToken(encoding);
+		this->ClearEncoding();
+		// add new encoding
+		for (const auto& encoding_str : encoding_seq) {
+			this->m_NameEncoding.emplace_back(LibCmo::EncodingHelper::CreateEncodingToken(encoding_str));
+		}
+	}
+
+	void CKContext::ClearEncoding() {
+		for (const auto& token : this->m_NameEncoding) {
+			if (token == EncodingHelper::INVALID_ENCODING_TOKEN) continue;
+			LibCmo::EncodingHelper::DestroyEncodingToken(token);
 		}
 		this->m_NameEncoding.clear();
-
-		// add new encoding
-		for (const auto& encoding_str : encoding_series) {
-			this->m_NameEncoding.push_back(LibCmo::EncodingHelper::CreateEncodingToken(encoding_str));
-		}
 	}
 
-
+	bool CKContext::IsValidEncoding() {
+		for (const auto& token : this->m_NameEncoding) {
+			if (token != EncodingHelper::INVALID_ENCODING_TOKEN) return true;
+		}
+		return false;
+	}
 
 #pragma endregion
 

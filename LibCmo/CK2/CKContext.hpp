@@ -100,18 +100,73 @@ namespace LibCmo::CK2 {
 
 		// ========== Encoding utilities ==========
 	public:
-		void GetUtf8String(const XContainer::XString& native_name, XContainer::XString& u8_name);
-		void GetNativeString(const XContainer::XString& u8_name, XContainer::XString& native_name);
+		/**
+		 * @brief Convert given ordinary string to UTF8 string.
+		 * @param[in] native_name The input ordinary string.
+		 * @param[out] u8_name The output UTF8 string.
+		 * @exception RuntimeException Raised when perform this operation with a blank encoding sequence.
+		 * @remarks
+		 * The encoding of ordinary is specified by encoding sequence.
+		 * If we fail to do convertion, the result will leave to blank and output a message to CKContext.
+		 * However, if you use this function with blank encoding sequence, it will raise exception.
+		*/
+		void GetUTF8String(const std::string& native_name, XContainer::XString& u8_name);
+		/**
+		 * @brief Convert given UTF8 string to ordinary string.
+		 * @param[in] u8_name The input UTF8 string.
+		 * @param[out] native_name The output ordinary string.
+		 * @exception RuntimeException Raised when perform this operation with a blank encoding sequence.
+		 * @remarks
+		 * The encoding of ordinary is specified by encoding sequence.
+		 * If we fail to do convertion, the result will leave to blank and output a message to CKContext.
+		 * However, if you use this function with blank encoding sequence, it will raise exception.
+		*/
+		void GetOrdinaryString(const XContainer::XString& u8_name, std::string& native_name);
+		/**
+		 * @brief Set the encoding sequence.
+		 * @param[in] encoding_series The encoding name in this sequence.
+		 * @remarks
+		 * \li The order in encoding sequence is important. The encoding name with lower index will be used for convertion first.
+		 * \li Encoding sequence will be used for performing GetUTF8String() and GetOrdinaryString().
+		 * We will try using it to do convertion from top to bottom (if one failed we will continue trying to use next one to do convertion).
+		*/
 		void SetEncoding(const XContainer::XArray<XContainer::XString>& encoding_series);
+		/**
+		 * @brief Clear specified encoding sequence.
+		*/
+		void ClearEncoding();
+		/**
+		 * @brief Check whether current encoding sequence at least has one valid encoding for convertion.
+		 * @return True if it is, otherwise false.
+		*/
+		bool IsValidEncoding();
 		
 	protected:
-		XContainer::XArray<EncodingHelper::ENCODING_TOKEN> m_NameEncoding;
+		XContainer::XArray<EncodingHelper::EncodingToken> m_NameEncoding;
 
 		// ========== Print utilities ==========
 	public:
-		using OutputCallback = std::function<void(CKSTRING)>;
+		/**
+		 * @brief The callback prototype.
+		 * @details It accept a CKSTRING representing the string need to be printed.
+		 * The passed CKSTRING is guaranteen that it can not be nullptr.
+		*/
+		using OutputCallback = void(*)(CKSTRING);
+		/**
+		 * @brief Output plain message.
+		 * @param[in] str Plain message. nullptr is allowed but not suggested.
+		*/
 		void OutputToConsole(CKSTRING str);
+		/**
+		 * @brief Output message with given format.
+		 * @param[in] fmt The format string. nullptr is allowed but not suggested.
+		 * @param[in] ... The arguments of format string.
+		*/
 		void OutputToConsoleEx(CKSTRING fmt, ...);
+		/**
+		 * @brief Set the callback for message printing.
+		 * @param[in] cb The function pointer to callback. nullptr to remove callback.
+		*/
 		void SetOutputCallback(OutputCallback cb);
 
 	protected:

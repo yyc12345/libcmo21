@@ -5,7 +5,7 @@
 namespace LibCmo::CK2::MgrImpls {
 
 	CKObjectManager::CKObjectManager(CKContext* ctx) :
-		CKBaseManager(ctx, OBJECT_MANAGER_GUID, "Object Manager"),
+		CKBaseManager(ctx, OBJECT_MANAGER_GUID, u8"Object Manager"),
 		m_ObjectsList(), m_ReturnedObjectOffsets(), m_ObjectCount(0),
 		m_GroupGlobalIndex(), m_SceneGlobalIndex(),
 		m_ObjectsListByClass(CKGetClassCount()) {}
