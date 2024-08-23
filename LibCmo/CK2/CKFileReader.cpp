@@ -18,6 +18,8 @@ namespace LibCmo::CK2 {
 	CKERROR CKFileReader::ShallowLoad(CKSTRING u8_filename) {
 		// check document status
 		if (this->m_Done) return CKERROR::CKERR_CANCELLED;
+		// check CKContext encoding sequence
+		if (!this->m_Ctx->IsValidEncoding()) return CKERROR::CKERR_CANCELLED;
 
 		// check file and open memory
 		if (u8_filename == nullptr) return CKERROR::CKERR_INVALIDPARAMETER;
@@ -35,6 +37,8 @@ namespace LibCmo::CK2 {
 		if (err != CKERROR::CKERR_OK) return err;
 
 		// other data will be free automatically
+		// set done flag and return
+		this->m_Done = true;
 		return CKERROR::CKERR_OK;
 	}
 
@@ -335,6 +339,8 @@ namespace LibCmo::CK2 {
 	CKERROR CKFileReader::DeepLoad(CKSTRING u8_filename) {
 		// check document status
 		if (this->m_Done) return CKERROR::CKERR_CANCELLED;
+		// check CKContext encoding sequence
+		if (!this->m_Ctx->IsValidEncoding()) return CKERROR::CKERR_CANCELLED;
 
 		// ========== prepare work ==========
 		CKERROR err = CKERROR::CKERR_OK;
@@ -342,6 +348,8 @@ namespace LibCmo::CK2 {
 		// get shallow document first
 		err = this->ShallowLoad(u8_filename);
 		if (err != CKERROR::CKERR_OK) return err;
+		// reset done flag because we need further processing
+		this->m_Done = false;
 
 		// ========== create object first ==========
 		for (auto& obj : this->m_FileObjects) {
@@ -387,6 +395,10 @@ namespace LibCmo::CK2 {
 		}
 
 		// ========== finalize work ==========
+		
+
+		// set done flag and return
+		this->m_Done = true;
 		return CKERROR::CKERR_OK;
 	}
 

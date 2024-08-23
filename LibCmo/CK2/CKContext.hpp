@@ -109,6 +109,7 @@ namespace LibCmo::CK2 {
 		 * The encoding of ordinary is specified by encoding sequence.
 		 * If we fail to do convertion, the result will leave to blank and output a message to CKContext.
 		 * However, if you use this function with blank encoding sequence, it will raise exception.
+		 * So becore using this function, please make sure that you have checked by calling IsValidEncoding().
 		*/
 		void GetUTF8String(const std::string& native_name, XContainer::XString& u8_name);
 		/**
@@ -120,6 +121,7 @@ namespace LibCmo::CK2 {
 		 * The encoding of ordinary is specified by encoding sequence.
 		 * If we fail to do convertion, the result will leave to blank and output a message to CKContext.
 		 * However, if you use this function with blank encoding sequence, it will raise exception.
+		 * So becore using this function, please make sure that you have checked by calling IsValidEncoding().
 		*/
 		void GetOrdinaryString(const XContainer::XString& u8_name, std::string& native_name);
 		/**

@@ -111,8 +111,8 @@ public class CppWriter {
 		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.Cpp);
 		
 		// write type defination (just to let user know what the type is)
-		indent.puts("// struct GeneralReflection { const char* mName; };");
-		indent.puts("// template<typename _Ty>");
+		indent.puts("// struct GeneralReflection { const char8_t* mName; };");
+		indent.puts("// template<typename _Ty, std::enable_if_t<std::is_enum_v<_Ty>, int> = 0>");
 		indent.puts("// using GeneralReflectionArray = std::vector<std::pair<_Ty, GeneralReflection>>;");
 		
 		indent.puts("");
@@ -138,7 +138,7 @@ public class CppWriter {
 
 			// write enum desc entries
 			for (EnumsHelper.EnumEntry_t enumEntry_t : enum_t.mEntries) {
-				indent.printf("{ LibCmo::%s::%s::%s, {\"%s\"} },", CommonHelper.getCKPartsNamespace(parts),
+				indent.printf("{ LibCmo::%s::%s::%s, { u8\"%s\" } },", CommonHelper.getCKPartsNamespace(parts),
 						enum_t.mEnumName, enumEntry_t.mEntryName, enumEntry_t.mEntryName);
 			}
 
@@ -209,7 +209,7 @@ public class CppWriter {
 		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.Cpp);
 
 		// write type defination (just to let user know what the type is)
-		indent.puts("// struct CkErrorReflection { const char* mName; const char* mDescription; };");
+		indent.puts("// struct CkErrorReflection { const char8_t* mName; const char8_t* mDescription; };");
 		indent.puts("// using CkErrorReflectionArray = std::vector<std::pair<LibCmo::CK2::CKERROR, CkErrorReflection>>;");
 		
 		indent.puts("");
@@ -224,7 +224,7 @@ public class CppWriter {
 			if (comment == null)
 				comment = "";
 
-			indent.printf("{ LibCmo::CK2::CKERROR::%s, { \"%s\", \"%s\" } },", entry.mEntryName, entry.mEntryName,
+			indent.printf("{ LibCmo::CK2::CKERROR::%s, { u8\"%s\", u8\"%s\" } },", entry.mEntryName, entry.mEntryName,
 					comment);
 		}
 		indent.dec();
@@ -249,7 +249,7 @@ public class CppWriter {
 		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.Cpp);
 
 		// write type defination (just to let user know what the type is)
-		indent.puts("// struct CkClassidReflection { std::vector<const char*> mHierarchy; };");
+		indent.puts("// struct CkClassidReflection { std::vector<const char8_t*> mHierarchy; };");
 		indent.puts("// using CkClassidReflectionArray = std::vector<std::pair<LibCmo::CK2::CK_CLASSID, CkClassidReflection>>;");
 		
 		indent.puts("");
@@ -262,8 +262,8 @@ public class CppWriter {
 			EnumsHelper.EnumEntryWithHierarchy_t specialized = (EnumsHelper.EnumEntryWithHierarchy_t) entry;
 
 			String hierarchy = specialized.mHierarchy.stream().map(value -> value.mEntryName)
-					.collect(Collectors.joining("\", \""));
-			indent.printf("{ LibCmo::CK2::CK_CLASSID::%s, { { \"%s\" } } },", entry.mEntryName, hierarchy);
+					.collect(Collectors.joining("\", u8\""));
+			indent.printf("{ LibCmo::CK2::CK_CLASSID::%s, { { u8\"%s\" } } },", entry.mEntryName, hierarchy);
 		}
 		indent.dec();
 		indent.puts("};");

@@ -12,6 +12,8 @@ namespace LibCmo::CK2 {
 	CKERROR CKFileWriter::Save(CKSTRING u8_filename) {
 		// check document status
 		if (this->m_Done) return CKERROR::CKERR_CANCELLED;
+		// check CKContext encoding sequence
+		if (!this->m_Ctx->IsValidEncoding()) return CKERROR::CKERR_CANCELLED;
 
 		// encoding conv helper
 		std::string name_conv;
@@ -347,6 +349,8 @@ namespace LibCmo::CK2 {
 		// close file
 		std::fclose(fs);
 
+		// set done flag and return
+		this->m_Done = true;
 		return CKERROR::CKERR_OK;
 	}
 

@@ -15,6 +15,7 @@ namespace LibCmo::CK2::ObjImpls {
 	 * All pointers should translate to DWORD(32 bit) for platform independent.
 	 * Otherwise this struct may be corrupted in x64 platform because pointer is QWORD in x64.
 	*/
+#pragma pack(4)
 	struct FakeBitmapProperties {
 		CKINT m_Size;
 		struct {
@@ -23,7 +24,7 @@ namespace LibCmo::CK2::ObjImpls {
 		}m_ReaderGuid;
 		struct {
 			// fake CKFileExtension
-			CKCHAR m_Data[4];
+			char m_Data[4];
 		}m_Ext;
 		struct {
 			// fake VxImageDescEx
@@ -60,6 +61,7 @@ namespace LibCmo::CK2::ObjImpls {
 		}m_Format;
 		/*void**/CKPTR m_Data;
 	};
+#pragma pack()
 
 	CKTexture::CKTexture(CKContext* ctx, CK_ID ckid, CKSTRING name) :
 		CKBeObject(ctx, ckid, name),
@@ -184,10 +186,12 @@ namespace LibCmo::CK2::ObjImpls {
 			// setup ext and guid
 			props.m_ReaderGuid.d1 = realprops.m_ReaderGuid.d1;
 			props.m_ReaderGuid.d2 = realprops.m_ReaderGuid.d2;
+			std::string ext;
+			m_Context->GetOrdinaryString(realprops.m_Ext.GetExt(), ext);
 			std::memcpy(
-				props.m_Ext.m_Data, 
-				realprops.m_Ext.GetExt(), 
-				std::min(CKSizeof(props.m_Ext.m_Data), realprops.m_Ext.GetSize())
+				props.m_Ext.m_Data,
+				ext.c_str(),
+				std::min(CKSizeof(props.m_Ext.m_Data) - CKDWORD_C(1), static_cast<CKDWORD>(ext.size()))
 			);
 
 			// write fake one
@@ -308,9 +312,14 @@ namespace LibCmo::CK2::ObjImpls {
 				if (buf != nullptr) {
 					FakeBitmapProperties* props = static_cast<FakeBitmapProperties*>(buf.get());
 
+					// get utf8 extension
+					XContainer::XString ext;
+					m_Context->GetUTF8String(props->m_Ext.m_Data, ext);
+
+					// get my bitmap prop
 					CKBitmapProperties myprops(
 						CKGUID(props->m_ReaderGuid.d1, props->m_ReaderGuid.d2),
-						props->m_Ext.m_Data
+						ext.c_str()
 					);
 					m_ImageHost.SetSaveFormat(myprops);
 				}

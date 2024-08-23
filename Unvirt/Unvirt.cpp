@@ -1,16 +1,21 @@
+#include <YYCCommonplace.hpp>
 #include "UnvirtContext.hpp"
-#include <IronPad.hpp>
 
 int main(int argc, char* argv[]) {
-
-	// start iron pad
-	IronPad::IronPadRegister();
 	
+	// register exception handler on windows release
+#if defined(LIBCMO_BUILD_RELEASE) && (YYCC_OS == YYCC_OS_WINDOWS)
+	YYCC::ExceptionHelper::Register();
+#endif
+	
+	// run core
 	Unvirt::Context::UnvirtContext ctx;
 	ctx.Run();
 
-	// stop iron pad
-	IronPad::IronPadUnregister();
+	// unregister exception handler on windows release
+#if defined(LIBCMO_BUILD_RELEASE) && (YYCC_OS == YYCC_OS_WINDOWS)
+	YYCC::ExceptionHelper::Register();
+#endif
 
 	return 0;
 }

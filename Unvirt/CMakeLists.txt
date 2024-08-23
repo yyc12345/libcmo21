@@ -5,7 +5,6 @@ target_sources(Unvirt
 PRIVATE
 	AccessibleValue.cpp
 	CmdHelper.cpp
-	StringHelper.cpp
 	StructFormatter.cpp
 	TerminalHelper.cpp
 	UnvirtContext.cpp
@@ -18,7 +17,6 @@ FILE_SET HEADERS
 FILES
 	AccessibleValue.hpp
 	CmdHelper.hpp
-	StringHelper.hpp
 	StructFormatter.hpp
 	TerminalHelper.hpp
 	UnvirtContext.hpp

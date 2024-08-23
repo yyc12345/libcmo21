@@ -1,41 +1,59 @@
 #pragma once
 
 #include <VTAll.hpp>
-#include "StringHelper.hpp"
 #include <vector>
 #include <string>
+#include <type_traits>
 
 namespace Unvirt {
 	namespace AccessibleValue {
 
-		constexpr const char c_InvalidEnumName[] = "[undefined]";
+		constexpr const char8_t c_InvalidEnumName[] = u8"[undefined]";
 
-		struct GeneralReflection { const char* mName; };
-		template<typename _Ty>
+#pragma region Size Formatter
+
+		std::u8string GetReadableFileSize(uint64_t _size);
+
+#pragma endregion
+
+#pragma region CKERROR CK_CLASSID Data
+
+		std::u8string GetCkErrorName(LibCmo::CK2::CKERROR err);
+		std::u8string GetCkErrorDescription(LibCmo::CK2::CKERROR err);
+
+		std::u8string GetClassIdName(LibCmo::CK2::CK_CLASSID cls);
+		std::u8string GetClassIdHierarchy(LibCmo::CK2::CK_CLASSID cls);
+
+#pragma endregion
+
+#pragma region Other Enums
+
+		struct GeneralReflection { const char8_t* mName; };
+		template<typename _Ty, std::enable_if_t<std::is_enum_v<_Ty>, int> = 0>
 		using GeneralReflectionArray = std::vector<std::pair<_Ty, GeneralReflection>>;
 
-		template<typename _Ty>
-		std::string GetEnumName(_Ty val, const GeneralReflectionArray<_Ty>& desc) {
-			std::string strl;
+		template<typename _Ty, std::enable_if_t<std::is_enum_v<_Ty>, int> = 0>
+		std::u8string GetEnumName(_Ty val, const GeneralReflectionArray<_Ty>& desc) {
+			std::u8string strl;
 			for (auto& item : desc) {
 				if (item.first == val) {
 					strl = item.second.mName;
 					return strl;
 				}
 			}
-			StringHelper::StdstringPrintf(strl, "%s (0x%08" PRIXCKDWORD ")", 
-				c_InvalidEnumName, 
+			YYCC::StringHelper::Printf(strl, u8"%s (0x%08" PRIXCKDWORD ")",
+				c_InvalidEnumName,
 				static_cast<LibCmo::CKDWORD>(val)
 			);
 			return strl;
 		}
-		template<typename _Ty>
-		std::string GetFlagEnumName(_Ty val, const GeneralReflectionArray<_Ty>& desc, const char* splitor) {
-			std::string strl, cache;
+		template<typename _Ty, std::enable_if_t<std::is_enum_v<_Ty>, int> = 0>
+		std::u8string GetFlagEnumName(_Ty val, const GeneralReflectionArray<_Ty>& desc, const char8_t* splitor = u8" ", const char8_t* indent = u8"") {
+			std::u8string strl, cache;
 			for (auto& item : desc) {
 				// if it have exacelt same entry, return directly
 				if (item.first == val) {
-					StringHelper::StdstringPrintf(strl, "%s (0x%08" PRIXCKDWORD ")",
+					YYCC::StringHelper::Printf(strl, u8"%s (0x%08" PRIXCKDWORD ")",
 						item.second.mName,
 						static_cast<LibCmo::CKDWORD>(item.first)
 					);
@@ -44,11 +62,18 @@ namespace Unvirt {
 
 				// check flag match
 				if (LibCmo::EnumsHelper::Has(val, item.first)) {
+					// add splittor if it not the first entry
 					if (strl.size() != 0u && splitor != nullptr) {
 						strl += splitor;
 					}
 
-					StringHelper::StdstringPrintf(cache, "%s (0x%08" PRIXCKDWORD ")",
+					// add indent if possible
+					if (indent != nullptr) {
+						strl += indent;
+					}
+
+					// add value self.
+					YYCC::StringHelper::Printf(cache, u8"%s (0x%08" PRIXCKDWORD ")",
 						item.second.mName,
 						static_cast<LibCmo::CKDWORD>(item.first)
 					);
@@ -58,21 +83,14 @@ namespace Unvirt {
 
 			// if nothing was gotten. set to undefined
 			if (strl.size() == 0u) {
-				StringHelper::StdstringPrintf(strl, "%s (0x%08" PRIXCKDWORD ")", 
-					c_InvalidEnumName, 
+				YYCC::StringHelper::Printf(strl, u8"%s (0x%08" PRIXCKDWORD ")",
+					c_InvalidEnumName,
 					static_cast<LibCmo::CKDWORD>(val)
 				);
 			}
 
 			return strl;
 		}
-
-		std::string GetClassIdName(LibCmo::CK2::CK_CLASSID cls);
-		std::string GetCkErrorName(LibCmo::CK2::CKERROR err);
-		std::string GetClassIdHierarchy(LibCmo::CK2::CK_CLASSID cls);
-		std::string GetCkErrorDescription(LibCmo::CK2::CKERROR err);
-
-		std::string GetReadableFileSize(uint64_t size);
 
 		namespace EnumDesc {
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE;
@@ -99,6 +117,8 @@ namespace Unvirt {
 			extern const GeneralReflectionArray<LibCmo::VxMath::VXMESH_LITMODE> VXMESH_LITMODE;
 			extern const GeneralReflectionArray<LibCmo::VxMath::VXTEXTURE_WRAPMODE> VXTEXTURE_WRAPMODE;
 		}
+
+#pragma endregion
 
 	}
 }

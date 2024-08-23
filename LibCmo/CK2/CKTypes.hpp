@@ -89,6 +89,11 @@ namespace LibCmo {
 #define PRI_CKSTRING "s"
 #define PRI_CKCHAR "c"
 
+#define CKBYTE_C(v) UINT8_C(v)
+#define CKWORD_C(v) UINT16_C(v)
+#define CKDWORD_C(v) UINT32_C(v)
+#define CKQWORD_C(v) UINT64_C(v)
+
 #define PRIuCKBYTE PRIu8
 #define PRIuCKWORD PRIu16
 #define PRIuCKDWORD PRIu32
@@ -103,6 +108,8 @@ namespace LibCmo {
 #define PRIXCKWORD PRIX16
 #define PRIXCKDWORD PRIX32
 #define PRIXCKQWORD PRIX64
+
+#define CKINT_C(v) INT32_C(v)
 
 #define PRIiCKINT PRIi32
 
