@@ -5,15 +5,19 @@
 #include <vector>
 #include <functional>
 #include <deque>
-#include <unordered_map>
+#include <map>
 #include <stdexcept>
 #include <cinttypes>
 #include <initializer_list>
+#include <type_traits>
+#include <memory>
 
 namespace Unvirt::CmdHelper {
 
 	class CmdSplitter {
 	public:
+		using Result_t = std::deque<std::u8string>;
+	private:
 		enum class StateType : int {
 			SPACE,
 			SINGLE,
@@ -21,86 +25,194 @@ namespace Unvirt::CmdHelper {
 			ESCAPE,
 			NORMAL
 		};
+
 	public:
 		CmdSplitter() :
-			mCmdChar(0), mBuffer(nullptr), mResult(nullptr),
-			mState(StateType::NORMAL), mPreState(StateType::NORMAL) {}
+			m_CurrentChar(u8'\0'), m_Buffer(), m_Result(), m_ValidResult(false),
+			m_State(StateType::NORMAL), m_PrevState(StateType::NORMAL) {}
 		~CmdSplitter() {}
 		YYCC_DEL_CLS_COPY_MOVE(CmdSplitter);
 
-		std::deque<std::string> Convert(const std::string& u8cmd);
-	protected:
-		char mCmdChar;
-		std::string* mBuffer;
-		std::deque<std::string>* mResult;
+		bool Convert(const std::u8string& u8cmd);
+		const Result_t& GetResult() const;
 
-		StateType mState, mPreState;
+	private:
+		void ProcSpace();
+		void ProcSingle();
+		void ProcDouble();
+		void ProcEscape();
+		void ProcNormal();
 
-		void ProcSpace(void);
-		void ProcSingle(void);
-		void ProcDouble(void);
-		void ProcEscape(void);
-		void ProcNormal(void);
+		char8_t m_CurrentChar;
+		std::u8string m_Buffer;
+		Result_t m_Result;
+		bool m_ValidResult;
+		StateType m_State, m_PrevState;
 	};
+
+#pragma region ArgumentsMap
+
+	namespace ArgumentsMapItem {
+
+		class AbstractItem {
+		public:
+			AbstractItem() {}
+			virtual ~AbstractItem() {}
+			YYCC_DEF_CLS_COPY_MOVE(AbstractItem);
+		};
+
+		template<typename _Ty, std::enable_if_t<std::is_arithmetic_v<_Ty>, int> = 0>
+		class ArithmeticItem : public AbstractItem {
+		public:
+			ArithmeticItem(_Ty value) : AbstractItem(), m_Data(value) {}
+			virtual ~ArithmeticItem() {}
+			YYCC_DEF_CLS_COPY_MOVE(ArithmeticItem);
+		public:
+			_Ty Get() const { return m_Data; }
+		protected:
+			_Ty m_Data;
+		};
+
+		template<typename _Ty, std::enable_if_t<std::is_arithmetic_v<_Ty>, int> = 0>
+		class ArithmeticArrayItem : public AbstractItem {
+		public:
+			ArithmeticArrayItem(const std::vector<_Ty>& values) : AbstractItem(), m_Data(values) {}
+			virtual ~ArithmeticArrayItem() {}
+			YYCC_DEF_CLS_COPY_MOVE(ArithmeticArrayItem);
+		public:
+			const std::vector<_Ty>& Get() const { return m_Data; }
+		protected:
+			std::vector<_Ty> m_Data;
+		};
+
+		class StringItem : public AbstractItem {
+		public:
+			StringItem(const std::u8string_view& value) : AbstractItem(), m_Data(value) {}
+			virtual ~StringItem() {}
+			YYCC_DEF_CLS_COPY_MOVE(StringItem);
+		public:
+			const std::u8string& Get() const { return m_Data; }
+		protected:
+			std::u8string m_Data;
+		};
+
+		class StringArrayItem : public AbstractItem {
+		public:
+			StringArrayItem(const std::vector<std::u8string>& value) : AbstractItem(), m_Data(value) {}
+			virtual ~StringArrayItem() {}
+			YYCC_DEF_CLS_COPY_MOVE(StringArrayItem);
+		public:
+			const std::vector<std::u8string>& Get() const { return m_Data; }
+		protected:
+			std::vector<std::u8string> m_Data;
+		};
+
+	}
+
+	class ArgumentsMap {
+	public:
+		ArgumentsMap() : m_Data() {}
+		~ArgumentsMap() {}
+		YYCC_DEF_CLS_COPY_MOVE(ArgumentsMap);
+
+	protected:
+		std::map<std::u8string, std::unique_ptr<ArgumentsMapItem::AbstractItem>> m_Data;
+
+	public:
+		template<class _Ty, class... _Types, std::enable_if_t<std::is_base_of_v<ArgumentsMapItem::AbstractItem, _Ty>, int> = 0>
+		void Add(const std::u8string_view& key, _Types&&... args) {
+			// check argument
+			if (key.empty())
+				throw std::invalid_argument("argument key should not be empty");
+			// insert into data
+			auto result = m_Data.try_emplace(std::u8string(key), std::make_unique<_Ty>(std::forward<_Types>(args)...));
+			if (!result.second)
+				throw std::runtime_error("try to add an existing key.");
+		}
+		template<class _Ty, std::enable_if_t<std::is_base_of_v<ArgumentsMapItem::AbstractItem, _Ty>, int> = 0>
+		const _Ty& Get() const {
+			// check argument
+			if (key.empty())
+				throw std::invalid_argument("argument key should not be empty");
+			// find key first
+			auto finder = m_Data.find(std::u8string(key));
+			if (finder == m_Data.end())
+				throw std::runtime_error("try to get a non-existent key.");
+			// get stored value data
+			const ArgumentsMapItem::AbstractItem& value = *finder->second.get();
+			return static_cast<const _Ty&>(value);
+		}
+		void Remove(const std::u8string_view& key) {
+			// check argument
+			if (key.empty())
+				throw std::invalid_argument("argument key should not be empty");
+			// remove and return remove result.
+			if (m_Data.erase(std::u8string(key)) == 0u)
+				throw std::runtime_error("try to delete a non-existent key.");
+		}
+	};
+
+#pragma endregion
 
 	class HelpDocument {
 	public:
 		HelpDocument();
 		~HelpDocument();
-		YYCC_DEL_CLS_COPY_MOVE(HelpDocument);
+		YYCC_DEF_CLS_COPY_MOVE(HelpDocument);
 
-		void Push(const std::string& arg_name, const std::string& arg_desc);
+	public:
+		void Push(const std::u8string& arg_name, const std::u8string& arg_desc);
 		void Pop();
-		void Terminate(std::string& command_desc);
+		void Terminate(std::u8string& command_desc);
 		void Print();
 
 	protected:
 		struct StackItem {
-			StackItem() : m_Name(), m_Desc() {}
-			StackItem(const std::string& name, const std::string& desc) : m_Name(name), m_Desc(desc) {}
+			StackItem();
+			StackItem(const std::u8string& name, const std::u8string& desc);
 			YYCC_DEF_CLS_COPY_MOVE(StackItem);
-			std::string m_Name;
-			std::string m_Desc;
+
+			std::u8string m_Name;
+			std::u8string m_Desc;
 		};
 		std::deque<StackItem> m_Stack;
+
 		struct ResultItem {
-			ResultItem() : m_CmdDesc(), m_ArgDesc() {}
-			ResultItem(const std::string& desc) : m_CmdDesc(desc), m_ArgDesc() {}
+			ResultItem();
+			ResultItem(const std::u8string& cmd_desc, const std::deque<StackItem>& arg_desc);
 			YYCC_DEF_CLS_COPY_MOVE(ResultItem);
-			std::string m_CmdDesc;
+
+			std::u8string m_CmdDesc;
 			std::vector<StackItem> m_ArgDesc;
 		};
 		std::vector<ResultItem> m_Results;
 	};
 
-	enum class NodeType {
-		Literal, Choice, Argument
-	};
-	class ArgumentsMap;
-	using ExecutionFct = std::function<void(const ArgumentsMap*)>;
 	class AbstractNode {
+		friend class CommandRoot;
+	public:
+		using ExecutionFct = void(*)(const ArgumentsMap&);
+
 	public:
 		AbstractNode();
 		virtual ~AbstractNode();
-		YYCC_DEL_CLS_COPY_MOVE(AbstractNode);
+		YYCC_DEF_CLS_COPY_MOVE(AbstractNode);
 
 		AbstractNode* Then(AbstractNode*);
 		AbstractNode* Executes(ExecutionFct, const char* = nullptr);
 		AbstractNode* Comment(const char*);
 
-	public:
-		void Help(HelpDocument*);
-		bool Consume(std::deque<std::string>&, ArgumentsMap*);
-		virtual NodeType GetNodeType() = 0;
-		virtual bool IsConflictWith(AbstractNode*) = 0;
 	protected:
-		virtual std::string GetHelpSymbol() = 0;
-		virtual bool BeginAccept(const std::string&, ArgumentsMap*) = 0;
-		virtual void EndAccept(ArgumentsMap*) = 0;
+		void Help(HelpDocument& doc);
+		bool Consume(CmdSplitter::Result_t& cmds, ArgumentsMap& am);
+		virtual bool IsConflictWith(AbstractNode* node) = 0;
+		virtual bool IsArgument() = 0;
+		virtual std::u8string HelpSymbol() = 0;
+		virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) = 0;
+		virtual void EndConsume(ArgumentsMap*) = 0;
 
-		std::vector<AbstractNode*> m_Literals;
-		std::vector<AbstractNode*> m_Choices;
-		std::vector<AbstractNode*> m_Args;
+	protected:
+		std::vector<std::unique_ptr<AbstractNode>> m_Nodes;
 		ExecutionFct m_Execution;
 		std::string m_ExecutionDesc;
 		std::string m_Comment;
@@ -178,8 +290,8 @@ namespace Unvirt::CmdHelper {
 		YYCC_DEL_CLS_COPY_MOVE(AbstractArgument);
 
 		template<class T>
-		T GetData() { 
-			return reinterpret_cast<T>(m_ParsedData); 
+		T GetData() {
+			return reinterpret_cast<T>(m_ParsedData);
 		}
 
 	public:
@@ -220,7 +332,7 @@ namespace Unvirt::CmdHelper {
 	class StringArgument : public AbstractArgument {
 	public:
 		using vType = std::string;
-		StringArgument(const char* argname) : 
+		StringArgument(const char* argname) :
 			AbstractArgument(argname) {}
 		virtual ~StringArgument() {}
 		YYCC_DEL_CLS_COPY_MOVE(StringArgument);
@@ -233,7 +345,7 @@ namespace Unvirt::CmdHelper {
 	class EncodingArgument : public AbstractArgument {
 	public:
 		using vType = std::vector<std::string>;
-		EncodingArgument(const char* argname) : 
+		EncodingArgument(const char* argname) :
 			AbstractArgument(argname) {}
 		virtual ~EncodingArgument() {}
 		YYCC_DEL_CLS_COPY_MOVE(EncodingArgument);
@@ -241,38 +353,6 @@ namespace Unvirt::CmdHelper {
 	protected:
 		virtual bool BeginParse(const std::string&) override;
 		virtual void EndParse() override;
-	};
-
-	class ArgumentsMap {
-	public:
-		ArgumentsMap() : m_Data() {}
-		~ArgumentsMap() {}
-		YYCC_DEL_CLS_COPY_MOVE(ArgumentsMap);
-
-		void Add(const std::string& k, AbstractNode* v);
-		void Remove(const std::string& k);
-
-		template<class _Ty>
-		_Ty* Get(const char* k) const {
-			if (k == nullptr) throw std::invalid_argument("Null argument name.");
-			std::string conv(k);
-
-			auto finder = m_Data.find(conv);
-			if (finder == m_Data.end()) throw std::invalid_argument("No such argument name.");
-			AbstractNode* node = finder->second;
-			switch (node->GetNodeType()) {
-				case NodeType::Argument:
-					return reinterpret_cast<_Ty*>(dynamic_cast<AbstractArgument*>(node)->GetData<_Ty*>());
-				case NodeType::Choice:
-					return reinterpret_cast<_Ty*>(dynamic_cast<Choice*>(node)->GetIndex());
-				case NodeType::Literal:
-				default:
-					throw std::runtime_error("No such argument type.");
-			}
-		}
-
-	protected:
-		std::unordered_map<std::string, AbstractNode*> m_Data;
 	};
 
 }

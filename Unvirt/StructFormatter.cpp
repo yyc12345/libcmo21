@@ -132,7 +132,7 @@ namespace Unvirt::StructFormatter {
 				beobj->GetID(),
 				AccessibleValue::GetClassIdName(beobj->GetClassID()).c_str(),
 				PrintPointer(beobj).c_str(),
-				PrintCKSTRING(beobj->GetName()).c_str()
+				(beobj != nullptr ? PrintCKSTRING(beobj->GetName()).c_str() : u8"")
 			);
 		}
 	}
@@ -166,16 +166,10 @@ namespace Unvirt::StructFormatter {
 		// print current mesh
 		{
 			auto curmesh = obj->GetCurrentMesh();
-			Console::Format(u8"->\t%s",
-				PrintPointer(curmesh).c_str()
+			Console::Format(u8"->\t%s\t%s",
+				PrintPointer(curmesh).c_str(),
+				(curmesh != nullptr ? PrintCKSTRING(curmesh->GetName()).c_str() : u8"")
 			);
-			if (curmesh != nullptr) {
-				Console::FormatLine(u8"\t%s",
-					PrintCKSTRING(curmesh->GetName()).c_str()
-				);
-			} else {
-				Console::WriteLine(u8"");
-			}
 		}
 		// print other meshes
 		for (LibCmo::CKDWORD i = 0; i < obj->GetPotentialMeshCount(); ++i) {
@@ -183,7 +177,7 @@ namespace Unvirt::StructFormatter {
 			Console::FormatLine(u8"#%" PRIuCKDWORD "\t%s\t%s",
 				i,
 				PrintPointer(thismesh).c_str(),
-				PrintCKSTRING(thismesh->GetName()).c_str()
+				(thismesh != nullptr ? PrintCKSTRING(thismesh->GetName()).c_str() : u8"")
 			);
 		}
 
@@ -239,26 +233,16 @@ namespace Unvirt::StructFormatter {
 		// color
 		Console::WriteLine(u8"== Color ==");
 
-		Console::Write(u8"Diffuse: ");
-		PrintColor(obj->GetDiffuse());
-		Console::Write(u8"\n");
-		Console::Write(u8"Ambient: ");
-		PrintColor(obj->GetAmbient());
-		Console::Write(u8"\n");
-		Console::Write(u8"Specular: ");
-		PrintColor(obj->GetSpecular());
-		Console::Write(u8"\n");
-		Console::Write(u8"Emissive: ");
-		PrintColor(obj->GetEmissive());
-		Console::Write(u8"\n");
+		Console::FormatLine(u8"Diffuse: %s", PrintColor(obj->GetDiffuse()).c_str());
+		Console::FormatLine(u8"Ambient: %s", PrintColor(obj->GetAmbient()).c_str());
+		Console::FormatLine(u8"Specular: %s", PrintColor(obj->GetSpecular()).c_str());
+		Console::FormatLine(u8"Emissive: %s", PrintColor(obj->GetEmissive()).c_str());
 
 		Console::FormatLine(u8"Specular Power: %.2" PRIfCKFLOAT, obj->GetSpecularPower());
 
 		// basic data
 		Console::WriteLine(u8"== Basic ==");
-		Console::Write(u8"Both Sided: ");
-		PrintBool(obj->GetTwoSidedEnabled());
-		Console::Write(u8"\n");
+		Console::FormatLine(u8"Both Sided: %s", PrintBool(obj->GetTwoSidedEnabled()).c_str());
 		Console::FormatLine(u8"Fill Mode: %s", AccessibleValue::GetEnumName(obj->GetFillMode(), AccessibleValue::EnumDesc::VXFILL_MODE).c_str());
 		Console::FormatLine(u8"Shade Mode: %s", AccessibleValue::GetEnumName(obj->GetShadeMode(), AccessibleValue::EnumDesc::VXSHADE_MODE).c_str());
 
@@ -268,48 +252,33 @@ namespace Unvirt::StructFormatter {
 		Console::WriteLine(u8"Index\tAddress\tName");
 		for (LibCmo::CKDWORD i = 0; i < 4; ++i) {
 			auto tex = obj->GetTexture(i);
-			if (tex != nullptr) {
-				Console::FormatLine(u8"#%" PRIuCKDWORD "\t%s\t%s",
-					i,
-					PrintPointer(tex),
-					PrintCKSTRING(tex->GetName()).c_str()
-				);
-			} else {
-				Console::FormatLine(u8"#%" PRIuCKDWORD "\t%s",
-					i,
-					PrintPointer(tex)
-				);
-			}
+			Console::FormatLine(u8"#%" PRIuCKDWORD "\t%s\t%s",
+				i,
+				PrintPointer(tex).c_str(),
+				(tex != nullptr ? PrintCKSTRING(tex->GetName()).c_str() : u8"")
+			);
 		}
 		Console::FormatLine(u8"Texture Blend: %s", AccessibleValue::GetEnumName(obj->GetTextureBlendMode(), AccessibleValue::EnumDesc::VXTEXTURE_BLENDMODE).c_str());
 		Console::FormatLine(u8"Filter Min: %s", AccessibleValue::GetEnumName(obj->GetTextureMinMode(), AccessibleValue::EnumDesc::VXTEXTURE_FILTERMODE).c_str());
 		Console::FormatLine(u8"Filter Mag: %s", AccessibleValue::GetEnumName(obj->GetTextureMagMode(), AccessibleValue::EnumDesc::VXTEXTURE_FILTERMODE).c_str());
 		Console::FormatLine(u8"Address Mode: %s", AccessibleValue::GetEnumName(obj->GetTextureAddressMode(), AccessibleValue::EnumDesc::VXTEXTURE_ADDRESSMODE).c_str());
-		Console::Write(u8"Perspective Correct: ");
-		PrintBool(obj->GetPerspectiveCorrectionEnabled());
-		Console::Write(u8"\n");
+		Console::FormatLine(u8"Perspective Correct: %s", PrintBool(obj->GetPerspectiveCorrectionEnabled()).c_str());
 
 		// alpha test
 		Console::WriteLine(u8"== Alpha Test ==");
-		Console::Write(u8"Enabled: ");
-		PrintBool(obj->GetAlphaTestEnabled());
-		Console::Write(u8"\n");
+		Console::FormatLine(u8"Enabled: %s", PrintBool(obj->GetAlphaTestEnabled()).c_str());
 		Console::FormatLine(u8"Alpha Function: %s", AccessibleValue::GetEnumName(obj->GetAlphaFunc(), AccessibleValue::EnumDesc::VXCMPFUNC).c_str());
 		Console::FormatLine(u8"Alpha Ref Value: %" PRIuCKBYTE, obj->GetAlphaRef());
 
 		// alpha blend
 		Console::WriteLine(u8"== Alpha Blend ==");
-		Console::Write(u8"Enabled: ");
-		PrintBool(obj->GetAlphaBlendEnabled());
-		Console::Write(u8"\n");
+		Console::FormatLine(u8"Enabled: %s", PrintBool(obj->GetAlphaBlendEnabled()).c_str());
 		Console::FormatLine(u8"Source Blend: %s", AccessibleValue::GetEnumName(obj->GetSourceBlend(), AccessibleValue::EnumDesc::VXBLEND_MODE).c_str());
 		Console::FormatLine(u8"Destination Blend: %s", AccessibleValue::GetEnumName(obj->GetDestBlend(), AccessibleValue::EnumDesc::VXBLEND_MODE).c_str());
 
 		// z buffer
 		Console::WriteLine(u8"== Z-Buffer Write ==");
-		Console::Write(u8"Enabled: ");
-		PrintBool(obj->GetZWriteEnabled());
-		Console::Write(u8"\n");
+		Console::FormatLine(u8"Enabled: %s", PrintBool(obj->GetZWriteEnabled()).c_str());
 		Console::FormatLine(u8"Z Compare Function: %s", AccessibleValue::GetEnumName(obj->GetZFunc(), AccessibleValue::EnumDesc::VXCMPFUNC).c_str());
 
 		// effect
@@ -324,7 +293,7 @@ namespace Unvirt::StructFormatter {
 
 		Console::WriteLine(u8"== Flags ==");
 		Console::WriteLine(u8"Mesh Flags:");
-		Console::WriteLine(AccessibleValue::GetFlagEnumName(obj->GetMeshFlags(), AccessibleValue::EnumDesc::VXMESH_FLAGS, u8"\n").c_str());
+		Console::WriteLine(AccessibleValue::GetFlagEnumName(obj->GetMeshFlags(), AccessibleValue::EnumDesc::VXMESH_FLAGS, u8"\n", u8"\t").c_str());
 		Console::FormatLine(u8"Lit Mode: %s", AccessibleValue::GetEnumName(obj->GetLitMode(), AccessibleValue::EnumDesc::VXMESH_LITMODE).c_str());
 		Console::FormatLine(u8"Wrap Mode: %s", AccessibleValue::GetEnumName(obj->GetWrapMode(), AccessibleValue::EnumDesc::VXTEXTURE_WRAPMODE).c_str());
 
@@ -333,26 +302,40 @@ namespace Unvirt::StructFormatter {
 		Console::FormatLine(u8"Vertex Count: %" PRIuCKDWORD, obj->GetVertexCount());
 		Console::WriteLine(u8"Address\tSize\tType");
 
-		PrintPointer(obj->GetVertexPositions());
-		Console::FormatLine(u8"\t0x%" PRIxCKDWORD " bytes\tPositions", obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector3));
-		PrintPointer(obj->GetVertexNormals());
-		Console::FormatLine(u8"\t0x%" PRIxCKDWORD " bytes\tNormals", obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector3));
-		PrintPointer(obj->GetVertexUVs());
-		Console::FormatLine(u8"\t0x%" PRIxCKDWORD " bytes\tUVs", obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector2));
-		PrintPointer(obj->GetVertexColors());
-		Console::FormatLine(u8"\t0x%" PRIxCKDWORD " bytes\tColors", obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD));
-		PrintPointer(obj->GetVertexSpecularColors());
-		Console::FormatLine(u8"\t0x%" PRIxCKDWORD " bytes\tSpecularColors", obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD));
+		Console::FormatLine(u8"%s\t0x%" PRIxCKDWORD " bytes\tPositions",
+			PrintPointer(obj->GetVertexPositions()).c_str(),
+			obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector3)
+		);
+		Console::FormatLine(u8"%s\t0x%" PRIxCKDWORD " bytes\tNormals",
+			PrintPointer(obj->GetVertexNormals()).c_str(),
+			obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector3)
+		);
+		Console::FormatLine(u8"%s\t0x%" PRIxCKDWORD " bytes\tUVs",
+			PrintPointer(obj->GetVertexUVs()).c_str(),
+			obj->GetVertexCount() * CKSizeof(LibCmo::VxMath::VxVector2)
+		);
+		Console::FormatLine(u8"%s\t0x%" PRIxCKDWORD " bytes\tColors",
+			PrintPointer(obj->GetVertexColors()).c_str(),
+			obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD)
+		);
+		Console::FormatLine(u8"%s\t0x%" PRIxCKDWORD " bytes\tSpecularColors",
+			PrintPointer(obj->GetVertexSpecularColors()).c_str(),
+			obj->GetVertexCount() * CKSizeof(LibCmo::CKDWORD)
+		);
 
 		// face data
 		Console::WriteLine(u8"== Face ==");
 		Console::FormatLine(u8"Face Count: %" PRIuCKDWORD, obj->GetFaceCount());
 		Console::WriteLine(u8"Address\tSize\tType");
 
-		PrintPointer(obj->GetFaceIndices());
-		Console::FormatLine(u8"\t0x%" PRIxCKDWORD " bytes\tIndices", obj->GetFaceCount() * 3 * CKSizeof(LibCmo::CKWORD));
-		PrintPointer(obj->GetFaceMaterialSlotIndexs());
-		Console::FormatLine(u8"\t0x%" PRIxCKDWORD " bytes\tMaterialSlotIndexs", obj->GetFaceCount() * CKSizeof(LibCmo::CKWORD));
+		Console::FormatLine(u8"%s\t0x%" PRIxCKDWORD " bytes\tIndices",
+			PrintPointer(obj->GetFaceIndices()).c_str(),
+			obj->GetFaceCount() * 3 * CKSizeof(LibCmo::CKWORD)
+		);
+		Console::FormatLine(u8"%s\t0x%" PRIxCKDWORD " bytes\tMaterialSlotIndexs",
+			PrintPointer(obj->GetFaceMaterialSlotIndexs()).c_str(),
+			obj->GetFaceCount() * CKSizeof(LibCmo::CKWORD)
+		);
 
 		// mtl slot data
 		Console::WriteLine(u8"== Material Slot ==");
@@ -363,12 +346,11 @@ namespace Unvirt::StructFormatter {
 		for (LibCmo::CKDWORD i = 0; i < slotcount; ++i) {
 			LibCmo::CK2::ObjImpls::CKMaterial* mtl = pMtlSlots[i];
 
-			Console::Format(u8"#%" PRIuCKDWORD "\t", i);
-			PrintPointer(mtl);
-			Console::Write(u8"\t");
-			if (mtl != nullptr)
-				PrintCKSTRING(mtl->GetName());
-			Console::Write(u8"\n");
+			Console::FormatLine(u8"#%" PRIuCKDWORD "\t%s\t%s",
+				i,
+				PrintPointer(mtl).c_str(),
+				(mtl != nullptr ? PrintCKSTRING(mtl->GetName()).c_str() : u8"")
+			);
 		}
 
 	}
@@ -437,27 +419,27 @@ namespace Unvirt::StructFormatter {
 	}
 	static void PrintObjectListEntry(const LibCmo::CK2::CKFileObject& obj, const LibCmo::CK2::CKFileInfo& fileinfo, size_t entry_index, bool full_detail) {
 		if (full_detail) {
-			Console::FormatLine(u8"0x%08" PRIxCKDWORD, obj.SaveFlags);
-			Console::FormatLine(u8"\t%s", AccessibleValue::GetEnumName(obj.Options, AccessibleValue::EnumDesc::CK_FO_OPTIONS).c_str());
+			Console::Format(u8"0x%08" PRIxCKDWORD "\t", obj.SaveFlags);
+			Console::Format(u8"%s\t", AccessibleValue::GetEnumName(obj.Options, AccessibleValue::EnumDesc::CK_FO_OPTIONS).c_str());
 
-			Console::FormatLine(u8"\t%" PRIuCKID "\t%" PRIuCKID,
+			Console::Format(u8"%" PRIuCKID "\t%" PRIuCKID "\t",
 				obj.CreatedObjectId,
 				obj.ObjectId
 			);
 
-			Console::FormatLine(u8"\t0x%08" PRIxCKDWORD " (Rel: 0x%08" PRIxCKDWORD ")",
+			Console::Format(u8"0x%08" PRIxCKDWORD " (Rel: 0x%08" PRIxCKDWORD ")\t",
 				obj.FileIndex,
 				obj.FileIndex - CKSizeof(LibCmo::CK2::CKRawFileInfo) - fileinfo.Hdr1UnPackSize
 			);
-			Console::FormatLine(u8"\t0x%08" PRIxCKDWORD, obj.PackSize);
+			Console::Format(u8"0x%08" PRIxCKDWORD "\t", obj.PackSize);
 		}
 		// following items are shared by full details and simple layout
-		Console::FormatLine(u8"\t#%" PRIuSIZET "\t%s\t%s\t%s\t%s",
+		Console::FormatLine(u8"#%" PRIuSIZET "\t%s\t%s\t%s\t%s",
 			entry_index,
 			AccessibleValue::GetClassIdName(obj.ObjectCid).c_str(),
 			PrintColorfulBool(obj.ObjPtr != nullptr).c_str(),
 			PrintColorfulBool(obj.Data != nullptr).c_str(),
-			PrintCKSTRING(LibCmo::XContainer::NSXString::ToCKSTRING(obj.Name))
+			PrintCKSTRING(LibCmo::XContainer::NSXString::ToCKSTRING(obj.Name)).c_str()
 		);
 	}
 	void PrintObjectList(
@@ -648,7 +630,7 @@ namespace Unvirt::StructFormatter {
 		Console::WriteLine(YYCC_COLOR_LIGHT_YELLOW(u8"Identifiers"));
 		Console::WriteLine(u8"Identifier\tData Pointer\tData Size");
 		for (const auto& ident : collection) {
-			Console::FormatLine(u8"0x%08" PRIxCKDWORD "\t%s\t%" PRIuCKDWORD " (%" PRIuCKDWORD " DWORD + %" PRIuCKDWORD ")\n",
+			Console::FormatLine(u8"0x%08" PRIxCKDWORD "\t%s\t%" PRIuCKDWORD " (%" PRIuCKDWORD " DWORD + %" PRIuCKDWORD ")",
 				ident.m_Identifier,
 				PrintPointer(ident.m_DataPtr).c_str(),
 				ident.m_AreaSize,

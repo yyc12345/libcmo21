@@ -6,7 +6,6 @@ PRIVATE
 	AccessibleValue.cpp
 	CmdHelper.cpp
 	StructFormatter.cpp
-	TerminalHelper.cpp
 	UnvirtContext.cpp
 	Unvirt.cpp
 )
@@ -18,7 +17,6 @@ FILES
 	AccessibleValue.hpp
 	CmdHelper.hpp
 	StructFormatter.hpp
-	TerminalHelper.hpp
 	UnvirtContext.hpp
 )
 # Setup header infomation

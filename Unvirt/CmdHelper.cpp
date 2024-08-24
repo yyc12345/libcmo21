@@ -4,24 +4,30 @@ namespace Unvirt::CmdHelper {
 
 #pragma region CmdSplitter
 
-	std::deque<std::string> CmdSplitter::Convert(const std::string& u8cmd) {
-		// set up variables
-		std::deque<std::string> result;
-		std::string buffer;
-		mBuffer = &buffer;
-		mResult = &result;
-		mState = mPreState = StateType::SPACE;
+	const std::deque<std::u8string>& CmdSplitter::GetResult() const {
+		if (!m_ValidResult)
+			throw std::runtime_error("try to get result from an invalid CmdSplitter.");
+		return m_Result;
+	}
+
+	bool CmdSplitter::Convert(const std::u8string& u8cmd) {
+		// Clear variables
+		m_ValidResult = false;
+		m_Result.clear();
+		m_Buffer.clear();
+		m_CurrentChar = u8'\0';
+		m_State = m_PrevState = StateType::SPACE;
 
 		// split
-		for (auto& c : u8cmd) {
-			mCmdChar = c;
+		for (char8_t c : u8cmd) {
+			m_CurrentChar = c;
 
-			// skip all invalid characters, \0 and etc.
-			// mCmdChar >= 0 to ensure all non-ASCII UTF8 char can be accepted directly.
-			if (mCmdChar >= 0 && (!std::isprint(mCmdChar)))
+			// skip all invalid characters (ascii code unit lower than space char)
+			// thus UTF8 code unit can directly accepted.
+			if (m_CurrentChar < u8' ')
 				continue;
 
-			switch (mState) {
+			switch (m_State) {
 				case StateType::SPACE:
 					ProcSpace();
 					break;
@@ -41,113 +47,128 @@ namespace Unvirt::CmdHelper {
 		}
 
 		// final proc
-		switch (mState) {
+		bool is_success = false;
+		switch (m_State) {
 			case StateType::SPACE:
+				is_success = true;
 				break;
 			case StateType::NORMAL:
 				// push the last one
-				mResult->push_back(*mBuffer);
+				m_Result.emplace_back(m_Buffer);
+				is_success = true;
 				break;
 			case StateType::SINGLE:
 			case StateType::DOUBLE:
 			case StateType::ESCAPE:
 				// error
-				result.clear();
+				is_success = false;
 				break;
+			default:
+				throw std::runtime_error("unreachable code.");
 		}
 
-		// return value
-		return result;
+		// check success
+		if (is_success) {
+			m_ValidResult = true;
+			return true;
+		} else {
+			m_Result.clear();
+			return false;
+		}
 	}
 
-	void CmdSplitter::ProcSpace(void) {
-		switch (mCmdChar) {
-			case '\'':
-				mState = StateType::SINGLE;
+	void CmdSplitter::ProcSpace() {
+		switch (m_CurrentChar) {
+			case u8'\'':
+				m_State = StateType::SINGLE;
 				break;
-			case '"':
-				mState = StateType::DOUBLE;
+			case u8'"':
+				m_State = StateType::DOUBLE;
 				break;
-			case '\\':
-				mState = StateType::ESCAPE;
-				mPreState = StateType::NORMAL;
+			case u8'\\':
+				m_State = StateType::ESCAPE;
+				m_PrevState = StateType::NORMAL;
 				break;
-			case ' ':
+			case u8' ':
 				break;	// skip blank
 			default:
-				mBuffer->push_back(mCmdChar);
-				mState = StateType::NORMAL;
+				m_Buffer.push_back(m_CurrentChar);
+				m_State = StateType::NORMAL;
 				break;
 		}
 	}
-	void CmdSplitter::ProcSingle(void) {
-		switch (mCmdChar) {
-			case '\'':
-				mState = StateType::NORMAL;
+	void CmdSplitter::ProcSingle() {
+		switch (m_CurrentChar) {
+			case u8'\'':
+				m_State = StateType::NORMAL;
 				break;
-			case '"':
-				mBuffer->push_back('"');
+			case u8'"':
+				m_Buffer.push_back('"');
 				break;
-			case '\\':
-				mState = StateType::ESCAPE;
-				mPreState = StateType::SINGLE;
+			case u8'\\':
+				m_State = StateType::ESCAPE;
+				m_PrevState = StateType::SINGLE;
 				break;
-			case ' ':
-				mBuffer->push_back(' ');
+			case u8' ':
+				m_Buffer.push_back(u8' ');
 				break;
 			default:
-				mBuffer->push_back(mCmdChar);
+				m_Buffer.push_back(m_CurrentChar);
 				break;
 		}
 	}
-	void CmdSplitter::ProcDouble(void) {
-		switch (mCmdChar) {
-			case '\'':
-				mBuffer->push_back('\'');
+	void CmdSplitter::ProcDouble() {
+		switch (m_CurrentChar) {
+			case u8'\'':
+				m_Buffer.push_back(u8'\'');
 				break;
-			case '"':
-				mState = StateType::NORMAL;
+			case u8'"':
+				m_State = StateType::NORMAL;
 				break;
-			case '\\':
-				mState = StateType::ESCAPE;
-				mPreState = StateType::DOUBLE;
+			case u8'\\':
+				m_State = StateType::ESCAPE;
+				m_PrevState = StateType::DOUBLE;
 				break;
-			case ' ':
-				mBuffer->push_back(' ');
+			case u8' ':
+				m_Buffer.push_back(u8' ');
 				break;
 			default:
-				mBuffer->push_back(mCmdChar);
+				m_Buffer.push_back(m_CurrentChar);
 				break;
 		}
 	}
-	void CmdSplitter::ProcEscape(void) {
+	void CmdSplitter::ProcEscape() {
 		// add itself
-		mBuffer->push_back(mCmdChar);
+		m_Buffer.push_back(m_CurrentChar);
 		// restore state
-		mState = mPreState;
+		m_State = m_PrevState;
 	}
-	void CmdSplitter::ProcNormal(void) {
-		switch (mCmdChar) {
-			case '\'':
-				mBuffer->push_back('\'');
+	void CmdSplitter::ProcNormal() {
+		switch (m_CurrentChar) {
+			case u8'\'':
+				m_Buffer.push_back(u8'\'');
 				break;
-			case '"':
-				mBuffer->push_back('"');
+			case u8'"':
+				m_Buffer.push_back(u8'"');
 				break;
-			case '\\':
-				mState = StateType::ESCAPE;
-				mPreState = StateType::NORMAL;
+			case u8'\\':
+				m_State = StateType::ESCAPE;
+				m_PrevState = StateType::NORMAL;
 				break;
-			case ' ':
-				mResult->push_back(*mBuffer);
-				mBuffer->clear();
-				mState = StateType::SPACE;
+			case u8' ':
+				m_Result.emplace_back(m_Buffer);
+				m_Buffer.clear();
+				m_State = StateType::SPACE;
 				break;
 			default:
-				mBuffer->push_back(mCmdChar);
+				m_Buffer.push_back(m_CurrentChar);
 				break;
 		}
 	}
+#pragma endregion
+
+#pragma region Arguments Map
+
 #pragma endregion
 
 #pragma region Help Document
@@ -156,42 +177,53 @@ namespace Unvirt::CmdHelper {
 
 	HelpDocument::~HelpDocument() {}
 
-	void HelpDocument::Push(const std::string& arg_name, const std::string& arg_desc) {
+	HelpDocument::StackItem::StackItem() : m_Name(), m_Desc() {}
+
+	HelpDocument::StackItem::StackItem(const std::u8string& name, const std::u8string& desc) : m_Name(name), m_Desc(desc) {}
+
+	HelpDocument::ResultItem::ResultItem() : m_CmdDesc(), m_ArgDesc() {}
+
+	HelpDocument::ResultItem::ResultItem(const std::u8string& cmd_desc, const std::deque<StackItem>& arg_desc) :
+		m_CmdDesc(cmd_desc), m_ArgDesc(arg_desc.begin(), arg_desc.end()) {}
+
+	void HelpDocument::Push(const std::u8string& arg_name, const std::u8string& arg_desc) {
 		m_Stack.emplace_back(StackItem { arg_name, arg_desc });
 	}
 
 	void HelpDocument::Pop() {
+		if (m_Stack.empty())
+			throw std::runtime_error("try pop back on an empty help document.");
 		m_Stack.pop_back();
 	}
 
-	void HelpDocument::Terminate(std::string& command_desc) {
-		// create new result and copy stack
-		ResultItem result(command_desc);
-		result.m_ArgDesc.insert(result.m_ArgDesc.end(), m_Stack.begin(), m_Stack.end());
+	void HelpDocument::Terminate(std::u8string& command_desc) {
+		// create new result
+		ResultItem result(command_desc, this->m_Stack);
 		// add into result
 		m_Results.emplace_back(std::move(result));
 	}
 
 	void HelpDocument::Print() {
-		for (auto& item : m_Results) {
-			fputs("Syntax: ", stdout);
-			for (auto& cmd : item.m_ArgDesc) {
-				fputs(cmd.m_Name.c_str(), stdout);
-				fputc(' ', stdout);
+		for (auto& cmd : m_Results) {
+			// syntax
+			YYCC::ConsoleHelper::WriteLine(u8"Syntax: ");
+			for (const auto& arg : cmd.m_ArgDesc) {
+				YYCC::ConsoleHelper::Format(u8"%s ", arg.m_Name.c_str());
 			}
-			fputc('\n', stdout);
-
-			if (!item.m_CmdDesc.empty()) {
-				fprintf(stdout, "Description: %s\n", item.m_CmdDesc.c_str());
+			YYCC::ConsoleHelper::WriteLine(u8"");
+			// command description
+			if (!cmd.m_CmdDesc.empty()) {
+				YYCC::ConsoleHelper::FormatLine(u8"Description: %s", cmd.m_CmdDesc.c_str());
 			}
-
-			for (auto& cmd : item.m_ArgDesc) {
-				if (!cmd.m_Desc.empty()) {
-					fprintf(stdout, "\t%s: %s\n", cmd.m_Name.c_str(), cmd.m_Desc.c_str());
+			// argument description
+			YYCC::ConsoleHelper::WriteLine(u8"Arguments:");
+			for (auto& arg : cmd.m_ArgDesc) {
+				if (!arg.m_Desc.empty()) {
+					YYCC::ConsoleHelper::FormatLine(u8"\t%s: %s", arg.m_Name.c_str(), arg.m_Desc.c_str());
 				}
 			}
-
-			fputc('\n', stdout);
+			// space between each commands
+			YYCC::ConsoleHelper::WriteLine(u8"");
 		}
 	}
 
@@ -406,8 +438,8 @@ namespace Unvirt::CmdHelper {
 
 #pragma region Literal
 
-	Literal::Literal(const char* words) : 
-		AbstractNode(), 
+	Literal::Literal(const char* words) :
+		AbstractNode(),
 		m_Literal(words == nullptr ? "" : words) {
 		if (words == nullptr || m_Literal.empty())
 			throw std::invalid_argument("Invalid literal.");
@@ -536,7 +568,7 @@ namespace Unvirt::CmdHelper {
 
 	AbstractArgument::AbstractArgument(const char* argname) :
 		AbstractNode(),
-		m_ArgName(argname == nullptr ? "" : argname), 
+		m_ArgName(argname == nullptr ? "" : argname),
 		m_Accepted(false), m_ParsedData(nullptr) {
 		if (argname == nullptr || m_ArgName.empty())
 			throw std::invalid_argument("Invalid argument name.");
@@ -648,18 +680,6 @@ namespace Unvirt::CmdHelper {
 	void EncodingArgument::EndParse() {
 		delete reinterpret_cast<EncodingArgument::vType*>(m_ParsedData);
 		m_ParsedData = nullptr;
-	}
-
-#pragma endregion
-
-#pragma region Argument Map
-
-	void ArgumentsMap::Add(const std::string& k, AbstractNode* v) {
-		m_Data.emplace(std::make_pair(k, v));
-	}
-
-	void ArgumentsMap::Remove(const std::string& k) {
-		m_Data.erase(k);
 	}
 
 #pragma endregion
