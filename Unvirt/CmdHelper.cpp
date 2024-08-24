@@ -169,6 +169,10 @@ namespace Unvirt::CmdHelper {
 
 #pragma region Arguments Map
 
+	ArgumentsMap::ArgumentsMap() : m_Data() {}
+
+	ArgumentsMap::~ArgumentsMap() {}
+
 #pragma endregion
 
 #pragma region Help Document
@@ -229,159 +233,287 @@ namespace Unvirt::CmdHelper {
 
 #pragma endregion
 
+	namespace Nodes {
+
 #pragma region Abstract Node
 
-	AbstractNode::AbstractNode() :
-		m_Execution(nullptr), m_Comment(),
-		m_Literals(), m_Choices(), m_Args() {}
+		AbstractNode::AbstractNode() :
+			m_Execution(nullptr), m_Comment(), m_Nodes() {}
 
-	AbstractNode::~AbstractNode() {
-		for (auto& ptr : m_Literals) {
-			delete ptr;
-		}
-		for (auto& ptr : m_Choices) {
-			delete ptr;
-		}
-		for (auto& ptr : m_Args) {
-			delete ptr;
-		}
-	}
+		AbstractNode::~AbstractNode() {}
 
-	AbstractNode* AbstractNode::Then(AbstractNode* node) {
-		// check conflict
-		for (auto& pnode : m_Literals) {
-			if (pnode->IsConflictWith(node))
-				throw std::invalid_argument("conflict node.");
-		}
-		for (auto& pnode : m_Choices) {
-			if (pnode->IsConflictWith(node))
-				throw std::invalid_argument("conflict node.");
-		}
-		for (auto& pnode : m_Args) {
-			if (pnode->IsConflictWith(node))
-				throw std::invalid_argument("conflict node.");
+		AbstractNode& AbstractNode::Executes(FctExecution_t fct, const std::u8string_view& exec_desc) {
+			if (m_Execution != nullptr)
+				throw std::invalid_argument("you should not assign execution multiuple times.");
+			if (fct == nullptr)
+				throw std::invalid_argument("the function passed for executing should not be nullptr.");
+			m_Execution = fct;
+			m_ExecutionDesc = exec_desc;
+			return *this;
 		}
 
-		// add into list
-		switch (node->GetNodeType()) {
-			case NodeType::Literal:
-				m_Literals.emplace_back(node);
-				break;
-			case NodeType::Choice:
-				m_Choices.emplace_back(node);
-				break;
-			case NodeType::Argument:
-				m_Args.emplace_back(node);
-				break;
-			default:
-				throw std::runtime_error("No such node type.");
+		AbstractNode& AbstractNode::Comment(const std::u8string_view& comment) {
+			m_Comment = comment;
+			return *this;
 		}
 
-		return this;
-	}
+		void AbstractNode::Help(HelpDocument& doc) {
+			// Push self symbol to help document stack.
+			doc.Push(GetHelpSymbol(), m_Comment);
 
-	AbstractNode* AbstractNode::Executes(ExecutionFct fct, const char* cmt) {
-		if (m_Execution != nullptr) throw std::invalid_argument("duplicated executions.");
-		if (fct == nullptr)  throw std::invalid_argument("no function.");
-		m_Execution = fct;
-		m_ExecutionDesc = cmt == nullptr ? "" : cmt;
-		return this;
-	}
+			// Check whether this node is terminal.
+			// If it is, terminate it once.
+			if (m_Execution != nullptr) {
+				doc.Terminate(m_ExecutionDesc);
+			}
 
-	AbstractNode* AbstractNode::Comment(const char* cmt) {
-		if (cmt == nullptr)
-			throw std::invalid_argument("no comment.");
-		m_Comment = cmt;
-		return this;
-	}
+			// Then process its children nodes.
+			for (auto& node : m_Nodes) {
+				node->Help(doc);
+			}
 
-	void AbstractNode::Help(HelpDocument* doc) {
-		// add self
-		std::string symbol(GetHelpSymbol());
-		doc->Push(symbol, m_Comment);
-
-		// check terminal
-		if (m_Execution != nullptr) {
-			doc->Terminate(m_ExecutionDesc);
+			// Pop self from help document stack
+			doc.Pop();
 		}
 
-		// iterate children
-		for (auto& pnode : m_Literals) {
-			pnode->Help(doc);
-		}
-		for (auto& pnode : m_Choices) {
-			pnode->Help(doc);
-		}
-		for (auto& pnode : m_Args) {
-			pnode->Help(doc);
-		}
+		bool AbstractNode::Consume(CmdSplitter::Result_t& al, ArgumentsMap& am) {
+			// if no data can consume, return
+			if (al.empty()) return false;
 
-		// pop self
-		doc->Pop();
-	}
+			// backup current value
+			std::u8string cur_cmd = al.front();
+			// consume self
+			if (!BeginConsume(cur_cmd, am)) {
+				// fail to consume self. not matched. return
+				return false;
+			}
 
-	bool AbstractNode::Consume(std::deque<std::string>& arglist, ArgumentsMap* argmap) {
-		// if no data can consume, return
-		if (arglist.empty()) return false;
-
-		// backup current value
-		std::string cur = arglist.front();
-		// consume self
-		if (!BeginAccept(cur, argmap)) {
-			// fail to consume self. not matched. return
-			return false;
-		}
-
-		// pop front for following code
-		arglist.pop_front();
+			// pop front for processing child nodes.
+			al.pop_front();
 
 #define CONSUME_DEFER \
-	arglist.push_front(cur); \
-	EndAccept(argmap);
+	al.emplace_front(cur_cmd); \
+	EndConsume(am);
 
-		if (arglist.empty()) {
-			// this is must be a terminal.
-			// check whether we have execution.
-			if (m_Execution == nullptr) {
+			if (al.empty()) {
+				// if no more data for parsing.
+				// this is must be a terminal.
+				// check whether we have execution.
+				if (m_Execution == nullptr) {
+					CONSUME_DEFER;
+					return false;
+				} else {
+					m_Execution(am);
+					CONSUME_DEFER;
+					return true;
+				}
+			} else {
+				// still have data to be parsed. try  to match them.
+				// iterate node list to find the real terminal
+				// however, we need iterate literal and choice first, the iterate argument.
+				for (auto& node : m_Nodes) {
+					if (node->IsArgument()) continue;
+					if (node->Consume(al, am)) {
+						CONSUME_DEFER;
+						return true;
+					}
+				}
+				for (auto& node : m_Nodes) {
+					if (!node->IsArgument()) continue;
+					if (node->Consume(al, am)) {
+						CONSUME_DEFER;
+						return true;
+					}
+				}
+
+				// if still nothing to match, return false
 				CONSUME_DEFER;
 				return false;
-			} else {
-				m_Execution(argmap);
-				CONSUME_DEFER;
-				return true;
 			}
-		} else {
-			// have following command, try match them
-			// iterate literal and argument to check terminal
-			for (auto& pnode : m_Literals) {
-				if (pnode->Consume(arglist, argmap)) {
-					CONSUME_DEFER;
-					return true;
-				}
-			}
-			for (auto& pnode : m_Choices) {
-				if (pnode->Consume(arglist, argmap)) {
-					CONSUME_DEFER;
-					return true;
-				}
-			}
-			for (auto& pnode : m_Args) {
-				if (pnode->Consume(arglist, argmap)) {
-					CONSUME_DEFER;
-					return true;
-				}
-			}
-
-			// if still nothing to match, return false
-			CONSUME_DEFER;
-			return false;
-		}
 
 #undef CONSUME_DEFER
 
-	}
+		}
 
 #pragma endregion
+
+#pragma region Literal
+
+		Literal::Literal(const std::u8string_view& words) :
+			AbstractNode(), m_Literal(words), m_ConflictSet { m_Literal } {
+			if (words.empty())
+				throw std::invalid_argument("The word of literal node should not be empty.");
+		}
+
+		Literal::~Literal() {}
+
+		bool Literal::IsArgument() { return false; }
+		const std::set<std::u8string>& Literal::GetConflictSet() { return m_ConflictSet; }
+		std::u8string Literal::GetHelpSymbol() { return m_Literal; }
+		bool Literal::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) { return cur_cmd == m_Literal; }
+		void Literal::EndConsume(ArgumentsMap& am) {}
+
+#pragma endregion
+
+#pragma region Choice
+
+		Choice::Choice(const std::u8string_view& argname, const std::initializer_list<std::u8string>& vocabulary) :
+			AbstractNode(),
+			m_ChoiceName(argname), m_Vocabulary(vocabulary),
+			m_ConflictSet() {
+			// check argument
+			if (argname.empty())
+				throw std::invalid_argument("Choice argument name should not be empty.");
+			if (m_Vocabulary.size() < 2u)
+				throw std::invalid_argument("Too less vocabulary for choice. At least 2 items.");
+			// init conflict set
+			m_ConflictSet.insert(m_ChoiceName);
+			m_ConflictSet.insert(m_Vocabulary.begin(), m_Vocabulary.end());
+		}
+
+		Choice::~Choice() {}
+
+		bool Choice::IsArgument() { return false; }
+		const std::set<std::u8string>& Choice::GetConflictSet() { return m_ConflictSet; }
+		std::u8string Choice::GetHelpSymbol() {
+			return YYCC::StringHelper::Printf(u8"[%s]",
+				YYCC::StringHelper::Join(m_Vocabulary, u8" | ").c_str()
+			);
+		}
+		bool Choice::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) {
+			for (size_t i = 0; i < m_Vocabulary.size(); ++i) {
+				if (cur_cmd == m_Vocabulary[i]) {
+					am.Add<AMItems::StringItem>(m_ChoiceName, cur_cmd);
+					return true;
+				}
+			}
+			return false;
+		}
+		void Choice::EndConsume(ArgumentsMap& am) { am.Remove(m_ChoiceName); }
+
+#pragma endregion
+
+#pragma region Abstract Argument
+
+		AbstractArgument::AbstractArgument(const std::u8string_view& argname) :
+			AbstractNode(),
+			m_ArgName(argname == nullptr ? "" : argname),
+			m_Accepted(false), m_ParsedData(nullptr) {
+			if (argname == nullptr || m_ArgName.empty())
+				throw std::invalid_argument("Invalid argument name.");
+		}
+
+		AbstractArgument::~AbstractArgument() {}
+
+		NodeType AbstractArgument::GetNodeType() {
+			return NodeType::Argument;
+		}
+
+		bool AbstractArgument::IsConflictWith(AbstractNode* node) {
+			switch (node->GetNodeType()) {
+				case NodeType::Literal:
+					return false;
+				case NodeType::Choice:
+					return m_ArgName == dynamic_cast<Choice*>(node)->m_ChoiceName;
+				case NodeType::Argument:
+					return m_ArgName == dynamic_cast<AbstractArgument*>(node)->m_ArgName;
+				default:
+					throw std::runtime_error("No such node type.");
+			}
+		}
+
+		std::string AbstractArgument::GetHelpSymbol() {
+			std::string newargname = "<";
+			newargname.append(m_ArgName);
+			newargname.append(">");
+			return newargname;
+		}
+
+		bool AbstractArgument::BeginAccept(const std::string& strl, ArgumentsMap* amap) {
+			m_Accepted = BeginParse(strl);
+			if (m_Accepted) amap->Add(m_ArgName, this);
+			return m_Accepted;
+		}
+
+		void AbstractArgument::EndAccept(ArgumentsMap* amap) {
+			if (m_Accepted) {
+				amap->Remove(m_ArgName);
+				EndParse();
+				m_Accepted = false;
+			}
+		}
+
+#pragma endregion
+
+#pragma region Argument Detail Impl
+
+		bool IntArgument::BeginParse(const std::string& val) {
+			char* pend = nullptr;
+			errno = 0;
+			int64_t v = std::strtoll(val.c_str(), &pend, 10);
+
+			if (pend == val.c_str() || errno == ERANGE) return false;
+
+			// check limit
+			int32_t value = static_cast<int32_t>(v);
+			if (m_IntLimit != nullptr && !m_IntLimit(value)) {
+				return false;
+			}
+
+			m_ParsedData = new IntArgument::vType(value);
+			return true;
+		}
+
+		void IntArgument::EndParse() {
+			delete reinterpret_cast<IntArgument::vType*>(m_ParsedData);
+			m_ParsedData = nullptr;
+		}
+
+		bool StringArgument::BeginParse(const std::string& strl) {
+			// string always accept every text
+			m_ParsedData = new StringArgument::vType(strl);
+			return true;
+		}
+
+		void StringArgument::EndParse() {
+			delete reinterpret_cast<StringArgument::vType*>(m_ParsedData);
+			m_ParsedData = nullptr;
+		}
+
+		// Copy from Gamepiaynmo/BallanceModLoader
+		std::vector<std::string> SplitString(const std::string& str, const std::string& de) {
+			size_t lpos, pos = 0;
+			std::vector<std::string> res;
+
+			lpos = str.find_first_not_of(de, pos);
+			while (lpos != std::string::npos) {
+				pos = str.find_first_of(de, lpos);
+				res.push_back(str.substr(lpos, pos - lpos));
+				if (pos == std::string::npos) break;
+
+				lpos = str.find_first_not_of(de, pos);
+			}
+
+			if (pos != std::string::npos)
+				res.push_back("");
+
+			return res;
+		}
+
+		bool EncodingArgument::BeginParse(const std::string& strl) {
+			// encoding always accept every text
+			m_ParsedData = new EncodingArgument::vType(SplitString(strl, ","));
+			return true;
+		}
+
+		void EncodingArgument::EndParse() {
+			delete reinterpret_cast<EncodingArgument::vType*>(m_ParsedData);
+			m_ParsedData = nullptr;
+		}
+
+#pragma endregion
+
+	}
 
 #pragma region Command Root
 
@@ -432,254 +564,6 @@ namespace Unvirt::CmdHelper {
 		}
 
 		return doc;
-	}
-
-#pragma endregion
-
-#pragma region Literal
-
-	Literal::Literal(const char* words) :
-		AbstractNode(),
-		m_Literal(words == nullptr ? "" : words) {
-		if (words == nullptr || m_Literal.empty())
-			throw std::invalid_argument("Invalid literal.");
-	}
-
-	Literal::~Literal() {}
-
-	NodeType Literal::GetNodeType() {
-		return NodeType::Literal;
-	}
-
-	bool Literal::IsConflictWith(AbstractNode* node) {
-		switch (node->GetNodeType()) {
-			case NodeType::Literal:
-				return dynamic_cast<Literal*>(node)->m_Literal == m_Literal;
-			case NodeType::Choice:
-				for (const auto& item : dynamic_cast<Choice*>(node)->m_Vocabulary) {
-					if (item == m_Literal) return true;
-				}
-				return false;
-			case NodeType::Argument:
-				return false;
-			default:
-				throw std::runtime_error("No such node type.");
-		}
-	}
-
-	std::string Literal::GetHelpSymbol() {
-		return m_Literal;
-	}
-
-	bool Literal::BeginAccept(const std::string& strl, ArgumentsMap*) {
-		return strl == m_Literal;
-	}
-
-	void Literal::EndAccept(ArgumentsMap*) {}
-
-#pragma endregion
-
-#pragma region Choice
-
-	Choice::Choice(const char* argname, const std::initializer_list<std::string>& vocabulary) :
-		AbstractNode(),
-		m_GottenIndex(0u), m_Accepted(false),
-		m_ChoiceName(argname == nullptr ? "" : argname), m_Vocabulary(vocabulary) {
-		if (argname == nullptr || m_ChoiceName.empty())
-			throw std::invalid_argument("Invalid choice name.");
-		if (m_Vocabulary.size() < 2)
-			throw std::invalid_argument("Too less vocabulary. At least 2 items.");
-	}
-
-	Choice::~Choice() {}
-
-	size_t* Choice::GetIndex() {
-		return &m_GottenIndex;
-	}
-
-	NodeType Choice::GetNodeType() {
-		return NodeType::Choice;
-	}
-
-	bool Choice::IsConflictWith(AbstractNode* node) {
-		switch (node->GetNodeType()) {
-			case NodeType::Literal:
-			{
-				Literal* pliteral = dynamic_cast<Literal*>(node);
-				for (const auto& word : m_Vocabulary) {
-					if (word == pliteral->m_Literal)
-						return true;
-				}
-				return false;
-			}
-			case NodeType::Choice:
-			{
-				Choice* pchoice = dynamic_cast<Choice*>(node);
-				if (pchoice->m_ChoiceName == m_ChoiceName)
-					return true;
-
-				for (const auto& thisword : m_Vocabulary) {
-					for (const auto& thatword : pchoice->m_Vocabulary) {
-						if (thisword == thatword)
-							return true;
-					}
-				}
-				return false;
-			}
-			case NodeType::Argument:
-				return m_ChoiceName == dynamic_cast<AbstractArgument*>(node)->m_ArgName;
-			default:
-				throw std::runtime_error("No such node type.");
-		}
-	}
-
-	std::string Choice::GetHelpSymbol() {
-		std::string switches;
-		for (const auto& item : m_Vocabulary) {
-			if (!switches.empty()) switches += " | ";
-			switches += item;
-		}
-		return "[" + switches + "]";
-	}
-
-	bool Choice::BeginAccept(const std::string& strl, ArgumentsMap* amap) {
-		for (size_t i = 0; i < m_Vocabulary.size(); ++i) {
-			if (strl == m_Vocabulary[i]) {
-				m_Accepted = true;
-				m_GottenIndex = i;
-				amap->Add(m_ChoiceName, this);
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	void Choice::EndAccept(ArgumentsMap* amap) {
-		if (m_Accepted) {
-			m_Accepted = false;
-			amap->Remove(m_ChoiceName);
-		}
-	}
-
-#pragma endregion
-
-#pragma region Abstract Argument
-
-	AbstractArgument::AbstractArgument(const char* argname) :
-		AbstractNode(),
-		m_ArgName(argname == nullptr ? "" : argname),
-		m_Accepted(false), m_ParsedData(nullptr) {
-		if (argname == nullptr || m_ArgName.empty())
-			throw std::invalid_argument("Invalid argument name.");
-	}
-
-	AbstractArgument::~AbstractArgument() {}
-
-	NodeType AbstractArgument::GetNodeType() {
-		return NodeType::Argument;
-	}
-
-	bool AbstractArgument::IsConflictWith(AbstractNode* node) {
-		switch (node->GetNodeType()) {
-			case NodeType::Literal:
-				return false;
-			case NodeType::Choice:
-				return m_ArgName == dynamic_cast<Choice*>(node)->m_ChoiceName;
-			case NodeType::Argument:
-				return m_ArgName == dynamic_cast<AbstractArgument*>(node)->m_ArgName;
-			default:
-				throw std::runtime_error("No such node type.");
-		}
-	}
-
-	std::string AbstractArgument::GetHelpSymbol() {
-		std::string newargname = "<";
-		newargname.append(m_ArgName);
-		newargname.append(">");
-		return newargname;
-	}
-
-	bool AbstractArgument::BeginAccept(const std::string& strl, ArgumentsMap* amap) {
-		m_Accepted = BeginParse(strl);
-		if (m_Accepted) amap->Add(m_ArgName, this);
-		return m_Accepted;
-	}
-
-	void AbstractArgument::EndAccept(ArgumentsMap* amap) {
-		if (m_Accepted) {
-			amap->Remove(m_ArgName);
-			EndParse();
-			m_Accepted = false;
-		}
-	}
-
-#pragma endregion
-
-#pragma region Argument Detail Impl
-
-	bool IntArgument::BeginParse(const std::string& val) {
-		char* pend = nullptr;
-		errno = 0;
-		int64_t v = std::strtoll(val.c_str(), &pend, 10);
-
-		if (pend == val.c_str() || errno == ERANGE) return false;
-
-		// check limit
-		int32_t value = static_cast<int32_t>(v);
-		if (m_IntLimit != nullptr && !m_IntLimit(value)) {
-			return false;
-		}
-
-		m_ParsedData = new IntArgument::vType(value);
-		return true;
-	}
-
-	void IntArgument::EndParse() {
-		delete reinterpret_cast<IntArgument::vType*>(m_ParsedData);
-		m_ParsedData = nullptr;
-	}
-
-	bool StringArgument::BeginParse(const std::string& strl) {
-		// string always accept every text
-		m_ParsedData = new StringArgument::vType(strl);
-		return true;
-	}
-
-	void StringArgument::EndParse() {
-		delete reinterpret_cast<StringArgument::vType*>(m_ParsedData);
-		m_ParsedData = nullptr;
-	}
-
-	// Copy from Gamepiaynmo/BallanceModLoader
-	std::vector<std::string> SplitString(const std::string& str, const std::string& de) {
-		size_t lpos, pos = 0;
-		std::vector<std::string> res;
-
-		lpos = str.find_first_not_of(de, pos);
-		while (lpos != std::string::npos) {
-			pos = str.find_first_of(de, lpos);
-			res.push_back(str.substr(lpos, pos - lpos));
-			if (pos == std::string::npos) break;
-
-			lpos = str.find_first_not_of(de, pos);
-		}
-
-		if (pos != std::string::npos)
-			res.push_back("");
-
-		return res;
-	}
-
-	bool EncodingArgument::BeginParse(const std::string& strl) {
-		// encoding always accept every text
-		m_ParsedData = new EncodingArgument::vType(SplitString(strl, ","));
-		return true;
-	}
-
-	void EncodingArgument::EndParse() {
-		delete reinterpret_cast<EncodingArgument::vType*>(m_ParsedData);
-		m_ParsedData = nullptr;
 	}
 
 #pragma endregion
