@@ -7,7 +7,6 @@
 #include <map>
 #include <set>
 #include <functional>
-#include <algorithm>
 #include <initializer_list>
 #include <type_traits>
 #include <stdexcept>
@@ -129,7 +128,7 @@ namespace Unvirt::CmdHelper {
 				throw std::runtime_error("try to add an existing key.");
 		}
 		template<class _Ty, std::enable_if_t<std::is_base_of_v<AMItems::AbstractItem, _Ty>, int> = 0>
-		const _Ty& Get() const {
+		const _Ty& Get(const std::u8string_view& key) const {
 			// check argument
 			if (key.empty())
 				throw std::invalid_argument("argument key should not be empty");
@@ -185,10 +184,55 @@ namespace Unvirt::CmdHelper {
 		std::vector<ResultItem> m_Results;
 	};
 
+	class ConflictSet {
+	public:
+		ConflictSet();
+		~ConflictSet();
+		YYCC_DEF_CLS_COPY_MOVE(ConflictSet);
+
+	public:
+		/**
+		 * @brief Add literal item into conflict set.
+		 * @param[in] value Literal item.
+		 * @remarks
+		 * \li Literal item is the string input in command line.
+		 * \li The word in Literal, and the vocabulary in Choice should be put by this function.
+		 * \li Added item will add \c literal: prefix to make it in literal scope,
+		 * so that it will not be compared with argument name items.
+		 * Because we allow 2 literal item and argument name item have same name.
+		*/
+		void AddLiteral(const std::u8string_view& value);
+		/**
+		 * @brief Add argument name item into conflict
+		 * @param[in] value Argument name item.
+		 * @remarks
+		 * \li Argument name item is the key name put in ArgumentsMap.
+		 * \li The argument name in Choice and Argument should be put by this function.
+		 * \li Added item will add \c argument: prefix to make it in argument name scope,
+		 * so that it will not be compared with literal items.
+		 * Because we allow 2 literal item and argument name item have same name.
+		*/
+		void AddArgument(const std::u8string_view& value);
+		/**
+		 * @brief Check whether this set is conflict with another.
+		 * @param[in] rhs The set to be compared.
+		 * @return True if they have conflict.
+		 * @remarks
+		 * This function simply compute the intersection of two set.
+		 * If the result is not empty, it means that there is a conflict.
+		*/
+		bool IsConflictWith(const ConflictSet& rhs) const;
+
+	protected:
+		std::set<std::u8string> m_ConflictSet;
+	};
+
+	// Forward declaration of CommandParser for Nodes::RootNode
+	class CommandParser;
+
 	namespace Nodes {
 
 		class AbstractNode {
-			friend class CommandRoot;
 		public:
 			using FctExecution_t = void(*)(const ArgumentsMap&);
 
@@ -221,8 +265,16 @@ namespace Unvirt::CmdHelper {
 
 		protected:
 			/**
+			 * @brief Check whether current node is root node.
+			 * @return True if it is, otherwise false.
+			 * @remarks
+			 * This function usually return false.
+			 * It only return true when using special node called root node with CommandParser.
+			*/
+			virtual bool IsRootNode() = 0;
+			/**
 			 * @brief Check whether current node is argument.
-			 * @return True if it is.
+			 * @return True if it is, otherwise false.
 			 * @remakrs
 			 * \li Sub-class must implement this function.
 			 * \li This function is used internally because when consuming nodes,
@@ -248,7 +300,7 @@ namespace Unvirt::CmdHelper {
 			 * \li Choice: Put its vocabulary and associated argument name in set.
 			 * \li Argument: Put its argument name in set.
 			*/
-			virtual const std::set<std::u8string>& GetConflictSet() = 0;
+			virtual const ConflictSet& GetConflictSet() = 0;
 			/**
 			 * @brief Get the string presented in syntax part in help messages.
 			 * @return The string presented in syntax part in help messages.
@@ -292,24 +344,18 @@ namespace Unvirt::CmdHelper {
 			 * @param[in] node The node instance to be added.
 			 * @return Return self for chain calling.
 			*/
-			template<class _Ty, std::enable_if_t<std::is_base_of_v<AbstractNode, _Ty>, int> = 0>
+			template<class _Ty, std::enable_if_t<std::is_base_of_v<AbstractNode, _Ty> && !std::is_same_v<AbstractNode, _Ty>, int> = 0>
 			AbstractNode& Then(_Ty&& node) {
 				// create node first
-				auto new_node = std::make_shared<_Ty>(std::forward<_Types>(node));
+				auto new_node = std::make_shared<_Ty>(std::forward<_Ty>(node));
+				// check root node.
+				if (new_node->IsRootNode())
+					throw std::invalid_argument("root node should not be inserted as child node.");
 				// check conflict
-				std::vector<std::u8string> intersection;
 				const auto& new_node_set = new_node->GetConflictSet();
-				for (auto& node : mNodes) {
+				for (auto& node : m_Nodes) {
 					const auto& node_set = node->GetConflictSet();
-					// compute intersection
-					intersection.clear();
-					std::set_intersection(
-						new_node_set.begin(), new_node_set.end(),
-						node_set.begin(), node_set.begin(),
-						std::back_inserter(intersection)
-					);
-					// check whether it is empty intersection
-					if (!intersection.empty())
+					if (new_node_set.IsConflictWith(node_set))
 						throw std::invalid_argument("try to add a conflict node. please check your code.");
 				}
 				// add into list
@@ -333,6 +379,22 @@ namespace Unvirt::CmdHelper {
 
 		};
 
+		class RootNode : public AbstractNode {
+			friend class CommandParser;
+		public:
+			RootNode();
+			virtual ~RootNode();
+			YYCC_DEF_CLS_COPY_MOVE(RootNode);
+
+		protected:
+			virtual bool IsRootNode() override;
+			virtual bool IsArgument() override;
+			virtual const ConflictSet& GetConflictSet() override;
+			virtual std::u8string GetHelpSymbol() override;
+			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
+			virtual void EndConsume(ArgumentsMap& am) override;
+		};
+
 		class Literal : public AbstractNode {
 		public:
 			Literal(const std::u8string_view& words);
@@ -340,34 +402,36 @@ namespace Unvirt::CmdHelper {
 			YYCC_DEF_CLS_COPY_MOVE(Literal);
 
 		protected:
+			virtual bool IsRootNode() override;
 			virtual bool IsArgument() override;
-			virtual const std::set<std::u8string>& GetConflictSet() override;
+			virtual const ConflictSet& GetConflictSet() override;
 			virtual std::u8string GetHelpSymbol() override;
 			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
 			virtual void EndConsume(ArgumentsMap& am) override;
 
 			std::u8string m_Literal;
-			std::set<std::u8string> m_ConflictSet;
+			ConflictSet m_ConflictSet;
 		};
 
 		class Choice : public AbstractNode {
 		public:
-			using ArgValue_t = size_t;
+			using ArgValue_t = AMItems::ArithmeticItem<size_t>;
 		public:
 			Choice(const std::u8string_view& argname, const std::initializer_list<std::u8string>& vocabulary);
 			virtual ~Choice();
 			YYCC_DEF_CLS_COPY_MOVE(Choice);
-			
+
 		protected:
+			virtual bool IsRootNode() override;
 			virtual bool IsArgument() override;
-			virtual const std::set<std::u8string>& GetConflictSet() override;
+			virtual const ConflictSet& GetConflictSet() override;
 			virtual std::u8string GetHelpSymbol() override;
 			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
 			virtual void EndConsume(ArgumentsMap& am) override;
 
 			std::u8string m_ChoiceName;
 			std::vector<std::u8string> m_Vocabulary;
-			std::set<std::u8string> m_ConflictSet;
+			ConflictSet m_ConflictSet;
 		};
 
 		class AbstractArgument : public AbstractNode {
@@ -375,65 +439,77 @@ namespace Unvirt::CmdHelper {
 			AbstractArgument(const std::u8string_view& argname);
 			virtual ~AbstractArgument();
 			YYCC_DEF_CLS_COPY_MOVE(AbstractArgument);
-			
+
 			// AbstractArgument do not implement BeginConsume().
 			// Because it involve the detail of data parsing.
 			// However, other parts are shared by all argument type.
 
 		protected:
+			virtual bool IsRootNode() override;
 			virtual bool IsArgument() override;
-			virtual const std::set<std::u8string>& GetConflictSet() override;
+			virtual const ConflictSet& GetConflictSet() override;
 			virtual std::u8string GetHelpSymbol() override;
-			// virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
+			//virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
 			virtual void EndConsume(ArgumentsMap& am) override;
 
-			std::u8string m_ArgName;
-			std::set<std::u8string> m_ConflictSet;
+			std::u8string m_ArgumentName;
+			ConflictSet m_ConflictSet;
 		};
 
-		/**
-		 * @brief Return true mean this value can accept.
-		*/
-		using IntLimit = std::function<bool(int32_t)>;
-		class IntArgument : public AbstractArgument {
+		template<typename _Ty, std::enable_if_t<std::is_arithmetic_v<_Ty>, int> = 0>
+		class ArithmeticArgument : public AbstractArgument {
 		public:
-			using vType = int32_t;
-			IntArgument(const char* argname, IntLimit limit = nullptr) :
-				AbstractArgument(argname), m_IntLimit(limit) {}
-			virtual ~IntArgument() {}
-			YYCC_DEL_CLS_COPY_MOVE(IntArgument);
+			using ArgValue_t = AMItems::ArithmeticItem<_Ty>;
+			using Constraint_t = YYCC::Constraints::Constraint<_Ty>;
+		public:
+			ArithmeticArgument(const std::u8string_view& argname, Constraint_t constraint = Constraint_t {}) :
+				AbstractArgument(argname), m_Constraint(constraint) {}
+			virtual ~ArithmeticArgument() {}
+			YYCC_DEF_CLS_COPY_MOVE(ArithmeticArgument);
 
 		protected:
-			virtual bool BeginParse(const std::string&) override;
-			virtual void EndParse() override;
-
-			IntLimit m_IntLimit;
+			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override {
+				// try parse
+				_Ty result;
+				if (!YYCC::ParserHelper::TryParse<_Ty>(cur_cmd, result))
+					return false;
+				// check constraint
+				if (m_Constraint.IsValid() && !m_Constraint.m_CheckFct(result))
+					return false;
+				// okey
+				am.Add<ArgValue_t>(m_ArgumentName, result);
+				return true;
+			}
+		protected:
+			Constraint_t m_Constraint;
 		};
 
 		class StringArgument : public AbstractArgument {
 		public:
-			using vType = std::string;
-			StringArgument(const char* argname) :
-				AbstractArgument(argname) {}
+			using ArgValue_t = AMItems::StringItem;
+			using Constraint_t = YYCC::Constraints::Constraint<std::u8string>;
+		public:
+			StringArgument(const std::u8string_view& argname, Constraint_t constraint = Constraint_t {}) :
+				AbstractArgument(argname), m_Constraint(constraint) {}
 			virtual ~StringArgument() {}
-			YYCC_DEL_CLS_COPY_MOVE(StringArgument);
+			YYCC_DEF_CLS_COPY_MOVE(StringArgument);
 
 		protected:
-			virtual bool BeginParse(const std::string&) override;
-			virtual void EndParse() override;
+			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
+			Constraint_t m_Constraint;
 		};
 
-		class EncodingArgument : public AbstractArgument {
+		class EncodingListArgument : public AbstractArgument {
 		public:
-			using vType = std::vector<std::string>;
-			EncodingArgument(const char* argname) :
+			using ArgValue_t = AMItems::StringArrayItem;
+		public:
+			EncodingListArgument(const std::u8string_view& argname) :
 				AbstractArgument(argname) {}
-			virtual ~EncodingArgument() {}
-			YYCC_DEL_CLS_COPY_MOVE(EncodingArgument);
+			virtual ~EncodingListArgument() {}
+			YYCC_DEF_CLS_COPY_MOVE(EncodingListArgument);
 
 		protected:
-			virtual bool BeginParse(const std::string&) override;
-			virtual void EndParse() override;
+			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
 		};
 
 	}
@@ -444,24 +520,12 @@ namespace Unvirt::CmdHelper {
 		~CommandParser();
 
 	public:
-		bool Parse(std::deque<std::string>& cmds);
+		bool Parse(const CmdSplitter::Result_t& cmds);
 		HelpDocument Help();
+		Nodes::RootNode& GetRoot();
 
 	private:
-		class RootNode : Nodes::AbstractNode {
-		public:
-			RootNode();
-			virtual ~RootNode();
-			YYCC_DEF_CLS_COPY_MOVE(RootNode);
-			
-		protected:
-			virtual bool IsArgument() override;
-			virtual const std::set<std::u8string>& GetConflictSet() override;
-			virtual std::u8string GetHelpSymbol() override;
-			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
-			virtual void EndConsume(ArgumentsMap& am) override;
-		};
-		RootNode m_RootNode;
+		Nodes::RootNode m_RootNode;
 	};
 
 	//class CommandRoot : public AbstractNode {

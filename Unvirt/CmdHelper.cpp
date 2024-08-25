@@ -1,4 +1,5 @@
 #include "CmdHelper.hpp"
+#include <algorithm>
 
 namespace Unvirt::CmdHelper {
 
@@ -233,6 +234,43 @@ namespace Unvirt::CmdHelper {
 
 #pragma endregion
 
+#pragma region Conflict Set
+
+	ConflictSet::ConflictSet() : m_ConflictSet() {}
+
+	ConflictSet::~ConflictSet() {}
+
+	void ConflictSet::AddLiteral(const std::u8string_view& value) {
+		if (value.empty())
+			throw std::invalid_argument("try to insert empty item to conflict set.");
+		auto result = m_ConflictSet.emplace(u8"literal:" + std::u8string(value));
+		if (!result.second)
+			throw std::runtime_error("try to insert duplicated item in conflict set.");
+	}
+
+	void ConflictSet::AddArgument(const std::u8string_view& value) {
+		if (value.empty())
+			throw std::invalid_argument("try to insert empty item to conflict set.");
+		auto result = m_ConflictSet.emplace(u8"argument:" + std::u8string(value));
+		if (!result.second)
+			throw std::runtime_error("try to insert duplicated item in conflict set.");
+	}
+
+	bool ConflictSet::IsConflictWith(const ConflictSet& rhs) const {
+		// create a cache to store computed intersection
+		std::vector<std::u8string> intersection;
+		// compute intersection
+		std::set_intersection(
+			this->m_ConflictSet.begin(), this->m_ConflictSet.end(),
+			rhs.m_ConflictSet.begin(), rhs.m_ConflictSet.begin(),
+			std::back_inserter(intersection)
+		);
+		// check whether it is empty intersection
+		return !intersection.empty();
+	}
+
+#pragma endregion
+
 	namespace Nodes {
 
 #pragma region Abstract Node
@@ -243,6 +281,8 @@ namespace Unvirt::CmdHelper {
 		AbstractNode::~AbstractNode() {}
 
 		AbstractNode& AbstractNode::Executes(FctExecution_t fct, const std::u8string_view& exec_desc) {
+			if (this->IsRootNode())
+				throw std::logic_error("root node should not have execution.");
 			if (m_Execution != nullptr)
 				throw std::invalid_argument("you should not assign execution multiuple times.");
 			if (fct == nullptr)
@@ -253,52 +293,76 @@ namespace Unvirt::CmdHelper {
 		}
 
 		AbstractNode& AbstractNode::Comment(const std::u8string_view& comment) {
+			if (this->IsRootNode())
+				throw std::logic_error("root node should not have comment.");
 			m_Comment = comment;
 			return *this;
 		}
 
 		void AbstractNode::Help(HelpDocument& doc) {
-			// Push self symbol to help document stack.
-			doc.Push(GetHelpSymbol(), m_Comment);
+			// If this node is not root node
+			if (!this->IsRootNode()) {
+				// Push self symbol to help document stack.
+				if (!this->IsRootNode()) {
+					doc.Push(GetHelpSymbol(), m_Comment);
+				}
 
-			// Check whether this node is terminal.
-			// If it is, terminate it once.
-			if (m_Execution != nullptr) {
-				doc.Terminate(m_ExecutionDesc);
+				// Check whether this node is terminal.
+				// If it is, terminate it once.
+				if (m_Execution != nullptr) {
+					doc.Terminate(m_ExecutionDesc);
+				}
 			}
 
-			// Then process its children nodes.
+			// Then process its children nodes (both root node and common node).
 			for (auto& node : m_Nodes) {
 				node->Help(doc);
 			}
 
 			// Pop self from help document stack
-			doc.Pop();
+			// if this node is not root node
+			if (!this->IsRootNode()) {
+				doc.Pop();
+			}
 		}
 
 		bool AbstractNode::Consume(CmdSplitter::Result_t& al, ArgumentsMap& am) {
-			// if no data can consume, return
+			// If no command to be consumed, return directly.
 			if (al.empty()) return false;
 
-			// backup current value
-			std::u8string cur_cmd = al.front();
-			// consume self
-			if (!BeginConsume(cur_cmd, am)) {
-				// fail to consume self. not matched. return
-				return false;
+			// Process for self if we are not root node
+			std::u8string cur_cmd;
+			if (!this->IsRootNode()) {
+				// Backup the top item in command stack for personal consume.
+				cur_cmd = al.front();
+				// Try to consume it for self.
+				if (!BeginConsume(cur_cmd, am)) {
+					// Fail to consume self.
+					// It means that this command is not matched with self.
+					// Return directly.
+					return false;
+				}
+				// Yes, command matched, we try consume it for child nodes.
+				// Pop the top item of command stack for child nodes processing.
+				al.pop_front();
 			}
 
-			// pop front for processing child nodes.
-			al.pop_front();
-
+			// Define free function if we are not the root node.
+			// Because we just pop the top item of command stack.
 #define CONSUME_DEFER \
+if (!this->IsRootNode()) { \
 	al.emplace_front(cur_cmd); \
-	EndConsume(am);
+	EndConsume(am); \
+}
 
 			if (al.empty()) {
-				// if no more data for parsing.
-				// this is must be a terminal.
-				// check whether we have execution.
+				// Root node do not have execution, return false directly
+				if (this->IsRootNode()) {
+					CONSUME_DEFER;
+					return false;
+				}
+				// If no more data for parsing, this is must be a terminal.
+				// Check whether we have execution if we are not root node.
 				if (m_Execution == nullptr) {
 					CONSUME_DEFER;
 					return false;
@@ -308,9 +372,9 @@ namespace Unvirt::CmdHelper {
 					return true;
 				}
 			} else {
-				// still have data to be parsed. try  to match them.
-				// iterate node list to find the real terminal
-				// however, we need iterate literal and choice first, the iterate argument.
+				// Command stack still item to be consumed.
+				// To consume them, we need iterate node list and find the real terminal.
+				// However, we need iterate literal and choice first, the iterate argument.
 				for (auto& node : m_Nodes) {
 					if (node->IsArgument()) continue;
 					if (node->Consume(al, am)) {
@@ -326,7 +390,9 @@ namespace Unvirt::CmdHelper {
 					}
 				}
 
-				// if still nothing to match, return false
+				// If all node can not consume it, 
+				// it means that this command can not match this node tree.
+				// Return false directly.
 				CONSUME_DEFER;
 				return false;
 			}
@@ -337,18 +403,35 @@ namespace Unvirt::CmdHelper {
 
 #pragma endregion
 
+#pragma region Root Node
+
+		RootNode::RootNode() : AbstractNode() {}
+		RootNode::~RootNode() {}
+
+		bool RootNode::IsRootNode() { return true; }
+		bool RootNode::IsArgument() { throw std::logic_error("this function is not allowed on root function."); }
+		const ConflictSet& RootNode::GetConflictSet() { throw std::logic_error("this function is not allowed on root function."); }
+		std::u8string RootNode::GetHelpSymbol() { throw std::logic_error("this function is not allowed on root function."); }
+		bool RootNode::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) { throw std::logic_error("this function is not allowed on root function."); }
+		void RootNode::EndConsume(ArgumentsMap& am) { throw std::logic_error("this function is not allowed on root function."); }
+
+#pragma endregion
+
 #pragma region Literal
 
 		Literal::Literal(const std::u8string_view& words) :
-			AbstractNode(), m_Literal(words), m_ConflictSet { m_Literal } {
+			AbstractNode(), m_Literal(words), m_ConflictSet() {
+			// check argument
 			if (words.empty())
 				throw std::invalid_argument("The word of literal node should not be empty.");
+			// set conflict set
+			m_ConflictSet.AddLiteral(m_Literal);
 		}
-
 		Literal::~Literal() {}
 
+		bool Literal::IsRootNode() { return false; }
 		bool Literal::IsArgument() { return false; }
-		const std::set<std::u8string>& Literal::GetConflictSet() { return m_ConflictSet; }
+		const ConflictSet& Literal::GetConflictSet() { return m_ConflictSet; }
 		std::u8string Literal::GetHelpSymbol() { return m_Literal; }
 		bool Literal::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) { return cur_cmd == m_Literal; }
 		void Literal::EndConsume(ArgumentsMap& am) {}
@@ -366,15 +449,20 @@ namespace Unvirt::CmdHelper {
 				throw std::invalid_argument("Choice argument name should not be empty.");
 			if (m_Vocabulary.size() < 2u)
 				throw std::invalid_argument("Too less vocabulary for choice. At least 2 items.");
+			std::set<std::u8string> vocabulary_set(m_Vocabulary.begin(), m_Vocabulary.end());
+			if (vocabulary_set.size() != m_Vocabulary.size())
+				throw std::invalid_argument("Vocabulary of choice should not have duplicated items.");
 			// init conflict set
-			m_ConflictSet.insert(m_ChoiceName);
-			m_ConflictSet.insert(m_Vocabulary.begin(), m_Vocabulary.end());
+			m_ConflictSet.AddArgument(m_ChoiceName);
+			for (const auto& word : m_Vocabulary) {
+				m_ConflictSet.AddLiteral(word);
+			}
 		}
-
 		Choice::~Choice() {}
 
+		bool Choice::IsRootNode() { return false; }
 		bool Choice::IsArgument() { return false; }
-		const std::set<std::u8string>& Choice::GetConflictSet() { return m_ConflictSet; }
+		const ConflictSet& Choice::GetConflictSet() { return m_ConflictSet; }
 		std::u8string Choice::GetHelpSymbol() {
 			return YYCC::StringHelper::Printf(u8"[%s]",
 				YYCC::StringHelper::Join(m_Vocabulary, u8" | ").c_str()
@@ -383,7 +471,7 @@ namespace Unvirt::CmdHelper {
 		bool Choice::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) {
 			for (size_t i = 0; i < m_Vocabulary.size(); ++i) {
 				if (cur_cmd == m_Vocabulary[i]) {
-					am.Add<AMItems::StringItem>(m_ChoiceName, cur_cmd);
+					am.Add<ArgValue_t>(m_ChoiceName, i);
 					return true;
 				}
 			}
@@ -397,173 +485,87 @@ namespace Unvirt::CmdHelper {
 
 		AbstractArgument::AbstractArgument(const std::u8string_view& argname) :
 			AbstractNode(),
-			m_ArgName(argname == nullptr ? "" : argname),
-			m_Accepted(false), m_ParsedData(nullptr) {
-			if (argname == nullptr || m_ArgName.empty())
-				throw std::invalid_argument("Invalid argument name.");
+			m_ArgumentName(argname), m_ConflictSet() {
+			// check argument
+			if (argname.empty())
+				throw std::invalid_argument("Argument name should not be empty.");
+			// setup conflict set
+			m_ConflictSet.AddArgument(m_ArgumentName);
 		}
-
 		AbstractArgument::~AbstractArgument() {}
 
-		NodeType AbstractArgument::GetNodeType() {
-			return NodeType::Argument;
+		bool AbstractArgument::IsRootNode() { return false; }
+		bool AbstractArgument::IsArgument() { return true; }
+		const ConflictSet& AbstractArgument::GetConflictSet() { return m_ConflictSet; }
+		std::u8string AbstractArgument::GetHelpSymbol() {
+			return YYCC::StringHelper::Printf(u8"<%s>", m_ArgumentName.c_str());
 		}
-
-		bool AbstractArgument::IsConflictWith(AbstractNode* node) {
-			switch (node->GetNodeType()) {
-				case NodeType::Literal:
-					return false;
-				case NodeType::Choice:
-					return m_ArgName == dynamic_cast<Choice*>(node)->m_ChoiceName;
-				case NodeType::Argument:
-					return m_ArgName == dynamic_cast<AbstractArgument*>(node)->m_ArgName;
-				default:
-					throw std::runtime_error("No such node type.");
-			}
-		}
-
-		std::string AbstractArgument::GetHelpSymbol() {
-			std::string newargname = "<";
-			newargname.append(m_ArgName);
-			newargname.append(">");
-			return newargname;
-		}
-
-		bool AbstractArgument::BeginAccept(const std::string& strl, ArgumentsMap* amap) {
-			m_Accepted = BeginParse(strl);
-			if (m_Accepted) amap->Add(m_ArgName, this);
-			return m_Accepted;
-		}
-
-		void AbstractArgument::EndAccept(ArgumentsMap* amap) {
-			if (m_Accepted) {
-				amap->Remove(m_ArgName);
-				EndParse();
-				m_Accepted = false;
-			}
-		}
+		//bool AbstractArgument::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) { return false; }
+		void AbstractArgument::EndConsume(ArgumentsMap& am) { am.Remove(m_ArgumentName); }
 
 #pragma endregion
 
-#pragma region Argument Detail Impl
+#pragma region Arithmetic Argument
 
-		bool IntArgument::BeginParse(const std::string& val) {
-			char* pend = nullptr;
-			errno = 0;
-			int64_t v = std::strtoll(val.c_str(), &pend, 10);
+		// It's a template class
+		// We are forced to implement it in header file.
 
-			if (pend == val.c_str() || errno == ERANGE) return false;
+#pragma endregion
 
-			// check limit
-			int32_t value = static_cast<int32_t>(v);
-			if (m_IntLimit != nullptr && !m_IntLimit(value)) {
+#pragma region String Argument
+
+		bool StringArgument::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) {
+			// check constraint
+			if (m_Constraint.IsValid() && !m_Constraint.m_CheckFct(cur_cmd))
 				return false;
-			}
-
-			m_ParsedData = new IntArgument::vType(value);
+			// accept
+			am.Add<ArgValue_t>(m_ArgumentName, cur_cmd);
 			return true;
 		}
 
-		void IntArgument::EndParse() {
-			delete reinterpret_cast<IntArgument::vType*>(m_ParsedData);
-			m_ParsedData = nullptr;
-		}
+#pragma endregion
 
-		bool StringArgument::BeginParse(const std::string& strl) {
-			// string always accept every text
-			m_ParsedData = new StringArgument::vType(strl);
+#pragma region Encoding List Argument
+
+		bool EncodingListArgument::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) {
+			// split given argument
+			std::vector<std::u8string> encs = YYCC::StringHelper::Split(cur_cmd, u8",");
+			// add into map
+			am.Add<ArgValue_t>(m_ArgumentName, encs);
 			return true;
-		}
-
-		void StringArgument::EndParse() {
-			delete reinterpret_cast<StringArgument::vType*>(m_ParsedData);
-			m_ParsedData = nullptr;
-		}
-
-		// Copy from Gamepiaynmo/BallanceModLoader
-		std::vector<std::string> SplitString(const std::string& str, const std::string& de) {
-			size_t lpos, pos = 0;
-			std::vector<std::string> res;
-
-			lpos = str.find_first_not_of(de, pos);
-			while (lpos != std::string::npos) {
-				pos = str.find_first_of(de, lpos);
-				res.push_back(str.substr(lpos, pos - lpos));
-				if (pos == std::string::npos) break;
-
-				lpos = str.find_first_not_of(de, pos);
-			}
-
-			if (pos != std::string::npos)
-				res.push_back("");
-
-			return res;
-		}
-
-		bool EncodingArgument::BeginParse(const std::string& strl) {
-			// encoding always accept every text
-			m_ParsedData = new EncodingArgument::vType(SplitString(strl, ","));
-			return true;
-		}
-
-		void EncodingArgument::EndParse() {
-			delete reinterpret_cast<EncodingArgument::vType*>(m_ParsedData);
-			m_ParsedData = nullptr;
 		}
 
 #pragma endregion
 
 	}
 
-#pragma region Command Root
+#pragma region Command Parser
 
-	CommandRoot::CommandRoot() : AbstractNode() {}
+	CommandParser::CommandParser() {}
 
-	CommandRoot::~CommandRoot() {}
+	CommandParser::~CommandParser() {}
 
-	bool CommandRoot::RootConsume(std::deque<std::string>& arglist) {
-		// if no data can consume, return
-		if (arglist.empty()) return false;
+	bool CommandParser::Parse(const CmdSplitter::Result_t& cmds) {
+		// Create a copy of given command
+		CmdSplitter::Result_t al(cmds);
+		// Create argument map
+		ArgumentsMap am;
 
-		// create a argument map
-		ArgumentsMap amap;
-
-		// and we only just need iterate all children
-		for (auto& pnode : m_Literals) {
-			if (pnode->Consume(arglist, &amap)) {
-				return true;
-			}
-		}
-		for (auto& pnode : m_Choices) {
-			if (pnode->Consume(arglist, &amap)) {
-				return true;
-			}
-		}
-		for (auto& pnode : m_Args) {
-			if (pnode->Consume(arglist, &amap)) {
-				return true;
-			}
-		}
-
-		// no matched
-		return false;
+		// Call root node Consume function and return its result.
+		return m_RootNode.Consume(al, am);
 	}
 
-	HelpDocument* CommandRoot::RootHelp() {
-		HelpDocument* doc = new HelpDocument();
-
-		// we only just need iterate all children
-		for (auto& pnode : m_Literals) {
-			pnode->Help(doc);
-		}
-		for (auto& pnode : m_Choices) {
-			pnode->Help(doc);
-		}
-		for (auto& pnode : m_Args) {
-			pnode->Help(doc);
-		}
-
+	HelpDocument CommandParser::Help() {
+		// Create help docuemnt
+		HelpDocument doc;
+		// use node tree to fill help document.
+		m_RootNode.Help(doc);
+		// return result.
 		return doc;
+	}
+
+	Nodes::RootNode& CommandParser::GetRoot() {
+		return m_RootNode;
 	}
 
 #pragma endregion
