@@ -211,20 +211,27 @@ namespace Unvirt::CmdHelper {
 	void HelpDocument::Print() {
 		for (auto& cmd : m_Results) {
 			// syntax
-			YYCC::ConsoleHelper::WriteLine(u8"Syntax: ");
+			// check whether all description of argument are emtpty.
+			bool empty_arg_desc = true;
+			YYCC::ConsoleHelper::Write(YYCC_COLOR_LIGHT_YELLOW(u8"Syntax: "));
 			for (const auto& arg : cmd.m_ArgDesc) {
+				if (!arg.m_Desc.empty()) empty_arg_desc = false;
 				YYCC::ConsoleHelper::Format(u8"%s ", arg.m_Name.c_str());
 			}
 			YYCC::ConsoleHelper::WriteLine(u8"");
 			// command description
 			if (!cmd.m_CmdDesc.empty()) {
-				YYCC::ConsoleHelper::FormatLine(u8"Description: %s", cmd.m_CmdDesc.c_str());
+				YYCC::ConsoleHelper::FormatLine(YYCC_COLOR_LIGHT_YELLOW(u8"Description: ") "%s", cmd.m_CmdDesc.c_str());
 			}
 			// argument description
-			YYCC::ConsoleHelper::WriteLine(u8"Arguments:");
-			for (auto& arg : cmd.m_ArgDesc) {
-				if (!arg.m_Desc.empty()) {
-					YYCC::ConsoleHelper::FormatLine(u8"\t%s: %s", arg.m_Name.c_str(), arg.m_Desc.c_str());
+			if (!empty_arg_desc) {
+				YYCC::ConsoleHelper::WriteLine(YYCC_COLOR_LIGHT_YELLOW(u8"Arguments:"));
+				for (auto& arg : cmd.m_ArgDesc) {
+					if (!arg.m_Desc.empty()) {
+						YYCC::ConsoleHelper::FormatLine(u8"\t" YYCC_COLOR_LIGHT_GREEN("%s") ": % s",
+							arg.m_Name.c_str(), arg.m_Desc.c_str()
+						);
+					}
 				}
 			}
 			// space between each commands
@@ -465,7 +472,7 @@ if (!this->IsRootNode()) { \
 		const ConflictSet& Choice::GetConflictSet() { return m_ConflictSet; }
 		std::u8string Choice::GetHelpSymbol() {
 			return YYCC::StringHelper::Printf(u8"[%s]",
-				YYCC::StringHelper::Join(m_Vocabulary, u8" | ").c_str()
+				YYCC::StringHelper::Join(m_Vocabulary.begin(), m_Vocabulary.end(), u8" | ").c_str()
 			);
 		}
 		bool Choice::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) {

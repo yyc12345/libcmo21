@@ -137,8 +137,8 @@ namespace Unvirt::CmdHelper {
 			if (finder == m_Data.end())
 				throw std::runtime_error("try to get a non-existent key.");
 			// get stored value data
-			const AMItems::AbstractItem& value = *finder->second.get();
-			return static_cast<const _Ty&>(value);
+			const _Ty* value = static_cast<const _Ty*>(finder->second.get());
+			return *value;
 		}
 		void Remove(const std::u8string_view& key) {
 			// check argument
@@ -150,17 +150,24 @@ namespace Unvirt::CmdHelper {
 		}
 	};
 
+	// Forward declaration for Nodes::AbstractNode
+	namespace Nodes { class AbstractNode; }
+
 	class HelpDocument {
+		friend class Nodes::AbstractNode;
 	public:
 		HelpDocument();
 		~HelpDocument();
 		YYCC_DEF_CLS_COPY_MOVE(HelpDocument);
 
 	public:
+		void Print();
+
+		// AbstractNode used
+	protected:
 		void Push(const std::u8string& arg_name, const std::u8string& arg_desc);
 		void Pop();
 		void Terminate(std::u8string& command_desc);
-		void Print();
 
 	protected:
 		struct StackItem {
@@ -345,14 +352,16 @@ namespace Unvirt::CmdHelper {
 			 * @return Return self for chain calling.
 			*/
 			template<class _Ty, std::enable_if_t<std::is_base_of_v<AbstractNode, _Ty> && !std::is_same_v<AbstractNode, _Ty>, int> = 0>
-			AbstractNode& Then(_Ty&& node) {
+			AbstractNode& Then(AbstractNode& node) {
 				// create node first
-				auto new_node = std::make_shared<_Ty>(std::forward<_Ty>(node));
+				auto new_node = std::make_shared<_Ty>(static_cast<_Ty&>(node));
+				// get its abstract pointer for checking
+				AbstractNode* new_node_ptr = new_node.get();
 				// check root node.
-				if (new_node->IsRootNode())
+				if (new_node_ptr->IsRootNode())
 					throw std::invalid_argument("root node should not be inserted as child node.");
 				// check conflict
-				const auto& new_node_set = new_node->GetConflictSet();
+				const auto& new_node_set = new_node_ptr->GetConflictSet();
 				for (auto& node : m_Nodes) {
 					const auto& node_set = node->GetConflictSet();
 					if (new_node_set.IsConflictWith(node_set))
@@ -527,24 +536,5 @@ namespace Unvirt::CmdHelper {
 	private:
 		Nodes::RootNode m_RootNode;
 	};
-
-	//class CommandRoot : public AbstractNode {
-	//public:
-	//	CommandRoot();
-	//	virtual ~CommandRoot();
-	//	YYCC_DEL_CLS_COPY_MOVE(CommandRoot);
-
-	//	// Root use special consume and help functions.
-	//	bool RootConsume(std::deque<std::string>&);
-	//	HelpDocument* RootHelp();
-
-	//public:
-	//protected:
-	//	virtual NodeType GetNodeType() override { throw std::logic_error("Root can not be called."); }
-	//	virtual bool IsConflictWith(AbstractNode*) override { throw std::logic_error("Root can not be called."); }
-	//	virtual std::string GetHelpSymbol()  override { throw std::logic_error("Root can not be called."); }
-	//	virtual bool BeginAccept(const std::string&, ArgumentsMap*) override { throw std::logic_error("Root can not be called."); }
-	//	virtual void EndAccept(ArgumentsMap*) override { throw std::logic_error("Root can not be called."); }
-	//};
 
 }
