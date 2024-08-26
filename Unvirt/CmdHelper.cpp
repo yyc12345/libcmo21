@@ -1,4 +1,5 @@
 #include "CmdHelper.hpp"
+#include <VTAll.hpp>
 #include <algorithm>
 
 namespace Unvirt::CmdHelper {
@@ -11,7 +12,7 @@ namespace Unvirt::CmdHelper {
 		return m_Result;
 	}
 
-	bool CmdSplitter::Convert(const std::u8string& u8cmd) {
+	bool CmdSplitter::Lex(const std::u8string& u8cmd) {
 		// Clear variables
 		m_ValidResult = false;
 		m_Result.clear();
@@ -537,7 +538,12 @@ if (!this->IsRootNode()) { \
 		bool EncodingListArgument::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) {
 			// split given argument
 			std::vector<std::u8string> encs = YYCC::StringHelper::Split(cur_cmd, u8",");
-			// add into map
+			// check each parts is a valid encoding name
+			for (const auto& item : encs) {
+				if (!LibCmo::EncodingHelper::IsValidEncodingName(item))
+					return false;
+			}
+			// okey, add into map
 			am.Add<ArgValue_t>(m_ArgumentName, encs);
 			return true;
 		}

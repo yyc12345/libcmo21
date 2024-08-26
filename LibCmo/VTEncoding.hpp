@@ -55,6 +55,23 @@ namespace LibCmo::EncodingHelper {
 	 * If token is #INVALID_ENCODING_TOKEN, this function does nothing.
 	*/
 	void DestroyEncodingToken(EncodingToken token);
+	/**
+	 * @brief Get associated universal encoding name of given encoding token.
+	 * @param[in] token The encoding token for getting name.
+	 * @return Encoding token associated name (the universal encoding name used to create this token).
+	 * Blank if given token is invalid or fail to get.
+	*/
+	std::u8string GetEncodingTokenAssociatedName(EncodingToken token);
+	/**
+	 * @brief Check whether given universal encoding name can be used to produce token.
+	 * @param[in] enc_name Universal encoding name.
+	 * @return True if it is, otherwise false.
+	 * @remarks
+	 * Please note this function only check whether given encoding name is acceptable by token creator.
+	 * Hoewver it doesn't mean that the token must be created if this function return true.
+	 * Because there are some runtime issues which can cause that fail to create encoding token.
+	*/
+	bool IsValidEncodingName(const std::u8string_view& enc_name);
 
 	/**
 	 * @brief Convert native string to UTF8 string by given encoding.

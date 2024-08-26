@@ -2,7 +2,6 @@
 
 #include <YYCCommonplace.hpp>
 #include "AccessibleValue.hpp"
-#include "TerminalHelper.hpp"
 
 namespace Console = YYCC::ConsoleHelper;
 

@@ -153,7 +153,7 @@ namespace LibCmo::CK2 {
 		 * @details It accept a CKSTRING representing the string need to be printed.
 		 * The passed CKSTRING is guaranteen that it can not be nullptr.
 		*/
-		using OutputCallback = void(*)(CKSTRING);
+		using OutputCallback = std::function<void(CKSTRING)>;
 		/**
 		 * @brief Output plain message.
 		 * @param[in] str Plain message. nullptr is allowed but not suggested.

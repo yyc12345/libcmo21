@@ -403,6 +403,9 @@ namespace LibCmo::EncodingHelper {
 #if YYCC_OS == YYCC_OS_WINDOWS
 
 	struct WindowsEncodingToken {
+		WindowsEncodingToken(const std::u8string_view& universal_code, UINT cp) :
+			m_Name(universal_code), m_CodePage(cp) {}
+		std::u8string m_Name;
 		UINT m_CodePage;
 	};
 
@@ -412,7 +415,8 @@ namespace LibCmo::EncodingHelper {
 	static const iconv_t c_InvalidIconvType = reinterpret_cast<iconv_t>(-1);
 
 	struct IconvEncodingToken {
-		IconvEncodingToken(const std::string_view& iconv_code) :
+		IconvEncodingToken(const std::u8string_view& universal_code, const std::string_view& iconv_code) :
+			m_Name(universal_code),
 			m_FromUTF8(c_InvalidIconvType), m_ToUTF8(c_InvalidIconvType) {
 			// if iconv code is empty, do nothing
 			if (iconv_code.empty()) return;
@@ -426,6 +430,8 @@ namespace LibCmo::EncodingHelper {
 			if (this->m_ToUTF8 != c_InvalidIconvType)
 				iconv_close(token_cast->m_ToUTF8);
 		}
+
+		std::u8string m_Name;
 		iconv_t m_FromUTF8;
 		iconv_t m_ToUTF8;
 	};
@@ -508,7 +514,7 @@ namespace LibCmo::EncodingHelper {
 		if (!YYCC::WinFctHelper::IsValidCodePage(cp))
 			return INVALID_ENCODING_TOKEN;
 		// create token and return
-		WindowsEncodingToken* token = new WindowsEncodingToken { cp };
+		WindowsEncodingToken* token = new WindowsEncodingToken(enc_name, cp);
 		return token;
 #else
 		// get iconv code first
@@ -516,7 +522,7 @@ namespace LibCmo::EncodingHelper {
 		if (!GetIconvCode(enc_name, code))
 			return INVALID_ENCODING_TOKEN;
 		// create token and set default value
-		IconvEncodingToken* token = new IconvEncodingToken(code);
+		IconvEncodingToken* token = new IconvEncodingToken(enc_name, code);
 		// check whether token has been initialized correctly
 		if (token->m_FromUTF8 == c_InvalidIconvType || token->m_ToUTF8 == c_InvalidIconvType) {
 			// failed. free resource and return
@@ -538,6 +544,34 @@ namespace LibCmo::EncodingHelper {
 #else
 		IconvEncodingToken* token_cast = static_cast<IconvEncodingToken*>(token);
 		delete token_cast;
+#endif
+	}
+
+	std::u8string GetEncodingTokenAssociatedName(EncodingToken token) {
+		// prepare return value
+		std::u8string ret;
+		// if token is invalid, return directly
+		if (token == INVALID_ENCODING_TOKEN) return ret;
+
+		// get associated name
+#if YYCC_OS == YYCC_OS_WINDOWS
+		WindowsEncodingToken* token_cast = static_cast<WindowsEncodingToken*>(token);
+		ret = token_cast->m_Name;
+#else
+		IconvEncodingToken* token_cast = static_cast<IconvEncodingToken*>(token);
+		ret = token_cast->m_Name;
+#endif
+		// return value
+		return ret;
+	}
+
+	bool IsValidEncodingName(const std::u8string_view& enc_name) {
+#if YYCC_OS == YYCC_OS_WINDOWS
+		UINT cp = CP_ACP;
+		return GetWindowsCodePage(enc_name, cp);
+#else
+		std::string code;
+		return GetIconvCode(enc_name, code);
 #endif
 	}
 

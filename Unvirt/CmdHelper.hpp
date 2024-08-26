@@ -31,9 +31,9 @@ namespace Unvirt::CmdHelper {
 			m_CurrentChar(u8'\0'), m_Buffer(), m_Result(), m_ValidResult(false),
 			m_State(StateType::NORMAL), m_PrevState(StateType::NORMAL) {}
 		~CmdSplitter() {}
-		YYCC_DEL_CLS_COPY_MOVE(CmdSplitter);
+		YYCC_DEF_CLS_COPY_MOVE(CmdSplitter);
 
-		bool Convert(const std::u8string& u8cmd);
+		bool Lex(const std::u8string& u8cmd);
 		const Result_t& GetResult() const;
 
 	private:
@@ -241,7 +241,7 @@ namespace Unvirt::CmdHelper {
 
 		class AbstractNode {
 		public:
-			using FctExecution_t = void(*)(const ArgumentsMap&);
+			using FctExecution_t = std::function<void(const ArgumentsMap&)>;
 
 		public:
 			AbstractNode();
