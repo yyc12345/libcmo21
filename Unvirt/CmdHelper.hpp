@@ -389,7 +389,7 @@ namespace Unvirt::CmdHelper {
 		};
 
 		class RootNode : public AbstractNode {
-			friend class CommandParser;
+			friend class ::Unvirt::CmdHelper::CommandParser;
 		public:
 			RootNode();
 			virtual ~RootNode();

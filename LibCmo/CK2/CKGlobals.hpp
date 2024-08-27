@@ -230,7 +230,7 @@ namespace LibCmo::CK2 {
 	 * @return True if it need to be notified, otherwise false.
 	 * If the class id of checking is invalid, this function always return false.
 	*/
-	bool CKIsNeedNotify(CK_CLASSID listener, CK_CLASSID deletedObjCid);	/**
+	bool CKIsNeedNotify(CK_CLASSID listener, CK_CLASSID deletedObjCid);
 	/**
 	 * @brief Get all class ids need to be notified when objects whose class id included in \c delObjCids are deleting.
 	 * @param[in] delObjCids The bit array representing class ids which need to be queried.

@@ -306,6 +306,8 @@ namespace BMap {
 				case LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE:
 					m_ObjTextures.emplace_back(fileobj.CreatedObjectId);
 					break;
+				default:
+					break; // skip unknow objects
 			}
 		}
 

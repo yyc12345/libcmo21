@@ -81,7 +81,7 @@ FILES
 	# X Container
 	XContainer/XTypes.hpp
 )
-# Setup include infomation
+# Setup include and linked library infomation
 target_include_directories(LibCmo
 PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>"
@@ -90,16 +90,17 @@ PRIVATE
     YYCC::YYCCommonplace
 	ZLIB::ZLIB
 	stb::stb-image
-	$<$<NOT:$<BOOL:${WIN32}>>:Iconv::Iconv>
 )
-# Setup linked library infomation
 target_link_libraries(LibCmo
 PRIVATE
 	YYCC::YYCCommonplace
 	ZLIB::ZLIB
 	stb::stb-image
-	$<$<NOT:$<BOOL:${WIN32}>>:Iconv::Iconv>
 )
+if (NOT WIN32)
+	target_include_directories(LibCmo PRIVATE Iconv::Iconv)
+	target_link_libraries(LibCmo PRIVATE Iconv::Iconv)
+endif ()
 # Setup C++ standard
 set_target_properties(LibCmo
 PROPERTIES

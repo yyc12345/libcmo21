@@ -31,7 +31,7 @@ namespace LibCmo {
 		UnreachableException(const char* msg) : message(msg ? msg : "") {}
 		UnreachableException(const UnreachableException& rhs) : message(rhs.message) {}
 		virtual ~UnreachableException() {}
-		[[nodiscard]] virtual const char* what() const override { return message.c_str(); }
+		[[nodiscard]] virtual const char* what() const noexcept override { return message.c_str(); }
 	private:
 		std::string message;
 	};
@@ -47,7 +47,7 @@ namespace LibCmo {
 		LogicException(const char* msg) : message(msg ? msg : "") {}
 		LogicException(const LogicException& rhs) : message(rhs.message) {}
 		virtual ~LogicException() {}
-		[[nodiscard]] virtual const char* what() const override { return message.c_str(); }
+		[[nodiscard]] virtual const char* what() const noexcept override { return message.c_str(); }
 	private:
 		std::string message;
 	};
@@ -62,7 +62,7 @@ namespace LibCmo {
 		RuntimeException(const char* msg) : message(msg ? msg : "") {}
 		RuntimeException(const RuntimeException& rhs) : message(rhs.message) {}
 		virtual ~RuntimeException() {}
-		[[nodiscard]] virtual const char* what() const override { return message.c_str(); }
+		[[nodiscard]] virtual const char* what() const noexcept override { return message.c_str(); }
 	private:
 		std::string message;
 	};

@@ -415,20 +415,21 @@ namespace LibCmo::EncodingHelper {
 	static const iconv_t c_InvalidIconvType = reinterpret_cast<iconv_t>(-1);
 
 	struct IconvEncodingToken {
-		IconvEncodingToken(const std::u8string_view& universal_code, const std::string_view& iconv_code) :
+		IconvEncodingToken(const std::u8string_view& universal_code, const std::string_view& _iconv_code) :
 			m_Name(universal_code),
 			m_FromUTF8(c_InvalidIconvType), m_ToUTF8(c_InvalidIconvType) {
 			// if iconv code is empty, do nothing
+			std::string iconv_code(_iconv_code);
 			if (iconv_code.empty()) return;
 			// setup iconv_t
-			this->m_FromUTF8 = iconv_open(code.c_str(), "UTF-8");
-			this->m_ToUTF8 = iconv_open("UTF-8", code.c_str());
+			this->m_FromUTF8 = iconv_open(iconv_code.c_str(), "UTF-8");
+			this->m_ToUTF8 = iconv_open("UTF-8", iconv_code.c_str());
 		}
 		~IconvEncodingToken() {
 			if (this->m_FromUTF8 != c_InvalidIconvType)
-				iconv_close(token_cast->m_FromUTF8);
+				iconv_close(this->m_FromUTF8);
 			if (this->m_ToUTF8 != c_InvalidIconvType)
-				iconv_close(token_cast->m_ToUTF8);
+				iconv_close(this->m_ToUTF8);
 		}
 
 		std::u8string m_Name;
@@ -526,7 +527,7 @@ namespace LibCmo::EncodingHelper {
 		// check whether token has been initialized correctly
 		if (token->m_FromUTF8 == c_InvalidIconvType || token->m_ToUTF8 == c_InvalidIconvType) {
 			// failed. free resource and return
-			delete token_cast;
+			delete token;
 			return INVALID_ENCODING_TOKEN;
 		}
 		// okey, return
@@ -588,7 +589,7 @@ namespace LibCmo::EncodingHelper {
 		return YYCC::EncodingHelper::UTF8ToChar(src, dst, token_cast->m_CodePage);
 #else
 		IconvEncodingToken* token_cast = static_cast<IconvEncodingToken*>(token);
-		return DoIconv(token_cast->FromUTF8, YYCC::EncodingHelper::ToOrdinaryView(src), dst);
+		return DoIconv(token_cast->m_FromUTF8, YYCC::EncodingHelper::ToOrdinaryView(src), dst);
 #endif
 	}
 	bool ToOrdinary(const char8_t* src, std::string& dst, EncodingToken token) {
@@ -616,7 +617,7 @@ namespace LibCmo::EncodingHelper {
 #else
 		IconvEncodingToken* token_cast = static_cast<IconvEncodingToken*>(token);
 		std::string dst_cache;
-		bool ret = DoIconv(token_cast->ToUTF8, src, dst_cache);
+		bool ret = DoIconv(token_cast->m_ToUTF8, src, dst_cache);
 		if (ret) dst = YYCC::EncodingHelper::ToUTF8(dst_cache);
 		return ret;
 #endif

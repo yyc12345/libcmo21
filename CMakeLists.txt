@@ -63,7 +63,7 @@ write_basic_package_version_file(
     COMPATIBILITY SameMinorVersion
 )
 configure_package_config_file(
-    ${CMAKE_CURRENT_LIST_DIR}/cmake/LibCmoConfig.cmake.in 
+    ${CMAKE_CURRENT_LIST_DIR}/CMake/LibCmoConfig.cmake.in 
     "${CMAKE_CURRENT_BINARY_DIR}/LibCmoConfig.cmake"
     INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LibCmo
 )
