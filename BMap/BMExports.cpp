@@ -1,5 +1,5 @@
 #include "BMExports.hpp"
-#include <IronPad.hpp>
+#include <YYCCommonplace.hpp>
 #include <set>
 #include <type_traits>
 #include <memory>
@@ -54,8 +54,11 @@ _Ty CheckGeneralObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possibl
 bool BMInit() {
 	if (CheckInited()) return false;
 
-	// register IronPad
-	IronPad::IronPadRegister();
+	// register exception handler if we are in Windows.
+#if YYCC_OS == YYCC_OS_WINDOWS
+	YYCC::ExceptionHelper::Register();
+#endif
+
 	// and startup CK environment
 	LibCmo::CK2::CKStartUp();
 
@@ -84,8 +87,11 @@ bool BMDispose() {
 
 	// shutdown CK environment
 	LibCmo::CK2::CKShutdown();
-	// unregister iron pad
-	IronPad::IronPadUnregister();
+
+	// unregister exception handler if we are in Windows
+#if YYCC_OS == YYCC_OS_WINDOWS
+	YYCC::ExceptionHelper::Unregister();
+#endif
 
 	return true;
 }

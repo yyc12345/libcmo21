@@ -281,8 +281,8 @@ namespace Unvirt::Context {
 		YYCC::ConsoleHelper::EnableColorfulConsole();
 
 		// Show banner
-		YYCC::ConsoleHelper::WriteLine(YYCC_COLOR_LIGHT_YELLOW(u8"Unvirt"));
-		YYCC::ConsoleHelper::WriteLine(YYCC_COLOR_LIGHT_YELLOW(u8"Type 'help' for more infomation. Type 'exit' to quit."));
+		YYCC::ConsoleHelper::WriteLine(YYCC_COLOR_LIGHT_YELLOW(u8"Unvirt 0.2.0") " build at " __DATE__ " " __TIME__);
+		YYCC::ConsoleHelper::WriteLine(u8"Type 'help' for more infomation. Type 'exit' to quit.");
 
 		// start process loop
 		while (true) {
