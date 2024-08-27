@@ -522,29 +522,17 @@ if (!this->IsRootNode()) { \
 
 #pragma region String Argument
 
+		StringArgument::StringArgument(const std::u8string_view& argname, Constraint_t constraint) :
+			AbstractArgument(argname), m_Constraint(constraint) {}
+
+		StringArgument::~StringArgument() {}
+
 		bool StringArgument::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) {
 			// check constraint
 			if (m_Constraint.IsValid() && !m_Constraint.m_CheckFct(cur_cmd))
 				return false;
 			// accept
 			am.Add<ArgValue_t>(m_ArgumentName, cur_cmd);
-			return true;
-		}
-
-#pragma endregion
-
-#pragma region Encoding List Argument
-
-		bool EncodingListArgument::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) {
-			// split given argument
-			std::vector<std::u8string> encs = YYCC::StringHelper::Split(cur_cmd, u8",");
-			// check each parts is a valid encoding name
-			for (const auto& item : encs) {
-				if (!LibCmo::EncodingHelper::IsValidEncodingName(item))
-					return false;
-			}
-			// okey, add into map
-			am.Add<ArgValue_t>(m_ArgumentName, encs);
 			return true;
 		}
 

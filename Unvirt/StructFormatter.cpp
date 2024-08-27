@@ -204,7 +204,7 @@ namespace Unvirt::StructFormatter {
 		for (LibCmo::CKDWORD i = 0; i < slot_count; ++i) {
 			auto desc = bd.GetImageDesc(i);
 
-			Console::FormatLine(u8"#%" PRIuCKDWORD "\t%" PRIuCKDWORD "\t%" PRIuCKDWORD "\t0x%" PRIxCKDWORD " bytes\t",
+			Console::FormatLine(u8"#%" PRIuCKDWORD "\t%" PRIuCKDWORD "\t%" PRIuCKDWORD "\t%s\t0x%" PRIxCKDWORD " bytes\t%s",
 				i,
 				desc->GetWidth(),
 				desc->GetHeight(),

@@ -20,6 +20,8 @@ namespace LibCmo::CK2::MgrImpls {
 
 		// get description first
 		const CKClassDesc* desc = CKGetClassDesc(cls);
+		// if no description, return directly to reject creating object.
+		if (desc == nullptr) return nullptr;
 
 		// allocate a CK_ID first
 		CKDWORD decided_off;
@@ -60,7 +62,9 @@ namespace LibCmo::CK2::MgrImpls {
 	void CKObjectManager::InternalDestroy(ObjImpls::CKObject* obj) {
 		// find desc by classid
 		const CKClassDesc* desc = CKGetClassDesc(obj->GetClassID());
-
+		// a create CKObject instance definitely can find corresponding desc.
+		// if not, throw exception.
+		if (desc == nullptr) throw LogicException("Invalid CK_CLASSID");
 		// free it
 		desc->ReleaseFct(m_Context, obj);
 	}

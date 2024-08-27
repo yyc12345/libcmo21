@@ -133,7 +133,8 @@ namespace LibCmo::CK2 {
 				if (namelen != 0) {
 					name_conv.resize(namelen);
 					parser->Read(name_conv.data(), namelen);
-					m_Ctx->GetUTF8String(name_conv, fileobj.Name);
+					if (!m_Ctx->GetUTF8String(name_conv, fileobj.Name))
+						m_Ctx->OutputToConsole(u8"Fail to get UTF8 name for CKObject when reading file header. Some objects name will leave to blank.");
 				} else {
 					XContainer::NSXString::FromCKSTRING(fileobj.Name, nullptr);
 				}
@@ -311,7 +312,8 @@ namespace LibCmo::CK2 {
 				// read filename
 				if (filenamelen != 0) {
 					parser->Read(name_conv.data(), filenamelen);
-					m_Ctx->GetUTF8String(name_conv, file);
+					if (!m_Ctx->GetUTF8String(name_conv, file))
+						m_Ctx->OutputToConsole(u8"Fail to get UTF8 name for included file when reading file body. Some included files may be stripped.");
 				}
 
 				// read file body length

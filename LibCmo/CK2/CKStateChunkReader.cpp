@@ -148,7 +148,13 @@ namespace LibCmo::CK2 {
 		}
 
 		// convert encoding
-		m_BindContext->GetUTF8String(cache, *strl);
+		if (!m_BindContext->GetUTF8String(cache, *strl)) {
+			m_BindContext->OutputToConsole(u8"Fail to get UTF8 string when reading CKStateChunk. Some objects may be loaded incorrectly.");
+			strl->clear();
+			return false;
+		}
+
+		// okey
 		return true;
 	}
 

@@ -138,7 +138,8 @@ namespace LibCmo::CK2 {
 
 		// convert encoding
 		std::string cache;
-		m_BindContext->GetOrdinaryString(*strl, cache);
+		if (!m_BindContext->GetOrdinaryString(*strl, cache))
+			m_BindContext->OutputToConsole(u8"Fail to get ordinary string when saving CKStateChunk. Some objects may be saved incorrectly.");
 
 		if (cache.empty()) {
 			// write zero string

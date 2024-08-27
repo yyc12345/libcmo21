@@ -281,7 +281,7 @@ namespace LibCmo::CK2 {
 
 #pragma region Encoding utilities
 
-	void CKContext::GetUTF8String(const std::string& native_name, XContainer::XString& u8_name) {
+	bool CKContext::GetUTF8String(const std::string& native_name, XContainer::XString& u8_name) {
 		bool conv_success = false, has_valid_token = false;
 		for (const auto& token : this->m_NameEncoding) {
 			if (token == EncodingHelper::INVALID_ENCODING_TOKEN) continue;
@@ -298,9 +298,11 @@ namespace LibCmo::CK2 {
 				this->OutputToConsole(u8"Error when converting to UTF8 string from ordinary string. The string will leave to blank.");
 			}
 		}
+		// return value
+		return conv_success;
 	}
 
-	void CKContext::GetOrdinaryString(const XContainer::XString& u8_name, std::string& native_name) {
+	bool CKContext::GetOrdinaryString(const XContainer::XString& u8_name, std::string& native_name) {
 		bool conv_success = false, has_valid_token = false;
 		for (const auto& token : this->m_NameEncoding) {
 			if (token == EncodingHelper::INVALID_ENCODING_TOKEN) continue;
@@ -317,6 +319,8 @@ namespace LibCmo::CK2 {
 				this->OutputToConsole(u8"Error when converting to ordinary string from UTF8 string. The string will leave to blank.");
 			}
 		}
+		// return value
+		return conv_success;
 	}
 
 	void CKContext::SetEncoding(const XContainer::XArray<XContainer::XString>& encoding_seq) {

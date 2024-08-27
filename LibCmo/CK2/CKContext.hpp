@@ -104,6 +104,7 @@ namespace LibCmo::CK2 {
 		 * @brief Convert given ordinary string to UTF8 string.
 		 * @param[in] native_name The input ordinary string.
 		 * @param[out] u8_name The output UTF8 string.
+		 * @return True if convertion is success, otherwise false.
 		 * @exception RuntimeException Raised when perform this operation with a blank encoding sequence.
 		 * @remarks
 		 * The encoding of ordinary is specified by encoding sequence.
@@ -111,11 +112,12 @@ namespace LibCmo::CK2 {
 		 * However, if you use this function with blank encoding sequence, it will raise exception.
 		 * So becore using this function, please make sure that you have checked by calling IsValidEncoding().
 		*/
-		void GetUTF8String(const std::string& native_name, XContainer::XString& u8_name);
+		bool GetUTF8String(const std::string& native_name, XContainer::XString& u8_name);
 		/**
 		 * @brief Convert given UTF8 string to ordinary string.
 		 * @param[in] u8_name The input UTF8 string.
 		 * @param[out] native_name The output ordinary string.
+		 * @return True if convertion is success, otherwise false.
 		 * @exception RuntimeException Raised when perform this operation with a blank encoding sequence.
 		 * @remarks
 		 * The encoding of ordinary is specified by encoding sequence.
@@ -123,7 +125,7 @@ namespace LibCmo::CK2 {
 		 * However, if you use this function with blank encoding sequence, it will raise exception.
 		 * So becore using this function, please make sure that you have checked by calling IsValidEncoding().
 		*/
-		void GetOrdinaryString(const XContainer::XString& u8_name, std::string& native_name);
+		bool GetOrdinaryString(const XContainer::XString& u8_name, std::string& native_name);
 		/**
 		 * @brief Set the encoding sequence.
 		 * @param[in] encoding_series The encoding name in this sequence.

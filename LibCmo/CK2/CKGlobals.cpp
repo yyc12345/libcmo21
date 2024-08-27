@@ -145,8 +145,7 @@ namespace LibCmo::CK2 {
 
 	void CKClassNeedNotificationFrom(CK_CLASSID listener, CK_CLASSID listenTo) {
 		size_t idxListener, idxListenTo;
-		if (!GetClassIdIndex(listener, idxListener) || !GetClassIdIndex(listenTo, idxListenTo))
-			throw LogicException("Invalid CK_CLASSID in argument.");
+		if (!GetClassIdIndex(listener, idxListener) || !GetClassIdIndex(listenTo, idxListenTo)) return;
 
 		XContainer::NSXBitArray::Set(g_CKClassInfo[idxListener].ToBeNotify, static_cast<CKDWORD>(idxListenTo));
 	}
@@ -191,25 +190,25 @@ namespace LibCmo::CK2 {
 
 	const CKClassDesc* CKGetClassDesc(CK_CLASSID cid) {
 		size_t intcid;
-		if (!GetClassIdIndex(cid, intcid))
-			throw LogicException("Invalid CK_CLASSID.");
+		if (!GetClassIdIndex(cid, intcid)) return nullptr;
 		return &g_CKClassInfo[intcid];
 	}
 
 	CKSTRING CKClassIDToString(CK_CLASSID cid) {
 		const CKClassDesc* desc = CKGetClassDesc(cid);
+		if (desc == nullptr) return u8"Undefined Type";
 		return desc->NameFct();
 	}
 
 	bool CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent) {
 		size_t intchild, intparent;
-		if (!GetClassIdIndex(child, intchild) || !GetClassIdIndex(parent, intparent))
-			throw LogicException("Invalid CK_CLASSID.");
+		if (!GetClassIdIndex(child, intchild) || !GetClassIdIndex(parent, intparent)) return false;
 		return g_CKClassInfo[intchild].Parents[intparent];
 	}
 
 	CK_CLASSID CKGetParentClassID(CK_CLASSID child) {
 		const CKClassDesc* desc = CKGetClassDesc(child);
+		if (desc == nullptr) return CK_CLASSID::CKCID_OBJECT;
 		return desc->Parent;
 	}
 
@@ -228,6 +227,7 @@ namespace LibCmo::CK2 {
 
 	bool CKIsNeedNotify(CK_CLASSID listener, CK_CLASSID deletedObjCid) {
 		const CKClassDesc* desc = CKGetClassDesc(listener);
+		if (desc == nullptr) return false;
 		return XContainer::NSXBitArray::IsSet(desc->CommonToBeNotify, static_cast<CKDWORD>(deletedObjCid));
 	}
 
@@ -238,6 +238,8 @@ namespace LibCmo::CK2 {
 			if (!XContainer::NSXBitArray::IsSet(delObjCids, static_cast<CKDWORD>(i))) continue;
 
 			const CKClassDesc* desc = CKGetClassDesc(static_cast<CK_CLASSID>(i));
+			if (desc == nullptr) continue;
+
 			XContainer::NSXBitArray::Or(result, desc->ToNotify);
 		}
 

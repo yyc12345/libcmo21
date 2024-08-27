@@ -155,7 +155,7 @@ namespace LibCmo::CK2 {
 	 * @brief Order that first class id will be notified when deleting object whose class id is second argument
 	 * @param[in] listener The id of class will be notified.
 	 * @param[in] listenTo The id of class which first argument interested in.
-	 * @exception LogicException Raised if given CK_CLASSID is invalid.
+	 * @remarks If one of given class ids is invalid, this function simply return and do nothing.
 	*/
 	void CKClassNeedNotificationFrom(CK_CLASSID listener, CK_CLASSID listenTo);
 	/**
@@ -188,15 +188,15 @@ namespace LibCmo::CK2 {
 	 * @brief Get the class description struct by given class id.
 	 * @param[in] cid Class id for fetching.
 	 * @return The pointer to corresponding class description.
-	 * We guaranteen that this pointer must not be nullptr.
-	 * @exception LogicException Raised if given CK_CLASSID is invalid.
+	 * If given class id is invalid, this function will return nullptr.
+	 * According to this, caller can utilize this function to validate class id.
 	*/
 	const CKClassDesc* CKGetClassDesc(CK_CLASSID cid);
 	/**
 	 * @brief Get the name representation of given class id.
 	 * @param[in] cid Class id for fetching.
 	 * @return The name of given class id.
-	 * @exception LogicException Raised if given CK_CLASSID is invalid.
+	 * If given class id is invalid, it return a predefined name.
 	*/
 	CKSTRING CKClassIDToString(CK_CLASSID cid);
 
@@ -205,14 +205,14 @@ namespace LibCmo::CK2 {
 	 * @param[in] child The id of first class assumed as child class.
 	 * @param[in] parent The id of second class assumed as parent class.
 	 * @return True if relation is satisfied, otherwise false.
-	 * @exception LogicException Raised if given CK_CLASSID is invalid.
+	 * If one of given class ids is invalid, this function always return false.
 	*/
 	bool CKIsChildClassOf(CK_CLASSID child, CK_CLASSID parent);
 	/**
 	 * @brief Get the parent class id of given class id.
 	 * @param[in] child The id to class which need to find parent class.
 	 * @return The parent class id.
-	 * @exception LogicException Raised if given CK_CLASSID is invalid.
+	 * If given class id is invalid, this function always return the class id of CKObject.
 	*/
 	CK_CLASSID CKGetParentClassID(CK_CLASSID child);
 	/**
@@ -220,7 +220,6 @@ namespace LibCmo::CK2 {
 	 * @param[in] cid1 The id of first class finding common parent.
 	 * @param[in] cid2 The id of second class finding common parent.
 	 * @return The cloest common parent class id.
-	 * @exception LogicException Raised if given CK_CLASSID is invalid.
 	*/
 	CK_CLASSID CKGetCommonParent(CK_CLASSID cid1, CK_CLASSID cid2);
 
@@ -229,14 +228,13 @@ namespace LibCmo::CK2 {
 	 * @param[in] listener The class id of checking whether need to be notified.
 	 * @param[in] deletedObjCid The class id of deleting object.
 	 * @return True if it need to be notified, otherwise false.
-	 * @exception LogicException Raised if given CK_CLASSID is invalid.
+	 * If the class id of checking is invalid, this function always return false.
 	*/
 	bool CKIsNeedNotify(CK_CLASSID listener, CK_CLASSID deletedObjCid);	/**
 	/**
 	 * @brief Get all class ids need to be notified when objects whose class id included in \c delObjCids are deleting.
 	 * @param[in] delObjCids The bit array representing class ids which need to be queried.
 	 * @return The queried bit array representing class ids need to be notified.
-	 * @exception LogicException Raised if given CK_CLASSID is invalid.
 	 * @see CKIsNeedNotify()
 	*/
 	XContainer::XBitArray CKGetAllNotifyClassID(const XContainer::XBitArray& delObjCids);

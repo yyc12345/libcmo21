@@ -7,7 +7,31 @@
 
 namespace Unvirt::Context {
 
-#pragma region Constraint Help Function
+#pragma region Specialized for CmdHelper
+
+	class EncodingListArgument : public CmdHelper::Nodes::AbstractArgument {
+	public:
+		using ArgValue_t = CmdHelper::AMItems::StringArrayItem;
+	public:
+		EncodingListArgument(const std::u8string_view& argname) :
+			AbstractArgument(argname) {}
+		virtual ~EncodingListArgument() {}
+		YYCC_DEF_CLS_COPY_MOVE(EncodingListArgument);
+
+	protected:
+		virtual bool BeginConsume(const std::u8string& cur_cmd, CmdHelper::ArgumentsMap& am) override {
+			// split given argument
+			std::vector<std::u8string> encs = YYCC::StringHelper::Split(cur_cmd, u8",");
+			// check each parts is a valid encoding name
+			for (const auto& item : encs) {
+				if (!LibCmo::EncodingHelper::IsValidEncodingName(item))
+					return false;
+			}
+			// okey, add into map
+			am.Add<ArgValue_t>(m_ArgumentName, encs);
+			return true;
+		}
+	};
 
 	static YYCC::Constraints::Constraint<size_t> GetOneBasedIndexConstraint() {
 		return YYCC::Constraints::Constraint<size_t> {
@@ -18,7 +42,6 @@ namespace Unvirt::Context {
 	}
 
 #pragma endregion
-
 
 #pragma region UnvirtContext Misc
 
@@ -136,7 +159,7 @@ namespace Unvirt::Context {
 			)
 		)
 		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"encoding")
-			.Then<CmdHelper::Nodes::EncodingListArgument>(CmdHelper::Nodes::EncodingListArgument(u8"enc")
+			.Then<EncodingListArgument>(EncodingListArgument(u8"enc")
 				.Comment(u8"CKContext used encoding splitted by ','. Support mutiple encoding.")
 				.Executes(
 					std::bind(&UnvirtContext::ProcEncoding, this, std::placeholders::_1),
@@ -644,7 +667,7 @@ namespace Unvirt::Context {
 	}
 
 	void UnvirtContext::ProcEncoding(const CmdHelper::ArgumentsMap& amap) {
-		const auto& encodings = amap.Get<CmdHelper::Nodes::EncodingListArgument::ArgValue_t>(u8"enc").Get();
+		const auto& encodings = amap.Get<EncodingListArgument::ArgValue_t>(u8"enc").Get();
 		m_Ctx->SetEncoding(encodings);
 	}
 
@@ -706,12 +729,12 @@ namespace Unvirt::Context {
 					}
 				}
 			}
-				}
+		}
 
 #else
 		PrintCommonError(u8"Test command only available in Debug mode.");
 #endif
-			}
+	}
 
 	void Unvirt::Context::UnvirtContext::ProcHelp(const CmdHelper::ArgumentsMap&) {
 		m_Help.Print();
@@ -723,4 +746,4 @@ namespace Unvirt::Context {
 
 #pragma endregion
 
-		}
+}

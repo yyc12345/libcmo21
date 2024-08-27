@@ -91,7 +91,8 @@ namespace LibCmo::CK2 {
 			sumHdrObjSize += 4 * CKSizeof(CKDWORD);
 			if (XContainer::NSXString::ToCKSTRING(obj.Name) != nullptr) {
 				// += Name size
-				m_Ctx->GetOrdinaryString(obj.Name, name_conv);
+				if (!m_Ctx->GetOrdinaryString(obj.Name, name_conv))
+					m_Ctx->OutputToConsole(u8"Fail to get ordinary string for CKObject name when computing the size of saved file. It may cause application crash or saved file has blank object name.");
 				sumHdrObjSize += static_cast<CKDWORD>(name_conv.size());
 			}
 
@@ -178,7 +179,8 @@ namespace LibCmo::CK2 {
 
 			if (XContainer::NSXString::ToCKSTRING(obj.Name) != nullptr) {
 				// if have name, write it
-				m_Ctx->GetOrdinaryString(obj.Name, name_conv);
+				if (!m_Ctx->GetOrdinaryString(obj.Name, name_conv))
+					m_Ctx->OutputToConsole(u8"Fail to get ordinary string for CKObject name when saving file. Some objects may be saved with blank name.");
 				CKDWORD namelen = static_cast<CKDWORD>(name_conv.size());
 				hdrparser->Write(&namelen);
 				hdrparser->Write(name_conv.data(), namelen);
@@ -318,7 +320,8 @@ namespace LibCmo::CK2 {
 			m_Ctx->GetPathManager()->GetFileName(filename);
 
 			// write filename
-			m_Ctx->GetOrdinaryString(filename, name_conv);
+			if (!m_Ctx->GetOrdinaryString(filename, name_conv))
+				m_Ctx->OutputToConsole(u8"Fail to get ordinary string for included file when saving file. Some included files may not be saved correctly.");
 			CKDWORD filenamelen = static_cast<CKDWORD>(name_conv.size());
 			std::fwrite(&filenamelen, sizeof(CKDWORD), 1, fs);
 			std::fwrite(name_conv.data(), sizeof(CKBYTE), filenamelen, fs);

@@ -187,7 +187,8 @@ namespace LibCmo::CK2::ObjImpls {
 			props.m_ReaderGuid.d1 = realprops.m_ReaderGuid.d1;
 			props.m_ReaderGuid.d2 = realprops.m_ReaderGuid.d2;
 			std::string ext;
-			m_Context->GetOrdinaryString(realprops.m_Ext.GetExt(), ext);
+			if (!m_Context->GetOrdinaryString(realprops.m_Ext.GetExt(), ext))
+				m_Context->OutputToConsole(u8"Fail to get ordinary string for the extension of bitmap properties when saving CKTexture. Some textures may be saved with blank extension.");
 			std::memcpy(
 				props.m_Ext.m_Data,
 				ext.c_str(),
@@ -314,7 +315,8 @@ namespace LibCmo::CK2::ObjImpls {
 
 					// get utf8 extension
 					XContainer::XString ext;
-					m_Context->GetUTF8String(props->m_Ext.m_Data, ext);
+					if (!m_Context->GetUTF8String(props->m_Ext.m_Data, ext))
+						m_Context->OutputToConsole(u8"Fail to get UTF8 extension when loading CKTexture. Some textures may have blank extension in bitmap properties.");
 
 					// get my bitmap prop
 					CKBitmapProperties myprops(

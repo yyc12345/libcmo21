@@ -498,27 +498,13 @@ namespace Unvirt::CmdHelper {
 			using ArgValue_t = AMItems::StringItem;
 			using Constraint_t = YYCC::Constraints::Constraint<std::u8string>;
 		public:
-			StringArgument(const std::u8string_view& argname, Constraint_t constraint = Constraint_t {}) :
-				AbstractArgument(argname), m_Constraint(constraint) {}
-			virtual ~StringArgument() {}
+			StringArgument(const std::u8string_view& argname, Constraint_t constraint = Constraint_t {});
+			virtual ~StringArgument();
 			YYCC_DEF_CLS_COPY_MOVE(StringArgument);
 
 		protected:
 			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
 			Constraint_t m_Constraint;
-		};
-
-		class EncodingListArgument : public AbstractArgument {
-		public:
-			using ArgValue_t = AMItems::StringArrayItem;
-		public:
-			EncodingListArgument(const std::u8string_view& argname) :
-				AbstractArgument(argname) {}
-			virtual ~EncodingListArgument() {}
-			YYCC_DEF_CLS_COPY_MOVE(EncodingListArgument);
-
-		protected:
-			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
 		};
 
 	}
