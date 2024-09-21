@@ -85,6 +85,7 @@ namespace BMapSharp.VirtoolsTypes {
         public VxVector4 w;
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 4, CharSet = CharSet.Ansi)]
     public struct CKFaceIndices {
         [MarshalAs(UnmanagedType.U4)]
         public uint I1;

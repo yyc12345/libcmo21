@@ -27,81 +27,122 @@ namespace BMapSharp {
                 return g_Instance;
             }
 
-            public IntPtr MarshalManagedToNative(object ManagedObj) {
-                if (ManagedObj is null) return IntPtr.Zero;
+            // For respecting the standard of BMap, 
+            // the native memory we created is a simple array and each item is a pointer to a NULL-terminated UTF8 string.
+            // Please note the array self is not NULL-terminated because its length is provided by another argument in function calling.
+            // However, this memory layout is not good for our marshaling.
+            // We can not know the size of array we created. Because we need iterate it when freeing or fetching data.
+            // We also can not know the size of string we created because we need read them when parsing them to C# string.
+            // 
+            // So the solution we made is adding an uint32_t header before the array to indicate the size of array.
+            // And also add an uint32_t header for each string to indicate the length of string (in bytes, NULL exclusive).
+            // So the pointer put in array is not the address we allocated, it has an offset.
+            // Also we return native pointer is not the address we allocated, it also has an offset.
 
+            private static readonly int szLengthHeaderSize = Marshal.SizeOf<int>();
+            private static readonly int szArrayItemSize = Marshal.SizeOf<IntPtr>();
+            private static readonly int szStringItemSize = Marshal.SizeOf<byte>();
+
+            public IntPtr MarshalManagedToNative(object ManagedObj) {
+                // Check nullptr object.
+                if (ManagedObj is null) return IntPtr.Zero;
+                // Check argument type.
                 string[] castManagedObj = ManagedObj as string[];
                 if (castManagedObj is null)
                     throw new MarshalDirectiveException("BMStringArrayMashaler must be used on an string array.");
 
-                // Allocate array pointer first.
-                // We need allocated memory with extra item and set it to zero later.
-                // Because we don't have any idea to check the length of this array when free it.
-                // Although native BMap library do not need this extra NULL terminal.
-                int szArrayItemSize = Marshal.SizeOf<IntPtr>();
-                IntPtr pArray = Marshal.AllocHGlobal(szArrayItemSize * (castManagedObj.Length + 1));
-
-                // The allocate string data one by one.
-                for (int i = 0; i < castManagedObj.Length; ++i) {
+                // Allocate string items first
+                int szArrayItemCount = castManagedObj.Length;
+                IntPtr[] apStrings = new IntPtr[szArrayItemCount];
+                for (int i = 0; i < szArrayItemCount; ++i) {
                     // Encode string first.
                     byte[] encString = Encoding.UTF8.GetBytes(castManagedObj[i]);
                     // Allocate string memory with extra NULL terminal.
-                    int szStringItemSize = Marshal.SizeOf<byte>();
-                    IntPtr pString = Marshal.AllocHGlobal(szStringItemSize * (encString.Length + 1));
-                    // Copy data into it.
-                    Marshal.Copy(encString, 0, pString, szStringItemSize * encString.Length);
+                    int szStringItemCount = encString.Length;
+                    IntPtr pString = Marshal.AllocHGlobal(szStringItemSize * (szStringItemCount + 1) + szLengthHeaderSize);
+                    // Setup length field
+                    Marshal.WriteInt32(pString, 0, szStringItemCount);
+                    // Copy string data with offset.
+                    IntPtr pFakeString = pString + szLengthHeaderSize;
+                    Marshal.Copy(encString, 0, pFakeString, szStringItemCount);
                     // Set NULL terminal.
-                    Marshal.WriteByte(pString, szStringItemSize * encString.Length, 0);
-                    // Add into pointer array
-                    Marshal.WriteIntPtr(pArray, szArrayItemSize * i, pString);
+                    Marshal.WriteByte(pFakeString, szStringItemSize * szStringItemCount, 0);
+                    // Set item in string pointer
+                    apStrings[i] = pFakeString;
                 }
 
-                // Write array NULL terminal
-                Marshal.WriteIntPtr(pArray, szArrayItemSize * castManagedObj.Length, IntPtr.Zero);
+                // Allocate array pointer now.
+                IntPtr pArray = Marshal.AllocHGlobal(szArrayItemSize * szArrayItemCount + szLengthHeaderSize);
+                // Setup length field
+                Marshal.WriteInt32(pArray, 0, szArrayItemCount);
+                // Copy string pointer data with offset.
+                IntPtr pFakeArray = pArray + szLengthHeaderSize;
+                Marshal.Copy(apStrings, 0, pFakeArray, szArrayItemCount);
 
                 // Return value
-                return pArray;
+                return pFakeArray;
             }
 
             public object MarshalNativeToManaged(IntPtr pNativeData) {
+                // Check nullptr
                 if (pNativeData == IntPtr.Zero) return null;
 
-                // Iterate the array until we reach the NULL terminal.
-                // And save all we meet string.
-                int szArrayItemSize = Marshal.SizeOf<IntPtr>();
-                IntPtr pArray = pNativeData;
-                int index = 0;
-                while (true) {
-                    // Get the pointer of this string.
-                    IntPtr pString = Marshal.ReadIntPtr(pArray, szArrayItemSize * index);
-                    // If it is NULL terminal, break the while.
-                    if (pString == IntPtr.Zero) break;
+                // Get real array pointer
+                IntPtr pFakeArray = pNativeData;
+                IntPtr pArray = pFakeArray - szLengthHeaderSize;
 
-                    // Read string into buffer and 
-                    Marshal.FreeHGlobal(pString);
-                    ++index;
+                // Get the count of array and read string pointers
+                int szArrayItemCount = Marshal.ReadInt32(pArray, 0);
+                IntPtr[] apStrings = new IntPtr[szArrayItemCount];
+                Marshal.Copy(pFakeArray, apStrings, 0, szArrayItemCount);
+
+                // Iterate the array and process each string one by one.
+                string[] ret = new string[szArrayItemCount];
+                for (int i = 0; i < szArrayItemCount; ++i) {
+                    // Get string pointer
+                    IntPtr pFakeString = apStrings[i];
+                    if (pFakeString == IntPtr.Zero) {
+                        ret[i] = null;
+                        continue;
+                    }
+                    IntPtr pString = pFakeString - szLengthHeaderSize;
+                    // Read string length
+                    int szStringItemCount = Marshal.ReadInt32(pString, 0);
+                    // Read string body
+                    byte[] encString = new byte[szStringItemCount];
+                    Marshal.Copy(pFakeString, encString, 0, szStringItemCount);
+                    // Decode string with UTF8
+                    ret[i] = Encoding.UTF8.GetString(encString);
                 }
+                
+                // Return result
+                return ret;
             }
 
             public void CleanUpNativeData(IntPtr pNativeData) {
+                // Check nullptr
                 if (pNativeData == IntPtr.Zero) return;
 
-                // Iterate the array until we reach the NULL terminal.
-                // And free every string we meet.
-                int szArrayItemSize = Marshal.SizeOf<IntPtr>();
-                IntPtr pArray = pNativeData;
-                int index = 0;
-                while (true) {
-                    // Get the pointer of this string.
-                    IntPtr pString = Marshal.ReadIntPtr(pArray, szArrayItemSize * index);
-                    // If it is NULL terminal, break the while.
-                    if (pString == IntPtr.Zero) break;
-                    // Free string and move index to next one.
+                // Get real array pointer
+                IntPtr pFakeArray = pNativeData;
+                IntPtr pArray = pFakeArray - szLengthHeaderSize;
+
+                // Get the count of array and read string pointers
+                int szArrayItemCount = Marshal.ReadInt32(pArray, 0);
+                IntPtr[] apStrings = new IntPtr[szArrayItemCount];
+                Marshal.Copy(pFakeArray, apStrings, 0, szArrayItemCount);
+
+                // Iterate the array and free them one by one.
+                for (int i = 0; i < szArrayItemCount; ++i) {
+                    // Get string pointer
+                    IntPtr pFakeString = apStrings[i];
+                    if (pFakeString == IntPtr.Zero) continue;
+                    IntPtr pString = pFakeString - szLengthHeaderSize;
+                    // Free string pointer
                     Marshal.FreeHGlobal(pString);
-                    ++index;
                 }
 
-                // Now free the array self.
+                // Free array self
                 Marshal.FreeHGlobal(pArray);
             }
 
