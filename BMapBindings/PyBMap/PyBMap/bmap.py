@@ -78,12 +78,13 @@ elif sys.platform.startswith('darwin'):
 else:
     _g_BMapLibName = "BMap.bin"
 
+_g_BMapLibPath: str =  os.path.join(os.path.dirname(__file__), _g_BMapLibName)
+
 _g_BMapModule: ctypes.CDLL | None = None
 try:
-    _g_BMapModule = ctypes.cdll.LoadLibrary(
-        os.path.join(os.path.dirname(__file__), _g_BMapLibName)
-    )
+    _g_BMapModule = ctypes.cdll.LoadLibrary(_g_BMapLibPath)
 except:
+    print(f'Fail to load native BMap dynamic library file "{_g_BMapLibPath}".')
     _g_BMapModule = None
 
 def is_bmap_available() -> bool:
@@ -106,6 +107,8 @@ def _create_bmap_func(fct_name: str, fct_params: list[typing.Any]) -> typing.Cal
 #endregion
 
 #region Function Defines
+
+##### GENERATED FUNCTIONS BEGIN #####
 
 ## BMInit
 #  @return True if no error, otherwise False.
@@ -781,5 +784,6 @@ BM3dObject_GetVisibility = _create_bmap_func('BM3dObject_GetVisibility', [bm_voi
 #  @return True if no error, otherwise False.
 BM3dObject_SetVisibility = _create_bmap_func('BM3dObject_SetVisibility', [bm_void_p, bm_CKID, bm_bool])
 
-#endregion
+##### GENERATED FUNCTIONS END #####
 
+#endregion

@@ -1,6 +1,6 @@
 using System;
 
-namespace BMapSharp {
+namespace BMapSharp.BMapWrapper {
 
 
 

@@ -69,15 +69,7 @@ public class PythonWriter {
 		OutputStreamWriter writer = CommonHelper.openWriter("dest/BMExports.py");
 		IndentHelper helper = new IndentHelper(writer);
 
-		// write snippet
-		CommonHelper.writeSnippet(writer, "snippets/header.py");
-
 		// write function decls
-
-		helper.puts("");
-		helper.puts("#region Function Defines");
-		helper.puts("");
-
 		for (ExpFctDecl fctdecl : data) {
 			// write annotation
 			// function name
@@ -96,10 +88,6 @@ public class PythonWriter {
 			helper.printf("%s = _create_bmap_func('%s', [%s])", fctdecl.mFctName, fctdecl.mFctName, fctdecl.mFctParams
 					.stream().map(value -> pythonTypeGetter(value)).collect(Collectors.joining(", ")));
 		}
-
-		helper.puts("");
-		helper.puts("#endregion");
-		helper.puts("");
 
 		writer.close();
 	}

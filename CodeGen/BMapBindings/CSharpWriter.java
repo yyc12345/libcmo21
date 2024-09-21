@@ -52,7 +52,7 @@ public class CSharpWriter {
 				ret.mCsType = "string";
 				break;
 			case 1:
-				ret.mMarshalAs = "UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringArrayMashaler)";
+				ret.mMarshalAs = "UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringArrayMarshaler)";
 				ret.mCsType = "string[]";
 				break;
 			}
@@ -212,10 +212,6 @@ public class CSharpWriter {
 		IndentHelper helper = new IndentHelper(writer);
 
 		// write function decls
-		helper.puts("");
-		helper.puts("#region Function Defines");
-		helper.puts("");
-
 		for (ExpFctDecl fctdecl : data) {
 			// write annotation
 			// summary (just plain function name)
@@ -253,7 +249,7 @@ public class CSharpWriter {
 				// push MarshalAsAttribute
 				sb.append("MarshalAs(");
 				sb.append(interop_type.mMarshalAs);
-				sb.append(") ");
+				sb.append(")] ");
 				// push out keyword if parameter is out parameter
 				if (!paramdecl.mIsInput) {
 					sb.append("out ");
@@ -270,10 +266,6 @@ public class CSharpWriter {
 			helper.printf("internal static extern bool %s(%s);", fctdecl.mFctName,
 					cs_param_list.stream().collect(Collectors.joining(", ")));
 		}
-
-		helper.puts("");
-		helper.puts("#endregion");
-		helper.puts("");
 
 		writer.close();
 	}

@@ -3,11 +3,21 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    
+
     <PackageId>BMapSharp</PackageId>
     <Version>1.0.0</Version>
     <Authors>yyc12345</Authors>
     <Company>BearKidsTeam</Company>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([System.OperatingSystem]::IsWindows())">
+    <DefineConstants>BMAP_OS_WINDOWS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([System.OperatingSystem]::IsLinux()) Or $([System.OperatingSystem]::IsFreeBSD())">
+    <DefineConstants>BMAP_OS_LINUX</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([System.OperatingSystem]::IsMacOS())">
+    <DefineConstants>BMAP_OS_MACOS</DefineConstants>
   </PropertyGroup>
 
 </Project>
