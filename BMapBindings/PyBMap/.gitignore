@@ -9,9 +9,6 @@
 *.dylib
 *.bin
 
-# Ignore testbench file.
-testbench.py
-
 # -------------------- Python --------------------
 # Byte-compiled / optimized / DLL files
 __pycache__/

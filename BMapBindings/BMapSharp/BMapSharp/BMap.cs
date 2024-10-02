@@ -7,6 +7,15 @@ namespace BMapSharp {
 
     public static class BMap {
 
+        /// <summary>BMapSharp module specific exception.</summary>
+        public class BMapException : Exception {
+            public BMapException() {}
+            public BMapException(string message)
+                : base(message) {}
+            public BMapException(string message, Exception inner)
+                : base(message, inner) {}
+        }
+
         /// <summary>The callback function of BMap.</summary>
         /// <param name="msg">The message content need to be printed.</param>
         public delegate void OutputCallback([In, MarshalAs(UnmanagedType.LPUTF8Str)] string msg);
@@ -20,12 +29,9 @@ namespace BMapSharp {
             // NOTE: I do not create a member to store the object we are marshaling.
             // Because my binding do not have In, Out parameter. All parameters are In OR Out.
             // So there is no reason to keep that member.
-            
-            private static BMStringArrayMarshaler g_Instance;
-            public static ICustomMarshaler GetInstance(string pstrCookie) {
-                if (g_Instance is null) g_Instance = new BMStringArrayMarshaler();
-                return g_Instance;
-            }
+
+            private static readonly BMStringArrayMarshaler g_Instance = new BMStringArrayMarshaler();
+            public static ICustomMarshaler GetInstance(string pstrCookie) => g_Instance;
 
             // For respecting the standard of BMap, 
             // the native memory we created is a simple array and each item is a pointer to a NULL-terminated UTF8 string.
@@ -114,7 +120,7 @@ namespace BMapSharp {
                     // Decode string with UTF8
                     ret[i] = Encoding.UTF8.GetString(encString);
                 }
-                
+
                 // Return result
                 return ret;
             }
@@ -151,6 +157,7 @@ namespace BMapSharp {
             }
 
             public int GetNativeDataSize() {
+                // Return -1 to indicate the managed type this marshaler handles is not a value type.
                 return -1;
             }
 
