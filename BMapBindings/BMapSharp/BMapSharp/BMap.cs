@@ -5,16 +5,19 @@ using BMapSharp.VirtoolsTypes;
 
 namespace BMapSharp {
 
-    public static class BMap {
-
-        /// <summary>BMapSharp module specific exception.</summary>
-        public class BMapException : Exception {
-            public BMapException() {}
-            public BMapException(string message)
-                : base(message) {}
-            public BMapException(string message, Exception inner)
-                : base(message, inner) {}
+    /// <summary>BMapSharp module specific exception.</summary>
+    public class BMapException : Exception {
+        public BMapException() {}
+        public BMapException(string message)
+            : base(message) {}
+        public BMapException(string message, Exception inner)
+            : base(message, inner) {}
+        public static void ThrowIfFailed(bool condition) {
+            if (!condition) throw new BMapException("BMap operation failed.");
         }
+    }
+
+    public static class BMap {
 
         /// <summary>The callback function of BMap.</summary>
         /// <param name="msg">The message content need to be printed.</param>
