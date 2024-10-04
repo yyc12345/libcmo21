@@ -23,16 +23,18 @@ namespace BMapSharp {
         /// <param name="msg">The message content need to be printed.</param>
         public delegate void OutputCallback([In, MarshalAs(UnmanagedType.LPUTF8Str)] string msg);
 
+        #region Custom Marshalers
+
+        // References:
+        // https://stackoverflow.com/questions/18498452/how-do-i-write-a-custom-marshaler-which-allows-data-to-flow-from-native-to-manag
+        // https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-runtime-interopservices-icustommarshaler
+        // 
+        // NOTE: I do not create a member to store the object we are marshaling.
+        // Because my binding do not have In, Out parameter. All parameters are In OR Out.
+        // So there is no reason to keep that member.
+
         /// <summary>The custom marshaler for BMap string array.</summary>
         public class BMStringArrayMarshaler : ICustomMarshaler {
-            // References:
-            // https://stackoverflow.com/questions/18498452/how-do-i-write-a-custom-marshaler-which-allows-data-to-flow-from-native-to-manag
-            // https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-runtime-interopservices-icustommarshaler
-            // 
-            // NOTE: I do not create a member to store the object we are marshaling.
-            // Because my binding do not have In, Out parameter. All parameters are In OR Out.
-            // So there is no reason to keep that member.
-
             private static readonly BMStringArrayMarshaler g_Instance = new BMStringArrayMarshaler();
             public static ICustomMarshaler GetInstance(string pstrCookie) => g_Instance;
 
@@ -48,13 +50,9 @@ namespace BMapSharp {
             // So the pointer put in array is not the address we allocated, it has an offset.
             // Also we return native pointer is not the address we allocated, it also has an offset.
 
-            private static readonly int szLengthHeaderSize = Marshal.SizeOf<int>();
-            private static readonly int szArrayItemSize = Marshal.SizeOf<IntPtr>();
-            private static readonly int szStringItemSize = Marshal.SizeOf<byte>();
-
-            public IntPtr MarshalManagedToNative(object ManagedObj) {
+            public nint MarshalManagedToNative(object ManagedObj) {
                 // Check nullptr object.
-                if (ManagedObj is null) return IntPtr.Zero;
+                if (ManagedObj is null) return nint.Zero;
                 // Check argument type.
                 string[] castManagedObj = ManagedObj as string[];
                 if (castManagedObj is null)
@@ -62,97 +60,73 @@ namespace BMapSharp {
 
                 // Allocate string items first
                 int szArrayItemCount = castManagedObj.Length;
-                IntPtr[] apStrings = new IntPtr[szArrayItemCount];
+                int szArrayItemSize = Marshal.SizeOf<nint>();
+                nint[] apString = new nint[szArrayItemCount];
                 for (int i = 0; i < szArrayItemCount; ++i) {
-                    // Encode string first.
-                    byte[] encString = Encoding.UTF8.GetBytes(castManagedObj[i]);
-                    // Allocate string memory with extra NULL terminal.
-                    int szStringItemCount = encString.Length;
-                    IntPtr pString = Marshal.AllocHGlobal(szStringItemSize * (szStringItemCount + 1) + szLengthHeaderSize);
-                    // Setup length field
-                    Marshal.WriteInt32(pString, 0, szStringItemCount);
-                    // Copy string data with offset.
-                    IntPtr pFakeString = pString + szLengthHeaderSize;
-                    Marshal.Copy(encString, 0, pFakeString, szStringItemCount);
-                    // Set NULL terminal.
-                    Marshal.WriteByte(pFakeString, szStringItemSize * szStringItemCount, 0);
-                    // Set item in string pointer
-                    apStrings[i] = pFakeString;
+                    // Check null string
+                    string stringObj = castManagedObj[i];
+                    if (stringObj is null) apString[i] = nint.Zero;
+                    else apString[i] = BMStringMarshaler.ToNative(stringObj);
                 }
 
                 // Allocate array pointer now.
-                IntPtr pArray = Marshal.AllocHGlobal(szArrayItemSize * szArrayItemCount + szLengthHeaderSize);
-                // Setup length field
-                Marshal.WriteInt32(pArray, 0, szArrayItemCount);
-                // Copy string pointer data with offset.
-                IntPtr pFakeArray = pArray + szLengthHeaderSize;
-                Marshal.Copy(apStrings, 0, pFakeArray, szArrayItemCount);
+                nint pArray = Marshal.AllocHGlobal(szArrayItemSize * (szArrayItemCount + 1));
+                // Copy string pointer data
+                Marshal.Copy(apString, 0, pArray, szArrayItemSize * szArrayItemCount);
+                // Setup NULL ternimal
+                Marshal.WriteIntPtr(pArray + (szArrayItemSize * szArrayItemCount), nint.Zero);
 
                 // Return value
-                return pFakeArray;
+                return pArray;
             }
 
-            public object MarshalNativeToManaged(IntPtr pNativeData) {
+            public object MarshalNativeToManaged(nint pNativeData) {
                 // Check nullptr
-                if (pNativeData == IntPtr.Zero) return null;
+                if (pNativeData == nint.Zero) return null;
 
-                // Get real array pointer
-                IntPtr pFakeArray = pNativeData;
-                IntPtr pArray = pFakeArray - szLengthHeaderSize;
-
-                // Get the count of array and read string pointers
-                int szArrayItemCount = Marshal.ReadInt32(pArray, 0);
-                IntPtr[] apStrings = new IntPtr[szArrayItemCount];
-                Marshal.Copy(pFakeArray, apStrings, 0, szArrayItemCount);
+                // Get the length of array
+                int szArrayItemCount = BMStringArrayMarshaler.GetArrayLength(pNativeData);
+                int szArrayItemSize = Marshal.SizeOf<nint>();
+                // Prepare array cache and read it.
+                nint[] apString = new nint[szArrayItemCount];
+                Marshal.Copy(pNativeData, apString, 0, szArrayItemSize * szArrayItemCount);
 
                 // Iterate the array and process each string one by one.
                 string[] ret = new string[szArrayItemCount];
                 for (int i = 0; i < szArrayItemCount; ++i) {
                     // Get string pointer
-                    IntPtr pFakeString = apStrings[i];
-                    if (pFakeString == IntPtr.Zero) {
+                    nint pString = apString[i];
+                    if (pString == nint.Zero) {
                         ret[i] = null;
                         continue;
                     }
-                    IntPtr pString = pFakeString - szLengthHeaderSize;
-                    // Read string length
-                    int szStringItemCount = Marshal.ReadInt32(pString, 0);
-                    // Read string body
-                    byte[] encString = new byte[szStringItemCount];
-                    Marshal.Copy(pFakeString, encString, 0, szStringItemCount);
-                    // Decode string with UTF8
-                    ret[i] = Encoding.UTF8.GetString(encString);
+                    // Extract string
+                    ret[i] = BMStringMarshaler.ToManaged(pString);
                 }
 
                 // Return result
                 return ret;
             }
 
-            public void CleanUpNativeData(IntPtr pNativeData) {
+            public void CleanUpNativeData(nint pNativeData) {
                 // Check nullptr
-                if (pNativeData == IntPtr.Zero) return;
+                if (pNativeData == nint.Zero) return;
 
-                // Get real array pointer
-                IntPtr pFakeArray = pNativeData;
-                IntPtr pArray = pFakeArray - szLengthHeaderSize;
+                // Get the length of array
+                int szArrayItemCount = BMStringArrayMarshaler.GetArrayLength(pNativeData);
+                int szArrayItemSize = Marshal.SizeOf<nint>();
+                // Prepare array cache and read it.
+                nint[] apString = new nint[szArrayItemCount];
+                Marshal.Copy(pNativeData, apString, 0, szArrayItemSize * szArrayItemCount);
+                // Free array self
+                Marshal.FreeHGlobal(pNativeData);
 
-                // Get the count of array and read string pointers
-                int szArrayItemCount = Marshal.ReadInt32(pArray, 0);
-                IntPtr[] apStrings = new IntPtr[szArrayItemCount];
-                Marshal.Copy(pFakeArray, apStrings, 0, szArrayItemCount);
-
-                // Iterate the array and free them one by one.
-                for (int i = 0; i < szArrayItemCount; ++i) {
-                    // Get string pointer
-                    IntPtr pFakeString = apStrings[i];
-                    if (pFakeString == IntPtr.Zero) continue;
-                    IntPtr pString = pFakeString - szLengthHeaderSize;
+                // Iterate the string pointer array and free them one by one.
+                foreach (nint pString in apString) {
                     // Free string pointer
+                    if (pString == nint.Zero) continue;
                     Marshal.FreeHGlobal(pString);
                 }
-
-                // Free array self
-                Marshal.FreeHGlobal(pArray);
             }
 
             public void CleanUpManagedData(object ManagedObj) {
@@ -164,7 +138,111 @@ namespace BMapSharp {
                 return -1;
             }
 
+            /// <summary>
+            /// Return the length of array created by this marshaler.
+            /// </summary>
+            /// <param name="ptr">The pointer to array for checking.</param>
+            /// <returns>The length of array (NULL terminal exclusive).</returns>
+            internal static int GetArrayLength(nint ptr) {
+                int count = 0, unit = Marshal.SizeOf<nint>();
+                while (Marshal.ReadIntPtr(ptr) != nint.Zero) {
+                    ptr += unit;
+                    ++count;
+                }
+                return count;
+            }
         }
+
+        public class BMStringMarshaler : ICustomMarshaler {
+            private static readonly BMStringMarshaler g_Instance = new BMStringMarshaler();
+            public static ICustomMarshaler GetInstance(string pstrCookie) => g_Instance;
+
+            public nint MarshalManagedToNative(object ManagedObj) {
+                // Check requirements.
+                if (ManagedObj is null) return nint.Zero;
+                string castManagedObj = ManagedObj as string;
+                if (castManagedObj is null)
+                    throw new MarshalDirectiveException("BMStringMarshaler must be used on a string.");
+                // Call self
+                return BMStringMarshaler.ToNative(castManagedObj);
+            }
+
+            public object MarshalNativeToManaged(nint pNativeData) {
+                // Check nullptr
+                if (pNativeData == nint.Zero) return null;
+                // Call self
+                return BMStringMarshaler.ToManaged(pNativeData);
+            }
+
+            public void CleanUpNativeData(nint pNativeData) {
+                // Check nullptr
+                if (pNativeData == nint.Zero) return;
+                // Free native pointer
+                Marshal.FreeHGlobal(pNativeData);
+            }
+
+            public void CleanUpManagedData(object ManagedObj) {
+                // Do nothing, because managed data do not need any clean up.
+            }
+
+            public int GetNativeDataSize() {
+                // Return -1 to indicate the managed type this marshaler handles is not a value type.
+                return -1;
+            }
+
+            /// <summary>
+            /// Return the length in byte of given pointer represented C style string.
+            /// </summary>
+            /// <param name="ptr">The pointer for checking.</param>
+            /// <returns>The length of C style string (NUL exclusive).</returns>
+            internal static int GetCStringLength(nint ptr) {
+                int count = 0, unit = Marshal.SizeOf<byte>();
+                while (Marshal.ReadByte(ptr) != (byte)0) {
+                    ptr += unit;
+                    ++count;
+                }
+                return count;
+            }
+            
+            /// <summary>
+            /// Convert given string object to native data.
+            /// This function is shared by 2 marshalers.
+            /// </summary>
+            /// <param name="obj">String object. Caller must make sure this object is not null.</param>
+            /// <returns>The created native data pointer.</returns>
+            internal static nint ToNative(string obj) {
+                // Encode string first
+                byte[] encString = Encoding.UTF8.GetBytes(obj);
+                // Allocate string memory with extra NUL.
+                int szStringItemCount = encString.Length;
+                int szStringItemSize = Marshal.SizeOf<byte>();
+                nint pString = Marshal.AllocHGlobal(szStringItemSize * (szStringItemCount + 1));
+                // Copy encoded string data
+                Marshal.Copy(encString, 0, pString, szStringItemSize * szStringItemCount);
+                // Setup NUL
+                Marshal.WriteByte(pString + (szStringItemSize * szStringItemCount), (byte)0);
+                // Return value
+                return pString;
+            }
+            /// <summary>
+            /// Extract managed string from given native pointer holding C style string data.
+            /// This function is shared by 2 marshalers.
+            /// </summary>
+            /// <param name="ptr">Native pointer holding string data. Caller must make sure this pointer is not nullptr.</param>
+            /// <returns>The extracted managed string data.</returns>
+            internal static string ToManaged(nint ptr) {
+                // Get the length of given string.
+                int szStringItemCount = BMStringMarshaler.GetCStringLength(ptr);
+                int szStringItemSize = Marshal.SizeOf<byte>();
+                // Prepare cache and copy string data
+                byte[] encString = new byte[szStringItemCount];
+                Marshal.Copy(ptr, encString, 0, szStringItemSize * szStringItemCount);
+                // Decode string and return
+                return Encoding.UTF8.GetString(encString);
+            }
+        }
+
+        #endregion
 
         // Decide the file name of loaded DLL.
 
