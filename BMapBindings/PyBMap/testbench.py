@@ -13,7 +13,7 @@ def main() -> None:
         for gp in reader.get_groups():
             print(gp.get_name())
 
-        print('===== Objects =====')
+        print('===== 3dObjects =====')
         for obj in reader.get_3dobjects():
             print(obj.get_name())
         

@@ -229,7 +229,7 @@ namespace BMapSharp.BMapWrapper {
             BMapException.ThrowIfFailed(BMap.BMFile_GetMeshCount(this.getPointer(), out uint out_count));
             return out_count;
         }
-        public IEnumerable<BMMesh> GetMeshs() {
+        public IEnumerable<BMMesh> GetMeshes() {
             uint count = GetMeshCount();
             for (uint i = 0; i < count; ++i) {
                 BMapException.ThrowIfFailed(BMap.BMFile_GetMesh(this.getPointer(), i, out uint out_id));

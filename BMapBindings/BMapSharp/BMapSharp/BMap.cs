@@ -19,10 +19,6 @@ namespace BMapSharp {
 
     public static class BMap {
 
-        /// <summary>The callback function of BMap.</summary>
-        /// <param name="msg">The message content need to be printed.</param>
-        public delegate void OutputCallback([In, MarshalAs(UnmanagedType.LPUTF8Str)] string msg);
-
         #region Custom Marshalers
 
         // References:
@@ -33,24 +29,38 @@ namespace BMapSharp {
         // Because my binding do not have In, Out parameter. All parameters are In OR Out.
         // So there is no reason to keep that member.
 
+        // IDK why Microsoft try to call ICustomMarshaler.CleanUpNativeData without calling ICustomMarshaler.MarshalManagedToNative.
+        // It is trying to free the pointer managed by LibCmo self (for example, it will try to free we got string when getting object name)!
+        // So as the compromise, we use "cookie" feature to explicit specify the marshaler In/Out behavior when getting it.
+        [Flags]
+        internal enum MarshalerType {
+            None = 0b0,
+            In = 0b1,
+            Out = 0b10
+        }
+
         /// <summary>The custom marshaler for BMap string array.</summary>
         public class BMStringArrayMarshaler : ICustomMarshaler {
-            private static readonly BMStringArrayMarshaler g_Instance = new BMStringArrayMarshaler();
-            public static ICustomMarshaler GetInstance(string pstrCookie) => g_Instance;
+            private static readonly BMStringArrayMarshaler g_InInstance = new BMStringArrayMarshaler(MarshalerType.In);
+            private static readonly BMStringArrayMarshaler g_OutInstance = new BMStringArrayMarshaler(MarshalerType.Out);
+            public static ICustomMarshaler GetInstance(string pstrCookie) {
+                if (pstrCookie == "In") return g_InInstance;
+                else if (pstrCookie == "Out") return g_OutInstance;
+                else throw new MarshalDirectiveException("Not supported cookie string for BMStringArrayMarshaler.");
+            }
+
+            private readonly MarshalerType m_MarshalerType;
+            private BMStringArrayMarshaler(MarshalerType marshaler_type) {
+                m_MarshalerType = marshaler_type;
+            }
 
             // For respecting the standard of BMap, 
             // the native memory we created is a simple array and each item is a pointer to a NULL-terminated UTF8 string.
-            // Please note the array self is not NULL-terminated because its length is provided by another argument in function calling.
-            // However, this memory layout is not good for our marshaling.
-            // We can not know the size of array we created. Because we need iterate it when freeing or fetching data.
-            // We also can not know the size of string we created because we need read them when parsing them to C# string.
-            // 
-            // So the solution we made is adding an uint32_t header before the array to indicate the size of array.
-            // And also add an uint32_t header for each string to indicate the length of string (in bytes, NULL exclusive).
-            // So the pointer put in array is not the address we allocated, it has an offset.
-            // Also we return native pointer is not the address we allocated, it also has an offset.
+            // Please note the array self is also NULL-terminated otherwise we don't know its length.
 
             public nint MarshalManagedToNative(object ManagedObj) {
+                // Check marshaler type
+                if (!m_MarshalerType.HasFlag(MarshalerType.In)) return nint.Zero;
                 // Check nullptr object.
                 if (ManagedObj is null) return nint.Zero;
                 // Check argument type.
@@ -72,7 +82,7 @@ namespace BMapSharp {
                 // Allocate array pointer now.
                 nint pArray = Marshal.AllocHGlobal(szArrayItemSize * (szArrayItemCount + 1));
                 // Copy string pointer data
-                Marshal.Copy(apString, 0, pArray, szArrayItemSize * szArrayItemCount);
+                Marshal.Copy(apString, 0, pArray, szArrayItemCount);
                 // Setup NULL ternimal
                 Marshal.WriteIntPtr(pArray + (szArrayItemSize * szArrayItemCount), nint.Zero);
 
@@ -81,6 +91,8 @@ namespace BMapSharp {
             }
 
             public object MarshalNativeToManaged(nint pNativeData) {
+                // Check marshaler type
+                if (!m_MarshalerType.HasFlag(MarshalerType.Out)) return null;
                 // Check nullptr
                 if (pNativeData == nint.Zero) return null;
 
@@ -89,7 +101,7 @@ namespace BMapSharp {
                 int szArrayItemSize = Marshal.SizeOf<nint>();
                 // Prepare array cache and read it.
                 nint[] apString = new nint[szArrayItemCount];
-                Marshal.Copy(pNativeData, apString, 0, szArrayItemSize * szArrayItemCount);
+                Marshal.Copy(pNativeData, apString, 0, szArrayItemCount);
 
                 // Iterate the array and process each string one by one.
                 string[] ret = new string[szArrayItemCount];
@@ -109,6 +121,8 @@ namespace BMapSharp {
             }
 
             public void CleanUpNativeData(nint pNativeData) {
+                // Check marshaler type
+                if (!m_MarshalerType.HasFlag(MarshalerType.In)) return;
                 // Check nullptr
                 if (pNativeData == nint.Zero) return;
 
@@ -117,7 +131,7 @@ namespace BMapSharp {
                 int szArrayItemSize = Marshal.SizeOf<nint>();
                 // Prepare array cache and read it.
                 nint[] apString = new nint[szArrayItemCount];
-                Marshal.Copy(pNativeData, apString, 0, szArrayItemSize * szArrayItemCount);
+                Marshal.Copy(pNativeData, apString, 0, szArrayItemCount);
                 // Free array self
                 Marshal.FreeHGlobal(pNativeData);
 
@@ -154,10 +168,22 @@ namespace BMapSharp {
         }
 
         public class BMStringMarshaler : ICustomMarshaler {
-            private static readonly BMStringMarshaler g_Instance = new BMStringMarshaler();
-            public static ICustomMarshaler GetInstance(string pstrCookie) => g_Instance;
+            private static readonly BMStringMarshaler g_InInstance = new BMStringMarshaler(MarshalerType.In);
+            private static readonly BMStringMarshaler g_OutInstance = new BMStringMarshaler(MarshalerType.Out);
+            public static ICustomMarshaler GetInstance(string pstrCookie) {
+                if (pstrCookie == "In") return g_InInstance;
+                else if (pstrCookie == "Out") return g_OutInstance;
+                else throw new MarshalDirectiveException("Not supported cookie string for BMStringMarshaler.");
+            }
+
+            private readonly MarshalerType m_MarshalerType;
+            private BMStringMarshaler(MarshalerType marshaler_type) {
+                m_MarshalerType = marshaler_type;
+            }
 
             public nint MarshalManagedToNative(object ManagedObj) {
+                // Check marshaler type
+                if (!m_MarshalerType.HasFlag(MarshalerType.In)) return nint.Zero;
                 // Check requirements.
                 if (ManagedObj is null) return nint.Zero;
                 string castManagedObj = ManagedObj as string;
@@ -168,6 +194,8 @@ namespace BMapSharp {
             }
 
             public object MarshalNativeToManaged(nint pNativeData) {
+                // Check marshaler type
+                if (!m_MarshalerType.HasFlag(MarshalerType.Out)) return null;
                 // Check nullptr
                 if (pNativeData == nint.Zero) return null;
                 // Call self
@@ -175,6 +203,8 @@ namespace BMapSharp {
             }
 
             public void CleanUpNativeData(nint pNativeData) {
+                // Check marshaler type
+                if (!m_MarshalerType.HasFlag(MarshalerType.In)) return;
                 // Check nullptr
                 if (pNativeData == nint.Zero) return;
                 // Free native pointer
@@ -218,7 +248,7 @@ namespace BMapSharp {
                 int szStringItemSize = Marshal.SizeOf<byte>();
                 nint pString = Marshal.AllocHGlobal(szStringItemSize * (szStringItemCount + 1));
                 // Copy encoded string data
-                Marshal.Copy(encString, 0, pString, szStringItemSize * szStringItemCount);
+                Marshal.Copy(encString, 0, pString, szStringItemCount);
                 // Setup NUL
                 Marshal.WriteByte(pString + (szStringItemSize * szStringItemCount), (byte)0);
                 // Return value
@@ -236,13 +266,17 @@ namespace BMapSharp {
                 int szStringItemSize = Marshal.SizeOf<byte>();
                 // Prepare cache and copy string data
                 byte[] encString = new byte[szStringItemCount];
-                Marshal.Copy(ptr, encString, 0, szStringItemSize * szStringItemCount);
+                Marshal.Copy(ptr, encString, 0, szStringItemCount);
                 // Decode string and return
                 return Encoding.UTF8.GetString(encString);
             }
         }
 
         #endregion
+
+        /// <summary>The callback function of BMap.</summary>
+        /// <param name="msg">The message content need to be printed.</param>
+        internal delegate void OutputCallback([In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler))] string msg);
 
         // Decide the file name of loaded DLL.
 
@@ -281,7 +315,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMFile_Load", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMFile_Load([In, MarshalAs(UnmanagedType.LPUTF8Str)] string file_name, [In, MarshalAs(UnmanagedType.LPUTF8Str)] string temp_folder, [In, MarshalAs(UnmanagedType.LPUTF8Str)] string texture_folder, [In, MarshalAs(UnmanagedType.FunctionPtr)] OutputCallback raw_callback, [In, MarshalAs(UnmanagedType.U4)] uint encoding_count, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringArrayMarshaler))] string[] encodings, [Out, MarshalAs(UnmanagedType.SysInt)] out IntPtr out_file);
+        internal static extern bool BMFile_Load([In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "In")] string file_name, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "In")] string temp_folder, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "In")] string texture_folder, [In, MarshalAs(UnmanagedType.FunctionPtr)] OutputCallback raw_callback, [In, MarshalAs(UnmanagedType.U4)] uint encoding_count, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringArrayMarshaler), MarshalCookie = "In")] string[] encodings, [Out, MarshalAs(UnmanagedType.SysInt)] out IntPtr out_file);
         /// <summary>BMFile_Create</summary>
         /// <param name="temp_folder">Type: LibCmo::CKSTRING. </param>
         /// <param name="texture_folder">Type: LibCmo::CKSTRING. </param>
@@ -292,7 +326,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMFile_Create", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMFile_Create([In, MarshalAs(UnmanagedType.LPUTF8Str)] string temp_folder, [In, MarshalAs(UnmanagedType.LPUTF8Str)] string texture_folder, [In, MarshalAs(UnmanagedType.FunctionPtr)] OutputCallback raw_callback, [In, MarshalAs(UnmanagedType.U4)] uint encoding_count, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringArrayMarshaler))] string[] encodings, [Out, MarshalAs(UnmanagedType.SysInt)] out IntPtr out_file);
+        internal static extern bool BMFile_Create([In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "In")] string temp_folder, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "In")] string texture_folder, [In, MarshalAs(UnmanagedType.FunctionPtr)] OutputCallback raw_callback, [In, MarshalAs(UnmanagedType.U4)] uint encoding_count, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringArrayMarshaler), MarshalCookie = "In")] string[] encodings, [Out, MarshalAs(UnmanagedType.SysInt)] out IntPtr out_file);
         /// <summary>BMFile_Save</summary>
         /// <param name="map_file">Type: BMap::BMFile*. </param>
         /// <param name="file_name">Type: LibCmo::CKSTRING. </param>
@@ -302,7 +336,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMFile_Save", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMFile_Save([In, MarshalAs(UnmanagedType.SysInt)] IntPtr map_file, [In, MarshalAs(UnmanagedType.LPUTF8Str)] string file_name, [In, MarshalAs(UnmanagedType.U4)] uint texture_save_opt, [In, MarshalAs(UnmanagedType.U1)] bool use_compress, [In, MarshalAs(UnmanagedType.I4)] int compreess_level);
+        internal static extern bool BMFile_Save([In, MarshalAs(UnmanagedType.SysInt)] IntPtr map_file, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "In")] string file_name, [In, MarshalAs(UnmanagedType.U4)] uint texture_save_opt, [In, MarshalAs(UnmanagedType.U1)] bool use_compress, [In, MarshalAs(UnmanagedType.I4)] int compreess_level);
         /// <summary>BMFile_Free</summary>
         /// <param name="map_file">Type: BMap::BMFile*. </param>
         /// <returns>True if no error, otherwise False.</returns>
@@ -537,7 +571,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMObject_GetName", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMObject_GetName([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.LPUTF8Str)] out string out_name);
+        internal static extern bool BMObject_GetName([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "Out")] out string out_name);
         /// <summary>BMObject_SetName</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -545,7 +579,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMObject_SetName", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMObject_SetName([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.LPUTF8Str)] string name);
+        internal static extern bool BMObject_SetName([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "In")] string name);
         /// <summary>BMGroup_AddObject</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -578,7 +612,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMTexture_GetFileName", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMTexture_GetFileName([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.LPUTF8Str)] out string out_filename);
+        internal static extern bool BMTexture_GetFileName([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "Out")] out string out_filename);
         /// <summary>BMTexture_LoadImage</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -586,7 +620,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMTexture_LoadImage", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMTexture_LoadImage([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.LPUTF8Str)] string filename);
+        internal static extern bool BMTexture_LoadImage([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "In")] string filename);
         /// <summary>BMTexture_SaveImage</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -594,7 +628,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMTexture_SaveImage", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMTexture_SaveImage([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.LPUTF8Str)] string filename);
+        internal static extern bool BMTexture_SaveImage([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "In")] string filename);
         /// <summary>BMTexture_GetSaveOptions</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>

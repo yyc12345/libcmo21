@@ -45,14 +45,22 @@ public class CSharpWriter {
 		// use "switch" to check variable type
 		switch (vt_base_type) {
 		case "CKSTRING":
+			// decide direction cookies
+			String direction_cookie = "";
+			if (paramdecl.mIsInput) {
+				direction_cookie = "In";
+			} else {
+				direction_cookie = "Out";
+			}
 			// only allow 0 and 1 pointer level for string.
 			switch (vt_pointer_level) {
 			case 0:
-				ret.mMarshalAs = "UnmanagedType.LPUTF8Str";
+				ret.mMarshalAs = "UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = \"" + direction_cookie + "\"";
+				// ret.mMarshalAs = "UnmanagedType.LPUTF8Str";
 				ret.mCsType = "string";
 				break;
 			case 1:
-				ret.mMarshalAs = "UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringArrayMarshaler)";
+				ret.mMarshalAs = "UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringArrayMarshaler), MarshalCookie = \"" + direction_cookie + "\"";
 				ret.mCsType = "string[]";
 				break;
 			}

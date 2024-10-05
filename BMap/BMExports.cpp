@@ -55,7 +55,7 @@ bool BMInit() {
 	if (CheckInited()) return false;
 
 	// register exception handler if we are in Windows.
-#if YYCC_OS == YYCC_OS_WINDOWS
+#if defined(LIBCMO_BUILD_RELEASE) && (YYCC_OS == YYCC_OS_WINDOWS)
 	YYCC::ExceptionHelper::Register();
 #endif
 
@@ -89,7 +89,7 @@ bool BMDispose() {
 	LibCmo::CK2::CKShutdown();
 
 	// unregister exception handler if we are in Windows
-#if YYCC_OS == YYCC_OS_WINDOWS
+#if defined(LIBCMO_BUILD_RELEASE) && (YYCC_OS == YYCC_OS_WINDOWS)
 	YYCC::ExceptionHelper::Unregister();
 #endif
 
