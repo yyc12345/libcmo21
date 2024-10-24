@@ -42,7 +42,7 @@ First, create subdirectory `Bin/build` and `Bin/install`.
 
 Then enter subdirectory `Bin/build` and use following command to configure CMake:
 
-- Windows: `cmake -DNEMO_BUILD_UNVIRT=ON -DNEMO_BUILD_BMAP=ON -DNEMO_BUILD_DOC=OFF -DSTB_IMAGE_PATH=<path-to-stb> -DYYCC_PATH=<path-to-yycc-install> -DZLIB_HEADER_PATH=<path-to-zlib-hdr> -DZLIB_BINARY_PATH=<path-to-zlib-bin> ../..`
+- Windows (MSVC): `cmake -DNEMO_BUILD_UNVIRT=ON -DNEMO_BUILD_BMAP=ON -DNEMO_BUILD_DOC=OFF -DSTB_IMAGE_PATH=<path-to-stb> -DYYCC_PATH=<path-to-yycc-install> -DZLIB_HEADER_PATH=<path-to-zlib-hdr> -DZLIB_BINARY_PATH=<path-to-zlib-bin> ../..`
 - non-Windows: `cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DNEMO_BUILD_UNVIRT=ON -DNEMO_BUILD_BMAP=ON -DNEMO_BUILD_DOC=OFF -DSTB_IMAGE_PATH=<path-to-stb> -DYYCC_PATH=<path-to-yycc-install> ../..`
 
 The arguments in command should be replaced by:
@@ -62,8 +62,8 @@ The switches in command can be switched as you wish:
 
 Execute following command to build libcmo21.
 
-* Windows：`cmake --build . --config RelWithDebInfo`
-* non-Windows：`cmake --build .`
+* Windows: `cmake --build . --config RelWithDebInfo`
+* non-Windows: `cmake --build .`
 
 ### Build Type
 
@@ -76,11 +76,3 @@ Currently the CMake install script still has some bugs and can not work as expec
 ## Note
 
 You may face issue when compiling this program on Linux or macOS because I develop this project on Windows frequently. The compatibility with Linux will only be checked just before releasing. And I don't have any Apple device to check the compatibility with macOS. So, for Linux issue, please report it directly and I will try to fix. For macOS bug, PR is welcomed.
-
-
-
-It can be compiled on Windows via sln file. You should set up `LibRef.props` when using sln file to build this project on Windows.  
-You also can use CMake file to compile this project on Linux or anything else platform. However CMake may not be updated in time because I develop this project on Windows frequently.  
-You may need use this command to configure CMake: `cmake .. -DSTB_IMAGE_PATH="/path/to/stb-image" -DCMAKE_BUILD_TYPE=Release`
-
-

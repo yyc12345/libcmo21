@@ -150,7 +150,7 @@ namespace BMapSharp.BMapWrapper {
     }
 
     public class BMObject : AbstractCKObject {
-        internal BMObject(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) {}
+        internal BMObject(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
 
         public string GetName() {
             BMapException.ThrowIfFailed(BMap.BMObject_GetName(
@@ -166,30 +166,30 @@ namespace BMapSharp.BMapWrapper {
     }
 
     public class BMTexture : BMObject {
-        internal BMTexture(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) {}
+        internal BMTexture(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
     }
 
     public class BMMaterial : BMObject {
-        internal BMMaterial(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) {}
+        internal BMMaterial(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
     }
 
     public class BMMesh : BMObject {
-        internal BMMesh(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) {}
+        internal BMMesh(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
     }
 
     public class BM3dObject : BMObject {
-        internal BM3dObject(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) {}
+        internal BM3dObject(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
     }
 
     public class BMGroup : BMObject {
-        internal BMGroup(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) {}
+        internal BMGroup(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
     }
 
     public sealed class BMFileReader : AbstractPointer {
         private static IntPtr AllocateHandle(string file_name, string temp_folder, string texture_folder, string[] encodings) {
             BMapException.ThrowIfFailed(BMap.BMFile_Load(
-                file_name, temp_folder, texture_folder, 
-                Utils.BMapSharpCallback, 
+                file_name, temp_folder, texture_folder,
+                Utils.BMapSharpCallback,
                 (uint)encodings.Length, encodings,
                 out IntPtr out_file
             ));
@@ -199,67 +199,44 @@ namespace BMapSharp.BMapWrapper {
             return BMap.BMFile_Free(this.handle);
         }
         public BMFileReader(string file_name, string temp_folder, string texture_folder, string[] encodings)
-        : base(AllocateHandle(file_name, temp_folder, texture_folder, encodings)) {}
+        : base(AllocateHandle(file_name, temp_folder, texture_folder, encodings)) { }
 
-        public uint GetTextureCount() {
-            BMapException.ThrowIfFailed(BMap.BMFile_GetTextureCount(this.getPointer(), out uint out_count));
+
+        private delegate bool FctProtoGetCount(nint bmf, out uint cnt);
+        private delegate bool FctProtoGetObject(nint bmf, uint idx, out uint id);
+        private delegate T FctProtoCreateInstance<T>(nint bmf, uint id);
+        private uint GetCKObjectCount(FctProtoGetCount fct_cnt) {
+            BMapException.ThrowIfFailed(fct_cnt(this.getPointer(), out uint out_count));
             return out_count;
         }
-        public IEnumerable<BMTexture> GetTextures() {
-            uint count = GetTextureCount();
+        private IEnumerable<T> GetCKObjects<T>(FctProtoGetCount fct_cnt, FctProtoGetObject fct_obj, FctProtoCreateInstance<T> fct_crt) {
+            uint count = GetCKObjectCount(fct_cnt);
             for (uint i = 0; i < count; ++i) {
-                BMapException.ThrowIfFailed(BMap.BMFile_GetTexture(this.getPointer(), i, out uint out_id));
-                yield return new BMTexture(this.getPointer(), out_id);
+                BMapException.ThrowIfFailed(fct_obj(this.getPointer(), i, out uint out_id));
+                yield return fct_crt(this.getPointer(), out_id);
             }
         }
 
-        public uint GetMaterialCount() {
-            BMapException.ThrowIfFailed(BMap.BMFile_GetMaterialCount(this.getPointer(), out uint out_count));
-            return out_count;
-        }
-        public IEnumerable<BMMaterial> GetMaterials() {
-            uint count = GetMaterialCount();
-            for (uint i = 0; i < count; ++i) {
-                BMapException.ThrowIfFailed(BMap.BMFile_GetMaterial(this.getPointer(), i, out uint out_id));
-                yield return new BMMaterial(this.getPointer(), out_id);
-            }
-        }
-
-        public uint GetMeshCount() {
-            BMapException.ThrowIfFailed(BMap.BMFile_GetMeshCount(this.getPointer(), out uint out_count));
-            return out_count;
-        }
-        public IEnumerable<BMMesh> GetMeshes() {
-            uint count = GetMeshCount();
-            for (uint i = 0; i < count; ++i) {
-                BMapException.ThrowIfFailed(BMap.BMFile_GetMesh(this.getPointer(), i, out uint out_id));
-                yield return new BMMesh(this.getPointer(), out_id);
-            }
-        }
-
-        public uint Get3dObjectCount() {
-            BMapException.ThrowIfFailed(BMap.BMFile_Get3dObjectCount(this.getPointer(), out uint out_count));
-            return out_count;
-        }
-        public IEnumerable<BM3dObject> Get3dObjects() {
-            uint count = Get3dObjectCount();
-            for (uint i = 0; i < count; ++i) {
-                BMapException.ThrowIfFailed(BMap.BMFile_Get3dObject(this.getPointer(), i, out uint out_id));
-                yield return new BM3dObject(this.getPointer(), out_id);
-            }
-        }
-
-        public uint GetGroupCount() {
-            BMapException.ThrowIfFailed(BMap.BMFile_GetGroupCount(this.getPointer(), out uint out_count));
-            return out_count;
-        }
-        public IEnumerable<BMGroup> GetGroups() {
-            uint count = GetGroupCount();
-            for (uint i = 0; i < count; ++i) {
-                BMapException.ThrowIfFailed(BMap.BMFile_GetGroup(this.getPointer(), i, out uint out_id));
-                yield return new BMGroup(this.getPointer(), out_id);
-            }
-        }
+        public uint GetTextureCount() =>
+            GetCKObjectCount(BMap.BMFile_GetTextureCount);
+        public IEnumerable<BMTexture> GetTextures() =>
+            GetCKObjects<BMTexture>(BMap.BMFile_GetTextureCount, BMap.BMFile_GetTexture, (bmf, id) => new BMTexture(bmf, id));
+        public uint GetMaterialCount() =>
+            GetCKObjectCount(BMap.BMFile_GetMaterialCount);
+        public IEnumerable<BMMaterial> GetMaterials() =>
+            GetCKObjects<BMMaterial>(BMap.BMFile_GetMaterialCount, BMap.BMFile_GetMaterial, (bmf, id) => new BMMaterial(bmf, id));
+        public uint GetMeshCount() =>
+            GetCKObjectCount(BMap.BMFile_GetMeshCount);
+        public IEnumerable<BMMesh> GetMeshes() =>
+            GetCKObjects<BMMesh>(BMap.BMFile_GetMeshCount, BMap.BMFile_GetMesh, (bmf, id) => new BMMesh(bmf, id));
+        public uint Get3dObjectCount() =>
+            GetCKObjectCount(BMap.BMFile_Get3dObjectCount);
+        public IEnumerable<BM3dObject> Get3dObjects() =>
+            GetCKObjects<BM3dObject>(BMap.BMFile_Get3dObjectCount, BMap.BMFile_Get3dObject, (bmf, id) => new BM3dObject(bmf, id));
+        public uint GetGroupCount() =>
+            GetCKObjectCount(BMap.BMFile_GetGroupCount);
+        public IEnumerable<BMGroup> GetGroups() =>
+            GetCKObjects<BMGroup>(BMap.BMFile_GetGroupCount, BMap.BMFile_GetGroup, (bmf, id) => new BMGroup(bmf, id));
 
     }
 
