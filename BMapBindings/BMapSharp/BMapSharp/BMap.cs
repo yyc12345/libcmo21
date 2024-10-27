@@ -58,11 +58,11 @@ namespace BMapSharp {
             // the native memory we created is a simple array and each item is a pointer to a NULL-terminated UTF8 string.
             // Please note the array self is also NULL-terminated otherwise we don't know its length.
 
-            public nint MarshalManagedToNative(object ManagedObj) {
+            public IntPtr MarshalManagedToNative(object ManagedObj) {
                 // Check marshaler type
-                if (!m_MarshalerType.HasFlag(MarshalerType.In)) return nint.Zero;
+                if (!m_MarshalerType.HasFlag(MarshalerType.In)) return IntPtr.Zero;
                 // Check nullptr object.
-                if (ManagedObj is null) return nint.Zero;
+                if (ManagedObj is null) return IntPtr.Zero;
                 // Check argument type.
                 string[] castManagedObj = ManagedObj as string[];
                 if (castManagedObj is null)
@@ -70,45 +70,45 @@ namespace BMapSharp {
 
                 // Allocate string items first
                 int szArrayItemCount = castManagedObj.Length;
-                int szArrayItemSize = Marshal.SizeOf<nint>();
-                nint[] apString = new nint[szArrayItemCount];
+                int szArrayItemSize = Marshal.SizeOf<IntPtr>();
+                IntPtr[] apString = new IntPtr[szArrayItemCount];
                 for (int i = 0; i < szArrayItemCount; ++i) {
                     // Check null string
                     string stringObj = castManagedObj[i];
-                    if (stringObj is null) apString[i] = nint.Zero;
+                    if (stringObj is null) apString[i] = IntPtr.Zero;
                     else apString[i] = BMStringMarshaler.ToNative(stringObj);
                 }
 
                 // Allocate array pointer now.
-                nint pArray = Marshal.AllocHGlobal(szArrayItemSize * (szArrayItemCount + 1));
+                IntPtr pArray = Marshal.AllocHGlobal(szArrayItemSize * (szArrayItemCount + 1));
                 // Copy string pointer data
                 Marshal.Copy(apString, 0, pArray, szArrayItemCount);
                 // Setup NULL ternimal
-                Marshal.WriteIntPtr(pArray + (szArrayItemSize * szArrayItemCount), nint.Zero);
+                Marshal.WriteIntPtr(pArray + (szArrayItemSize * szArrayItemCount), IntPtr.Zero);
 
                 // Return value
                 return pArray;
             }
 
-            public object MarshalNativeToManaged(nint pNativeData) {
+            public object MarshalNativeToManaged(IntPtr pNativeData) {
                 // Check marshaler type
                 if (!m_MarshalerType.HasFlag(MarshalerType.Out)) return null;
                 // Check nullptr
-                if (pNativeData == nint.Zero) return null;
+                if (pNativeData == IntPtr.Zero) return null;
 
                 // Get the length of array
                 int szArrayItemCount = BMStringArrayMarshaler.GetArrayLength(pNativeData);
-                int szArrayItemSize = Marshal.SizeOf<nint>();
+                int szArrayItemSize = Marshal.SizeOf<IntPtr>();
                 // Prepare array cache and read it.
-                nint[] apString = new nint[szArrayItemCount];
+                IntPtr[] apString = new IntPtr[szArrayItemCount];
                 Marshal.Copy(pNativeData, apString, 0, szArrayItemCount);
 
                 // Iterate the array and process each string one by one.
                 string[] ret = new string[szArrayItemCount];
                 for (int i = 0; i < szArrayItemCount; ++i) {
                     // Get string pointer
-                    nint pString = apString[i];
-                    if (pString == nint.Zero) {
+                    IntPtr pString = apString[i];
+                    if (pString == IntPtr.Zero) {
                         ret[i] = null;
                         continue;
                     }
@@ -120,25 +120,25 @@ namespace BMapSharp {
                 return ret;
             }
 
-            public void CleanUpNativeData(nint pNativeData) {
+            public void CleanUpNativeData(IntPtr pNativeData) {
                 // Check marshaler type
                 if (!m_MarshalerType.HasFlag(MarshalerType.In)) return;
                 // Check nullptr
-                if (pNativeData == nint.Zero) return;
+                if (pNativeData == IntPtr.Zero) return;
 
                 // Get the length of array
                 int szArrayItemCount = BMStringArrayMarshaler.GetArrayLength(pNativeData);
-                int szArrayItemSize = Marshal.SizeOf<nint>();
+                int szArrayItemSize = Marshal.SizeOf<IntPtr>();
                 // Prepare array cache and read it.
-                nint[] apString = new nint[szArrayItemCount];
+                IntPtr[] apString = new IntPtr[szArrayItemCount];
                 Marshal.Copy(pNativeData, apString, 0, szArrayItemCount);
                 // Free array self
                 Marshal.FreeHGlobal(pNativeData);
 
                 // Iterate the string pointer array and free them one by one.
-                foreach (nint pString in apString) {
+                foreach (IntPtr pString in apString) {
                     // Free string pointer
-                    if (pString == nint.Zero) continue;
+                    if (pString == IntPtr.Zero) continue;
                     Marshal.FreeHGlobal(pString);
                 }
             }
@@ -157,9 +157,9 @@ namespace BMapSharp {
             /// </summary>
             /// <param name="ptr">The pointer to array for checking.</param>
             /// <returns>The length of array (NULL terminal exclusive).</returns>
-            internal static int GetArrayLength(nint ptr) {
-                int count = 0, unit = Marshal.SizeOf<nint>();
-                while (Marshal.ReadIntPtr(ptr) != nint.Zero) {
+            internal static int GetArrayLength(IntPtr ptr) {
+                int count = 0, unit = Marshal.SizeOf<IntPtr>();
+                while (Marshal.ReadIntPtr(ptr) != IntPtr.Zero) {
                     ptr += unit;
                     ++count;
                 }
@@ -181,11 +181,11 @@ namespace BMapSharp {
                 m_MarshalerType = marshaler_type;
             }
 
-            public nint MarshalManagedToNative(object ManagedObj) {
+            public IntPtr MarshalManagedToNative(object ManagedObj) {
                 // Check marshaler type
-                if (!m_MarshalerType.HasFlag(MarshalerType.In)) return nint.Zero;
+                if (!m_MarshalerType.HasFlag(MarshalerType.In)) return IntPtr.Zero;
                 // Check requirements.
-                if (ManagedObj is null) return nint.Zero;
+                if (ManagedObj is null) return IntPtr.Zero;
                 string castManagedObj = ManagedObj as string;
                 if (castManagedObj is null)
                     throw new MarshalDirectiveException("BMStringMarshaler must be used on a string.");
@@ -193,20 +193,20 @@ namespace BMapSharp {
                 return BMStringMarshaler.ToNative(castManagedObj);
             }
 
-            public object MarshalNativeToManaged(nint pNativeData) {
+            public object MarshalNativeToManaged(IntPtr pNativeData) {
                 // Check marshaler type
                 if (!m_MarshalerType.HasFlag(MarshalerType.Out)) return null;
                 // Check nullptr
-                if (pNativeData == nint.Zero) return null;
+                if (pNativeData == IntPtr.Zero) return null;
                 // Call self
                 return BMStringMarshaler.ToManaged(pNativeData);
             }
 
-            public void CleanUpNativeData(nint pNativeData) {
+            public void CleanUpNativeData(IntPtr pNativeData) {
                 // Check marshaler type
                 if (!m_MarshalerType.HasFlag(MarshalerType.In)) return;
                 // Check nullptr
-                if (pNativeData == nint.Zero) return;
+                if (pNativeData == IntPtr.Zero) return;
                 // Free native pointer
                 Marshal.FreeHGlobal(pNativeData);
             }
@@ -225,7 +225,7 @@ namespace BMapSharp {
             /// </summary>
             /// <param name="ptr">The pointer for checking.</param>
             /// <returns>The length of C style string (NUL exclusive).</returns>
-            internal static int GetCStringLength(nint ptr) {
+            internal static int GetCStringLength(IntPtr ptr) {
                 int count = 0, unit = Marshal.SizeOf<byte>();
                 while (Marshal.ReadByte(ptr) != (byte)0) {
                     ptr += unit;
@@ -240,13 +240,13 @@ namespace BMapSharp {
             /// </summary>
             /// <param name="obj">String object. Caller must make sure this object is not null.</param>
             /// <returns>The created native data pointer.</returns>
-            internal static nint ToNative(string obj) {
+            internal static IntPtr ToNative(string obj) {
                 // Encode string first
                 byte[] encString = Encoding.UTF8.GetBytes(obj);
                 // Allocate string memory with extra NUL.
                 int szStringItemCount = encString.Length;
                 int szStringItemSize = Marshal.SizeOf<byte>();
-                nint pString = Marshal.AllocHGlobal(szStringItemSize * (szStringItemCount + 1));
+                IntPtr pString = Marshal.AllocHGlobal(szStringItemSize * (szStringItemCount + 1));
                 // Copy encoded string data
                 Marshal.Copy(encString, 0, pString, szStringItemCount);
                 // Setup NUL
@@ -260,7 +260,7 @@ namespace BMapSharp {
             /// </summary>
             /// <param name="ptr">Native pointer holding string data. Caller must make sure this pointer is not nullptr.</param>
             /// <returns>The extracted managed string data.</returns>
-            internal static string ToManaged(nint ptr) {
+            internal static string ToManaged(IntPtr ptr) {
                 // Get the length of given string.
                 int szStringItemCount = BMStringMarshaler.GetCStringLength(ptr);
                 int szStringItemSize = Marshal.SizeOf<byte>();

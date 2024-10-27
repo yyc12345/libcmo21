@@ -94,16 +94,19 @@ namespace BMapSharp.BMapWrapper {
         #endregion
     }
 
-    public abstract class AbstractCKObject {
-        internal AbstractCKObject(IntPtr raw_pointer, uint ckid) {
-            m_RawPointer = raw_pointer;
+    public abstract class AbstractCKObject : SafeHandle {
+        // Same as AbstractPointer, but not own this handle.
+        internal AbstractCKObject(IntPtr raw_pointer, uint ckid) : base(Utils.INVALID_PTR, false) {
+            this.handle = raw_pointer;
             m_CKID = ckid;
         }
 
-        private readonly IntPtr m_RawPointer;
+        public override bool IsInvalid => this.handle == Utils.INVALID_PTR;
+        protected override bool ReleaseHandle() => throw new NotImplementedException();
+
         private readonly uint m_CKID;
-        protected bool isValid() => m_RawPointer != Utils.INVALID_PTR && m_RawPointer != Utils.INVALID_CKID;
-        protected IntPtr getPointer() => m_RawPointer;
+        protected bool isValid() => this.handle != Utils.INVALID_PTR && m_CKID != Utils.INVALID_CKID;
+        protected IntPtr getPointer() => this.handle;
         protected uint getCKID() => m_CKID;
 
         // private uint m_CKID;
@@ -143,14 +146,14 @@ namespace BMapSharp.BMapWrapper {
 
         #region Misc
 
-        public override int GetHashCode() => HashCode.Combine(m_RawPointer, m_CKID);
-        public override string ToString() => $"{m_RawPointer}, {m_CKID}";
+        public override int GetHashCode() => HashCode.Combine(this.handle, m_CKID);
+        public override string ToString() => $"{this.handle}, {m_CKID}";
 
         #endregion
     }
 
     public class BMObject : AbstractCKObject {
-        internal BMObject(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+        internal BMObject(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
 
         public string GetName() {
             BMapException.ThrowIfFailed(BMap.BMObject_GetName(
@@ -166,27 +169,27 @@ namespace BMapSharp.BMapWrapper {
     }
 
     public class BMTexture : BMObject {
-        internal BMTexture(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+        internal BMTexture(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
     }
 
     public class BMMaterial : BMObject {
-        internal BMMaterial(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+        internal BMMaterial(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
     }
 
     public class BMMesh : BMObject {
-        internal BMMesh(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+        internal BMMesh(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
     }
 
     public class BM3dObject : BMObject {
-        internal BM3dObject(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+        internal BM3dObject(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
     }
 
     public class BMGroup : BMObject {
-        internal BMGroup(nint raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+        internal BMGroup(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
     }
 
     public sealed class BMFileReader : AbstractPointer {
-        private static IntPtr AllocateHandle(string file_name, string temp_folder, string texture_folder, string[] encodings) {
+        private static IntPtr allocateHandle(string file_name, string temp_folder, string texture_folder, string[] encodings) {
             BMapException.ThrowIfFailed(BMap.BMFile_Load(
                 file_name, temp_folder, texture_folder,
                 Utils.BMapSharpCallback,
@@ -196,21 +199,20 @@ namespace BMapSharp.BMapWrapper {
             return out_file;
         }
         protected override bool ReleaseHandle() {
-            return BMap.BMFile_Free(this.handle);
+            return BMap.BMFile_Free(this.getPointer());
         }
         public BMFileReader(string file_name, string temp_folder, string texture_folder, string[] encodings)
-        : base(AllocateHandle(file_name, temp_folder, texture_folder, encodings)) { }
+        : base(allocateHandle(file_name, temp_folder, texture_folder, encodings)) { }
 
-
-        private delegate bool FctProtoGetCount(nint bmf, out uint cnt);
-        private delegate bool FctProtoGetObject(nint bmf, uint idx, out uint id);
-        private delegate T FctProtoCreateInstance<T>(nint bmf, uint id);
-        private uint GetCKObjectCount(FctProtoGetCount fct_cnt) {
+        private delegate bool FctProtoGetCount(IntPtr bmf, out uint cnt);
+        private delegate bool FctProtoGetObject(IntPtr bmf, uint idx, out uint id);
+        private delegate T FctProtoCreateInstance<T>(IntPtr bmf, uint id);
+        private uint getCKObjectCount(FctProtoGetCount fct_cnt) {
             BMapException.ThrowIfFailed(fct_cnt(this.getPointer(), out uint out_count));
             return out_count;
         }
-        private IEnumerable<T> GetCKObjects<T>(FctProtoGetCount fct_cnt, FctProtoGetObject fct_obj, FctProtoCreateInstance<T> fct_crt) {
-            uint count = GetCKObjectCount(fct_cnt);
+        private IEnumerable<T> getCKObjects<T>(FctProtoGetCount fct_cnt, FctProtoGetObject fct_obj, FctProtoCreateInstance<T> fct_crt) {
+            uint count = getCKObjectCount(fct_cnt);
             for (uint i = 0; i < count; ++i) {
                 BMapException.ThrowIfFailed(fct_obj(this.getPointer(), i, out uint out_id));
                 yield return fct_crt(this.getPointer(), out_id);
@@ -218,26 +220,56 @@ namespace BMapSharp.BMapWrapper {
         }
 
         public uint GetTextureCount() =>
-            GetCKObjectCount(BMap.BMFile_GetTextureCount);
+            getCKObjectCount(BMap.BMFile_GetTextureCount);
         public IEnumerable<BMTexture> GetTextures() =>
-            GetCKObjects<BMTexture>(BMap.BMFile_GetTextureCount, BMap.BMFile_GetTexture, (bmf, id) => new BMTexture(bmf, id));
+            getCKObjects<BMTexture>(BMap.BMFile_GetTextureCount, BMap.BMFile_GetTexture, (bmf, id) => new BMTexture(bmf, id));
         public uint GetMaterialCount() =>
-            GetCKObjectCount(BMap.BMFile_GetMaterialCount);
+            getCKObjectCount(BMap.BMFile_GetMaterialCount);
         public IEnumerable<BMMaterial> GetMaterials() =>
-            GetCKObjects<BMMaterial>(BMap.BMFile_GetMaterialCount, BMap.BMFile_GetMaterial, (bmf, id) => new BMMaterial(bmf, id));
+            getCKObjects<BMMaterial>(BMap.BMFile_GetMaterialCount, BMap.BMFile_GetMaterial, (bmf, id) => new BMMaterial(bmf, id));
         public uint GetMeshCount() =>
-            GetCKObjectCount(BMap.BMFile_GetMeshCount);
+            getCKObjectCount(BMap.BMFile_GetMeshCount);
         public IEnumerable<BMMesh> GetMeshes() =>
-            GetCKObjects<BMMesh>(BMap.BMFile_GetMeshCount, BMap.BMFile_GetMesh, (bmf, id) => new BMMesh(bmf, id));
+            getCKObjects<BMMesh>(BMap.BMFile_GetMeshCount, BMap.BMFile_GetMesh, (bmf, id) => new BMMesh(bmf, id));
         public uint Get3dObjectCount() =>
-            GetCKObjectCount(BMap.BMFile_Get3dObjectCount);
+            getCKObjectCount(BMap.BMFile_Get3dObjectCount);
         public IEnumerable<BM3dObject> Get3dObjects() =>
-            GetCKObjects<BM3dObject>(BMap.BMFile_Get3dObjectCount, BMap.BMFile_Get3dObject, (bmf, id) => new BM3dObject(bmf, id));
+            getCKObjects<BM3dObject>(BMap.BMFile_Get3dObjectCount, BMap.BMFile_Get3dObject, (bmf, id) => new BM3dObject(bmf, id));
         public uint GetGroupCount() =>
-            GetCKObjectCount(BMap.BMFile_GetGroupCount);
+            getCKObjectCount(BMap.BMFile_GetGroupCount);
         public IEnumerable<BMGroup> GetGroups() =>
-            GetCKObjects<BMGroup>(BMap.BMFile_GetGroupCount, BMap.BMFile_GetGroup, (bmf, id) => new BMGroup(bmf, id));
+            getCKObjects<BMGroup>(BMap.BMFile_GetGroupCount, BMap.BMFile_GetGroup, (bmf, id) => new BMGroup(bmf, id));
 
+    }
+
+    public sealed class BMFileWriter : AbstractPointer {
+        private static IntPtr allocateHandle(string temp_folder, string texture_folder, string[] encodings) {
+            BMapException.ThrowIfFailed(BMap.BMFile_Create(
+                temp_folder, texture_folder,
+                Utils.BMapSharpCallback,
+                (uint)encodings.Length, encodings,
+                out IntPtr out_file
+            ));
+            return out_file;
+        }
+        protected override bool ReleaseHandle() {
+            return BMap.BMFile_Free(this.getPointer());
+        }
+        public BMFileWriter(string temp_folder, string texture_folder, string[] encodings)
+        : base(allocateHandle(temp_folder, texture_folder, encodings)) { }
+
+        private delegate bool FctProtoCreateObject(IntPtr bmf, out uint id);
+        private delegate T FctProtoCreateInstance<T>(IntPtr bmf, uint id);
+        private T createCKObject<T>(FctProtoCreateObject fct_crt, FctProtoCreateInstance<T> fct_inst) {
+            BMapException.ThrowIfFailed(fct_crt(this.getPointer(), out uint out_id));
+            return fct_inst(this.getPointer(), out_id);
+        }
+
+        public BMTexture CreateTexture() => createCKObject<BMTexture>(BMap.BMFile_CreateTexture, (bmf, id) => new BMTexture(bmf, id));
+        public BMMaterial CreateMaterial() => createCKObject<BMMaterial>(BMap.BMFile_CreateMaterial, (bmf, id) => new BMMaterial(bmf, id));
+        public BMMesh CreateMesh() => createCKObject<BMMesh>(BMap.BMFile_CreateMesh, (bmf, id) => new BMMesh(bmf, id));
+        public BM3dObject Create3dObject() => createCKObject<BM3dObject>(BMap.BMFile_Create3dObject, (bmf, id) => new BM3dObject(bmf, id));
+        public BMGroup CreateGroup() => createCKObject<BMGroup>(BMap.BMFile_CreateGroup, (bmf, id) => new BMGroup(bmf, id));
     }
 
 }
