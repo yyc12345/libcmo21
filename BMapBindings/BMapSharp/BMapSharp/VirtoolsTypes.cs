@@ -166,6 +166,18 @@ namespace BMapSharp.VirtoolsTypes {
         }
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 4, CharSet = CharSet.Ansi)]
+    public struct CKShortFaceIndices {
+        [MarshalAs(UnmanagedType.U2)]
+        public ushort I1, I2, I3;
+
+        public CKShortFaceIndices(ushort i1 = 0, ushort i2 = 0, ushort i3 = 0) {
+            I1 = i1;
+            I2 = i2;
+            I3 = i3;
+        }
+    }
+
     public enum CK_TEXTURE_SAVEOPTIONS : uint {
         CKTEXTURE_RAWDATA = 0,	/**< Save raw data inside file. The bitmap is saved in a raw 32 bit per pixel format.  */
         CKTEXTURE_EXTERNAL = 1,	/**< Store only the file name for the texture. The bitmap file must be present in the bitmap paths when loading the composition.  */
