@@ -18,13 +18,18 @@ Since libcmo21 0.2.0, we only provide it in CMake build system. So Windows user 
 
 ### YYCCommonplace
 
-You should clone YYCCommonplace and switch to the latest release tag (or specified commit hash provided with libcmo21 release infos if you are building for specific libcmo21 version). Then compile it **in C++ 20 mode** (this is crucial because libcmo21 use C++ 20, and YYCCommonplace's ABI is incompatible between C++ 17 version and C++ 20 version). Finally install it as CMake package.
+You should clone YYCCommonplace and switch to the latest release tag (or specified commit hash provided with libcmo21 release infos if you are building for specific libcmo21 version). When configuring YYCCommonplace, you should notice following infos:
+
+* Please make sure that you have specified C++ 20 explicitly by passing `-DCMAKE_CXX_STANDARD=20` in command line. This is crucial because libcmo21 use C++ 20, and YYCCommonplace's ABI is incompatible between C++ 17 version and C++ 20 version.
+* If you need `BMap` in final libcmo21 built artifacts, and you are in non-Windows system now, please specify position independent code flag by passing `-DCMAKE_POSITION_INDEPENDENT_CODE=True` in command line. GCC and Clang will reject linking if you don't flag it.
+
+After configuring, you can normally build YYCCommonplace like a common CMake project.
 
 Please note if your final program or dynamic library is provided for end user, please choose `RelWithDebInfo` build type (`Release` is not suggested because it will strip all debug infos and it is not good for bug reporter, which is embedded in program, to report crash). If final program is served for programmer debugging, please choose `Debug` build type.
 
 ### stb
 
-You should clone stb repository first. In ideally scenario, we suggest you switch to the latest commit. However, all builds are actually only run on a specific commit hash `5736b15f7ea0ffb08dd38af21067c314d6a3aae9`. So if the latest commit is not work, please switch to this commit hash instead.
+You should clone stb repository first, then switch to a specific commit hash `5736b15f7ea0ffb08dd38af21067c314d6a3aae9`. In ideally scenario, people like to choose the latest commit. However, I hardly update this dependency so the latest commit is not work.
 
 ### zlib
 
