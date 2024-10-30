@@ -31,30 +31,40 @@ namespace BMapSharpTestbench {
                 //     }
                 // }
 
-                Console.WriteLine("===== 3dObjects =====");
-                foreach (var obj in reader.Get3dObjects()) {
-                    Console.WriteLine(obj.GetName());
+                // Console.WriteLine("===== 3dObjects =====");
+                // foreach (var obj in reader.Get3dObjects()) {
+                //     Console.WriteLine(obj.GetName());
 
-                    var current_mesh = obj.GetCurrentMesh();
-                    var mesh_name = current_mesh is null ? "<null>" : current_mesh.GetName();
-                    Console.WriteLine($"\tMesh: {mesh_name}");
-                    Console.WriteLine($"\tVisibility: {obj.GetVisibility()}");
-                    Console.WriteLine($"\tMatrix: {obj.GetWorldMatrix().ToManaged()}");
-                }
+                //     var current_mesh = obj.GetCurrentMesh();
+                //     var mesh_name = current_mesh is null ? "<null>" : current_mesh.GetName();
+                //     Console.WriteLine($"\tMesh: {mesh_name}");
+                //     Console.WriteLine($"\tVisibility: {obj.GetVisibility()}");
+                //     Console.WriteLine($"\tMatrix: {obj.GetWorldMatrix().ToManaged()}");
+                // }
 
                 // Console.WriteLine("===== Meshes =====");
                 // foreach (var mesh in reader.GetMeshes()) {
                 //     Console.WriteLine(mesh.GetName());
                 // }
 
-                // Console.WriteLine("===== Materials =====");
-                // foreach (var mtl in reader.GetMaterials()) {
-                //     Console.WriteLine(mtl.GetName());
-                // }
+                Console.WriteLine("===== Materials =====");
+                foreach (var mtl in reader.GetMaterials()) {
+                    Console.WriteLine(mtl.GetName());
+
+                    Console.WriteLine($"\tDiffuse: {mtl.GetDiffuse().ToManagedRGBA()}");
+                    Console.WriteLine($"\tAmbient: {mtl.GetAmbient().ToManagedRGBA()}");
+                    Console.WriteLine($"\tSpecular: {mtl.GetSpecular().ToManagedRGBA()}");
+                    Console.WriteLine($"\tEmissive: {mtl.GetEmissive().ToManagedRGBA()}");
+                    Console.WriteLine($"\tSpecular Power: {mtl.GetSpecularPower()}");
+                }
 
                 // Console.WriteLine("===== Textures =====");
                 // foreach (var tex in reader.GetTextures()) {
                 //     Console.WriteLine(tex.GetName());
+
+                //     Console.WriteLine($"\tFile Name: {tex.GetFileName()}");
+                //     Console.WriteLine($"\tSave Options: {tex.GetSaveOptions()}");
+                //     Console.WriteLine($"\tVideo Format: {tex.GetVideoFormat()}");
                 // }
 
             }

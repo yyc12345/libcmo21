@@ -59,7 +59,7 @@ The arguments in command should be replaced by:
 
 The switches in command can be switched as you wish:
 
-* `NEMO_BUILD_UNVIRT`: Build `unvirt`, a command line application debugging Virtools files.
+* `NEMO_BUILD_UNVIRT`: Build `Unvirt`, a command line application debugging Virtools files.
 * `NEMO_BUILD_BMAP`: Build `BMap`, a dynamic library specific used for loading Ballance map file.
 * `NEMO_BUILD_DOC`: Build the document of libcmo21.
 

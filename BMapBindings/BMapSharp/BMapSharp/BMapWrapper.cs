@@ -57,8 +57,8 @@ namespace BMapSharp.BMapWrapper {
         internal static void CKFaceIndicesAssigner(IntPtr pstruct, uint count, IEnumerable<CKFaceIndices> iem)
             => StructAssigner<CKFaceIndices>(pstruct, count, iem);
         internal static void CKShortFaceIndicesAssigner(IntPtr pstruct, uint count, IEnumerable<CKShortFaceIndices> iem)
-            => StructAssigner<CKShortFaceIndices>(pstruct, count, iem); // TODO: There is a padding bug!!!
-        
+            => StructAssigner<CKShortFaceIndices>(pstruct, count, iem);
+
         private static IEnumerable<T> StructIterator<T>(IntPtr pstruct, uint count) {
             var stride = Marshal.SizeOf<T>();
             for (uint i = 0; i < count; ++i) {
@@ -73,7 +73,7 @@ namespace BMapSharp.BMapWrapper {
         internal static IEnumerable<CKFaceIndices> CKFaceIndicesIterator(IntPtr pstruct, uint count)
             => StructIterator<CKFaceIndices>(pstruct, count);
         internal static IEnumerable<CKShortFaceIndices> CKShortFaceIndicesIterator(IntPtr pstruct, uint count)
-            => StructIterator<CKShortFaceIndices>(pstruct, count); // TODO: There is a padding bug!!!
+            => StructIterator<CKShortFaceIndices>(pstruct, count);
 
         #endregion
 
@@ -210,10 +210,69 @@ namespace BMapSharp.BMapWrapper {
 
     public class BMTexture : BMObject {
         internal BMTexture(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+
+        public string GetFileName() {
+            BMapException.ThrowIfFailed(BMap.BMTexture_GetFileName(getPointer(), getCKID(), out string out_filename));
+            return out_filename;
+        }
+
+        public void LoadImage(string filepath) {
+            BMapException.ThrowIfFailed(BMap.BMTexture_LoadImage(getPointer(), getCKID(), filepath));
+        }
+
+        public void SaveImage(string filepath) {
+            BMapException.ThrowIfFailed(BMap.BMTexture_SaveImage(getPointer(), getCKID(), filepath));
+        }
+
+        public CK_TEXTURE_SAVEOPTIONS GetSaveOptions() {
+            BMapException.ThrowIfFailed(BMap.BMTexture_GetSaveOptions(getPointer(), getCKID(), out uint out_saveopt));
+            return (CK_TEXTURE_SAVEOPTIONS)out_saveopt;
+        }
+
+        public void SetSaveOptions(CK_TEXTURE_SAVEOPTIONS opt) {
+            BMapException.ThrowIfFailed(BMap.BMTexture_SetSaveOptions(getPointer(), getCKID(), (uint)opt));
+        }
+
+        public VX_PIXELFORMAT GetVideoFormat() {
+            BMapException.ThrowIfFailed(BMap.BMTexture_GetVideoFormat(getPointer(), getCKID(), out uint out_vfmt));
+            return (VX_PIXELFORMAT)out_vfmt;
+        }
+
+        public void SetVideoFormat(VX_PIXELFORMAT vfmt) {
+            BMapException.ThrowIfFailed(BMap.BMTexture_SetVideoFormat(getPointer(), getCKID(), (uint)vfmt));
+        }
     }
 
     public class BMMaterial : BMObject {
         internal BMMaterial(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+
+        private delegate bool FctVxColorSetter(IntPtr bmf, uint id, VxColor col);
+        private delegate bool FctVxColorGetter(IntPtr bmf, uint id, out VxColor col);
+        private VxColor getVxColor(FctVxColorGetter fct) {
+            BMapException.ThrowIfFailed(fct(getPointer(), getCKID(), out VxColor out_col));
+            return out_col;
+        }
+        private void setVxColor(FctVxColorSetter fct, VxColor col) {
+            BMapException.ThrowIfFailed(fct(getPointer(), getCKID(), col));
+        }
+
+        public VxColor GetDiffuse() => getVxColor(BMap.BMMaterial_GetDiffuse);
+        public void SetDiffuse(VxColor col) => setVxColor(BMap.BMMaterial_SetDiffuse, col);
+        public VxColor GetAmbient() => getVxColor(BMap.BMMaterial_GetAmbient);
+        public void SetAmbient(VxColor col) => setVxColor(BMap.BMMaterial_SetAmbient, col);
+        public VxColor GetSpecular() => getVxColor(BMap.BMMaterial_GetSpecular);
+        public void SetSpecular(VxColor col) => setVxColor(BMap.BMMaterial_SetSpecular, col);
+        public VxColor GetEmissive() => getVxColor(BMap.BMMaterial_GetEmissive);
+        public void SetEmissive(VxColor col) => setVxColor(BMap.BMMaterial_SetEmissive, col);
+
+        public float GetSpecularPower() {
+            BMapException.ThrowIfFailed(BMap.BMMaterial_GetSpecularPower(getPointer(), getCKID(), out float out_val));
+            return out_val;
+        }
+        public void SetSpecularPower(float val) {
+            BMapException.ThrowIfFailed(BMap.BMMaterial_SetSpecularPower(getPointer(), getCKID(), val));
+        }
+
     }
 
     public class BMMesh : BMObject {
