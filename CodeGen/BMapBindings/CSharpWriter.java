@@ -118,6 +118,7 @@ public class CSharpWriter {
 				ret.mMarshalAs = "UnmanagedType.SysInt";
 				ret.mCsType = "IntPtr";
 			}
+			break;
 		case "CK_ID":
 			if (vt_pointer_level == 0) {
 				ret.mMarshalAs = "UnmanagedType.U4";
@@ -195,11 +196,14 @@ public class CSharpWriter {
 		case "VXSHADE_MODE":
 		case "VXCMPFUNC":
 		case "VXMESH_LITMODE":
-			// all enum share the same underlying type.
+			// all enum type use the same strategy
 			if (vt_pointer_level == 0) {
+				// all enum type should be marshaled as its underlying type
+				// but we can use its name in C# directly.
 				ret.mMarshalAs = "UnmanagedType.U4";
-				ret.mCsType = "uint";
+				ret.mCsType = vt_base_type;
 			} else {
+				// for pointer type, use IntPtr instead.
 				ret.mMarshalAs = "UnmanagedType.SysInt";
 				ret.mCsType = "IntPtr";
 			}

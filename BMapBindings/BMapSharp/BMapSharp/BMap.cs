@@ -293,7 +293,7 @@ namespace BMapSharp {
         #region Function Defines
 
         // ##### GENERATED FUNCTIONS BEGIN #####
-
+        
         /// <summary>BMInit</summary>
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMInit", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
@@ -336,7 +336,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMFile_Save", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMFile_Save([In, MarshalAs(UnmanagedType.SysInt)] IntPtr map_file, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "In")] string file_name, [In, MarshalAs(UnmanagedType.U4)] uint texture_save_opt, [In, MarshalAs(UnmanagedType.U1)] bool use_compress, [In, MarshalAs(UnmanagedType.I4)] int compreess_level);
+        internal static extern bool BMFile_Save([In, MarshalAs(UnmanagedType.SysInt)] IntPtr map_file, [In, MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "In")] string file_name, [In, MarshalAs(UnmanagedType.U4)] CK_TEXTURE_SAVEOPTIONS texture_save_opt, [In, MarshalAs(UnmanagedType.U1)] bool use_compress, [In, MarshalAs(UnmanagedType.I4)] int compreess_level);
         /// <summary>BMFile_Free</summary>
         /// <param name="map_file">Type: BMap::BMFile*. </param>
         /// <returns>True if no error, otherwise False.</returns>
@@ -636,7 +636,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMTexture_GetSaveOptions", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMTexture_GetSaveOptions([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_saveopt);
+        internal static extern bool BMTexture_GetSaveOptions([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out CK_TEXTURE_SAVEOPTIONS out_saveopt);
         /// <summary>BMTexture_SetSaveOptions</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -644,7 +644,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMTexture_SetSaveOptions", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMTexture_SetSaveOptions([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint saveopt);
+        internal static extern bool BMTexture_SetSaveOptions([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] CK_TEXTURE_SAVEOPTIONS saveopt);
         /// <summary>BMTexture_GetVideoFormat</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -652,7 +652,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMTexture_GetVideoFormat", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMTexture_GetVideoFormat([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_vfmt);
+        internal static extern bool BMTexture_GetVideoFormat([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VX_PIXELFORMAT out_vfmt);
         /// <summary>BMTexture_SetVideoFormat</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -660,7 +660,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMTexture_SetVideoFormat", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMTexture_SetVideoFormat([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint vfmt);
+        internal static extern bool BMTexture_SetVideoFormat([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VX_PIXELFORMAT vfmt);
         /// <summary>BMMaterial_GetDiffuse</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -780,7 +780,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_GetTextureBlendMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_GetTextureBlendMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_val);
+        internal static extern bool BMMaterial_GetTextureBlendMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXTEXTURE_BLENDMODE out_val);
         /// <summary>BMMaterial_SetTextureBlendMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -788,7 +788,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_SetTextureBlendMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_SetTextureBlendMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint val);
+        internal static extern bool BMMaterial_SetTextureBlendMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXTEXTURE_BLENDMODE val);
         /// <summary>BMMaterial_GetTextureMinMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -796,7 +796,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_GetTextureMinMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_GetTextureMinMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_val);
+        internal static extern bool BMMaterial_GetTextureMinMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXTEXTURE_FILTERMODE out_val);
         /// <summary>BMMaterial_SetTextureMinMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -804,7 +804,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_SetTextureMinMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_SetTextureMinMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint val);
+        internal static extern bool BMMaterial_SetTextureMinMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXTEXTURE_FILTERMODE val);
         /// <summary>BMMaterial_GetTextureMagMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -812,7 +812,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_GetTextureMagMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_GetTextureMagMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_val);
+        internal static extern bool BMMaterial_GetTextureMagMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXTEXTURE_FILTERMODE out_val);
         /// <summary>BMMaterial_SetTextureMagMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -820,7 +820,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_SetTextureMagMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_SetTextureMagMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint val);
+        internal static extern bool BMMaterial_SetTextureMagMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXTEXTURE_FILTERMODE val);
         /// <summary>BMMaterial_GetTextureAddressMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -828,7 +828,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_GetTextureAddressMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_GetTextureAddressMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_val);
+        internal static extern bool BMMaterial_GetTextureAddressMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXTEXTURE_ADDRESSMODE out_val);
         /// <summary>BMMaterial_SetTextureAddressMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -836,7 +836,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_SetTextureAddressMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_SetTextureAddressMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint val);
+        internal static extern bool BMMaterial_SetTextureAddressMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXTEXTURE_ADDRESSMODE val);
         /// <summary>BMMaterial_GetSourceBlend</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -844,7 +844,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_GetSourceBlend", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_GetSourceBlend([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_val);
+        internal static extern bool BMMaterial_GetSourceBlend([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXBLEND_MODE out_val);
         /// <summary>BMMaterial_SetSourceBlend</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -852,7 +852,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_SetSourceBlend", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_SetSourceBlend([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint val);
+        internal static extern bool BMMaterial_SetSourceBlend([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXBLEND_MODE val);
         /// <summary>BMMaterial_GetDestBlend</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -860,7 +860,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_GetDestBlend", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_GetDestBlend([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_val);
+        internal static extern bool BMMaterial_GetDestBlend([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXBLEND_MODE out_val);
         /// <summary>BMMaterial_SetDestBlend</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -868,7 +868,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_SetDestBlend", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_SetDestBlend([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint val);
+        internal static extern bool BMMaterial_SetDestBlend([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXBLEND_MODE val);
         /// <summary>BMMaterial_GetFillMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -876,7 +876,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_GetFillMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_GetFillMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_val);
+        internal static extern bool BMMaterial_GetFillMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXFILL_MODE out_val);
         /// <summary>BMMaterial_SetFillMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -884,7 +884,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_SetFillMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_SetFillMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint val);
+        internal static extern bool BMMaterial_SetFillMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXFILL_MODE val);
         /// <summary>BMMaterial_GetShadeMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -892,7 +892,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_GetShadeMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_GetShadeMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_val);
+        internal static extern bool BMMaterial_GetShadeMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXSHADE_MODE out_val);
         /// <summary>BMMaterial_SetShadeMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -900,7 +900,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_SetShadeMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_SetShadeMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint val);
+        internal static extern bool BMMaterial_SetShadeMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXSHADE_MODE val);
         /// <summary>BMMaterial_GetAlphaTestEnabled</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -988,7 +988,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_GetAlphaRef", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_GetAlphaRef([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_val);
+        internal static extern bool BMMaterial_GetAlphaRef([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U1)] out byte out_val);
         /// <summary>BMMaterial_SetAlphaRef</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -996,7 +996,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_SetAlphaRef", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_SetAlphaRef([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint val);
+        internal static extern bool BMMaterial_SetAlphaRef([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U1)] byte val);
         /// <summary>BMMaterial_GetAlphaFunc</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -1004,7 +1004,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_GetAlphaFunc", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_GetAlphaFunc([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_val);
+        internal static extern bool BMMaterial_GetAlphaFunc([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXCMPFUNC out_val);
         /// <summary>BMMaterial_SetAlphaFunc</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -1012,7 +1012,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_SetAlphaFunc", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_SetAlphaFunc([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint val);
+        internal static extern bool BMMaterial_SetAlphaFunc([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXCMPFUNC val);
         /// <summary>BMMaterial_GetZFunc</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -1020,7 +1020,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_GetZFunc", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_GetZFunc([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_val);
+        internal static extern bool BMMaterial_GetZFunc([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXCMPFUNC out_val);
         /// <summary>BMMaterial_SetZFunc</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -1028,7 +1028,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMaterial_SetZFunc", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMaterial_SetZFunc([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint val);
+        internal static extern bool BMMaterial_SetZFunc([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXCMPFUNC val);
         /// <summary>BMMesh_GetLitMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -1036,7 +1036,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMesh_GetLitMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMesh_GetLitMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_mode);
+        internal static extern bool BMMesh_GetLitMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXMESH_LITMODE out_mode);
         /// <summary>BMMesh_SetLitMode</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
@@ -1044,7 +1044,7 @@ namespace BMapSharp {
         /// <returns>True if no error, otherwise False.</returns>
         [DllImport(g_DllName, EntryPoint = "BMMesh_SetLitMode", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BMMesh_SetLitMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint mode);
+        internal static extern bool BMMesh_SetLitMode([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXMESH_LITMODE mode);
         /// <summary>BMMesh_GetVertexCount</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>

@@ -15,12 +15,14 @@ namespace BMapSharp.VirtoolsTypes {
         public float X, Y;
 
         public VxVector2(float _x = 0.0f, float _y = 0.0f) {
-            X = _x;
-            Y = _y;
+            X = _x; Y = _y;
         }
+        public VxVector2(Vector2 vec) {
+            FromManaged(vec);
+        }
+
         public void FromManaged(Vector2 vec) {
-            X = vec.X;
-            Y = vec.Y;
+            X = vec.X; Y = vec.Y;
         }
         public Vector2 ToManaged() {
             return new Vector2(X, Y);
@@ -33,14 +35,14 @@ namespace BMapSharp.VirtoolsTypes {
         public float X, Y, Z;
 
         public VxVector3(float _x = 0.0f, float _y = 0.0f, float _z = 0.0f) {
-            X = _x;
-            Y = _y;
-            Z = _z;
+            X = _x; Y = _y; Z = _z;
         }
+        public VxVector3(Vector3 vec) {
+            FromManaged(vec);
+        }
+
         public void FromManaged(Vector3 vec) {
-            X = vec.X;
-            Y = vec.Y;
-            Z = vec.Z;
+            X = vec.X; Y = vec.Y; Z = vec.Z;
         }
         public Vector3 ToManaged() {
             return new Vector3(X, Y, Z);
@@ -53,26 +55,28 @@ namespace BMapSharp.VirtoolsTypes {
         public float A, R, G, B;
 
         public VxColor(float _r, float _g, float _b, float _a) {
-            A = _a;
-            R = _r;
-            G = _g;
-            B = _b;
+            A = _a; R = _r; G = _g; B = _b;
             Regulate();
         }
+        public VxColor(Vector4 col) {
+            FromManagedRGBA(col);
+        }
+        public VxColor(Vector3 col) {
+            FromManagedRGB(col);
+        }
+        public VxColor(uint val) {
+            FromDword(val);
+        }
+
         public void FromManagedRGBA(Vector4 col) {
-            R = col.X;
-            G = col.Y;
-            B = col.Z;
-            A = col.W;
+            R = col.X;  G = col.Y; B = col.Z; A = col.W;
             Regulate();
         }
         public Vector4 ToManagedRGBA() {
             return new Vector4(R, G, B, A);
         }
         public void FromManagedRGB(Vector3 col) {
-            R = col.X;
-            G = col.Y;
-            B = col.Z;
+            R = col.X; G = col.Y; B = col.Z; A = 1.0f;
             Regulate();
         }
         public Vector3 ToManagedRGB() {
@@ -101,6 +105,7 @@ namespace BMapSharp.VirtoolsTypes {
             val |= (uint)(B * 255.0f);
             return val;
         }
+        
         public static float ClampFactor(float factor) {
             return System.Math.Clamp(factor, 0.0f, 1.0f);
         }

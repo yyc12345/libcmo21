@@ -29,7 +29,7 @@ Please note if your final program or dynamic library is provided for end user, p
 
 ### stb
 
-You should clone stb repository first, then switch to a specific commit hash `5736b15f7ea0ffb08dd38af21067c314d6a3aae9`. In ideally scenario, people like to choose the latest commit. However, I hardly update this dependency so the latest commit is not work.
+You should clone stb repository first, then switch to a specific commit hash `5736b15f7ea0ffb08dd38af21067c314d6a3aae9`. In ideally scenario, people like to choose the latest commit. However, I not frequently update this dependency.
 
 ### zlib
 
@@ -41,7 +41,7 @@ If you are running on non-Windows system. You usually do not need to do anything
 
 ### Directory Hierarchy
 
-First, create subdirectory `Bin/build` and `Bin/install`.
+First, create subdirectory `Bin/build` and `Bin/install` at the root directory of libcmo21.
 
 ### Configuration
 
@@ -60,7 +60,7 @@ The arguments in command should be replaced by:
 The switches in command can be switched as you wish:
 
 * `NEMO_BUILD_UNVIRT`: Build `Unvirt`, a command line application debugging Virtools files.
-* `NEMO_BUILD_BMAP`: Build `BMap`, a dynamic library specific used for loading Ballance map file.
+* `NEMO_BUILD_BMAP`: Build `BMap`, a dynamic library specific used for loading Ballance map file. If you are coming from my another project [BallanceBlenderPlugin](https://github.com/yyc12345/BallanceBlenderHelper), this is what you need.
 * `NEMO_BUILD_DOC`: Build the document of libcmo21.
 
 ### Build

@@ -45,7 +45,7 @@ namespace BMapSharp.BMapWrapper {
             var stride = Marshal.SizeOf<T>();
             var itor = iem.GetEnumerator();
             for (uint i = 0; i < count; ++i) {
-                BMapException.ThrowIfFailed(itor.MoveNext());
+                if (!itor.MoveNext()) throw new BMapException("The length of given data is too short when assigning struct array.");
                 Marshal.StructureToPtr<T>(itor.Current, pstruct, false);
                 pstruct += stride;
             }
@@ -194,84 +194,105 @@ namespace BMapSharp.BMapWrapper {
         public override string ToString() => $"{this.handle}, {m_CKID}";
 
         #endregion
+
+        #region Subclass Utilities
+
+        protected delegate bool FctGenericValueGetter<T>(IntPtr bmf, uint id, out T val);
+        protected delegate bool FctGenericValueSetter<T>(IntPtr bmf, uint id, T val);
+        protected T getGenericValue<T>(FctGenericValueGetter<T> fct) {
+            BMapException.ThrowIfFailed(fct(getPointer(), getCKID(), out T out_val));
+            return out_val;
+        }
+        protected void setGenericValue<T>(FctGenericValueSetter<T> fct, T val) {
+            BMapException.ThrowIfFailed(fct(getPointer(), getCKID(), val));
+        }
+
+        #endregion
     }
 
     public class BMObject : AbstractCKObject {
         internal BMObject(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
 
-        public string GetName() {
-            BMapException.ThrowIfFailed(BMap.BMObject_GetName(getPointer(), getCKID(), out string out_name));
-            return out_name;
-        }
-        public void SetName(string name) {
-            BMapException.ThrowIfFailed(BMap.BMObject_SetName(getPointer(), getCKID(), name));
-        }
+        public string GetName() => getGenericValue<string>(BMap.BMObject_GetName);
+        public void SetName(string name) => setGenericValue<string>(BMap.BMObject_SetName, name);
     }
 
     public class BMTexture : BMObject {
         internal BMTexture(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
 
-        public string GetFileName() {
-            BMapException.ThrowIfFailed(BMap.BMTexture_GetFileName(getPointer(), getCKID(), out string out_filename));
-            return out_filename;
-        }
+        public string GetFileName() => getGenericValue<string>(BMap.BMTexture_GetFileName);
 
         public void LoadImage(string filepath) {
             BMapException.ThrowIfFailed(BMap.BMTexture_LoadImage(getPointer(), getCKID(), filepath));
         }
-
         public void SaveImage(string filepath) {
             BMapException.ThrowIfFailed(BMap.BMTexture_SaveImage(getPointer(), getCKID(), filepath));
         }
 
-        public CK_TEXTURE_SAVEOPTIONS GetSaveOptions() {
-            BMapException.ThrowIfFailed(BMap.BMTexture_GetSaveOptions(getPointer(), getCKID(), out uint out_saveopt));
-            return (CK_TEXTURE_SAVEOPTIONS)out_saveopt;
-        }
-
-        public void SetSaveOptions(CK_TEXTURE_SAVEOPTIONS opt) {
-            BMapException.ThrowIfFailed(BMap.BMTexture_SetSaveOptions(getPointer(), getCKID(), (uint)opt));
-        }
-
-        public VX_PIXELFORMAT GetVideoFormat() {
-            BMapException.ThrowIfFailed(BMap.BMTexture_GetVideoFormat(getPointer(), getCKID(), out uint out_vfmt));
-            return (VX_PIXELFORMAT)out_vfmt;
-        }
-
-        public void SetVideoFormat(VX_PIXELFORMAT vfmt) {
-            BMapException.ThrowIfFailed(BMap.BMTexture_SetVideoFormat(getPointer(), getCKID(), (uint)vfmt));
-        }
+        public CK_TEXTURE_SAVEOPTIONS GetSaveOptions() => getGenericValue<CK_TEXTURE_SAVEOPTIONS>(BMap.BMTexture_GetSaveOptions);
+        public void SetSaveOptions(CK_TEXTURE_SAVEOPTIONS opt) => setGenericValue<CK_TEXTURE_SAVEOPTIONS>(BMap.BMTexture_SetSaveOptions, opt);
+        public VX_PIXELFORMAT GetVideoFormat() => getGenericValue<VX_PIXELFORMAT>(BMap.BMTexture_GetVideoFormat);
+        public void SetVideoFormat(VX_PIXELFORMAT vfmt) => setGenericValue<VX_PIXELFORMAT>(BMap.BMTexture_SetVideoFormat, vfmt);
     }
 
     public class BMMaterial : BMObject {
         internal BMMaterial(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
 
-        private delegate bool FctVxColorSetter(IntPtr bmf, uint id, VxColor col);
-        private delegate bool FctVxColorGetter(IntPtr bmf, uint id, out VxColor col);
-        private VxColor getVxColor(FctVxColorGetter fct) {
-            BMapException.ThrowIfFailed(fct(getPointer(), getCKID(), out VxColor out_col));
-            return out_col;
+        public VxColor GetDiffuse() => getGenericValue<VxColor>(BMap.BMMaterial_GetDiffuse);
+        public void SetDiffuse(VxColor col) => setGenericValue<VxColor>(BMap.BMMaterial_SetDiffuse, col);
+        public VxColor GetAmbient() => getGenericValue<VxColor>(BMap.BMMaterial_GetAmbient);
+        public void SetAmbient(VxColor col) => setGenericValue<VxColor>(BMap.BMMaterial_SetAmbient, col);
+        public VxColor GetSpecular() => getGenericValue<VxColor>(BMap.BMMaterial_GetSpecular);
+        public void SetSpecular(VxColor col) => setGenericValue<VxColor>(BMap.BMMaterial_SetSpecular, col);
+        public VxColor GetEmissive() => getGenericValue<VxColor>(BMap.BMMaterial_GetEmissive);
+        public void SetEmissive(VxColor col) => setGenericValue<VxColor>(BMap.BMMaterial_SetEmissive, col);
+
+        public float GetSpecularPower() => getGenericValue<float>(BMap.BMMaterial_GetSpecularPower);
+        public void SetSpecularPower(float val) => setGenericValue<float>(BMap.BMMaterial_SetSpecularPower, val);
+
+        public VxColor GetTextureBorderColor() {
+            BMapException.ThrowIfFailed(BMap.BMMaterial_GetTextureBorderColor(getPointer(), getCKID(), out uint out_val));
+            return new VxColor(out_val);
         }
-        private void setVxColor(FctVxColorSetter fct, VxColor col) {
-            BMapException.ThrowIfFailed(fct(getPointer(), getCKID(), col));
+        public void SetTextureBorderColor(VxColor col) {
+            BMapException.ThrowIfFailed(BMap.BMMaterial_SetTextureBorderColor(getPointer(), getCKID(), col.ToDword()));
         }
 
-        public VxColor GetDiffuse() => getVxColor(BMap.BMMaterial_GetDiffuse);
-        public void SetDiffuse(VxColor col) => setVxColor(BMap.BMMaterial_SetDiffuse, col);
-        public VxColor GetAmbient() => getVxColor(BMap.BMMaterial_GetAmbient);
-        public void SetAmbient(VxColor col) => setVxColor(BMap.BMMaterial_SetAmbient, col);
-        public VxColor GetSpecular() => getVxColor(BMap.BMMaterial_GetSpecular);
-        public void SetSpecular(VxColor col) => setVxColor(BMap.BMMaterial_SetSpecular, col);
-        public VxColor GetEmissive() => getVxColor(BMap.BMMaterial_GetEmissive);
-        public void SetEmissive(VxColor col) => setVxColor(BMap.BMMaterial_SetEmissive, col);
+        public VXTEXTURE_BLENDMODE GetTextureBlendMode() => getGenericValue<VXTEXTURE_BLENDMODE>(BMap.BMMaterial_GetTextureBlendMode);
+        public void SetTextureBlendMode(VXTEXTURE_BLENDMODE val) => setGenericValue<VXTEXTURE_BLENDMODE>(BMap.BMMaterial_SetTextureBlendMode, val);
+        public VXTEXTURE_FILTERMODE GetTextureMinMode() => getGenericValue<VXTEXTURE_FILTERMODE>(BMap.BMMaterial_GetTextureMinMode);
+        public void SetTextureMinMode(VXTEXTURE_FILTERMODE val) => setGenericValue<VXTEXTURE_FILTERMODE>(BMap.BMMaterial_SetTextureMinMode, val);
+        public VXTEXTURE_FILTERMODE GetTextureMagMode() => getGenericValue<VXTEXTURE_FILTERMODE>(BMap.BMMaterial_GetTextureMagMode);
+        public void SetTextureMagMode(VXTEXTURE_FILTERMODE val) => setGenericValue<VXTEXTURE_FILTERMODE>(BMap.BMMaterial_SetTextureMagMode, val);
+        public VXTEXTURE_ADDRESSMODE GetTextureAddressMode() => getGenericValue<VXTEXTURE_ADDRESSMODE>(BMap.BMMaterial_GetTextureAddressMode);
+        public void SetTextureAddressMode(VXTEXTURE_ADDRESSMODE val) => setGenericValue<VXTEXTURE_ADDRESSMODE>(BMap.BMMaterial_SetTextureAddressMode, val);
+        public VXBLEND_MODE GetSourceBlend() => getGenericValue<VXBLEND_MODE>(BMap.BMMaterial_GetSourceBlend);
+        public void SetSourceBlend(VXBLEND_MODE val) => setGenericValue<VXBLEND_MODE>(BMap.BMMaterial_SetSourceBlend, val);
+        public VXBLEND_MODE GetDestBlend() => getGenericValue<VXBLEND_MODE>(BMap.BMMaterial_GetDestBlend);
+        public void SetDestBlend(VXBLEND_MODE val) => setGenericValue<VXBLEND_MODE>(BMap.BMMaterial_SetDestBlend, val);
+        public VXFILL_MODE GetFillMode() => getGenericValue<VXFILL_MODE>(BMap.BMMaterial_GetFillMode);
+        public void SetFillMode(VXFILL_MODE val) => setGenericValue<VXFILL_MODE>(BMap.BMMaterial_SetFillMode, val);
+        public VXSHADE_MODE GetShadeMode() => getGenericValue<VXSHADE_MODE>(BMap.BMMaterial_GetShadeMode);
+        public void SetShadeMode(VXSHADE_MODE val) => setGenericValue<VXSHADE_MODE>(BMap.BMMaterial_SetShadeMode, val);
 
-        public float GetSpecularPower() {
-            BMapException.ThrowIfFailed(BMap.BMMaterial_GetSpecularPower(getPointer(), getCKID(), out float out_val));
-            return out_val;
-        }
-        public void SetSpecularPower(float val) {
-            BMapException.ThrowIfFailed(BMap.BMMaterial_SetSpecularPower(getPointer(), getCKID(), val));
-        }
+        public bool GetAlphaTestEnabled() => getGenericValue<bool>(BMap.BMMaterial_GetAlphaTestEnabled);
+        public void SetAlphaTestEnabled(bool val) => setGenericValue<bool>(BMap.BMMaterial_SetAlphaTestEnabled, val);
+        public bool GetAlphaBlendEnabled() => getGenericValue<bool>(BMap.BMMaterial_GetAlphaBlendEnabled);
+        public void SetAlphaBlendEnabled(bool val) => setGenericValue<bool>(BMap.BMMaterial_SetAlphaBlendEnabled, val);
+        public bool GetPerspectiveCorrectionEnabled() => getGenericValue<bool>(BMap.BMMaterial_GetPerspectiveCorrectionEnabled);
+        public void SetPerspectiveCorrectionEnabled(bool val) => setGenericValue<bool>(BMap.BMMaterial_SetPerspectiveCorrectionEnabled, val);
+        public bool GetZWriteEnabled() => getGenericValue<bool>(BMap.BMMaterial_GetZWriteEnabled);
+        public void SetZWriteEnabled(bool val) => setGenericValue<bool>(BMap.BMMaterial_SetZWriteEnabled, val);
+        public bool GetTwoSidedEnabled() => getGenericValue<bool>(BMap.BMMaterial_GetTwoSidedEnabled);
+        public void SetTwoSidedEnabled(bool val) => setGenericValue<bool>(BMap.BMMaterial_SetTwoSidedEnabled, val);
+
+        public byte GetAlphaRef() => getGenericValue<byte>(BMap.BMMaterial_GetAlphaRef);
+        public void SetAlphaRef(byte val) => setGenericValue<byte>(BMap.BMMaterial_SetAlphaRef, val);
+
+        public VXCMPFUNC GetAlphaFunc() => getGenericValue<VXCMPFUNC>(BMap.BMMaterial_GetAlphaFunc);
+        public void SetAlphaFunc(VXCMPFUNC val) => setGenericValue<VXCMPFUNC>(BMap.BMMaterial_SetAlphaFunc, val);
+        public VXCMPFUNC GetZFunc() => getGenericValue<VXCMPFUNC>(BMap.BMMaterial_GetZFunc);
+        public void SetZFunc(VXCMPFUNC val) => setGenericValue<VXCMPFUNC>(BMap.BMMaterial_SetZFunc, val);
 
     }
 
