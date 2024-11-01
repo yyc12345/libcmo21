@@ -61,6 +61,10 @@ namespace BMapSharp.BMapWrapper {
             => StructAssigner<CKShortFaceIndices>(pstruct, count, iem);
         internal static void ShortAssigner(IntPtr pstruct, uint count, IEnumerable<short> iem)
             => StructAssigner<short>(pstruct, count, iem);
+        internal static void CKIDAssigner(IntPtr pstruct, uint count, IEnumerable<uint> iem)
+            => StructAssigner<uint>(pstruct, count, iem);
+        internal static void CKDWORDAssigner(IntPtr pstruct, uint count, IEnumerable<uint> iem)
+            => StructAssigner<uint>(pstruct, count, iem);
 
         private static IEnumerable<T> StructIterator<T>(IntPtr pstruct, uint count) {
             var stride = Marshal.SizeOf<T>();
@@ -79,6 +83,10 @@ namespace BMapSharp.BMapWrapper {
             => StructIterator<CKShortFaceIndices>(pstruct, count);
         internal static IEnumerable<short> ShortIterator(IntPtr pstruct, uint count)
             => StructIterator<short>(pstruct, count);
+        internal static IEnumerable<uint> CKIDIterator(IntPtr pstruct, uint count)
+            => StructIterator<uint>(pstruct, count);
+        internal static IEnumerable<uint> CKDWORDIterator(IntPtr pstruct, uint count)
+            => StructIterator<uint>(pstruct, count);
 
         #endregion
 
@@ -548,12 +556,29 @@ namespace BMapSharp.BMapWrapper {
             Utils.VxVector2Assigner(out_mem, count, iem);
         }
 
-        // public void PrepareMtlSlot(uint count, IEnumerable<BMMaterial> iem) {
-        //     // Prepare count first
-        //     BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareMtlSlotCount(getPointer(), count));
-        //     // Then put data
-        //     BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareMtlSlot(getPointer(), out IntPtr out_mem));
-        // }
+        public void PrepareMtlSlot(uint count, IEnumerable<BMMaterial> iem) {
+            // Prepare count first
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareMtlSlotCount(getPointer(), count));
+            // Then put data
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareMtlSlot(getPointer(), out IntPtr out_mem));
+            var cast_iem = iem.Select((mtl) => mtl is null ? Utils.INVALID_CKID : mtl.getCKID());
+            Utils.CKIDAssigner(out_mem, count, cast_iem);
+        }
+
+        public void PrepareFace(uint count, IEnumerable<CKFaceIndices> vec_idx, IEnumerable<CKFaceIndices> nml_idx, IEnumerable<CKFaceIndices> uv_idx, IEnumerable<uint> mtl_idx) {
+            // Prepare count first
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareFaceCount(getPointer(), count));
+            // Get data address
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareFaceVertexIndices(getPointer(), out IntPtr raw_vec_idx));
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareFaceNormalIndices(getPointer(), out IntPtr raw_nml_idx));
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareFaceUVIndices(getPointer(), out IntPtr raw_uv_idx));
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareFaceMtlSlot(getPointer(), out IntPtr raw_mtl_idx));
+            // Assign data
+            Utils.CKFaceIndicesAssigner(raw_vec_idx, count, vec_idx);
+            Utils.CKFaceIndicesAssigner(raw_nml_idx, count, nml_idx);
+            Utils.CKFaceIndicesAssigner(raw_uv_idx, count, uv_idx);
+            Utils.CKDWORDAssigner(raw_mtl_idx, count, mtl_idx);
+        }
 
     }
 
