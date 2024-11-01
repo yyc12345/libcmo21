@@ -52,7 +52,7 @@ namespace BMapSharp.VirtoolsTypes {
     [StructLayout(LayoutKind.Sequential, Pack = 4, CharSet = CharSet.Ansi)]
     public struct VxColor {
         [MarshalAs(UnmanagedType.R4)]
-        public float A, R, G, B;
+        public float R, G, B, A;
 
         public VxColor(float _r, float _g, float _b, float _a) {
             A = _a; R = _r; G = _g; B = _b;
