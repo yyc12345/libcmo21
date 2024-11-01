@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using BMapSharp.VirtoolsTypes;
 
@@ -58,6 +59,8 @@ namespace BMapSharp.BMapWrapper {
             => StructAssigner<CKFaceIndices>(pstruct, count, iem);
         internal static void CKShortFaceIndicesAssigner(IntPtr pstruct, uint count, IEnumerable<CKShortFaceIndices> iem)
             => StructAssigner<CKShortFaceIndices>(pstruct, count, iem);
+        internal static void ShortAssigner(IntPtr pstruct, uint count, IEnumerable<short> iem)
+            => StructAssigner<short>(pstruct, count, iem);
 
         private static IEnumerable<T> StructIterator<T>(IntPtr pstruct, uint count) {
             var stride = Marshal.SizeOf<T>();
@@ -74,6 +77,8 @@ namespace BMapSharp.BMapWrapper {
             => StructIterator<CKFaceIndices>(pstruct, count);
         internal static IEnumerable<CKShortFaceIndices> CKShortFaceIndicesIterator(IntPtr pstruct, uint count)
             => StructIterator<CKShortFaceIndices>(pstruct, count);
+        internal static IEnumerable<short> ShortIterator(IntPtr pstruct, uint count)
+            => StructIterator<short>(pstruct, count);
 
         #endregion
 
@@ -199,10 +204,12 @@ namespace BMapSharp.BMapWrapper {
 
         protected delegate bool FctGenericValueGetter<T>(IntPtr bmf, uint id, out T val);
         protected delegate bool FctGenericValueSetter<T>(IntPtr bmf, uint id, T val);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected T getGenericValue<T>(FctGenericValueGetter<T> fct) {
             BMapException.ThrowIfFailed(fct(getPointer(), getCKID(), out T out_val));
             return out_val;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void setGenericValue<T>(FctGenericValueSetter<T> fct, T val) {
             BMapException.ThrowIfFailed(fct(getPointer(), getCKID(), val));
         }
@@ -298,39 +305,96 @@ namespace BMapSharp.BMapWrapper {
 
     public class BMMesh : BMObject {
         internal BMMesh(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+
+        public VXMESH_LITMODE GetLitMode() => getGenericValue<VXMESH_LITMODE>(BMap.BMMesh_GetLitMode);
+        public void SetLitMode(VXMESH_LITMODE mode) => setGenericValue<VXMESH_LITMODE>(BMap.BMMesh_SetLitMode, mode);
+
+        public uint GetVertexCount() => getGenericValue<uint>(BMap.BMMesh_GetVertexCount);
+        public void SetVertexCount(uint count) => setGenericValue<uint>(BMap.BMMesh_SetVertexCount, count);
+        public IEnumerable<VxVector3> GetVertexPositions() {
+            BMapException.ThrowIfFailed(BMap.BMMesh_GetVertexPositions(getPointer(), getCKID(), out IntPtr out_mem));
+            return Utils.VxVector3Iterator(out_mem, GetVertexCount());
+        }
+        public void SetVertexPositions(IEnumerable<VxVector3> iem) {
+            BMapException.ThrowIfFailed(BMap.BMMesh_GetVertexPositions(getPointer(), getCKID(), out IntPtr out_mem));
+            Utils.VxVector3Assigner(out_mem, GetVertexCount(), iem);
+        }
+        public IEnumerable<VxVector3> GetVertexNormals() {
+            BMapException.ThrowIfFailed(BMap.BMMesh_GetVertexNormals(getPointer(), getCKID(), out IntPtr out_mem));
+            return Utils.VxVector3Iterator(out_mem, GetVertexCount());
+        }
+        public void SetVertexNormals(IEnumerable<VxVector3> iem) {
+            BMapException.ThrowIfFailed(BMap.BMMesh_GetVertexNormals(getPointer(), getCKID(), out IntPtr out_mem));
+            Utils.VxVector3Assigner(out_mem, GetVertexCount(), iem);
+        }
+        public IEnumerable<VxVector2> GetVertexUVs() {
+            BMapException.ThrowIfFailed(BMap.BMMesh_GetVertexUVs(getPointer(), getCKID(), out IntPtr out_mem));
+            return Utils.VxVector2Iterator(out_mem, GetVertexCount());
+        }
+        public void SetVertexUVs(IEnumerable<VxVector2> iem) {
+            BMapException.ThrowIfFailed(BMap.BMMesh_GetVertexUVs(getPointer(), getCKID(), out IntPtr out_mem));
+            Utils.VxVector2Assigner(out_mem, GetVertexCount(), iem);
+        }
+
+        public uint GetFaceCount() => getGenericValue<uint>(BMap.BMMesh_GetFaceCount);
+        public void SetFaceCount(uint count) => setGenericValue<uint>(BMap.BMMesh_SetFaceCount, count);
+        public IEnumerable<CKShortFaceIndices> GetFaceIndices() {
+            BMapException.ThrowIfFailed(BMap.BMMesh_GetFaceIndices(getPointer(), getCKID(), out IntPtr out_mem));
+            return Utils.CKShortFaceIndicesIterator(out_mem, GetFaceCount());
+        }
+        public void SetFaceIndices(IEnumerable<CKShortFaceIndices> iem) {
+            BMapException.ThrowIfFailed(BMap.BMMesh_GetFaceIndices(getPointer(), getCKID(), out IntPtr out_mem));
+            Utils.CKShortFaceIndicesAssigner(out_mem, GetFaceCount(), iem);
+        }
+        public IEnumerable<short> GetFaceMaterialSlotIndexs() {
+            BMapException.ThrowIfFailed(BMap.BMMesh_GetFaceMaterialSlotIndexs(getPointer(), getCKID(), out IntPtr out_mem));
+            return Utils.ShortIterator(out_mem, GetFaceCount());
+        }
+        public void SetFaceMaterialSlotIndexs(IEnumerable<short> iem) {
+            BMapException.ThrowIfFailed(BMap.BMMesh_GetFaceMaterialSlotIndexs(getPointer(), getCKID(), out IntPtr out_mem));
+            Utils.ShortAssigner(out_mem, GetFaceCount(), iem);
+        }
+        
+        public uint GetMaterialSlotCount() => getGenericValue<uint>(BMap.BMMesh_GetMaterialSlotCount);
+        public void SetMaterialSlotCount(uint count) => setGenericValue<uint>(BMap.BMMesh_SetMaterialSlotCount, count);
+        public IEnumerable<BMMaterial> GetMaterialSlots() {
+            uint count = GetMaterialSlotCount();
+            for (uint i = 0; i < count; ++i) {
+                BMapException.ThrowIfFailed(BMap.BMMesh_GetMaterialSlot(getPointer(), getCKID(), i, out uint out_mtlid));
+                if (out_mtlid == Utils.INVALID_CKID) yield return null;
+                else yield return new BMMaterial(getPointer(), out_mtlid);
+            }
+        }
+        public void SetMaterialSlots(IEnumerable<BMMaterial> iem) {
+            uint count = GetMaterialSlotCount();
+            var itor = iem.GetEnumerator();
+            for (uint i = 0; i < count; ++i) {
+                if (!itor.MoveNext()) throw new BMapException("The length of given material array is too short when assigning material slots.");
+                uint mtlid = itor.Current is null ? Utils.INVALID_CKID : itor.Current.getCKID();
+                BMapException.ThrowIfFailed(BMap.BMMesh_SetMaterialSlot(getPointer(), getCKID(), i, mtlid));
+            }
+        }
+
     }
 
     public class BM3dObject : BMObject {
         internal BM3dObject(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
 
-        public VxMatrix GetWorldMatrix() {
-            BMapException.ThrowIfFailed(BMap.BM3dObject_GetWorldMatrix(getPointer(), getCKID(), out VxMatrix out_mat));
-            return out_mat;
-        }
-
-        public void SetWorldMatrix(VxMatrix mat) {
-            BMapException.ThrowIfFailed(BMap.BM3dObject_SetWorldMatrix(getPointer(), getCKID(), mat));
-        }
+        public VxMatrix GetWorldMatrix() => getGenericValue<VxMatrix>(BMap.BM3dObject_GetWorldMatrix);
+        public void SetWorldMatrix(VxMatrix mat) => setGenericValue<VxMatrix>(BMap.BM3dObject_SetWorldMatrix, mat);
 
         public BMMesh GetCurrentMesh() {
             BMapException.ThrowIfFailed(BMap.BM3dObject_GetCurrentMesh(getPointer(), getCKID(), out uint out_meshid));
             if (out_meshid == Utils.INVALID_CKID) return null;
             else return new BMMesh(getPointer(), out_meshid);
         }
-
         public void SetCurrentMesh(BMMesh mesh) {
             uint meshid = (mesh is null) ? Utils.INVALID_CKID : mesh.getCKID();
             BMapException.ThrowIfFailed(BMap.BM3dObject_SetCurrentMesh(getPointer(), getCKID(), meshid));
         }
 
-        public bool GetVisibility() {
-            BMapException.ThrowIfFailed(BMap.BM3dObject_GetVisibility(getPointer(), getCKID(), out bool out_isVisible));
-            return out_isVisible;
-        }
-
-        public void SetVisibility(bool visb) {
-            BMapException.ThrowIfFailed(BMap.BM3dObject_SetVisibility(getPointer(), getCKID(), visb));
-        }
+        public bool GetVisibility() => getGenericValue<bool>(BMap.BM3dObject_GetVisibility);
+        public void SetVisibility(bool visb) => setGenericValue<bool>(BMap.BM3dObject_SetVisibility, visb);
     }
 
     public class BMGroup : BMObject {
@@ -340,11 +404,7 @@ namespace BMapSharp.BMapWrapper {
             BMapException.ThrowIfFailed(BMap.BMGroup_AddObject(getPointer(), getCKID(), member.getCKID()));
         }
 
-        public uint GetObjectCount() {
-            BMapException.ThrowIfFailed(BMap.BMGroup_GetObjectCount(getPointer(), getCKID(), out uint out_count));
-            return out_count;
-        }
-
+        public uint GetObjectCount() => getGenericValue<uint>(BMap.BMGroup_GetObjectCount);
         public IEnumerable<BM3dObject> GetObjects() {
             var size = GetObjectCount();
             for (uint i = 0; i < size; ++i) {
@@ -424,6 +484,16 @@ namespace BMapSharp.BMapWrapper {
         public BMFileWriter(string temp_folder, string texture_folder, string[] encodings)
         : base(allocateHandle(temp_folder, texture_folder, encodings)) { }
 
+        public void Save(string filename, CK_TEXTURE_SAVEOPTIONS texture_save_opt, bool use_compress, int compress_level) {
+            BMapException.ThrowIfFailed(BMap.BMFile_Save(
+                getPointer(),
+                filename,
+                texture_save_opt,
+                use_compress,
+                compress_level
+            ));
+        }
+
         private delegate bool FctProtoCreateObject(IntPtr bmf, out uint id);
         private delegate T FctProtoCreateInstance<T>(IntPtr bmf, uint id);
         private T createCKObject<T>(FctProtoCreateObject fct_crt, FctProtoCreateInstance<T> fct_inst) {
@@ -448,6 +518,42 @@ namespace BMapSharp.BMapWrapper {
         }
         public BMMeshTrans() : base(allocateHandle()) { }
 
+        public void Parse(BMMesh objmesh) {
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_Parse(
+                getPointer(),
+                objmesh.getPointer(),
+                objmesh.getCKID()
+            ));
+        }
+
+        public void PrepareVertex(uint count, IEnumerable<VxVector3> iem) {
+            // Prepare count first
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareVertexCount(getPointer(), count));
+            // Then put data
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareVertex(getPointer(), out IntPtr out_mem));
+            Utils.VxVector3Assigner(out_mem, count, iem);
+        }
+        public void PrepareNormal(uint count, IEnumerable<VxVector3> iem) {
+            // Prepare count first
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareNormalCount(getPointer(), count));
+            // Then put data
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareNormal(getPointer(), out IntPtr out_mem));
+            Utils.VxVector3Assigner(out_mem, count, iem);
+        }
+        public void PrepareUV(uint count, IEnumerable<VxVector2> iem) {
+            // Prepare count first
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareUVCount(getPointer(), count));
+            // Then put data
+            BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareUV(getPointer(), out IntPtr out_mem));
+            Utils.VxVector2Assigner(out_mem, count, iem);
+        }
+
+        // public void PrepareMtlSlot(uint count, IEnumerable<BMMaterial> iem) {
+        //     // Prepare count first
+        //     BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareMtlSlotCount(getPointer(), count));
+        //     // Then put data
+        //     BMapException.ThrowIfFailed(BMap.BMMeshTrans_PrepareMtlSlot(getPointer(), out IntPtr out_mem));
+        // }
 
     }
 
