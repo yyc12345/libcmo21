@@ -86,19 +86,15 @@ target_include_directories(LibCmo
 PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-PRIVATE
-    YYCC::YYCCommonplace
-	ZLIB::ZLIB
-	stb::stb-image
 )
 target_link_libraries(LibCmo
-PRIVATE
+PUBLIC
 	YYCC::YYCCommonplace
+PRIVATE
 	ZLIB::ZLIB
 	stb::stb-image
 )
 if (NOT WIN32)
-	target_include_directories(LibCmo PRIVATE Iconv::Iconv)
 	target_link_libraries(LibCmo PRIVATE Iconv::Iconv)
 endif ()
 # Setup C++ standard

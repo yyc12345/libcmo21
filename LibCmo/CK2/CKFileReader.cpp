@@ -205,8 +205,8 @@ namespace LibCmo::CK2 {
 		std::string name_conv;
 
 		// ========== compress feature process ==========
-		if (EnumsHelper::Has(this->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
-			EnumsHelper::Has(this->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
+		if (YYCC::EnumHelper::Has(this->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
+			YYCC::EnumHelper::Has(this->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
 
 			void* decomp_buffer = CKUnPackData(this->m_FileInfo.DataUnPackSize, parser->GetPtr(), this->m_FileInfo.DataPackSize);
 			if (decomp_buffer != nullptr) {

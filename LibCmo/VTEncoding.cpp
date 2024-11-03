@@ -2,10 +2,10 @@
 #include <map>
 
 #if YYCC_OS == YYCC_OS_WINDOWS
-#include <WinImportPrefix.hpp>
+#include <YYCC/WinImportPrefix.hpp>
 #include <Windows.h>
 #include <fileapi.h>
-#include <WinImportSuffix.hpp>
+#include <YYCC/WinImportSuffix.hpp>
 #else
 #include <iconv.h>
 #endif

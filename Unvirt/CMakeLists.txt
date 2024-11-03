@@ -23,8 +23,6 @@ FILES
 target_include_directories(Unvirt
 PRIVATE
 	"${CMAKE_CURRENT_LIST_DIR}"
-	YYCC::YYCCommonplace
-	LibCmo
 )
 # Setup linked library infomation
 target_link_libraries(Unvirt
@@ -53,6 +51,6 @@ PRIVATE
 
 # Install Unvirt only on Release mode
 install(TARGETS Unvirt
-    CONFIGURATIONS Release
+	CONFIGURATIONS Release RelWithDebInfo MinSizeRel
     RUNTIME DESTINATION ${YYCC_INSTALL_BIN_PATH}
 )

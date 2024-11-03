@@ -61,7 +61,7 @@ namespace Unvirt {
 				}
 
 				// check flag match
-				if (LibCmo::EnumsHelper::Has(val, item.first)) {
+				if (YYCC::EnumHelper::Has(val, item.first)) {
 					// add splittor if it not the first entry
 					if (strl.size() != 0u && splitor != nullptr) {
 						strl += splitor;

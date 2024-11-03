@@ -521,7 +521,7 @@ namespace LibCmo::CK2 {
 		m_Slots.resize(count);
 
 		if (count == 0) {
-			EnumsHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_INVALID);
+			YYCC::EnumHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_INVALID);
 		}
 	}
 
@@ -535,8 +535,8 @@ namespace LibCmo::CK2 {
 		m_CurrentSlot = slot;
 
 		// NOTE: idk what the fuck this is. just interpter the IDA decompiled code.
-		if (EnumsHelper::Has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP)) {
-			EnumsHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_FORCERESTORE);
+		if (YYCC::EnumHelper::Has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP)) {
+			YYCC::EnumHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_FORCERESTORE);
 		}
 	}
 
@@ -660,14 +660,14 @@ namespace LibCmo::CK2 {
 		// but we decide split the flag settings and slot. 
 		// User should set slot count manually.
 		if (is_cube) {
-			EnumsHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
+			YYCC::EnumHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
 		} else {
-			EnumsHelper::Rm(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
+			YYCC::EnumHelper::Remove(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
 		}
 	}
 
 	bool CKBitmapData::IsCubeMap() const {
-		return EnumsHelper::Has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
+		return YYCC::EnumHelper::Has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
 	}
 
 	const CKBitmapProperties& CKBitmapData::GetSaveFormat() const {
@@ -688,14 +688,14 @@ namespace LibCmo::CK2 {
 
 	void CKBitmapData::SetTransparent(bool Transparency) {
 		if (Transparency) {
-			EnumsHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
+			YYCC::EnumHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
 		} else {
-			EnumsHelper::Rm(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
+			YYCC::EnumHelper::Remove(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
 		}
 	}
 
 	bool CKBitmapData::IsTransparent() const {
-		return EnumsHelper::Has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
+		return YYCC::EnumHelper::Has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
 	}
 
 	void CKBitmapData::SetTransparentColor(CKDWORD col) {

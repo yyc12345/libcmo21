@@ -216,8 +216,8 @@ namespace LibCmo::CK2 {
 		}
 
 		// compress header if needed
-		if (EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
-			EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
+		if (YYCC::EnumHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
+			YYCC::EnumHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
 
 			CKDWORD comp_buf_size = 0;
 			void* comp_buffer = CKPackData(hdrparser->GetBase(), hdrparser->GetSize(), comp_buf_size, m_Ctx->GetCompressionLevel());
@@ -263,8 +263,8 @@ namespace LibCmo::CK2 {
 		}
 
 		// compress header if needed
-		if (EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
-			EnumsHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
+		if (YYCC::EnumHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
+			YYCC::EnumHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
 
 			CKDWORD comp_buf_size = 0;
 			void* comp_buffer = CKPackData(datparser->GetBase(), datparser->GetSize(), comp_buf_size, m_Ctx->GetCompressionLevel());

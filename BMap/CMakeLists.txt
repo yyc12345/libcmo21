@@ -18,8 +18,6 @@ FILES
 target_include_directories(BMap
 PRIVATE
 	"${CMAKE_CURRENT_LIST_DIR}"
-	YYCC::YYCCommonplace
-	LibCmo
 )
 # Setup linked library infomation
 target_link_libraries(BMap
@@ -52,6 +50,6 @@ PRIVATE
 
 # Install BMap only on Release mode
 install(TARGETS BMap
-    CONFIGURATIONS Release
+    CONFIGURATIONS Release RelWithDebInfo MinSizeRel
     RUNTIME DESTINATION ${YYCC_INSTALL_BIN_PATH}
 )

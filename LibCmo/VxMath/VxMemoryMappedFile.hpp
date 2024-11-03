@@ -2,9 +2,9 @@
 
 #include "../VTInternal.hpp"
 #if YYCC_OS == YYCC_OS_WINDOWS
-#include <WinImportPrefix.hpp>
+#include <YYCC/WinImportPrefix.hpp>
 #include <Windows.h>
-#include <WinImportSuffix.hpp>
+#include <YYCC/WinImportSuffix.hpp>
 #else
 #include <sys/mman.h>
 #include <sys/stat.h>

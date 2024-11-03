@@ -419,23 +419,23 @@ namespace LibCmo::CK2 {
 				std::memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
 				bufpos += this->m_DataDwSize;
 			}
-			if (!EnumsHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE)) {
+			if (!YYCC::EnumHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE)) {
 				// forced no bind file
 				this->m_BindFile = nullptr;
 			}
-			if (EnumsHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS)) {
+			if (YYCC::EnumHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS)) {
 				this->m_ObjectList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
 				std::memcpy(this->m_ObjectList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ObjectList.size());
 				bufpos += this->m_ObjectList.size();
 			}
-			if (EnumsHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN)) {
+			if (YYCC::EnumHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN)) {
 				this->m_ChunkList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
 				std::memcpy(this->m_ChunkList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ChunkList.size());
 				bufpos += this->m_ChunkList.size();
 			}
-			if (EnumsHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN)) {
+			if (YYCC::EnumHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN)) {
 				this->m_ManagerList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
 				std::memcpy(this->m_ManagerList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ManagerList.size());
@@ -459,19 +459,19 @@ namespace LibCmo::CK2 {
 
 		if (!m_ObjectList.empty()) {
 			size += CKSizeof(CKDWORD) * static_cast<CKDWORD>(m_ObjectList.size()) + sizeof(CKDWORD);
-			EnumsHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS);
+			YYCC::EnumHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS);
 		}
 		if (!m_ChunkList.empty()) {
 			size += CKSizeof(CKDWORD) * static_cast<CKDWORD>(m_ChunkList.size()) + sizeof(CKDWORD);
-			EnumsHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN);
+			YYCC::EnumHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN);
 		}
 		if (!m_ManagerList.empty()) {
 			size += CKSizeof(CKDWORD) * static_cast<CKDWORD>(m_ManagerList.size()) + sizeof(CKDWORD);
-			EnumsHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN);
+			YYCC::EnumHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN);
 		}
 
 		if (this->m_BindFile != nullptr) {
-			EnumsHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE);
+			YYCC::EnumHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE);
 		}
 
 		// if buffer provided, write it

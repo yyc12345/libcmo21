@@ -14,5 +14,6 @@ add_custom_target (NeMoDocuments
 
 # Install built documentation
 install (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
+    CONFIGURATIONS Release RelWithDebInfo MinSizeRel
     DESTINATION ${NEMO_INSTALL_DOC_PATH}
 )
