@@ -29,7 +29,7 @@ Please note if your final program or dynamic library is provided for end user, p
 
 ### stb
 
-You should clone stb repository first, then switch to a specific commit hash `5736b15f7ea0ffb08dd38af21067c314d6a3aae9`. In ideally scenario, people like to choose the latest commit. However, I not frequently update this dependency.
+You should clone stb repository first, then switch to a specific commit hash `2e2bef463a5b53ddf8bb788e25da6b8506314c08`. In ideally scenario, people like to choose the latest commit. However, I not frequently update this dependency.
 
 ### zlib
 
