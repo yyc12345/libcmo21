@@ -1,0 +1,3 @@
+# Disable output
+win_build.bat
+linux_build.sh
