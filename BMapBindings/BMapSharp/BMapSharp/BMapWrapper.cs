@@ -35,7 +35,7 @@ namespace BMapSharp.BMapWrapper {
         /// It just writes the data in console.
         /// </summary>
         internal static void BMapSharpCallback(string msg) {
-            Console.WriteLine(msg);
+            Console.WriteLine($"[BMapSharp] {msg}");
         }
 
         #endregion
