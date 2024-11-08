@@ -100,7 +100,10 @@ namespace BMapSharp.BMapWrapper {
         #endregion
     }
 
-    public abstract class AbstractPointer : SafeHandle {
+    // TODO: Maybe I need to implement IEquatable, IComparable<T>, and IComparable for AbstractPointer and AbstractCKObject.
+    // But I give it up. I am lazy. What I have written barely works for me now.
+
+    public abstract class AbstractPointer : SafeHandle, IEquatable<AbstractPointer> {
         internal AbstractPointer(IntPtr raw_pointer) : base(Utils.INVALID_PTR, true) {
             this.handle = raw_pointer;
         }
@@ -111,47 +114,42 @@ namespace BMapSharp.BMapWrapper {
         internal bool isValid() => this.handle != Utils.INVALID_PTR;
         internal IntPtr getPointer() => this.handle;
 
-        // protected AbstractPointer(IntPtr raw_pointer) : base(raw_pointer, true) {}
+        #region IEquatable
 
-        // protected IntPtr GetPointer() => this.handle;
-        // public override bool IsInvalid { get { return this.handle == Utils.INVALID_PTR; } }
+        public override bool Equals(object obj) => this.Equals(obj as AbstractPointer);
+        public bool Equals(AbstractPointer obj) {
+            if (obj is null) return false;
+            // Optimization for a common success case
+            if (Object.ReferenceEquals(this, obj)) return true;
+            // If run-time types are not exactly the same, return false.
+            if (this.GetType() != obj.GetType()) return false;
+            // Return true if the fields match.
+            return this.handle == obj.handle;
+        }
 
-        // #region IComparable
+        public override int GetHashCode() => this.handle.GetHashCode();
 
-        // public int CompareTo(AbstractPointer other) {
-        //     return m_RawPointer.CompareTo(other.m_RawPointer);
-        // }
+        public static bool operator ==(AbstractPointer lhs, AbstractPointer rhs) {
+            if (lhs is null) {
+                if (rhs is null) return true;
+                // Only left side is null.
+                return false;
+            }
+            // Equals handles case of null on right side
+            return lhs.Equals(rhs);
+        }
+        public static bool operator !=(AbstractPointer lhs, AbstractPointer rhs) => !(lhs == rhs);
 
-        // #endregion
-
-        // #region IEquatable
-
-        // public override bool Equals(object obj) => this.Equals(obj as AbstractPointer);
-        // public bool Equals(AbstractPointer other) {
-        //     if (other is null) return false;
-        //     if (Object.ReferenceEquals(this, other)) return true;
-        //     // if (this.GetType() != other.GetType()) return false;
-        //     return this.m_RawPointer == other.m_RawPointer;
-        // }
-
-        // public static bool operator ==(AbstractPointer lhs, AbstractPointer rhs) {
-        //     if (lhs is null) {
-        //         if (rhs is null) return true;
-        //         return false;
-        //     }
-        //     return lhs.Equals(rhs);
-        // }
-        // public static bool operator !=(AbstractPointer lhs, AbstractPointer rhs) => !(lhs == rhs);
-
-        // #endregion
+        #endregion
 
         #region Misc
-        public override int GetHashCode() => this.handle.GetHashCode();
+
         public override string ToString() => this.handle.ToString();
+
         #endregion
     }
 
-    public abstract class AbstractCKObject : SafeHandle {
+    public abstract class AbstractCKObject : SafeHandle, IEquatable<AbstractCKObject> {
         // Same as AbstractPointer, but not own this handle.
         internal AbstractCKObject(IntPtr raw_pointer, uint ckid) : base(Utils.INVALID_PTR, false) {
             this.handle = raw_pointer;
@@ -166,44 +164,36 @@ namespace BMapSharp.BMapWrapper {
         internal IntPtr getPointer() => this.handle;
         internal uint getCKID() => m_CKID;
 
-        // private uint m_CKID;
+        #region IEquatable
 
-        // protected AbstractCKObject(IntPtr raw_pointer, uint ckid) : base(raw_pointer) {
-        //     m_CKID = ckid;
-        // }
+        public override bool Equals(object obj) => this.Equals(obj as AbstractCKObject);
+        public bool Equals(AbstractCKObject obj) {
+            if (obj is null) return false;
+            // Optimization for a common success case
+            if (Object.ReferenceEquals(this, obj)) return true;
+            // If run-time types are not exactly the same, return false.
+            if (this.GetType() != obj.GetType()) return false;
+            // Return true if the fields match.
+            return (this.m_CKID == obj.m_CKID) && (this.handle == obj.handle);
+        }
 
-        // protected override bool IsValid() => base.IsValid() && m_CKID != Utils.INVALID_CKID;
-        // protected uint GetCKID() => m_CKID;
+        public override int GetHashCode() => HashCode.Combine(this.handle, m_CKID);
 
-        // #region IComparable
+        public static bool operator ==(AbstractCKObject lhs, AbstractCKObject rhs) {
+            if (lhs is null) {
+                if (rhs is null) return true;
+                // Only left side is null.
+                return false;
+            }
+            // Equals handles case of null on right side
+            return lhs.Equals(rhs);
+        }
+        public static bool operator !=(AbstractCKObject lhs, AbstractCKObject rhs) => !(lhs == rhs);
 
-        // public int CompareTo(AbstractCKObject other) {
-        //     var ret = base.CompareTo((AbstractPointer)other);
-        //     if (ret != 0) return ret;
-        //     return m_CKID.CompareTo(other.m_CKID);
-        // }
-
-        // #endregion
-
-        // #region IEquatable
-
-        // public override bool Equals(object obj) => this.Equals(obj as AbstractCKObject);
-        // public bool Equals(AbstractCKObject other) {
-        //     if (other is null) return false;
-        //     if (Object.ReferenceEquals(this, other)) return true;
-
-        // }
-
-        // public static bool operator ==(AbstractCKObject left, AbstractCKObject right) =>
-        //     ((AbstractPointer)left == (AbstractPointer)right) && left.m_CKID == right.m_CKID;
-        // public static bool operator !=(AbstractCKObject left, AbstractCKObject right) =>
-        //     ((AbstractPointer)left != (AbstractPointer)right) || left.m_CKID != right.m_CKID;
-
-        // #endregion
+        #endregion
 
         #region Misc
 
-        public override int GetHashCode() => HashCode.Combine(this.handle, m_CKID);
         public override string ToString() => $"{this.handle}, {m_CKID}";
 
         #endregion
