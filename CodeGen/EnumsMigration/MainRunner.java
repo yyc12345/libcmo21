@@ -170,6 +170,14 @@ public class MainRunner {
 		PythonWriter.writeAccVal("dest/CK_BITMAPDATA_FLAGS.AccVal.py", single);
 		CSharpWriter.writeAccVal("dest/CK_BITMAPDATA_FLAGS.AccVal.cs", single);
 
+		single = organiseDefines("src/CK_CAMERA_PROJECTION.txt", "CK_CAMERA_PROJECTION");
+		CppWriter.writeEnum("dest/CK_CAMERA_PROJECTION.hpp", single);
+		PythonWriter.writeEnum("dest/CK_CAMERA_PROJECTION.py", single);
+		CSharpWriter.writeEnum("dest/CK_CAMERA_PROJECTION.cs", single);
+		CppWriter.writeAccVal("dest/CK_CAMERA_PROJECTION.AccVal.hpp", single, CommonHelper.CKParts.CK2);
+		PythonWriter.writeAccVal("dest/CK_CAMERA_PROJECTION.AccVal.py", single);
+		CSharpWriter.writeAccVal("dest/CK_CAMERA_PROJECTION.AccVal.cs", single);
+
 		// print message.
 		System.out.println("DONE!");
 	}

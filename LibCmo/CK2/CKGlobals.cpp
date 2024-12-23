@@ -20,6 +20,10 @@
 #include "ObjImpls/CKTexture.hpp"
 #include "ObjImpls/CKMaterial.hpp"
 #include "ObjImpls/CKMesh.hpp"
+#include "ObjImpls/CKLight.hpp"
+#include "ObjImpls/CKTargetLight.hpp"
+#include "ObjImpls/CKCamera.hpp"
+#include "ObjImpls/CKTargetCamera.hpp"
 
 namespace LibCmo::CK2 {
 
@@ -439,6 +443,10 @@ CKClassRegister(cid, parentCid, \
 		EasyClassReg(ObjImpls::CKTexture, CK_CLASSID::CKCID_TEXTURE, CK_CLASSID::CKCID_BEOBJECT, "Texture");
 		EasyClassRegWithNotify(ObjImpls::CKMaterial, CK_CLASSID::CKCID_MATERIAL, CK_CLASSID::CKCID_BEOBJECT, "Material", { CK_CLASSID::CKCID_TEXTURE });
 		EasyClassRegWithNotify(ObjImpls::CKMesh, CK_CLASSID::CKCID_MESH, CK_CLASSID::CKCID_BEOBJECT, "Mesh", { CK_CLASSID::CKCID_MATERIAL });
+		EasyClassReg(ObjImpls::CKLight, CK_CLASSID::CKCID_LIGHT, CK_CLASSID::CKCID_3DENTITY, "Light");
+		EasyClassReg(ObjImpls::CKCamera, CK_CLASSID::CKCID_CAMERA, CK_CLASSID::CKCID_3DENTITY, "Camera");
+		EasyClassRegWithNotify(ObjImpls::CKTargetLight, CK_CLASSID::CKCID_TARGETLIGHT, CK_CLASSID::CKCID_LIGHT, "Target Light", { CK_CLASSID::CKCID_3DENTITY });
+		EasyClassRegWithNotify(ObjImpls::CKTargetCamera, CK_CLASSID::CKCID_TARGETCAMERA, CK_CLASSID::CKCID_CAMERA, "Target Camera", { CK_CLASSID::CKCID_3DENTITY });
 
 #undef EasyClassReg
 #undef EasyClassRegWithNotify

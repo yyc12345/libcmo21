@@ -41,6 +41,25 @@ typedef enum VX_PIXELFORMAT {
 	_4_ARGB8888_CLUT  = 31		// 4 bits indexed CLUT (ARGB)
 } VX_PIXELFORMAT;
 
+
+/******************************************************************
+{filename:VXLIGHT_TYPE}
+Summary: Light type.
+
+Remarks:
+	+ Used by CKLight::SetType to specify the type of a light. 
+See also: CKLight::SetType,CKLight::GetType
+******************************************************************/
+typedef enum VXLIGHT_TYPE
+{
+	VX_LIGHTPOINT =	1UL,	//	The Light is a point of light
+	VX_LIGHTSPOT  =	2UL,	//	The light is a spotlight
+	VX_LIGHTDIREC =	3UL,	//	The light is directional light : Lights comes from an infinite point so only direction of light can be given
+	VX_LIGHTPARA  =	4UL	// 	Obsolete, do not use
+} VXLIGHT_TYPE;
+
+
+
 /*****************************************************************
 {filename:VXTEXTURE_BLENDMODE}
   Summary: Blend Mode Flags

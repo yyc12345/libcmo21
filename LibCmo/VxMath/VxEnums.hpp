@@ -46,6 +46,21 @@ namespace LibCmo::VxMath {
 	};
 
 	/**
+	{filename:VXLIGHT_TYPE}
+	Summary: Light type.
+
+	Remarks:
+	+ Used by CKLight::SetType to specify the type of a light.
+	See also: CKLight::SetType,CKLight::GetType
+	 */
+	enum class VXLIGHT_TYPE : CKDWORD {
+		VX_LIGHTPOINT = 1UL,	/**< The Light is a point of light  */
+		VX_LIGHTSPOT = 2UL,	/**< The light is a spotlight  */
+		VX_LIGHTDIREC = 3UL,	/**< The light is directional light : Lights comes from an infinite point so only direction of light can be given  */
+		VX_LIGHTPARA = 4UL,	/**< Obsolete, do not use  */
+	};
+
+	/**
 	  Summary: Blend Mode Flags
 	Remarks:
 		+ The VXTEXTURE_BLENDMODE is used by CKMaterial::SetTextureBlendMode() to specify how
