@@ -36,7 +36,7 @@ namespace LibCmo::EncodingHelper {
 	 * In underlying implementation, it actually is \c nullptr.
 	 * Because EncodingToken is just a raw pointer.
 	*/
-	constexpr EncodingToken INVALID_ENCODING_TOKEN = nullptr;
+	inline constexpr EncodingToken INVALID_ENCODING_TOKEN = nullptr;
 
 	/**
 	 * @brief Create encoding token by given universal encoding name.

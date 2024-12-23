@@ -4,9 +4,9 @@
  * \file
  * The top header file for LibCom self development.
  * Every C++ header or source file located in this project should include this first 
- * except the headers including this file.
+ * except the headers included in this file.
  * The header files included by this header should be carefully managed,
- * to make sure there are no include loop and each header files can works correctly.
+ * to make sure there are no include loop and each header files can work correctly.
  * 
  * This header should only be used as internal header file.
  * It only contains all necessary stuff used by this project self.
@@ -17,7 +17,7 @@
  * So they will use native type, not CK type for declaration and implementation.
  * Take VTEncoding.hpp for example, All string used in it is \c std::u8string, not LibCmo::XContainer::XString.
  * The file starts with \c CK, \c Vx, and \c X is a part of Virtools SDK.
- * They should use Virtools type anywhere, except that Virtools type can not fulfill their requirement.
+ * They should use Virtools type anywhere, except that Virtools type can not fulfill their requirements.
 */
 
 // The base header of LibCmo.

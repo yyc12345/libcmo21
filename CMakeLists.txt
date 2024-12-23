@@ -53,7 +53,7 @@ endif ()
 install(EXPORT LibCmoTargets
     FILE LibCmoTargets.cmake
     NAMESPACE NeMo::
-    DESTINATION ${YYCC_INSTALL_LIB_PATH}/cmake/LibCmo
+    DESTINATION ${NEMO_INSTALL_LIB_PATH}/cmake/LibCmo
 )
 # Package configuration file
 include(CMakePackageConfigHelpers)
@@ -65,7 +65,7 @@ write_basic_package_version_file(
 configure_package_config_file(
     ${CMAKE_CURRENT_LIST_DIR}/CMake/LibCmoConfig.cmake.in 
     "${CMAKE_CURRENT_BINARY_DIR}/LibCmoConfig.cmake"
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LibCmo
+    INSTALL_DESTINATION ${NEMO_INSTALL_LIB_PATH}/cmake/LibCmo
 )
 # Copy package files to install destination
 install(
@@ -73,5 +73,5 @@ FILES
     "${CMAKE_CURRENT_BINARY_DIR}/LibCmoConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/LibCmoConfigVersion.cmake"
 DESTINATION
-    ${CMAKE_INSTALL_LIBDIR}/cmake/LibCmo
+    ${NEMO_INSTALL_LIB_PATH}/cmake/LibCmo
 )

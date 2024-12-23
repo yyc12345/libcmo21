@@ -34,6 +34,10 @@
 #include "CK2/ObjImpls/CKTexture.hpp"
 #include "CK2/ObjImpls/CKMaterial.hpp"
 #include "CK2/ObjImpls/CKMesh.hpp"
+#include "CK2/ObjImpls/CKLight.hpp"
+#include "CK2/ObjImpls/CKTargetLight.hpp"
+#include "CK2/ObjImpls/CKCamera.hpp"
+#include "CK2/ObjImpls/CKTargetCamera.hpp"
 
 // CK2 Managers
 #include "CK2/MgrImpls/CKBaseManager.hpp"

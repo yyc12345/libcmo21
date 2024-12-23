@@ -30,6 +30,10 @@ PRIVATE
 	CK2/ObjImpls/CKMesh.cpp
 	CK2/ObjImpls/CKObject.cpp
 	CK2/ObjImpls/CKTexture.cpp
+	CK2/ObjImpls/CKLight.cpp
+	CK2/ObjImpls/CKTargetLight.cpp
+	CK2/ObjImpls/CKCamera.cpp
+	CK2/ObjImpls/CKTargetCamera.cpp
 	# VxMath
 	VxMath/VxMemoryMappedFile.cpp
 	VxMath/VxMath.cpp
@@ -73,6 +77,10 @@ FILES
 	CK2/ObjImpls/CK3dObject.hpp
 	CK2/ObjImpls/CKRenderObject.hpp
 	CK2/ObjImpls/CKSceneObject.hpp
+	CK2/ObjImpls/CKLight.hpp
+	CK2/ObjImpls/CKTargetLight.hpp
+	CK2/ObjImpls/CKCamera.hpp
+	CK2/ObjImpls/CKTargetCamera.hpp
 	# VxMath
 	VxMath/VxTypes.hpp
 	VxMath/VxMath.hpp
