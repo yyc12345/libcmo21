@@ -157,7 +157,7 @@ namespace LibCmo::CK2::ObjImpls {
 
 			// read matrix
 			// reset
-			m_WorldMatrix.ResetToIdentity();
+			m_WorldMatrix.SetIdentity();
 			// force read as vector3
 			chunk->ReadStruct(reinterpret_cast<VxMath::VxVector3*>(&m_WorldMatrix[0]));
 			chunk->ReadStruct(reinterpret_cast<VxMath::VxVector3*>(&m_WorldMatrix[1]));

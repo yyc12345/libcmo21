@@ -1,0 +1,178 @@
+{% import 'VxTypes.shared.jinja' as shared %}
+{#
+For friend operator overload, we do not need add CLASSNAME:: prefix for it.
+Because they are not a part of that class.
+#}
+
+#pragma region {{ sname }}
+
+{# Ctor type 1 - Default ctor -#}
+{{ sname }}::{{ sname }}() : {{- shared.initialize_list_builder(svars, False) -}} {} {% if not is_vector %}// SET YOUR CUSTOM INIT{% endif %}
+{#- Ctor type 2 - User specified ctor #}
+{{ sname }}::{{ sname }}({{- shared.argument_list_builder(svars) -}}) : {{- shared.initialize_list_builder(svars, True) -}} {}
+
+{#- Offset operator #}
+CKFLOAT& {{ sname }}::operator[](size_t i) {
+    switch (i) {
+        {%- for item in svars %}
+        case {{ loop.index0 }}: return {{ item }};
+        {%- endfor %}
+        default: throw LogicException("Invalid index for {{ sname }}::operator[].");
+    }
+}
+const CKFLOAT& {{ sname }}::operator[](size_t i) const {
+    switch (i) {
+        {%- for item in svars %}
+        case {{ loop.index0 }}: return {{ item }};
+        {%- endfor %}
+        default: throw LogicException("Invalid index for {{ sname }}::operator[].");
+    }
+}
+
+{#- Equal operator #}
+bool {{ sname }}::operator==(const {{ sname }}& rhs) const {
+    return (
+        {%- for item in svars -%}
+        {{ item }} == rhs.{{ item }} {%- if not loop.last %} && {% endif %}
+        {%- endfor -%}
+    );
+}
+
+{#- Spaceship operator #}
+auto {{ sname }}::operator<=>(const {{ sname }}& rhs) const {
+    {%- for item in svars[:-1] %}
+    if (auto cmp = {{ item }} <=> rhs.{{ item }}; cmp != 0) return cmp;
+    {%- endfor %}
+    return {{ svars[-1] }} <=> rhs.{{ svars[-1] }};
+}
+
+
+{#- BEGIN VECTOR SPECIFIC #}
+{%- if is_vector %}
+
+{#- Add, minus operators #}
+{#- Unary operators #}
+{{ sname }} {{ sname }}::operator+() const {
+    return *this;
+}
+{{ sname }} {{ sname }}::operator-() const {
+    return {{ sname }}(
+        {%- for item in svars -%}
+        -{{ item }} {%- if not loop.last %}, {% endif %}
+        {%- endfor -%}
+    );
+}
+{#- Additive operators #}
+{{ sname }}& {{ sname }}::operator+=(const {{ sname }}& rhs) {
+    {%- for item in svars %}
+    {{ item }} += rhs.{{ item }};
+    {%- endfor %}
+    return *this;
+}
+{{ sname }} operator+(const {{ sname }}& lhs, const {{ sname }}& rhs) {
+    return {{ sname }}(
+        {%- for item in svars -%}
+        lhs.{{ item }} + rhs.{{ item }} {%- if not loop.last %}, {% endif %}
+        {%- endfor -%}
+    );
+}
+{{ sname }}& {{ sname }}::operator-=(const {{ sname }}& rhs) {
+    {%- for item in svars %}
+    {{ item }} -= rhs.{{ item }};
+    {%- endfor %}
+    return *this;
+}
+{{ sname }} operator-(const {{ sname }}& lhs, const {{ sname }}& rhs) {
+    return {{ sname }}(
+        {%- for item in svars -%}
+        lhs.{{ item }} - rhs.{{ item }} {%- if not loop.last %}, {% endif %}
+        {%- endfor -%}
+    );
+}
+
+{#- Mul operator #}
+{{ sname }}& {{ sname }}::operator*=(CKFLOAT rhs) {
+    {%- for item in svars %}
+    {{ item }} *= rhs;
+    {%- endfor %}
+    return *this;
+}
+{{ sname }} operator*(const {{ sname }}& lhs, CKFLOAT rhs) {
+    return {{ sname }}(
+        {%- for item in svars -%}
+        lhs.{{ item }} * rhs {%- if not loop.last %}, {% endif %}
+        {%- endfor -%}
+    );
+}
+{{ sname }} operator*(CKFLOAT lhs, const {{ sname }}& rhs) {
+    return {{ sname }}(
+        {%- for item in svars -%}
+        lhs * rhs.{{ item }} {%- if not loop.last %}, {% endif %}
+        {%- endfor -%}
+    );
+}
+CKFLOAT operator*(const {{ sname }}& lhs, const {{ sname }}& rhs) {
+    return (
+        {%- for item in svars -%}
+        lhs.{{ item }} * rhs.{{ item }} {%- if not loop.last %} + {% endif %}
+        {%- endfor -%}
+    );
+}
+
+{#- Div operator #}
+{{ sname }}& {{ sname }}::operator/=(CKFLOAT rhs) {
+    if (rhs == 0.0f) return *this;
+    {%- for item in svars %}
+    {{ item }} /= rhs;
+    {%- endfor %}
+    return *this;
+}
+{{ sname }} operator/(const {{ sname }}& lhs, CKFLOAT rhs) {
+    if (rhs == 0.0f) return {{ sname }}();
+    else return {{ sname }}(
+            {%- for item in svars -%}
+            lhs.{{ item }} / rhs {%- if not loop.last %}, {% endif %}
+            {%- endfor -%}
+        );
+}
+
+{#- Length functions #}
+CKFLOAT {{ sname }}::SquaredLength() const {
+    return (
+        {%- for item in svars -%}
+        {{ item }} * {{ item }} {%- if not loop.last %} + {% endif %}
+        {%- endfor -%}
+    );
+}
+CKFLOAT {{ sname }}::Length() const {
+    return std::sqrt(SquaredLength());
+}
+
+{#- Normalize functions #}
+void {{ sname }}::Normalized() {
+    CKFLOAT len = Length();
+    if (len == 0.0f) return;
+    {%- for item in svars %}
+    {{ item }} /= len;
+    {%- endfor %}
+}
+{{ sname }} {{ sname }}::Normalize() const {
+    CKFLOAT len = Length();
+    if (len == 0.0f) return {{ sname }}();
+    else return {{ sname }}(
+        {%- for item in svars -%}
+        {{ item }} / len {%- if not loop.last %}, {% endif %}
+        {%- endfor -%}
+    );
+}
+
+{%- endif %}
+{#- END VECTOR SPECIFIC #}
+
+
+{#- User custom region #}
+
+/* ===== BEGIN USER CUSTOM ===== */
+/* =====  END  USER CUSTOM ===== */
+
+#pragma endregion

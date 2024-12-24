@@ -1,0 +1,65 @@
+{% import 'VxTypes.shared.jinja' as shared %}
+
+struct {{ sname }} {
+    {#- Variable declaration #}
+	CKFLOAT {{ ", ".join(svars) }};
+
+    {#- Ctor type 1 - Default ctor #}
+	{{ sname }}();
+    {#- Ctor type 2 - User specified ctor #}
+	{{ sname }}({{- shared.argument_list_builder(svars) -}});
+
+    {#- Default copy ctor, move ctor, copy assigner, move assigner #}
+	YYCC_DEF_CLS_COPY_MOVE({{ sname }});
+    
+    {#- Offset operator #}
+	CKFLOAT& operator[](size_t i);
+	const CKFLOAT& operator[](size_t i) const;
+
+    {#- Equal operator #}
+	bool operator==(const {{ sname }}& rhs) const;
+
+    {#- Spaceship operator #}
+	auto operator<=>(const {{ sname }}& rhs) const;
+
+
+	{#- BEGIN VECTOR SPECIFIC #}
+	{%- if is_vector %}
+
+    {#- Add, minus operators #}
+    {#- Unary operators #}
+    {{ sname }} operator+() const;
+    {{ sname }} operator-() const;
+    {#- Additive operators #}
+	{{ sname }}& operator+=(const {{ sname }}& rhs);
+	friend {{ sname }} operator+(const {{ sname }}& lhs, const {{ sname }}& rhs);
+	{{ sname }}& operator-=(const {{ sname }}& rhs);
+	friend {{ sname }} operator-(const {{ sname }}& lhs, const {{ sname }}& rhs);
+
+    {#- Mul operator #}
+	{{ sname }}& operator*=(CKFLOAT rhs);
+	friend {{ sname }} operator*(const {{ sname }}& lhs, CKFLOAT rhs);
+	friend {{ sname }} operator*(CKFLOAT lhs, const {{ sname }}& rhs);
+	friend CKFLOAT operator*(const {{ sname }}& lhs, const {{ sname }}& rhs);
+
+    {#- Div operator #}
+	{{ sname }}& operator/=(CKFLOAT rhs);
+	friend {{ sname }} operator/(const {{ sname }}& lhs, CKFLOAT rhs);
+	
+    {#- Length functions #}
+	CKFLOAT SquaredLength() const;
+	CKFLOAT Length() const;
+
+    {#- Normalize functions #}
+	void Normalized();
+	{{ sname }} Normalize() const;
+
+	{%- endif %}
+	{#- END VECTOR SPECIFIC #}
+
+
+	{#- User custom region #}
+
+	/* ===== BEGIN USER CUSTOM ===== */
+	/* =====  END  USER CUSTOM ===== */
+};

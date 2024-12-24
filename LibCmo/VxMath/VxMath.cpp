@@ -134,39 +134,4 @@ namespace LibCmo::VxMath {
 
 #pragma endregion
 
-#pragma region Patched
-
-	namespace NSVxVector {
-
-		float DotProduct(const VxVector2& lhs, const VxVector2& rhs) {
-			return lhs * rhs;
-		}
-		
-		float DotProduct(const VxVector3& lhs, const VxVector3& rhs) {
-			return lhs * rhs;
-		}
-
-		float DotProduct(const VxVector4& lhs, const VxVector4& rhs) {
-			return lhs * rhs;
-		}
-
-		VxVector3 CrossProduct(const VxVector3& lhs, const VxVector3& rhs) {
-			return VxVector3(
-				lhs.y * rhs.z - lhs.z * rhs.y,
-				lhs.z * rhs.x - lhs.x * rhs.z,
-				lhs.x * rhs.y - lhs.y * rhs.x
-			);
-		}
-
-		void Abs(VxVector3& lhs) {
-			lhs.x = std::fabs(lhs.x);
-			lhs.y = std::fabs(lhs.y);
-			lhs.z = std::fabs(lhs.z);
-		}
-
-	}
-
-#pragma endregion
-
-
 }

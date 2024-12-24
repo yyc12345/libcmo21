@@ -573,7 +573,7 @@ namespace LibCmo::CK2::ObjImpls {
 				// get diff by distance
 				VxMath::VxVector3 diff = m_VertexNormal[vid] - generated[vid];
 				// abs the diff and add into accumulated diff
-				VxMath::NSVxVector::Abs(diff);
+				VxMath::NSVxVector::Absolute(diff);
 				accnml += diff;
 			}
 			

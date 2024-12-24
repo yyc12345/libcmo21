@@ -1,0 +1,21 @@
+{#
+The macro to generate C++ ctor argument list
+It produce like this: `CKFLOAT _x, CKFLOAT _y, CKFLOAT _z, CKFLOAT _w`
+#}
+{% macro argument_list_builder(svars) %}
+{%- for item in svars -%}
+CKFLOAT _{{- item -}}{%- if not loop.last %}, {% endif -%}
+{%- endfor -%}
+{% endmacro %}
+
+{#
+The macro to generate C++ ctor initialize list
+It produce like this: `x(0.0f), y(0.0f), z(0.0f), w(0.0f)`
+or this: `x(_x), y(_y), z(_z), w(_w)`
+according to user request.
+#}
+{% macro initialize_list_builder(svars, is_user) %}
+{%- for item in svars -%}
+{{- item -}}({%- if is_user -%}_{{- item -}}{%- else -%}0.0f{%- endif -%}){%- if not loop.last %}, {% endif -%}
+{%- endfor -%}
+{% endmacro %}

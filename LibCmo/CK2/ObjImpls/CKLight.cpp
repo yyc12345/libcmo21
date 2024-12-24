@@ -131,7 +131,6 @@ namespace LibCmo::CK2::ObjImpls {
 	VxMath::VXLIGHT_TYPE CKLight::GetType() const {
 		return m_LightData.m_Type;
 	}
-
 	void CKLight::SetType(VxMath::VXLIGHT_TYPE light_type) {
 		m_LightData.m_Type = light_type;
 	}
@@ -139,7 +138,6 @@ namespace LibCmo::CK2::ObjImpls {
 	const VxMath::VxColor& CKLight::GetColor() const {
 		return m_LightData.m_Diffuse;
 	}
-
 	void CKLight::SetColor(const VxMath::VxColor& c) {
 		m_LightData.m_Diffuse = c;
 	}
@@ -147,23 +145,18 @@ namespace LibCmo::CK2::ObjImpls {
 	CKFLOAT CKLight::GetConstantAttenuation() const {
 		return m_LightData.m_Attenuation0;
 	}
-
 	CKFLOAT CKLight::GetLinearAttenuation() const {
 		return m_LightData.m_Attenuation1;
 	}
-
 	CKFLOAT CKLight::GetQuadraticAttenuation() const {
 		return m_LightData.m_Attenuation2;
 	}
-
 	void CKLight::SetConstantAttenuation(CKFLOAT value) {
 		m_LightData.m_Attenuation0 = value;
 	}
-
 	void CKLight::SetLinearAttenuation(CKFLOAT value) {
 		m_LightData.m_Attenuation1 = value;
 	}
-
 	void CKLight::SetQuadraticAttenuation(CKFLOAT value) {
 		m_LightData.m_Attenuation2 = value;
 	}
@@ -171,7 +164,6 @@ namespace LibCmo::CK2::ObjImpls {
 	CKFLOAT CKLight::GetRange() const {
 		return m_LightData.m_Range;
 	}
-
 	void CKLight::SetRange(CKFLOAT value) {
 		m_LightData.m_Range = value;
 	}
@@ -179,23 +171,18 @@ namespace LibCmo::CK2::ObjImpls {
 	CKFLOAT CKLight::GetHotSpot() const {
 		return m_LightData.m_InnerSpotCone;
 	}
-
 	CKFLOAT CKLight::GetFalloff() const {
 		return m_LightData.m_OuterSpotCone;
 	}
-
 	CKFLOAT CKLight::GetFalloffShape() const {
 		return m_LightData.m_Falloff;
 	}
-
 	void CKLight::SetHotSpot(CKFLOAT value) {
 		m_LightData.m_InnerSpotCone = value;
 	}
-
 	void CKLight::SetFalloff(CKFLOAT value) {
 		m_LightData.m_OuterSpotCone = value;
 	}
-
 	void CKLight::SetFalloffShape(CKFLOAT value) {
 		m_LightData.m_Falloff = value;
 	}
@@ -203,7 +190,6 @@ namespace LibCmo::CK2::ObjImpls {
 	bool CKLight::GetActivity() const {
 		return YYCC::EnumHelper::Has(m_LightFlags, LightFlags::Active);
 	}
-
 	void CKLight::Active(bool active) {
 		if (active) {
 			YYCC::EnumHelper::Add(m_LightFlags, LightFlags::Active);
@@ -215,7 +201,6 @@ namespace LibCmo::CK2::ObjImpls {
 	bool CKLight::GetSpecularFlag() const {
 		return YYCC::EnumHelper::Has(m_LightFlags, LightFlags::Specular);
 	}
-
 	void CKLight::SetSpecularFlag(bool specular) {
 		if (specular) {
 			YYCC::EnumHelper::Add(m_LightFlags, LightFlags::Specular);
@@ -229,7 +214,6 @@ namespace LibCmo::CK2::ObjImpls {
 		// So it always return nullptr.
 		return nullptr;
 	}
-
 	void CKLight::SetTarget(CK3dEntity* target) {
 		// Normal light do not support target.
 		// So, do nothing.
@@ -238,7 +222,6 @@ namespace LibCmo::CK2::ObjImpls {
 	CKFLOAT CKLight::GetLightPower() const {
 		return m_LightPower;
 	}
-
 	void CKLight::SetLightPower(CKFLOAT power) {
 		m_LightPower = power;
 	}

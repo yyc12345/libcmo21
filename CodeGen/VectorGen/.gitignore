@@ -1,2 +1,3 @@
 # Result
-*.hpp
+VxTypes.hpp
+VxTypes.cpp

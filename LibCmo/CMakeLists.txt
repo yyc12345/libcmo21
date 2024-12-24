@@ -36,6 +36,7 @@ PRIVATE
 	CK2/ObjImpls/CKTargetCamera.cpp
 	# VxMath
 	VxMath/VxMemoryMappedFile.cpp
+    VxMath/VxTypes.cpp
 	VxMath/VxMath.cpp
 	# X Container
 	XContainer/XTypes.cpp
