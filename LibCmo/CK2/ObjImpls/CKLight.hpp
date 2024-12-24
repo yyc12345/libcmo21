@@ -75,10 +75,15 @@ namespace LibCmo::CK2::ObjImpls {
 			CKFLOAT m_InnerSpotCone;
 			CKFLOAT m_OuterSpotCone;
 		};
+		enum class LightFlags : CKDWORD {
+			None = 0,
+			Active = 0x100u, /**< if set, this light is active. */
+			Specular = 0x200u, /**< if set, this light has specular flag. */
+		};
 
 		CKLightData m_LightData;
-		// YYCMARK: This variable is called in m_Flags in reverse code.
-		DWORD m_LightFlags;
+		// MARK: This variable is called in m_Flags in reverse code.
+		LightFlags m_LightFlags;
 		CKFLOAT m_LightPower;
 	};
 

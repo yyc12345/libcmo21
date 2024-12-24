@@ -375,33 +375,6 @@ namespace LibCmo::VxMath {
 		VxColor(CKFLOAT _r, CKFLOAT _g, CKFLOAT _b, CKFLOAT _a) : r(_r), g(_g), b(_b), a(_a) {}
 		VxColor(CKDWORD argb) { FromARGB(argb); }
 		YYCC_DEF_CLS_COPY_MOVE(VxColor);
-		void FromARGB(CKDWORD argb) {
-			a = ((argb & 0xFF000000) >> 24) / 255.0f;
-			r = ((argb & 0x00FF0000) >> 16) / 255.0f;
-			g = ((argb & 0x0000FF00) >> 8) / 255.0f;
-			b = ((argb & 0x000000FF) >> 0) / 255.0f;
-		}
-		CKDWORD ToARGB() const {
-			CKDWORD argb = 0;
-			argb |= static_cast<CKDWORD>(a * 255.0f);
-			argb <<= 8;
-			argb |= static_cast<CKDWORD>(r * 255.0f);
-			argb <<= 8;
-			argb |= static_cast<CKDWORD>(g * 255.0f);
-			argb <<= 8;
-			argb |= static_cast<CKDWORD>(b * 255.0f);
-			return argb;
-		}
-		void Regulate() {
-			if (r > 1.0f) r = 1.0f;
-			else if (r < 0.0f) r = 0.0f;
-			if (g > 1.0f) g = 1.0f;
-			else if (g < 0.0f) g = 0.0f;
-			if (b > 1.0f) b = 1.0f;
-			else if (b < 0.0f) b = 0.0f;
-			if (a > 1.0f) a = 1.0f;
-			else if (a < 0.0f) a = 0.0f;
-		}
 		CKFLOAT& operator[](size_t i) {
 			switch (i) {
 				case 0: return r;
@@ -428,6 +401,35 @@ namespace LibCmo::VxMath {
 			if (auto cmp = g <=> rhs.g; cmp != 0) return cmp;
 			if (auto cmp = b <=> rhs.b; cmp != 0) return cmp;
 			return a <=> rhs.a;
+		}
+
+		VxColor(CKFLOAT _r, CKFLOAT _g, CKFLOAT _b) : r(_r), g(_g), b(_b), a(1.0f) {}
+		void FromARGB(CKDWORD argb) {
+			a = ((argb & 0xFF000000) >> 24) / 255.0f;
+			r = ((argb & 0x00FF0000) >> 16) / 255.0f;
+			g = ((argb & 0x0000FF00) >> 8) / 255.0f;
+			b = ((argb & 0x000000FF) >> 0) / 255.0f;
+		}
+		CKDWORD ToARGB() const {
+			CKDWORD argb = 0;
+			argb |= static_cast<CKDWORD>(a * 255.0f);
+			argb <<= 8;
+			argb |= static_cast<CKDWORD>(r * 255.0f);
+			argb <<= 8;
+			argb |= static_cast<CKDWORD>(g * 255.0f);
+			argb <<= 8;
+			argb |= static_cast<CKDWORD>(b * 255.0f);
+			return argb;
+		}
+		void Regulate() {
+			if (r > 1.0f) r = 1.0f;
+			else if (r < 0.0f) r = 0.0f;
+			if (g > 1.0f) g = 1.0f;
+			else if (g < 0.0f) g = 0.0f;
+			if (b > 1.0f) b = 1.0f;
+			else if (b < 0.0f) b = 0.0f;
+			if (a > 1.0f) a = 1.0f;
+			else if (a < 0.0f) a = 0.0f;
 		}
 	};
 

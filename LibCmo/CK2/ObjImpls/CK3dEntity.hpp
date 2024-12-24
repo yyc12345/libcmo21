@@ -48,7 +48,7 @@ namespace LibCmo::CK2::ObjImpls {
 		CKDWORD m_ZOrder;	// replace the whole heavy CKSceneGraphNode
 		
 		VxMath::VX_MOVEABLE_FLAGS m_MoveableFlags;
-		// YYCMARK: This field is called m_EntityFlags in reverse project.
+		// MARK: This field is called m_EntityFlags in reverse project.
 		// I change this because I want to give it a more explicit name to make it is different with other flags.
 		CK_3DENTITY_FLAGS m_3dEntityFlags;
 
