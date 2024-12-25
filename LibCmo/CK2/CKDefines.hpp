@@ -141,6 +141,28 @@ namespace LibCmo::CK2 {
 		CKFileExtension m_Ext; /**< File Extension of the image being described by this structure */
 	};
 
+	/**
+	 * @brief Light Structure passed to CKRasterizerContext::SetLight()
+	 * @details
+	 * This struct is a part of CKRasterizer.
+	 * I put it in there just for the convenience of CKLight.
+	*/
+	struct CKLightData {
+		VxMath::VXLIGHT_TYPE m_Type; /**< Point, Spot, Directionnal   */
+		VxMath::VxColor m_Diffuse; /**< Diffuse Color */
+		VxMath::VxColor m_Specular; /**< Specular Color (Unused...) */
+		VxMath::VxColor m_Ambient; /**< Ambient Color (Unused...) */
+		VxMath::VxVector3 m_Position; /**< World Position */
+		VxMath::VxVector3 m_Direction; /**< Direction */
+		CKFLOAT m_Range; /**< Range */
+		CKFLOAT m_Falloff;
+		CKFLOAT m_Attenuation0;
+		CKFLOAT m_Attenuation1;
+		CKFLOAT m_Attenuation2;
+		CKFLOAT m_InnerSpotCone; /**< Only for spot lights */
+		CKFLOAT m_OuterSpotCone; /**< Only for spot lights */
+	};
+
 #pragma endregion
 
 

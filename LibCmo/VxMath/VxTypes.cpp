@@ -442,7 +442,7 @@ namespace LibCmo::VxMath {
 		Clear();
 		m_Data[0][0] = m_Data[1][1] = m_Data[2][2] = m_Data[3][3] = 1.0f;
 	}
-	void VxMatrix::Perspective(float Fov, float Aspect, float Near_plane, float Far_plane) {
+	void VxMatrix::Perspective(CKFLOAT Fov, CKFLOAT Aspect, CKFLOAT Near_plane, CKFLOAT Far_plane) {
 		Clear();
 		m_Data[0][0] = std::cosf(Fov * 0.5f) / std::sinf(Fov * 0.5f);
 		m_Data[1][1] = m_Data[0][0] * Aspect;
@@ -450,10 +450,10 @@ namespace LibCmo::VxMath {
 		m_Data[3][2] = -m_Data[2][2] * Near_plane;
 		m_Data[2][3] = 1;
 	}
-	void VxMatrix::PerspectiveRect(float Left, float Right, float Top, float Bottom, float Near_plane, float Far_plane) {
+	void VxMatrix::PerspectiveRect(CKFLOAT Left, CKFLOAT Right, CKFLOAT Top, CKFLOAT Bottom, CKFLOAT Near_plane, CKFLOAT Far_plane) {
 		Clear();
-		float RL = 1.0f / (Right - Left);
-		float TB = 1.0f / (Top - Bottom);
+		CKFLOAT RL = 1.0f / (Right - Left);
+		CKFLOAT TB = 1.0f / (Top - Bottom);
 		m_Data[0][0] = 2.0f * Near_plane * RL;
 		m_Data[1][1] = 2.0f * Near_plane * TB;
 		m_Data[2][0] = -(Right + Left) * RL;
@@ -462,20 +462,20 @@ namespace LibCmo::VxMath {
 		m_Data[3][2] = -m_Data[2][2] * Near_plane;
 		m_Data[2][3] = 1;
 	}
-	void VxMatrix::Orthographic(float Zoom, float Aspect, float Near_plane, float Far_plane) {
+	void VxMatrix::Orthographic(CKFLOAT Zoom, CKFLOAT Aspect, CKFLOAT Near_plane, CKFLOAT Far_plane) {
 		Clear();
-		float iz = 1.0f / (Far_plane - Near_plane);
+		CKFLOAT iz = 1.0f / (Far_plane - Near_plane);
 		m_Data[0][0] = Zoom;
 		m_Data[1][1] = Zoom * Aspect;
 		m_Data[2][2] = iz;
 		m_Data[3][2] = -Near_plane * iz;
 		m_Data[3][3] = 1.0f;
 	}
-	void VxMatrix::OrthographicRect(float Left, float Right, float Top, float Bottom, float Near_plane, float Far_plane) {
+	void VxMatrix::OrthographicRect(CKFLOAT Left, CKFLOAT Right, CKFLOAT Top, CKFLOAT Bottom, CKFLOAT Near_plane, CKFLOAT Far_plane) {
 		Clear();
-		float ix = 1.0f / (Right - Left);
-		float iy = 1.0f / (Top - Bottom);
-		float iz = 1.0f / (Far_plane - Near_plane);
+		CKFLOAT ix = 1.0f / (Right - Left);
+		CKFLOAT iy = 1.0f / (Top - Bottom);
+		CKFLOAT iz = 1.0f / (Far_plane - Near_plane);
 		m_Data[0][0] = 2.0f * ix;
 		m_Data[1][1] = -2.0f * iy;
 		m_Data[2][2] = iz;
@@ -492,15 +492,15 @@ namespace LibCmo::VxMath {
 
 	namespace NSVxVector {
 
-		float DotProduct(const VxVector2& lhs, const VxVector2& rhs) {
+		CKFLOAT DotProduct(const VxVector2& lhs, const VxVector2& rhs) {
 			return lhs * rhs;
 		}
 
-		float DotProduct(const VxVector3& lhs, const VxVector3& rhs) {
+		CKFLOAT DotProduct(const VxVector3& lhs, const VxVector3& rhs) {
 			return lhs * rhs;
 		}
 
-		float DotProduct(const VxVector4& lhs, const VxVector4& rhs) {
+		CKFLOAT DotProduct(const VxVector4& lhs, const VxVector4& rhs) {
 			return lhs * rhs;
 		}
 

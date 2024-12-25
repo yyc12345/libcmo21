@@ -221,7 +221,7 @@ namespace LibCmo::VxMath {
 		 *
 		 * @see PerspectiveRect, Orthographic, OrthographicRect
 		 */
-		void Perspective(float Fov, float Aspect, float Near_plane, float Far_plane);
+		void Perspective(CKFLOAT Fov, CKFLOAT Aspect, CKFLOAT Near_plane, CKFLOAT Far_plane);
 		/**
 		 * @brief Constructs a perspective projection matrix given a view rectangle.
 		 * @param[in] Left Left clipping plane value.
@@ -246,7 +246,7 @@ namespace LibCmo::VxMath {
 		 *
 		 * @see Perspective, Orthographic, OrthographicRect
 		 */
-		void PerspectiveRect(float Left, float Right, float Top, float Bottom, float Near_plane, float Far_plane);
+		void PerspectiveRect(CKFLOAT Left, CKFLOAT Right, CKFLOAT Top, CKFLOAT Bottom, CKFLOAT Near_plane, CKFLOAT Far_plane);
 		/**
 		 * @brief Constructs a orthographic projection matrix.
 		 * @param[in] Zoom Zoom factor.
@@ -265,7 +265,7 @@ namespace LibCmo::VxMath {
 		 *
 		 * @see Perspective, OrthographicRect
 		 */
-		void Orthographic(float Zoom, float Aspect, float Near_plane, float Far_plane);
+		void Orthographic(CKFLOAT Zoom, CKFLOAT Aspect, CKFLOAT Near_plane, CKFLOAT Far_plane);
 		/**
 		 * @brief Constructs a orthographic projection matrix.
 		 * @param[in] Left Left clipping plane value.
@@ -290,7 +290,7 @@ namespace LibCmo::VxMath {
 		 *
 		 * @see Perspective, Orthographic
 		 */
-		void OrthographicRect(float Left, float Right, float Top, float Bottom, float Near_plane, float Far_plane);
+		void OrthographicRect(CKFLOAT Left, CKFLOAT Right, CKFLOAT Top, CKFLOAT Bottom, CKFLOAT Near_plane, CKFLOAT Far_plane);
 		/* =====  END  USER CUSTOM ===== */
 	};
 

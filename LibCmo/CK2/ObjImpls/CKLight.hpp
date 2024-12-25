@@ -60,21 +60,6 @@ namespace LibCmo::CK2::ObjImpls {
 		void SetLightPower(CKFLOAT power = 1.0f);
 
 	protected:
-		struct CKLightData {
-			VxMath::VXLIGHT_TYPE m_Type;
-			VxMath::VxColor m_Diffuse;
-			VxMath::VxColor m_Specular;
-			VxMath::VxColor m_Ambient;
-			VxMath::VxVector3 m_Position;
-			VxMath::VxVector3 m_Direction;
-			CKFLOAT m_Range;
-			CKFLOAT m_Falloff;
-			CKFLOAT m_Attenuation0;
-			CKFLOAT m_Attenuation1;
-			CKFLOAT m_Attenuation2;
-			CKFLOAT m_InnerSpotCone;
-			CKFLOAT m_OuterSpotCone;
-		};
 		enum class LightFlags : CKDWORD {
 			None = 0,
 			Active = 0x100u, /**< if set, this light is active. */
