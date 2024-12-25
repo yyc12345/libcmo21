@@ -117,11 +117,11 @@ SetObjectFlags(obj_flags); \
 		REMOVE_UPTODATE_FLAG;
 	}
 
-	void CKCamera::GetAspectRatio(int& width, int& height) const {
+	void CKCamera::GetAspectRatio(CKDWORD& width, CKDWORD& height) const {
 		width = m_Width;
 		height = m_Height;
 	}
-	void CKCamera::SetAspectRatio(int width, int height) {
+	void CKCamera::SetAspectRatio(CKDWORD width, CKDWORD height) {
 		m_Width = width;
 		m_Height = height;
 		REMOVE_UPTODATE_FLAG;

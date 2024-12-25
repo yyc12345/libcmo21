@@ -165,7 +165,7 @@ namespace Unvirt::StructFormatter {
 		// print current mesh
 		{
 			auto curmesh = obj->GetCurrentMesh();
-			Console::Format(u8"->\t%s\t%s",
+			Console::FormatLine(u8"->\t%s\t%s",
 				PrintPointer(curmesh).c_str(),
 				(curmesh != nullptr ? PrintCKSTRING(curmesh->GetName()).c_str() : u8"")
 			);
@@ -180,6 +180,70 @@ namespace Unvirt::StructFormatter {
 			);
 		}
 
+	}
+	
+	static void PrintCKLightDetail(LibCmo::CK2::ObjImpls::CKLight* obj) {
+		PrintCK3dEntityDetail(obj);
+		Console::WriteLine(YYCC_COLOR_LIGHT_YELLOW(u8"CKLight"));
+		
+		Console::WriteLine(u8"== Basics ==");
+		Console::FormatLine(u8"Type: %s", AccessibleValue::GetEnumName(obj->GetType(), AccessibleValue::EnumDesc::VXLIGHT_TYPE).c_str());
+		Console::FormatLine(u8"Color: %s", PrintColor(obj->GetColor()).c_str());
+		Console::FormatLine(u8"Light Power: %.2" PRIfCKFLOAT, obj->GetLightPower());
+		
+		Console::WriteLine(u8"== Switches ==");
+		Console::FormatLine(u8"Activity: %s", PrintBool(obj->GetActivity()).c_str());
+		Console::FormatLine(u8"Specular Flag: %s", PrintBool(obj->GetSpecularFlag()).c_str());
+
+		Console::WriteLine(u8"== Attenuation ==");
+		Console::FormatLine(u8"Constant Attenuation: %.2" PRIfCKFLOAT, obj->GetConstantAttenuation());
+		Console::FormatLine(u8"Linear Attenuation: %.2" PRIfCKFLOAT, obj->GetLinearAttenuation());
+		Console::FormatLine(u8"Quadratic Attenuation: %.2" PRIfCKFLOAT, obj->GetQuadraticAttenuation());
+		
+		Console::WriteLine(u8"== Spot Cone ==");
+		Console::FormatLine(u8"Range: %.2" PRIfCKFLOAT, obj->GetRange());
+		Console::FormatLine(u8"Hot Spot: %.2" PRIfCKFLOAT, obj->GetHotSpot());
+		Console::FormatLine(u8"Falloff: %.2" PRIfCKFLOAT, obj->GetFalloff());
+		Console::FormatLine(u8"Falloff Shape: %.2" PRIfCKFLOAT, obj->GetFalloffShape());
+		
+		Console::WriteLine(u8"== Target ==");
+		auto thistarget = obj->GetTarget();
+		Console::FormatLine(u8"Target Address: %s", PrintPointer(thistarget).c_str());
+		if (thistarget != nullptr)
+			Console::FormatLine(u8"Target Name: %s", PrintCKSTRING(thistarget->GetName()).c_str());
+	}
+	
+	static void PrintCKTargetLightDetail(LibCmo::CK2::ObjImpls::CKTargetLight* obj) {
+		PrintCKLightDetail(obj);
+		Console::WriteLine(YYCC_COLOR_LIGHT_YELLOW(u8"CKTargetLight"));
+		Console::WriteLine(YYCC_COLOR_LIGHT_RED(u8"No Data"));
+	}
+	
+	static void PrintCKCameraDetail(LibCmo::CK2::ObjImpls::CKCamera* obj) {
+		PrintCK3dEntityDetail(obj);
+		Console::WriteLine(YYCC_COLOR_LIGHT_YELLOW(u8"CKCamera"));
+		
+		Console::WriteLine(u8"== Basics ==");
+		Console::FormatLine(u8"Projection Type: %s", AccessibleValue::GetEnumName(obj->GetProjectionType(), AccessibleValue::EnumDesc::CK_CAMERA_PROJECTION).c_str());
+		Console::FormatLine(u8"Orthographic Zoom: %.2" PRIfCKFLOAT, obj->GetOrthographicZoom());
+		Console::FormatLine(u8"Front Plane: %.2" PRIfCKFLOAT, obj->GetFrontPlane());
+		Console::FormatLine(u8"Back Plane: %.2" PRIfCKFLOAT, obj->GetBackPlane());
+		Console::FormatLine(u8"Fov: %.2" PRIfCKFLOAT, obj->GetFov());
+		LibCmo::CKDWORD width, height;
+		obj->GetAspectRatio(width, height);
+		Console::FormatLine(u8"Aspect Ratio: %" PRIuCKDWORD " : %" PRIuCKDWORD, width, height);
+		
+		Console::WriteLine(u8"== Target ==");
+		auto thistarget = obj->GetTarget();
+		Console::FormatLine(u8"Target Address: %s", PrintPointer(thistarget).c_str());
+		if (thistarget != nullptr)
+			Console::FormatLine(u8"Target Name: %s", PrintCKSTRING(thistarget->GetName()).c_str());
+	}
+
+	static void PrintCKTargetCameraDetail(LibCmo::CK2::ObjImpls::CKTargetCamera* obj) {
+		PrintCKCameraDetail(obj);
+		Console::WriteLine(YYCC_COLOR_LIGHT_YELLOW(u8"CKTargetCamera"));
+		Console::WriteLine(YYCC_COLOR_LIGHT_RED(u8"No Data"));
 	}
 
 	static void PrintCK3dObjectDetail(LibCmo::CK2::ObjImpls::CK3dObject* obj) {
@@ -559,6 +623,18 @@ namespace Unvirt::StructFormatter {
 				break;
 			case LibCmo::CK2::CK_CLASSID::CKCID_3DENTITY:
 				PrintCK3dEntityDetail(static_cast<LibCmo::CK2::ObjImpls::CK3dEntity*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_LIGHT:
+				PrintCKLightDetail(static_cast<LibCmo::CK2::ObjImpls::CKLight*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT:
+				PrintCKTargetLightDetail(static_cast<LibCmo::CK2::ObjImpls::CKTargetLight*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_CAMERA:
+				PrintCKCameraDetail(static_cast<LibCmo::CK2::ObjImpls::CKCamera*>(mobj));
+				break;
+			case LibCmo::CK2::CK_CLASSID::CKCID_TARGETCAMERA:
+				PrintCKTargetCameraDetail(static_cast<LibCmo::CK2::ObjImpls::CKTargetCamera*>(mobj));
 				break;
 			case LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT:
 				PrintCK3dObjectDetail(static_cast<LibCmo::CK2::ObjImpls::CK3dObject*>(mobj));

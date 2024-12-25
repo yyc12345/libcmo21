@@ -264,8 +264,7 @@ namespace LibCmo::CK2 {
 
 		va_list argptr;
 		va_start(argptr, fmt);
-		XContainer::XString result;
-		YYCC::StringHelper::VPrintf(fmt, argptr);
+		XContainer::XString result(YYCC::StringHelper::VPrintf(fmt, argptr));
 		va_end(argptr);
 
 		// use c_str(), not XContainer::NSXString::ToCKSTRING because we want make sure this paramter is not nullptr.

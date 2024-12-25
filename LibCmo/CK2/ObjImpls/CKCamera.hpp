@@ -33,8 +33,8 @@ namespace LibCmo::CK2::ObjImpls {
 		void SetBackPlane(CKFLOAT back);
 		void SetFov(CKFLOAT fov);
 
-		void GetAspectRatio(int& width, int& height) const;
-		void SetAspectRatio(int width, int height);
+		void GetAspectRatio(CKDWORD& width, CKDWORD& height) const;
+		void SetAspectRatio(CKDWORD width, CKDWORD height);
 
 		void ComputeProjectionMatrix(VxMath::VxMatrix& mat) const;
 

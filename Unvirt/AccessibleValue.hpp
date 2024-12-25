@@ -102,8 +102,10 @@ namespace Unvirt {
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_3DENTITY_FLAGS> CK_3DENTITY_FLAGS;
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS> CK_TEXTURE_SAVEOPTIONS;
 			extern const GeneralReflectionArray<LibCmo::CK2::CK_BITMAPDATA_FLAGS> CK_BITMAPDATA_FLAGS;
+			extern const GeneralReflectionArray<LibCmo::CK2::CK_CAMERA_PROJECTION> CK_CAMERA_PROJECTION;
 
 			extern const GeneralReflectionArray<LibCmo::VxMath::VX_PIXELFORMAT> VX_PIXELFORMAT;
+			extern const GeneralReflectionArray<LibCmo::VxMath::VXLIGHT_TYPE> VXLIGHT_TYPE;
 			extern const GeneralReflectionArray<LibCmo::VxMath::VXTEXTURE_BLENDMODE> VXTEXTURE_BLENDMODE;
 			extern const GeneralReflectionArray<LibCmo::VxMath::VXTEXTURE_FILTERMODE> VXTEXTURE_FILTERMODE;
 			extern const GeneralReflectionArray<LibCmo::VxMath::VXBLEND_MODE> VXBLEND_MODE;
