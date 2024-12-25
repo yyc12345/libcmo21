@@ -15,15 +15,16 @@ namespace LibCmo::CK2::ObjImpls {
 			return CK_CLASSID::CKCID_TARGETLIGHT;
 		}
 		
-		virtual void CheckPreDeletion() override;
+		virtual void PreDelete() override;
+		virtual void CheckPostDeletion() override;
 
 		// 2 RW funcions
 		virtual bool Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) override;
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
 		
 
-		virtual CK3dEntity* GetTarget() const;
-		virtual void SetTarget(CK3dEntity* target);
+		virtual CK3dEntity* GetTarget() const override;
+		virtual void SetTarget(CK3dEntity* target) override;
 
 	protected:
 		CK_ID m_Target3dEntity;
