@@ -38,10 +38,11 @@ namespace LibCmo::CK2::ObjImpls {
 
 		void ComputeProjectionMatrix(VxMath::VxMatrix& mat) const;
 
+		// TODO: Finish CKCamera roll feature because it now involve some functions which is not implemented in CK3dEntity.
 		// Roll Angle
-		void ResetRoll();
-		void Roll(CKFLOAT angle);
-		
+		//void ResetRoll();
+		//void Roll(CKFLOAT angle);
+
 		// Target access
 		virtual CK3dEntity* GetTarget() const;
 		virtual void SetTarget(CK3dEntity* target);
