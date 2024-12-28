@@ -89,20 +89,46 @@ namespace LibCmo::CK2 {
 			// reset crc field of header
 			rawHeader.Crc = 0u;
 
-			// compute crc
+			// Compute and check CRC in theory (< Virtools 4.0)
 			CKDWORD gotten_crc = CKComputeDataCRC(&rawHeader, CKSizeof(CKRawFileInfo), 0u);
-			parser->SetCursor(sizeof(CKRawFileInfo));
+			parser->SetCursor(CKSizeof(CKRawFileInfo));
 			gotten_crc = CKComputeDataCRC(parser->GetPtr(), this->m_FileInfo.Hdr1PackSize, gotten_crc);
 			parser->MoveCursor(this->m_FileInfo.Hdr1PackSize);
 			gotten_crc = CKComputeDataCRC(parser->GetPtr(), this->m_FileInfo.DataPackSize, gotten_crc);
 
 			if (gotten_crc != this->m_FileInfo.Crc) {
-				this->m_Ctx->OutputToConsole(u8"Virtools file CRC error.");
-				return CKERROR::CKERR_FILECRCERROR;
+				// MARK: 
+				// If the CRC check failed, there is another way to compute CRC. (>= Virtools 4.0)
+				// This is a patch for Dassault stupid programmer.
+				// 
+				// After Virtools 4.0, Dassault use a new way to compute the CRC of file.
+				// Dassault introduce a new class called CKMemoryBufferWriter which use file and memory map to handle big file properly.
+				// However, there is a bug in virtual function CKMemoryBufferWriter::ComputeCRC.
+				// It takes `PreviousCRC` as argument but never use it in function. In this function, the start value of CRC compution is hardcoded 0.
+				// So, although Dassault programmer try to compute CRC for file header, header part and daat part in code, it actually only compute CRC for data part!
+				// I 100% sure this is the mistake of Dassault stupid programmer and this bug cause horrible result.
+				// 
+				// In Virtools 2.1, engine will check CRC of file first. If no matched CRC, engine will reject loading file.
+				// So the obvious result is that we can not load file saved by Virtools 4.0 in Virtools 2.1.
+				// But this is not the point which makes me indignant.
+				// The real weird point is that we can use Virtools 3.5 to open file saved by Virtools 4.0 but why?
+				// After some research, I found that the programmer of Dassault totally removed CRC check when loading file since some version which I don't know!
+				// This is totally cheat and commercial-oriented behavior!
+				// I guess Dassault programmer also find that they can not load new created file in old Virtools.
+				// But they entirely don't know how to resolve it. So they just directly remove the whole of CRC checker!
+				// That's the point which makes me indignant.
+				gotten_crc = CKComputeDataCRC(parser->GetPtr(), this->m_FileInfo.DataPackSize, 0u);
+
+				// Both CRC compute methods are failed, this file may be really broken.
+				// Report exception directly.
+				if (gotten_crc != this->m_FileInfo.Crc) {
+					this->m_Ctx->OutputToConsole(u8"Virtools file CRC error.");
+					return CKERROR::CKERR_FILECRCERROR;
+				}
 			}
 
 			// reset cursor
-			parser->SetCursor(sizeof(CKRawFileInfo));
+			parser->SetCursor(CKSizeof(CKRawFileInfo));
 
 			// compare size to decide wheher use compress feature
 			if (this->m_FileInfo.Hdr1PackSize != this->m_FileInfo.Hdr1UnPackSize) {
@@ -189,7 +215,7 @@ namespace LibCmo::CK2 {
 		if (this->m_FileInfo.FileVersion >= 8) {
 			// file ver >= 8, use header offset
 			// because it have compress feature
-			ParserPtr->SetCursor(this->m_FileInfo.Hdr1PackSize + sizeof(CKRawFileInfo));
+			ParserPtr->SetCursor(this->m_FileInfo.Hdr1PackSize + CKSizeof(CKRawFileInfo));
 		} else {
 			// otherwise, sync with current parser.
 			ParserPtr->SetCursor(parser->GetCursor());
@@ -397,7 +423,7 @@ namespace LibCmo::CK2 {
 		}
 
 		// ========== finalize work ==========
-		
+
 
 		// set done flag and return
 		this->m_Done = true;
