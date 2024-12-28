@@ -21,7 +21,7 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual ~CKMesh();
 		YYCC_DEL_CLS_COPY_MOVE(CKMesh);
 		
-		virtual CK_CLASSID GetClassID(void) override { 
+		virtual CK_CLASSID GetClassID() override { 
 			return CK_CLASSID::CKCID_MESH; 
 		}
 		

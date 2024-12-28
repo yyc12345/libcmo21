@@ -13,7 +13,7 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual ~CKRenderObject() {}
 		YYCC_DEL_CLS_COPY_MOVE(CKRenderObject);
 
-		virtual CK_CLASSID GetClassID(void) override { 
+		virtual CK_CLASSID GetClassID() override { 
 			return CK_CLASSID::CKCID_RENDEROBJECT; 
 		}
 

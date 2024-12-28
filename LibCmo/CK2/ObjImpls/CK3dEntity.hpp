@@ -11,7 +11,7 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual ~CK3dEntity();
 		YYCC_DEL_CLS_COPY_MOVE(CK3dEntity);
 
-		virtual CK_CLASSID GetClassID(void) override { 
+		virtual CK_CLASSID GetClassID() override { 
 			return CK_CLASSID::CKCID_3DENTITY; 
 		}
 		

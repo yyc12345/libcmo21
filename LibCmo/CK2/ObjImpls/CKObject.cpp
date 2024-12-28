@@ -16,16 +16,16 @@ namespace LibCmo::CK2::ObjImpls {
 
 #pragma region Non-virtual Functions
 
-	CK_ID CKObject::GetID(void) const {
+	CK_ID CKObject::GetID() const {
 		return m_ID;
 	}
-	CKSTRING CKObject::GetName(void) const {
+	CKSTRING CKObject::GetName() const {
 		return XContainer::NSXString::ToCKSTRING(m_Name);
 	}
 	void CKObject::SetName(CKSTRING u8_name) {
 		XContainer::NSXString::FromCKSTRING(m_Name, u8_name);
 	}
-	CK_OBJECT_FLAGS CKObject::GetObjectFlags(void) const {
+	CK_OBJECT_FLAGS CKObject::GetObjectFlags() const {
 		return m_ObjectFlags;
 	}
 	void CKObject::SetObjectFlags(CK_OBJECT_FLAGS flags) {

@@ -128,7 +128,7 @@ namespace LibCmo::VxMath {
 		this->m_bIsValid = true;
 	}
 
-	VxMemoryMappedFile::~VxMemoryMappedFile(void) {
+	VxMemoryMappedFile::~VxMemoryMappedFile() {
 		if (this->m_bIsValid) {
 			// only success mapping need free
 			this->m_bIsValid = false;

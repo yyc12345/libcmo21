@@ -44,9 +44,9 @@ namespace LibCmo::CK2 {
 
 		const void* GetPtr(CKINT extraoff = 0) { return (this->m_MemBegin + m_MemPos + extraoff); }
 		void* GetMutablePtr(CKINT extraoff = 0) { return (this->m_MemBegin + m_MemPos + extraoff); }
-		void* GetBase(void) { return this->m_MemBegin; }
-		CKDWORD GetSize(void) { return this->m_MemSize; }
-		CKDWORD GetCursor(void) { return this->m_MemPos; }
+		void* GetBase() { return this->m_MemBegin; }
+		CKDWORD GetSize() { return this->m_MemSize; }
+		CKDWORD GetCursor() { return this->m_MemPos; }
 		void MoveCursor(CKINT off) { this->m_MemPos += off; }
 		void SetCursor(CKDWORD off) { this->m_MemPos = off; }
 		void Read(void* data, CKDWORD data_size) {

@@ -12,7 +12,7 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual ~CKMaterial();
 		YYCC_DEL_CLS_COPY_MOVE(CKMaterial);
 
-		virtual CK_CLASSID GetClassID(void) override {
+		virtual CK_CLASSID GetClassID() override {
 			return CK_CLASSID::CKCID_MATERIAL;
 		}
 

@@ -13,7 +13,7 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual ~CK3dObject() {}
 		YYCC_DEL_CLS_COPY_MOVE(CK3dObject);
 
-		virtual CK_CLASSID GetClassID(void) override { 
+		virtual CK_CLASSID GetClassID() override { 
 			return CK_CLASSID::CKCID_3DOBJECT; 
 		}
 		// CK3dObject do not implement any load/save functions

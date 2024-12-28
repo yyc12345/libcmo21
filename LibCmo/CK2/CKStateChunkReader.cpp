@@ -4,7 +4,7 @@
 
 namespace LibCmo::CK2 {
 
-	void CKStateChunk::StartRead(void) {
+	void CKStateChunk::StartRead() {
 		if (this->m_Parser.m_Status != CKStateChunkStatus::IDLE) return;
 
 		this->m_Parser.m_CurrentPos = 0u;
@@ -13,7 +13,7 @@ namespace LibCmo::CK2 {
 		this->m_Parser.m_Status = CKStateChunkStatus::READ;
 	}
 
-	void CKStateChunk::StopRead(void) {
+	void CKStateChunk::StopRead() {
 		if (this->m_Parser.m_Status != CKStateChunkStatus::READ) return;
 
 		this->m_Parser.m_CurrentPos = 0u;
@@ -220,7 +220,7 @@ namespace LibCmo::CK2 {
 		return true;
 	}
 
-	//CKStateChunk* CKStateChunk::ReadSubChunk(void) {
+	//CKStateChunk* CKStateChunk::ReadSubChunk() {
 	//	CKStateChunk* subchunk = nullptr;
 
 	//	// get size and do a enough space check

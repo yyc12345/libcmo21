@@ -42,15 +42,15 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual ~CKObject();
 		YYCC_DEL_CLS_COPY_MOVE(CKObject);
 
-		CK_ID GetID(void) const;
-		CKSTRING GetName(void) const;
+		CK_ID GetID() const;
+		CKSTRING GetName() const;
 		void SetName(CKSTRING u8_name);
-		CK_OBJECT_FLAGS GetObjectFlags(void) const;
+		CK_OBJECT_FLAGS GetObjectFlags() const;
 		void SetObjectFlags(CK_OBJECT_FLAGS flags);
 		bool IsToBeDeleted() const;
 		CKContext* GetCKContext() const;
 
-		virtual CK_CLASSID GetClassID(void) { 
+		virtual CK_CLASSID GetClassID() { 
 			return CK_CLASSID::CKCID_OBJECT; 
 		}
 

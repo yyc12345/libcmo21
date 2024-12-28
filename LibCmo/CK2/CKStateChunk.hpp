@@ -265,8 +265,8 @@ namespace LibCmo::CK2 {
 #pragma region Read Function
 
 	public:
-		void StartRead(void);
-		void StopRead(void);
+		void StartRead();
+		void StopRead();
 
 		/* ========== Identifier Functions ==========*/
 
@@ -556,7 +556,7 @@ namespace LibCmo::CK2 {
 		/*
 		* Actually this function mix various functions, including CloseChunk(), UpdateSize() and etc.
 		*/
-		void StopWrite(void);
+		void StopWrite();
 
 
 		/* ========== Identifier Functions ==========*/

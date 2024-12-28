@@ -32,7 +32,7 @@ namespace LibCmo::CK2 {
 		this->m_Parser.m_Status = CKStateChunkStatus::WRITE;
 	}
 
-	void CKStateChunk::StopWrite(void) {
+	void CKStateChunk::StopWrite() {
 		if (this->m_Parser.m_Status != CKStateChunkStatus::WRITE) return;
 
 		// update buffer size
