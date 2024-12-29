@@ -2,6 +2,247 @@
 
 namespace BMap {
 
+#pragma region BMfile
+
+	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, NakedOutputCallback raw_callback, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING* encodings, bool is_loader) :
+		m_IsInitError(false), m_IsLoader(is_loader), m_HasLoaded(false), m_HasSaved(false), m_Context(nullptr) {
+		m_Context = new LibCmo::CK2::CKContext();
+		// binding callback with lambda wrapper.
+		// check whether callback is nullptr.
+		m_IsInitError = m_IsInitError || (raw_callback == nullptr);
+		if (raw_callback != nullptr) {
+			m_Context->SetOutputCallback([raw_callback](LibCmo::CKSTRING strl) -> void {
+				raw_callback(strl);
+				});
+		}
+
+		// set temp folder and texture folder
+		auto pm = m_Context->GetPathManager();
+		m_IsInitError = m_IsInitError || !pm->AddPath(texture_folder);
+		m_IsInitError = m_IsInitError || !pm->SetTempFolder(temp_folder);
+
+		// set encoding
+		LibCmo::XContainer::XArray<LibCmo::XContainer::XString> cache;
+		for (LibCmo::CKDWORD i = 0; i < encoding_count; ++i) {
+			if (encodings[i] != nullptr)
+				cache.emplace_back(encodings[i]);
+		}
+		m_Context->SetEncoding(cache);
+		m_IsInitError = m_IsInitError || !m_Context->IsValidEncoding();
+
+		// set default texture save mode is external
+		m_Context->SetGlobalImagesSaveOptions(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_EXTERNAL);
+		// set default file write mode is whole compressed
+		m_Context->SetFileWriteMode(LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED);
+	}
+
+	BMFile::~BMFile() {
+		delete m_Context;
+	}
+
+#pragma region Safe Check Function
+
+	bool BMFile::IsInitError() {
+		return m_IsInitError;
+	}
+
+	bool BMFile::CanExecLoad() {
+		// no error, is loader, no prev load
+		return (!m_IsInitError && m_IsLoader && !m_HasLoaded);
+	}
+	bool BMFile::CanExecSave() {
+		// no error, is saver, no prev save
+		return (!m_IsInitError && !m_IsLoader && !m_HasSaved);
+	}
+	bool BMFile::CanExecLoaderVisitor() {
+		// no error, is loader, has loaded
+		return (!m_IsInitError && m_IsLoader && m_HasLoaded);
+	}
+	bool BMFile::CanExecSaverVisitor() {
+		// no error, is saver, not saveed yet
+		// same as CanExecSave
+		return (!m_IsInitError && !m_IsLoader && !m_HasSaved);
+	}
+
+#pragma endregion
+
+#pragma region Help Function
+
+	bool BMFile::Load(LibCmo::CKSTRING filename) {
+		if (!CanExecLoad()) return false;
+
+		// create temp ckfile and load
+		LibCmo::CK2::CKFileReader reader(m_Context);
+		LibCmo::CK2::CKERROR err = reader.DeepLoad(filename);
+
+		// detect error
+		if (err != LibCmo::CK2::CKERROR::CKERR_OK) {
+			// failed. clear document and return false
+			m_Context->ClearAll();
+			return false;
+		}
+
+		// sync data list to our list
+		m_ObjGroups.clear();
+		m_Obj3dObjects.clear();
+		m_ObjMeshes.clear();
+		m_ObjMaterials.clear();
+		m_ObjTextures.clear();
+		m_ObjTargetLights.clear();
+		for (const auto& fileobj : reader.GetFileObjects()) {
+			if (fileobj.ObjPtr == nullptr) continue;
+
+			switch (fileobj.ObjectCid) {
+				case LibCmo::CK2::CK_CLASSID::CKCID_GROUP:
+					m_ObjGroups.emplace_back(fileobj.CreatedObjectId);
+					break;
+				case LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT:
+					m_Obj3dObjects.emplace_back(fileobj.CreatedObjectId);
+					break;
+				case LibCmo::CK2::CK_CLASSID::CKCID_MESH:
+					m_ObjMeshes.emplace_back(fileobj.CreatedObjectId);
+					break;
+				case LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL:
+					m_ObjMaterials.emplace_back(fileobj.CreatedObjectId);
+					break;
+				case LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE:
+					m_ObjTextures.emplace_back(fileobj.CreatedObjectId);
+					break;
+				case LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT:
+					m_ObjTargetLights.emplace_back(fileobj.CreatedObjectId);
+					break;
+				default:
+					break; // skip unknow objects
+			}
+		}
+
+		m_HasLoaded = true;
+		return true;
+	}
+
+	bool BMFile::Save(LibCmo::CKSTRING filename, LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS texture_save_opt, bool use_compress, LibCmo::CKINT compress_level) {
+		if (!CanExecSave()) return false;
+
+		// create temp writer
+		LibCmo::CK2::CKFileWriter writer(m_Context);
+
+		// fill object data
+		for (const auto& id : m_ObjGroups) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+		for (const auto& id : m_Obj3dObjects) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+		for (const auto& id : m_ObjMeshes) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+		for (const auto& id : m_ObjMaterials) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+		for (const auto& id : m_ObjTextures) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+		for (const auto& id :m_ObjTargetLights) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+
+		// set global texture save mode
+		m_Context->SetGlobalImagesSaveOptions(texture_save_opt);
+		// set compress level
+		if (use_compress) {
+			m_Context->SetFileWriteMode(LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED);
+			m_Context->SetCompressionLevel(compress_level);
+		} else {
+			m_Context->SetFileWriteMode(LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED);
+		}
+
+		// save to file and detect error
+		LibCmo::CK2::CKERROR err = writer.Save(filename);
+
+		// return with error detect.
+		m_HasSaved = true;
+		return err == LibCmo::CK2::CKERROR::CKERR_OK;
+	}
+
+	LibCmo::CK2::ObjImpls::CKObject* BMFile::GetObjectPtr(LibCmo::CK2::CK_ID objid) {
+		// we fetch object from CKContext to get better performance
+		LibCmo::CK2::ObjImpls::CKObject* obj = m_Context->GetObject(objid);
+
+		// however, we can not directly return the pointer fetched fron CKContext.
+		// BMFile only provide limited type visiting, we must make sure it provided ID also is existed in out stored list.
+		// so we check its type here. if type is not matched, we reset it to nullptr.
+		if (obj != nullptr) {
+			switch (obj->GetClassID()) {
+				case LibCmo::CK2::CK_CLASSID::CKCID_GROUP:
+				case LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT:
+				case LibCmo::CK2::CK_CLASSID::CKCID_MESH:
+				case LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL:
+				case LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE:
+				case LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT:
+					break; // okey. do nothing
+				default:
+					// this object should not be exposed to outside, reset it to nullptr
+					obj = nullptr;
+					break;
+			}
+		}
+
+		// return result
+		return obj;
+	}
+
+#pragma endregion
+
+#pragma region Visitor
+
+	LibCmo::CKDWORD BMFile::CommonGetObjectCount(std::vector<LibCmo::CK2::CK_ID>& container) {
+		// only available in loader
+		if (!CanExecLoaderVisitor()) return 0;
+		return static_cast<LibCmo::CKDWORD>(container.size());
+	}
+	LibCmo::CK2::CK_ID BMFile::CommonGetObject(std::vector<LibCmo::CK2::CK_ID>& container, LibCmo::CKDWORD idx) {
+		// only available in loader
+		if (!CanExecLoaderVisitor()) return 0;
+		return container[idx];
+	}
+	LibCmo::CK2::CK_ID BMFile::CommonCreateObject(std::vector<LibCmo::CK2::CK_ID>& container, LibCmo::CK2::CK_CLASSID cid) {
+		// only available in saver
+		if (!CanExecSaverVisitor()) return 0;
+
+		// try create object and get its pointer
+		LibCmo::CK2::ObjImpls::CKObject* obj = m_Context->CreateObject(cid, nullptr);
+		// check creation validation
+		if (obj == nullptr) return 0;
+
+		// if success, write its id and emplace its id into list
+		LibCmo::CK2::CK_ID objid = obj->GetID();
+		container.emplace_back(objid);
+		return objid;
+	}
+
+	LibCmo::CKDWORD BMFile::GetGroupCount() { return CommonGetObjectCount(m_ObjGroups); }
+	LibCmo::CK2::CK_ID BMFile::GetGroup(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjGroups, idx); }
+	LibCmo::CK2::CK_ID BMFile::CreateGroup() { return CommonCreateObject(m_ObjGroups, LibCmo::CK2::CK_CLASSID::CKCID_GROUP); }
+	LibCmo::CKDWORD BMFile::Get3dObjectCount() { return CommonGetObjectCount(m_Obj3dObjects); }
+	LibCmo::CK2::CK_ID BMFile::Get3dObject(LibCmo::CKDWORD idx) { return CommonGetObject(m_Obj3dObjects, idx); }
+	LibCmo::CK2::CK_ID BMFile::Create3dObject() { return CommonCreateObject(m_Obj3dObjects, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT); }
+	LibCmo::CKDWORD BMFile::GetMeshCount() { return CommonGetObjectCount(m_ObjMeshes); }
+	LibCmo::CK2::CK_ID BMFile::GetMesh(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjMeshes, idx); }
+	LibCmo::CK2::CK_ID BMFile::CreateMesh() { return CommonCreateObject(m_ObjMeshes, LibCmo::CK2::CK_CLASSID::CKCID_MESH); }
+	LibCmo::CKDWORD BMFile::GetMaterialCount() { return CommonGetObjectCount(m_ObjMaterials); }
+	LibCmo::CK2::CK_ID BMFile::GetMaterial(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjMaterials, idx); }
+	LibCmo::CK2::CK_ID BMFile::CreateMaterial() { return CommonCreateObject(m_ObjMaterials, LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL); }
+	LibCmo::CKDWORD BMFile::GetTextureCount() { return CommonGetObjectCount(m_ObjTextures); }
+	LibCmo::CK2::CK_ID BMFile::GetTexture(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjTextures, idx); }
+	LibCmo::CK2::CK_ID BMFile::CreateTexture() { return CommonCreateObject(m_ObjTextures, LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE); }
+	LibCmo::CKDWORD BMFile::GetTargetLightCount() { return CommonGetObjectCount(m_ObjTargetLights); }
+	LibCmo::CK2::CK_ID BMFile::GetTargetLight(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjTargetLights, idx); }
+	LibCmo::CK2::CK_ID BMFile::CreateTargetLight() { return CommonCreateObject(m_ObjTargetLights, LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT); }
+
+#pragma endregion
+
+#pragma endregion
+
 #pragma region BMMeshTransition
 
 	BMMeshTransition::TransitionVertex::TransitionVertex(
@@ -226,151 +467,6 @@ namespace BMap {
 		}
 	}
 
-
-#pragma endregion
-
-#pragma region BMfile
-
-	BMFile::BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, NakedOutputCallback raw_callback, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING* encodings, bool is_loader) :
-		m_IsInitError(false), m_IsLoader(is_loader), m_HasLoaded(false), m_HasSaved(false), m_Context(nullptr) {
-		m_Context = new LibCmo::CK2::CKContext();
-		// binding callback with lambda wrapper.
-		// check whether callback is nullptr.
-		m_IsInitError = m_IsInitError || (raw_callback == nullptr);
-		if (raw_callback != nullptr) {
-			m_Context->SetOutputCallback([raw_callback](LibCmo::CKSTRING strl) -> void {
-				raw_callback(strl);
-				});
-		}
-
-		// set temp folder and texture folder
-		auto pm = m_Context->GetPathManager();
-		m_IsInitError = m_IsInitError || !pm->AddPath(texture_folder);
-		m_IsInitError = m_IsInitError || !pm->SetTempFolder(temp_folder);
-
-		// set encoding
-		LibCmo::XContainer::XArray<LibCmo::XContainer::XString> cache;
-		for (LibCmo::CKDWORD i = 0; i < encoding_count; ++i) {
-			if (encodings[i] != nullptr)
-				cache.emplace_back(encodings[i]);
-		}
-		m_Context->SetEncoding(cache);
-		m_IsInitError = m_IsInitError || !m_Context->IsValidEncoding();
-
-		// set default texture save mode is external
-		m_Context->SetGlobalImagesSaveOptions(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_EXTERNAL);
-		// set default file write mode is whole compressed
-		m_Context->SetFileWriteMode(LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED);
-	}
-
-	BMFile::~BMFile() {
-		delete m_Context;
-	}
-
-	bool BMFile::Load(LibCmo::CKSTRING filename) {
-		if (!CanExecLoad()) return false;
-
-		// create temp ckfile and load
-		LibCmo::CK2::CKFileReader reader(m_Context);
-		LibCmo::CK2::CKERROR err = reader.DeepLoad(filename);
-
-		// detect error
-		if (err != LibCmo::CK2::CKERROR::CKERR_OK) {
-			// failed. clear document and return false
-			m_Context->ClearAll();
-			return false;
-		}
-
-		// sync data list to our list
-		m_ObjGroups.clear();
-		m_Obj3dObjects.clear();
-		m_ObjMeshs.clear();
-		m_ObjMaterials.clear();
-		m_ObjTextures.clear();
-		for (const auto& fileobj : reader.GetFileObjects()) {
-			if (fileobj.ObjPtr == nullptr) continue;
-
-			switch (fileobj.ObjectCid) {
-				case LibCmo::CK2::CK_CLASSID::CKCID_GROUP:
-					m_ObjGroups.emplace_back(fileobj.CreatedObjectId);
-					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT:
-					m_Obj3dObjects.emplace_back(fileobj.CreatedObjectId);
-					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_MESH:
-					m_ObjMeshs.emplace_back(fileobj.CreatedObjectId);
-					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL:
-					m_ObjMaterials.emplace_back(fileobj.CreatedObjectId);
-					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE:
-					m_ObjTextures.emplace_back(fileobj.CreatedObjectId);
-					break;
-				default:
-					break; // skip unknow objects
-			}
-		}
-
-		m_HasLoaded = true;
-		return true;
-	}
-
-	bool BMFile::Save(LibCmo::CKSTRING filename, LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS texture_save_opt, bool use_compress, LibCmo::CKINT compress_level) {
-		if (!CanExecSave()) return false;
-
-		// create temp writer
-		LibCmo::CK2::CKFileWriter writer(m_Context);
-
-		// fill object data
-		for (const auto& id : m_ObjGroups) {
-			writer.AddSavedObject(m_Context->GetObject(id));
-		}
-		for (const auto& id : m_Obj3dObjects) {
-			writer.AddSavedObject(m_Context->GetObject(id));
-		}
-		for (const auto& id : m_ObjMeshs) {
-			writer.AddSavedObject(m_Context->GetObject(id));
-		}
-		for (const auto& id : m_ObjMaterials) {
-			writer.AddSavedObject(m_Context->GetObject(id));
-		}
-		for (const auto& id : m_ObjTextures) {
-			writer.AddSavedObject(m_Context->GetObject(id));
-		}
-
-		// set global texture save mode
-		m_Context->SetGlobalImagesSaveOptions(texture_save_opt);
-		// set compress level
-		if (use_compress) {
-			m_Context->SetFileWriteMode(LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED);
-			m_Context->SetCompressionLevel(compress_level);
-		} else {
-			m_Context->SetFileWriteMode(LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED);
-		}
-
-		// save to file and detect error
-		LibCmo::CK2::CKERROR err = writer.Save(filename);
-
-		// return with error detect.
-		m_HasSaved = true;
-		return err == LibCmo::CK2::CKERROR::CKERR_OK;
-	}
-
-	LibCmo::CKDWORD BMFile::GetGroupCount() { return CommonGetObjectCount(m_ObjGroups); }
-	LibCmo::CK2::CK_ID BMFile::GetGroup(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjGroups, idx); }
-	LibCmo::CK2::CK_ID BMFile::CreateGroup() { return CommonCreateObject(m_ObjGroups, LibCmo::CK2::CK_CLASSID::CKCID_GROUP); }
-	LibCmo::CKDWORD BMFile::Get3dObjectCount() { return CommonGetObjectCount(m_Obj3dObjects); }
-	LibCmo::CK2::CK_ID BMFile::Get3dObject(LibCmo::CKDWORD idx) { return CommonGetObject(m_Obj3dObjects, idx); }
-	LibCmo::CK2::CK_ID BMFile::Create3dObject() { return CommonCreateObject(m_Obj3dObjects, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT); }
-	LibCmo::CKDWORD BMFile::GetMeshCount() { return CommonGetObjectCount(m_ObjMeshs); }
-	LibCmo::CK2::CK_ID BMFile::GetMesh(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjMeshs, idx); }
-	LibCmo::CK2::CK_ID BMFile::CreateMesh() { return CommonCreateObject(m_ObjMeshs, LibCmo::CK2::CK_CLASSID::CKCID_MESH); }
-	LibCmo::CKDWORD BMFile::GetMaterialCount() { return CommonGetObjectCount(m_ObjMaterials); }
-	LibCmo::CK2::CK_ID BMFile::GetMaterial(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjMaterials, idx); }
-	LibCmo::CK2::CK_ID BMFile::CreateMaterial() { return CommonCreateObject(m_ObjMaterials, LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL); }
-	LibCmo::CKDWORD BMFile::GetTextureCount() { return CommonGetObjectCount(m_ObjTextures); }
-	LibCmo::CK2::CK_ID BMFile::GetTexture(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjTextures, idx); }
-	LibCmo::CK2::CK_ID BMFile::CreateTexture() { return CommonCreateObject(m_ObjTextures, LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE); }
 
 #pragma endregion
 

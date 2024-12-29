@@ -42,10 +42,13 @@ _Ty CheckGeneralObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possibl
 
 #define CheckCKObject(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_OBJECT)
 #define CheckCKGroup(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKGroup*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_GROUP)
-#define CheckCK3dObject(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CK3dObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT)
+#define CheckCK3dEntity(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CK3dObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_3DENTITY)
+#define CheckCK3dObject(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CK3dEntity*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT)
 #define CheckCKMesh(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKMesh*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_MESH)
 #define CheckCKMaterial(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKMaterial*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL)
 #define CheckCKTexture(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKTexture*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE)
+#define CheckCKLight(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKLight*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_LIGHT)
+#define CheckCKTargetLight(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKTargetLight*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT)
 
 #pragma endregion
 
@@ -143,7 +146,7 @@ bool BMFile_Create(
 bool BMFile_Save(
 	BMPARAM_IN(BMap::BMFile*, map_file),
 	BMPARAM_IN(LibCmo::CKSTRING, file_name),
-	BMPARAM_IN(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS, texture_save_opt), 
+	BMPARAM_IN(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS, texture_save_opt),
 	BMPARAM_IN(bool, use_compress),
 	BMPARAM_IN(LibCmo::CKINT, compreess_level)) {
 	if (!CheckBMFile(map_file)) return false;
@@ -232,6 +235,21 @@ bool BMFile_GetTexture(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, id
 bool BMFile_CreateTexture(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
 	if (!CheckBMFile(bmfile)) return false;
 	BMPARAM_OUT_ASSIGN(out_id, bmfile->CreateTexture());
+	return true;
+}
+bool BMFile_GetTargetLightCount(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_count, bmfile->GetTargetLightCount());
+	return true;
+}
+bool BMFile_GetTargetLight(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, idx), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->GetTargetLight(idx));
+	return true;
+}
+bool BMFile_CreateTargetLight(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->CreateTargetLight());
 	return true;
 }
 
@@ -841,34 +859,34 @@ bool BMMesh_SetMaterialSlot(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCm
 
 #pragma endregion
 
-#pragma region CK3dObject
+#pragma region CK3dEntity
 
-bool BM3dObject_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxMatrix, out_mat)) {
-	auto obj = CheckCK3dObject(bmfile, objid);
+bool BM3dEntity_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxMatrix, out_mat)) {
+	auto obj = CheckCK3dEntity(bmfile, objid);
 	if (obj == nullptr) return false;
 
 	BMPARAM_OUT_ASSIGN(out_mat, obj->GetWorldMatrix());
 	return true;
 }
 
-bool BM3dObject_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxMatrix, mat)) {
-	auto obj = CheckCK3dObject(bmfile, objid);
+bool BM3dEntity_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxMatrix, mat)) {
+	auto obj = CheckCK3dEntity(bmfile, objid);
 	if (obj == nullptr) return false;
 
 	obj->SetWorldMatrix(mat);
 	return true;
 }
 
-bool BM3dObject_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_meshid)) {
-	auto obj = CheckCK3dObject(bmfile, objid);
+bool BM3dEntity_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_meshid)) {
+	auto obj = CheckCK3dEntity(bmfile, objid);
 	if (obj == nullptr) return false;
 
 	BMPARAM_OUT_ASSIGN(out_meshid, SafeGetID(obj->GetCurrentMesh()));
 	return true;
 }
 
-bool BM3dObject_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, meshid)) {
-	auto obj = CheckCK3dObject(bmfile, objid);
+bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, meshid)) {
+	auto obj = CheckCK3dEntity(bmfile, objid);
 	auto meshobj = CheckCKMesh(bmfile, meshid);
 	if (obj == nullptr /*|| meshobj == nullptr*/) return false;	//allow nullptr assign
 
@@ -876,16 +894,16 @@ bool BM3dObject_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(Li
 	return true;
 }
 
-bool BM3dObject_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_isVisible)) {
-	auto obj = CheckCK3dObject(bmfile, objid);
+bool BM3dEntity_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_isVisible)) {
+	auto obj = CheckCK3dEntity(bmfile, objid);
 	if (obj == nullptr) return false;
 
 	BMPARAM_OUT_ASSIGN(out_isVisible, obj->IsVisible());
 	return true;
 }
 
-bool BM3dObject_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, is_visible)) {
-	auto obj = CheckCK3dObject(bmfile, objid);
+bool BM3dEntity_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, is_visible)) {
+	auto obj = CheckCK3dEntity(bmfile, objid);
 	if (obj == nullptr) return false;
 
 	obj->Show(is_visible ? LibCmo::CK2::CK_OBJECT_SHOWOPTION::CKSHOW : LibCmo::CK2::CK_OBJECT_SHOWOPTION::CKHIDE);
@@ -894,3 +912,131 @@ bool BM3dObject_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(boo
 
 #pragma endregion
 
+#pragma region CK3dObject
+
+//nothing
+
+#pragma endregion
+
+#pragma region CKLight
+
+bool BMLight_GetType(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXLIGHT_TYPE, out_val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetType());
+	return true;
+}
+bool BMLight_SetType(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXLIGHT_TYPE, val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetType(val);
+	return true;
+}
+
+bool BMLight_GetColor(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxColor, out_val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetColor());
+	return true;
+}
+bool BMLight_SetColor(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxColor, col)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetColor(col);
+	return true;
+}
+
+bool BMLight_GetConstantAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetConstantAttenuation());
+	return true;
+}
+bool BMLight_SetConstantAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetConstantAttenuation(val);
+	return true;
+}
+bool BMLight_GetLinearAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetLinearAttenuation());
+	return true;
+}
+bool BMLight_SetLinearAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetLinearAttenuation(val);
+	return true;
+}
+bool BMLight_GetQuadraticAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetQuadraticAttenuation());
+	return true;
+}
+bool BMLight_SetQuadraticAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetQuadraticAttenuation(val);
+	return true;
+}
+
+bool BMLight_GetRange(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetRange());
+	return true;
+}
+bool BMLight_SetRange(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetRange(val);
+	return true;
+}
+
+bool BMLight_GetHotSpot(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetHotSpot());
+	return true;
+}
+bool BMLight_SetHotSpot(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetHotSpot(val);
+	return true;
+}
+bool BMLight_GetFalloff(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetFalloff());
+	return true;
+}
+bool BMLight_SetFalloff(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetFalloff(val);
+	return true;
+}
+bool BMLight_GetFalloffShape(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetFalloffShape());
+	return true;
+}
+bool BMLight_SetFalloffShape(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
+	auto obj = CheckCKLight(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetFalloffShape(val);
+	return true;
+}
+
+#pragma endregion
+
+#pragma region CKTargetLight
+
+// nothing
+
+#pragma endregion

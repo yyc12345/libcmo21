@@ -16,93 +16,95 @@ namespace BMap {
 		~BMFile();
 		YYCC_DEL_CLS_COPY_MOVE(BMFile);
 
-		// ===== safe visit functions ===== 
+		// ===== Safe Check Function ===== 
 
-		/**
-		Safe Visit Function will make sure this class is visited with safe mode.
-		These function will block all other functions if this class init failed.
-		Or, block any more operations if this class has loaded or saved once. In this time you only can free this class
+		/*
+		Safe Check Function will make sure this class is visited in safe mode.
+		Some of them are exposed to outside to report current status of this class, for example, whether there is a issue when initialize this class.
+		And some of them are used by internal functions to make sure there is a safe environment to execute corresponding functions.
+		For example, #Load function will use #CanExecLoad to detect whether it can execute loading process.
 		*/
 		
 	public:
-		bool IsInitError() {
-			return m_IsInitError;
-		}
-
-	private:
-		bool CanExecLoad() {
-			// no error, is loader, no prev load
-			return (!m_IsInitError && m_IsLoader && !m_HasLoaded);
-		}
-		bool CanExecSave() {
-			// no error, is saver, no prev save
-			return (!m_IsInitError && !m_IsLoader && !m_HasSaved);
-		}
-		bool CanExecLoaderVisitor() {
-			// no error, is loader, has loaded
-			return (!m_IsInitError && m_IsLoader && m_HasLoaded);
-		}
-		bool CanExecSaverVisitor() {
-			// no error, is saver, not saveed yet
-			// same as CanExecSave
-			return (!m_IsInitError && !m_IsLoader && !m_HasSaved);
-		}
+		/**
+		 * @brief Check whether there is an error when initializing this class.
+		 * @details
+		 * This class is exposed for outside code to check.
+		 * Internal code should use one of following 4 private check functions to check environment.
+		 * @return True if there is an error when initializing this class.
+		*/
+		bool IsInitError();
 
 	private:
 		/**
-		 * @brief True if an error occurs when initializing this class.
+		 * @brief Check whether it's okey to execute #Load function.
+		 * @return True if it is okey.
 		*/
-		bool m_IsInitError;
+		bool CanExecLoad();
 		/**
-		 * @brief True if this class is a reader.
+		 * @brief Check whether it's okey to execute #Save function.
+		 * @return True if it is okey.
 		*/
-		bool m_IsLoader;
+		bool CanExecSave();
 		/**
-		 * @brief True if this class has read. Only valid when this class is reader.
+		 * @brief Check whether it's okey to execute Loader-related function.
+		 * @details
+		 * Due to implementation, saving file and loading file are use the same class, BMFile to represent.
+		 * So obviously you can visit loader-related function in a saver.
+		 * This operation is illegal. So we need block these operation.
+		 * This is what this function does. Provide the condition which raise blocking.
+		 * @return True if it is okey.
 		*/
-		bool m_HasLoaded;
+		bool CanExecLoaderVisitor();
 		/**
-		 * @brief True if this class has written. Only valid when this class is writer.
+		 * @brief Check whether it's okey to execute Saver-related function.
+		 * @return True if it is okey.
+		 * @see CanExecLoaderVisitor
 		*/
-		bool m_HasSaved;
+		bool CanExecSaverVisitor();
 
-		// ===== help functions ===== 
+	private:
+		bool m_IsInitError; /**< True if an error occurs when initializing this class. */
+		bool m_IsLoader; /**< True if this class is a reader. */
+		bool m_HasLoaded; /**< True if this class has read. It's undefined behavior when visiting this variable if this class is not reader. */
+		bool m_HasSaved; /**< True if this class has written. It's undefined behavior when visiting this variable if this class is not writer. */
+
+		// ===== Help Function ===== 
 
 	public:
+		/**
+		 * @brief Load document to this class.
+		 * @param[in] filename The path to file.
+		 * @return True if no error, otherwise false.
+		*/
 		bool Load(LibCmo::CKSTRING filename);
+		/**
+		 * @brief Save current class into document.
+		 * @param[in] filename The path to file.
+		 * @param[in] texture_save_opt Global texture save option
+		 * @param[in] use_compress True if use compression when saving.
+		 * @param[in] compress_level The compress level if you choose using compression in file.
+		 * @return 
+		*/
 		bool Save(LibCmo::CKSTRING filename, LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS texture_save_opt, bool use_compress, LibCmo::CKINT compress_level);
 
-		LibCmo::CK2::ObjImpls::CKObject* GetObjectPtr(LibCmo::CK2::CK_ID objid) {
-			return m_Context->GetObject(objid);;
-		}
+		/**
+		 * @brief Get object pointer from given ID.
+		 * @details
+		 * This function is specially exposed to outside for detecting whether given ID is valid in BMFile.
+		 * Also used by BMMeshTransition to get essential objects.
+		 * @param[in] objid The ID of object.
+		 * @return The pointer to given ID represented object. nullptr if not found.
+		*/
+		LibCmo::CK2::ObjImpls::CKObject* GetObjectPtr(LibCmo::CK2::CK_ID objid);
 
-		// ===== visitors ===== 
+		// ===== Visitor ===== 
 
 	private:
-		LibCmo::CKDWORD CommonGetObjectCount(std::vector<LibCmo::CK2::CK_ID>& container) {
-			// only available in loader
-			if (!CanExecLoaderVisitor()) return 0;
-			return static_cast<LibCmo::CKDWORD>(container.size());
-		}
-		LibCmo::CK2::CK_ID CommonGetObject(std::vector<LibCmo::CK2::CK_ID>& container, LibCmo::CKDWORD idx) {
-			// only available in loader
-			if (!CanExecLoaderVisitor()) return 0;
-			return container[idx];
-		}
-		LibCmo::CK2::CK_ID CommonCreateObject(std::vector<LibCmo::CK2::CK_ID>& container, LibCmo::CK2::CK_CLASSID cid) {
-			// only available in saver
-			if (!CanExecSaverVisitor()) return 0;
+		LibCmo::CKDWORD CommonGetObjectCount(std::vector<LibCmo::CK2::CK_ID>& container);
+		LibCmo::CK2::CK_ID CommonGetObject(std::vector<LibCmo::CK2::CK_ID>& container, LibCmo::CKDWORD idx);
+		LibCmo::CK2::CK_ID CommonCreateObject(std::vector<LibCmo::CK2::CK_ID>& container, LibCmo::CK2::CK_CLASSID cid);
 
-			// try create object and get its pointer
-			LibCmo::CK2::ObjImpls::CKObject* obj = m_Context->CreateObject(cid, nullptr);
-			// check creation validation
-			if (obj == nullptr) return 0;
-
-			// if success, write its id and emplace its id into list
-			LibCmo::CK2::CK_ID objid = obj->GetID();
-			container.emplace_back(objid);
-			return objid;
-		}
 	public:
 		LibCmo::CKDWORD GetGroupCount();
 		LibCmo::CK2::CK_ID GetGroup(LibCmo::CKDWORD idx);
@@ -119,15 +121,19 @@ namespace BMap {
 		LibCmo::CKDWORD GetTextureCount();
 		LibCmo::CK2::CK_ID GetTexture(LibCmo::CKDWORD idx);
 		LibCmo::CK2::CK_ID CreateTexture();
+		LibCmo::CKDWORD GetTargetLightCount();
+		LibCmo::CK2::CK_ID GetTargetLight(LibCmo::CKDWORD idx);
+		LibCmo::CK2::CK_ID CreateTargetLight();
 
 	private:
 		LibCmo::CK2::CKContext* m_Context;
 
 		std::vector<LibCmo::CK2::CK_ID> m_ObjGroups;
 		std::vector<LibCmo::CK2::CK_ID> m_Obj3dObjects;
-		std::vector<LibCmo::CK2::CK_ID> m_ObjMeshs;
+		std::vector<LibCmo::CK2::CK_ID> m_ObjMeshes;
 		std::vector<LibCmo::CK2::CK_ID> m_ObjMaterials;
 		std::vector<LibCmo::CK2::CK_ID> m_ObjTextures;
+		std::vector<LibCmo::CK2::CK_ID> m_ObjTargetLights;
 
 	};
 	

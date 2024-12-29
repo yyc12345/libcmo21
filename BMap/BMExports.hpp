@@ -51,7 +51,7 @@ Each CK_ID also should be used with its corresponding BMFile*, because each BMfi
 //  Do nothing and hope for the best?
 #define BMAP_RAW_EXPORT
 #define BMAP_RAW_IMPORT
-#pragma error "Unknown dynamic link import/export semantics."
+#error "Unknown dynamic link import/export semantics."
 #endif
 
 // Choosee import or export command according to special macro.
@@ -81,7 +81,9 @@ Each CK_ID also should be used with its corresponding BMFile*, because each BMfi
 /** Declare an input parameter */
 #define BMPARAM_IN(_t, _name) _t _name
 /**
+@brief
 Declare an output parameter.
+@details
 A pointer will be added automatically for caller receive it.
 See BMPARAM_OUT_ASSIGN and BMPARAM_OUT_VAL to know how to use output param in function body.
 @remark
@@ -91,8 +93,8 @@ bool some_interface_func(BMPARAM_OUT(Type_t, param_name)) {
 	BMPARAM_OUT_ASSIGN(param_name, some_value);	// assign to out param.
 	return BMPARAM_OUT_VAL(param_name) != other_value;	// use out param value.
 }
-@see BMPARAM_OUT_ASSIGN, BMPARAM_OUT_VAL
 ```
+@see BMPARAM_OUT_ASSIGN, BMPARAM_OUT_VAL
 */
 #define BMPARAM_OUT(_t, _name) _t* _name
 /** Assign value for out param in function body. */
@@ -154,6 +156,9 @@ BMAP_EXPORT bool BMFile_CreateMaterial(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(Li
 BMAP_EXPORT bool BMFile_GetTextureCount(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CKDWORD, out_count));
 BMAP_EXPORT bool BMFile_GetTexture(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, idx), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id));
 BMAP_EXPORT bool BMFile_CreateTexture(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id));
+BMAP_EXPORT bool BMFile_GetTargetLightCount(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CKDWORD, out_count));
+BMAP_EXPORT bool BMFile_GetTargetLight(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, idx), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id));
+BMAP_EXPORT bool BMFile_CreateTargetLight(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id));
 
 #pragma endregion
 
@@ -285,13 +290,52 @@ BMAP_EXPORT bool BMMesh_SetMaterialSlot(BMPARAM_OBJECT_DECL(bmfile, objid), BMPA
 
 #pragma endregion
 
+#pragma region CK3dEntity
+
+BMAP_EXPORT bool BM3dEntity_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxMatrix, out_mat));
+BMAP_EXPORT bool BM3dEntity_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxMatrix, mat));
+BMAP_EXPORT bool BM3dEntity_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_meshid));
+BMAP_EXPORT bool BM3dEntity_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, meshid));
+BMAP_EXPORT bool BM3dEntity_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_isVisible));
+BMAP_EXPORT bool BM3dEntity_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, is_visible));
+
+#pragma endregion
+
 #pragma region CK3dObject
 
-BMAP_EXPORT bool BM3dObject_GetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxMatrix, out_mat));
-BMAP_EXPORT bool BM3dObject_SetWorldMatrix(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxMatrix, mat));
-BMAP_EXPORT bool BM3dObject_GetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_meshid));
-BMAP_EXPORT bool BM3dObject_SetCurrentMesh(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_ID, meshid));
-BMAP_EXPORT bool BM3dObject_GetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(bool, out_isVisible));
-BMAP_EXPORT bool BM3dObject_SetVisibility(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(bool, is_visible));
+// nothing
+
+#pragma endregion
+
+#pragma region CKLight
+
+BMAP_EXPORT bool BMLight_GetType(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VXLIGHT_TYPE, out_val));
+BMAP_EXPORT bool BMLight_SetType(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VXLIGHT_TYPE, val));
+
+BMAP_EXPORT bool BMLight_GetColor(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::VxMath::VxColor, out_val));
+BMAP_EXPORT bool BMLight_SetColor(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::VxMath::VxColor, col));
+
+BMAP_EXPORT bool BMLight_GetConstantAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+BMAP_EXPORT bool BMLight_SetConstantAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+BMAP_EXPORT bool BMLight_GetLinearAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+BMAP_EXPORT bool BMLight_SetLinearAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+BMAP_EXPORT bool BMLight_GetQuadraticAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+BMAP_EXPORT bool BMLight_SetQuadraticAttenuation(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+
+BMAP_EXPORT bool BMLight_GetRange(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+BMAP_EXPORT bool BMLight_SetRange(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+
+BMAP_EXPORT bool BMLight_GetHotSpot(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+BMAP_EXPORT bool BMLight_SetHotSpot(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+BMAP_EXPORT bool BMLight_GetFalloff(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+BMAP_EXPORT bool BMLight_SetFalloff(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+BMAP_EXPORT bool BMLight_GetFalloffShape(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+BMAP_EXPORT bool BMLight_SetFalloffShape(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+
+#pragma endregion
+
+#pragma region CKTargetLight
+
+// nothing
 
 #pragma endregion
