@@ -476,10 +476,10 @@ class BMMesh(BMObject):
         except StopIteration:
             _Utils.raise_out_of_length_exception()
 
-class BM3dObject(BMObject):
+class BM3dEntity(BMObject):
     def get_world_matrix(self) -> virtools_types.VxMatrix:
         mat: bmap.bm_VxMatrix = bmap.bm_VxMatrix()
-        bmap.BM3dObject_GetWorldMatrix(self._get_pointer(), self._get_ckid(), ctypes.byref(mat))
+        bmap.BM3dEntity_GetWorldMatrix(self._get_pointer(), self._get_ckid(), ctypes.byref(mat))
         # use cast & pointer to get matrix data conveniently
         flat: bmap.bm_CKFLOAT_p = ctypes.cast(ctypes.byref(mat), bmap.bm_CKFLOAT_p)
         ret: virtools_types.VxMatrix = virtools_types.VxMatrix()
@@ -489,11 +489,11 @@ class BM3dObject(BMObject):
     def set_world_matrix(self, mat_: virtools_types.VxMatrix) -> None:
         # star syntax expand the tuple as the argument.
         mat: bmap.bm_VxMatrix = bmap.bm_VxMatrix(*(mat_.to_const()))
-        bmap.BM3dObject_SetWorldMatrix(self._get_pointer(), self._get_ckid(), mat)
+        bmap.BM3dEntity_SetWorldMatrix(self._get_pointer(), self._get_ckid(), mat)
 
     def get_current_mesh(self) -> BMMesh | None:
         ckid: bmap.bm_CKID = bmap.bm_CKID()
-        bmap.BM3dObject_GetCurrentMesh(self._get_pointer(), self._get_ckid(), ctypes.byref(ckid))
+        bmap.BM3dEntity_GetCurrentMesh(self._get_pointer(), self._get_ckid(), ctypes.byref(ckid))
         if ckid.value == g_InvalidCKID:
             return None
         else:
@@ -503,12 +503,60 @@ class BM3dObject(BMObject):
         ckid: bmap.bm_CKID = bmap.bm_CKID(g_InvalidCKID)
         if mesh is not None:
             ckid = mesh._get_ckid()
-        bmap.BM3dObject_SetCurrentMesh(self._get_pointer(), self._get_ckid(), ckid)
+        bmap.BM3dEntity_SetCurrentMesh(self._get_pointer(), self._get_ckid(), ckid)
 
     def get_visibility(self) -> bool:
-        return self._get_bool_value(bmap.BM3dObject_GetVisibility)
+        return self._get_bool_value(bmap.BM3dEntity_GetVisibility)
     def set_visibility(self, visb_: bool) -> None:
-        self._set_bool_value(bmap.BM3dObject_SetVisibility, visb_)
+        self._set_bool_value(bmap.BM3dEntity_SetVisibility, visb_)
+
+class BM3dObject(BM3dEntity):
+    pass
+
+class BMLight(BM3dEntity):
+    def get_type(self) -> virtools_types.VXLIGHT_TYPE:
+        return self._get_enum_value(virtools_types.VXLIGHT_TYPE, bmap.BMLight_GetType)
+    def set_type(self, data_: virtools_types.VXLIGHT_TYPE) -> None:
+        self._set_enum_value(bmap.BMLight_SetType, data_)
+
+    def get_color(self) -> virtools_types.VxColor:
+        return self._get_vxcolor_value(bmap.BMLight_GetColor)
+    def set_color(self, col: virtools_types.VxColor) -> None:
+        self._set_vxcolor_value(bmap.BMLight_SetColor, col)
+
+    def get_constant_attenuation(self) -> float:
+        return self._get_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_GetConstantAttenuation)
+    def set_constant_attenuation(self, val_: float) -> None:
+        self._set_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_SetConstantAttenuation, val_)
+    def get_linear_attenuation(self) -> float:
+        return self._get_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_GetLinearAttenuation)
+    def set_linear_attenuation(self, val_: float) -> None:
+        self._set_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_SetLinearAttenuation, val_)
+    def get_quadratic_attenuation(self) -> float:
+        return self._get_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_GetQuadraticAttenuation)
+    def set_quadratic_attenuation(self, val_: float) -> None:
+        self._set_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_SetQuadraticAttenuation, val_)
+        
+    def get_range(self) -> float:
+        return self._get_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_GetRange)
+    def set_range(self, val_: float) -> None:
+        self._set_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_SetRange, val_)
+
+    def get_hot_spot(self) -> float:
+        return self._get_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_GetHotSpot)
+    def set_hot_spot(self, val_: float) -> None:
+        self._set_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_SetHotSpot, val_)
+    def get_falloff(self) -> float:
+        return self._get_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_GetFalloff)
+    def set_falloff(self, val_: float) -> None:
+        self._set_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_SetFalloff, val_)
+    def get_falloff_shape(self) -> float:
+        return self._get_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_GetFalloffShape)
+    def set_falloff_shape(self, val_: float) -> None:
+        self._set_float_point_value(bmap.bm_CKFLOAT, bmap.BMLight_SetFalloffShape, val_)
+        
+class BMTargetLight(BMLight):
+    pass
 
 class BMGroup(BMObject):
     def add_object(self, member: BM3dObject) -> None:
@@ -603,6 +651,10 @@ class BMFileReader(_AbstractPointer):
         return self.__get_ckobject_count(bmap.BMFile_GetGroupCount)
     def get_groups(self) -> typing.Iterator[BMGroup]:
         return self.__get_ckobjects(BMGroup, bmap.BMFile_GetGroupCount, bmap.BMFile_GetGroup)
+    def get_target_light_count(self) -> int:
+        return self.__get_ckobject_count(bmap.BMFile_GetTargetLightCount)
+    def get_target_lights(self) -> typing.Iterator[BMTargetLight]:
+        return self.__get_ckobjects(BMTargetLight, bmap.BMFile_GetTargetLightCount, bmap.BMFile_GetTargetLight)
     
 class BMFileWriter(_AbstractPointer):
     def __init__(self, temp_folder_: str, texture_folder_: str, encodings_: tuple[str]):
@@ -663,6 +715,8 @@ class BMFileWriter(_AbstractPointer):
         return self.__create_ckobject(BM3dObject, bmap.BMFile_Create3dObject)
     def create_group(self) -> BMGroup:
         return self.__create_ckobject(BMGroup, bmap.BMFile_CreateGroup)
+    def create_target_light(self) -> BMTargetLight:
+        return self.__create_ckobject(BMTargetLight, bmap.BMFile_CreateTargetLight)
     
 class BMMeshTrans(_AbstractPointer):
     def __init__(self):

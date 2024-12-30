@@ -352,7 +352,7 @@ namespace BMapSharp.BMapWrapper {
             BMapException.ThrowIfFailed(BMap.BMMesh_GetFaceMaterialSlotIndexs(getPointer(), getCKID(), out IntPtr out_mem));
             Utils.ShortAssigner(out_mem, GetFaceCount(), iem);
         }
-        
+
         public uint GetMaterialSlotCount() => getGenericValue<uint>(BMap.BMMesh_GetMaterialSlotCount);
         public void SetMaterialSlotCount(uint count) => setGenericValue<uint>(BMap.BMMesh_SetMaterialSlotCount, count);
         public IEnumerable<BMMaterial> GetMaterialSlots() {
@@ -375,24 +375,61 @@ namespace BMapSharp.BMapWrapper {
 
     }
 
-    public class BM3dObject : BMObject {
-        internal BM3dObject(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+    public class BM3dEntity : BMObject {
+        internal BM3dEntity(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
 
-        public VxMatrix GetWorldMatrix() => getGenericValue<VxMatrix>(BMap.BM3dObject_GetWorldMatrix);
-        public void SetWorldMatrix(VxMatrix mat) => setGenericValue<VxMatrix>(BMap.BM3dObject_SetWorldMatrix, mat);
+        public VxMatrix GetWorldMatrix() => getGenericValue<VxMatrix>(BMap.BM3dEntity_GetWorldMatrix);
+        public void SetWorldMatrix(VxMatrix mat) => setGenericValue<VxMatrix>(BMap.BM3dEntity_SetWorldMatrix, mat);
 
         public BMMesh GetCurrentMesh() {
-            BMapException.ThrowIfFailed(BMap.BM3dObject_GetCurrentMesh(getPointer(), getCKID(), out uint out_meshid));
+            BMapException.ThrowIfFailed(BMap.BM3dEntity_GetCurrentMesh(getPointer(), getCKID(), out uint out_meshid));
             if (out_meshid == Utils.INVALID_CKID) return null;
             else return new BMMesh(getPointer(), out_meshid);
         }
         public void SetCurrentMesh(BMMesh mesh) {
             uint meshid = (mesh is null) ? Utils.INVALID_CKID : mesh.getCKID();
-            BMapException.ThrowIfFailed(BMap.BM3dObject_SetCurrentMesh(getPointer(), getCKID(), meshid));
+            BMapException.ThrowIfFailed(BMap.BM3dEntity_SetCurrentMesh(getPointer(), getCKID(), meshid));
         }
 
-        public bool GetVisibility() => getGenericValue<bool>(BMap.BM3dObject_GetVisibility);
-        public void SetVisibility(bool visb) => setGenericValue<bool>(BMap.BM3dObject_SetVisibility, visb);
+        public bool GetVisibility() => getGenericValue<bool>(BMap.BM3dEntity_GetVisibility);
+        public void SetVisibility(bool visb) => setGenericValue<bool>(BMap.BM3dEntity_SetVisibility, visb);
+    }
+
+    public class BM3dObject : BM3dEntity {
+        internal BM3dObject(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+    }
+
+    public class BMLight : BM3dEntity {
+        internal BMLight(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
+
+        // Name `GetType` is conflict with C# base class function name.
+        // So we add a `Light` prefix for it.
+        public VXLIGHT_TYPE GetLightType() => getGenericValue<VXLIGHT_TYPE>(BMap.BMLight_GetType);
+        public void SetLightType(VXLIGHT_TYPE val) => setGenericValue<VXLIGHT_TYPE>(BMap.BMLight_SetType, val);
+
+        public VxColor GetColor() => getGenericValue<VxColor>(BMap.BMLight_GetColor);
+        public void SetColor(VxColor col) => setGenericValue<VxColor>(BMap.BMLight_SetColor, col);
+
+        public float GetConstantAttenuation() => getGenericValue<float>(BMap.BMLight_GetConstantAttenuation);
+        public void SetConstantAttenuation(float val) => setGenericValue<float>(BMap.BMLight_SetConstantAttenuation, val);
+        public float GetLinearAttenuation() => getGenericValue<float>(BMap.BMLight_GetLinearAttenuation);
+        public void SetLinearAttenuation(float val) => setGenericValue<float>(BMap.BMLight_SetLinearAttenuation, val);
+        public float GetQuadraticAttenuation() => getGenericValue<float>(BMap.BMLight_GetQuadraticAttenuation);
+        public void SetQuadraticAttenuation(float val) => setGenericValue<float>(BMap.BMLight_SetQuadraticAttenuation, val);
+
+        public float GetRange() => getGenericValue<float>(BMap.BMLight_GetRange);
+        public void SetRange(float val) => setGenericValue<float>(BMap.BMLight_SetRange, val);
+
+        public float GetHotSpot() => getGenericValue<float>(BMap.BMLight_GetHotSpot);
+        public void SetHotSpot(float val) => setGenericValue<float>(BMap.BMLight_SetHotSpot, val);
+        public float GetFalloff() => getGenericValue<float>(BMap.BMLight_GetFalloff);
+        public void SetFalloff(float val) => setGenericValue<float>(BMap.BMLight_SetFalloff, val);
+        public float GetFalloffShape() => getGenericValue<float>(BMap.BMLight_GetFalloffShape);
+        public void SetFalloffShape(float val) => setGenericValue<float>(BMap.BMLight_SetFalloffShape, val);
+    }
+
+    public class BMTargetLight : BMLight {
+        internal BMTargetLight(IntPtr raw_pointer, uint ckid) : base(raw_pointer, ckid) { }
     }
 
     public class BMGroup : BMObject {
@@ -463,6 +500,10 @@ namespace BMapSharp.BMapWrapper {
             getCKObjectCount(BMap.BMFile_GetGroupCount);
         public IEnumerable<BMGroup> GetGroups() =>
             getCKObjects<BMGroup>(BMap.BMFile_GetGroupCount, BMap.BMFile_GetGroup, (bmf, id) => new BMGroup(bmf, id));
+        public uint GetTargetLightCount() =>
+            getCKObjectCount(BMap.BMFile_GetTargetLightCount);
+        public IEnumerable<BMTargetLight> GetTargetLights() =>
+            getCKObjects<BMTargetLight>(BMap.BMFile_GetTargetLightCount, BMap.BMFile_GetTargetLight, (bmf, id) => new BMTargetLight(bmf, id));
 
     }
 
@@ -504,6 +545,7 @@ namespace BMapSharp.BMapWrapper {
         public BMMesh CreateMesh() => createCKObject<BMMesh>(BMap.BMFile_CreateMesh, (bmf, id) => new BMMesh(bmf, id));
         public BM3dObject Create3dObject() => createCKObject<BM3dObject>(BMap.BMFile_Create3dObject, (bmf, id) => new BM3dObject(bmf, id));
         public BMGroup CreateGroup() => createCKObject<BMGroup>(BMap.BMFile_CreateGroup, (bmf, id) => new BMGroup(bmf, id));
+        public BMTargetLight CreateTargetLight() => createCKObject<BMTargetLight>(BMap.BMFile_CreateTargetLight, (bmf, id) => new BMTargetLight(bmf, id));
     }
 
     public sealed class BMMeshTrans : AbstractPointer {

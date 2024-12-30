@@ -4,7 +4,7 @@ import PyBMap.bmap_wrapper as bmap
 def main() -> None:
     input(f'Python PID is {os.getpid()}. Waiting for debugger, press any key to continue...')
 
-    file_name: str = 'Level_02.NMO'
+    file_name: str = 'LightCameraTest.nmo'
     temp_folder: str = 'Temp'
     texture_folder: str = 'F:\\Ballance\\Ballance\\Textures'
     encodings: tuple[str, ...] = ('cp1252', )
@@ -38,37 +38,37 @@ def test_common(reader: bmap.BMFileReader):
     #     print(f'\tFace Count: {mesh.get_face_count()}')
     #     print(f'\tMaterial Slot Count: {mesh.get_material_slot_count()}')
 
-    print('===== Materials =====')
-    for mtl in reader.get_materials():
-        print(mtl.get_name())
+    # print('===== Materials =====')
+    # for mtl in reader.get_materials():
+    #     print(mtl.get_name())
         
-        print(f'\tDiffuse: {mtl.get_diffuse().to_const_rgba()}')
-        print(f'\tAmbient: {mtl.get_ambient().to_const_rgba()}')
-        print(f'\tSpecular: {mtl.get_specular().to_const_rgba()}')
-        print(f'\tEmissive: {mtl.get_emissive().to_const_rgba()}')
+    #     print(f'\tDiffuse: {mtl.get_diffuse().to_const_rgba()}')
+    #     print(f'\tAmbient: {mtl.get_ambient().to_const_rgba()}')
+    #     print(f'\tSpecular: {mtl.get_specular().to_const_rgba()}')
+    #     print(f'\tEmissive: {mtl.get_emissive().to_const_rgba()}')
 
-        print(f'\tSpecular Power: {mtl.get_specular_power()}')
+    #     print(f'\tSpecular Power: {mtl.get_specular_power()}')
 
-        print(f'\tTexture Border Color: {mtl.get_texture_border_color().to_const_rgba()}')
+    #     print(f'\tTexture Border Color: {mtl.get_texture_border_color().to_const_rgba()}')
 
-        print(f'\tTexture Blend Mode: {mtl.get_texture_blend_mode()}')
-        print(f'\tTexture Min Mode: {mtl.get_texture_min_mode()}')
-        print(f'\tTexture Mag Mode: {mtl.get_texture_mag_mode()}')
-        print(f'\tSource Blend: {mtl.get_source_blend()}')
-        print(f'\tDest Blend: {mtl.get_dest_blend()}')
-        print(f'\tFill Mode: {mtl.get_fill_mode()}')
-        print(f'\tShade Mode: {mtl.get_shade_mode()}')
+    #     print(f'\tTexture Blend Mode: {mtl.get_texture_blend_mode()}')
+    #     print(f'\tTexture Min Mode: {mtl.get_texture_min_mode()}')
+    #     print(f'\tTexture Mag Mode: {mtl.get_texture_mag_mode()}')
+    #     print(f'\tSource Blend: {mtl.get_source_blend()}')
+    #     print(f'\tDest Blend: {mtl.get_dest_blend()}')
+    #     print(f'\tFill Mode: {mtl.get_fill_mode()}')
+    #     print(f'\tShade Mode: {mtl.get_shade_mode()}')
 
-        print(f'\tAlpha Test Enabled: {mtl.get_alpha_test_enabled()}')
-        print(f'\tAlpha Blend Enabled: {mtl.get_alpha_blend_enabled()}')
-        print(f'\tPerspective Correction Enabled: {mtl.get_perspective_correction_enabled()}')
-        print(f'\tZ Write Enabled: {mtl.get_z_write_enabled()}')
-        print(f'\tTwo Sided Enabled: {mtl.get_two_sided_enabled()}')
+    #     print(f'\tAlpha Test Enabled: {mtl.get_alpha_test_enabled()}')
+    #     print(f'\tAlpha Blend Enabled: {mtl.get_alpha_blend_enabled()}')
+    #     print(f'\tPerspective Correction Enabled: {mtl.get_perspective_correction_enabled()}')
+    #     print(f'\tZ Write Enabled: {mtl.get_z_write_enabled()}')
+    #     print(f'\tTwo Sided Enabled: {mtl.get_two_sided_enabled()}')
 
-        print(f'\tAlpha Ref: {mtl.get_alpha_ref()}')
+    #     print(f'\tAlpha Ref: {mtl.get_alpha_ref()}')
 
-        print(f'\tAlpha Func: {mtl.get_alpha_func()}')
-        print(f'\tZ Func: {mtl.get_z_func()}')
+    #     print(f'\tAlpha Func: {mtl.get_alpha_func()}')
+    #     print(f'\tZ Func: {mtl.get_z_func()}')
 
     # print('===== Textures =====')
     # for tex in reader.get_textures():
@@ -77,6 +77,23 @@ def test_common(reader: bmap.BMFileReader):
     #     print(f'\tFile Name: {tex.get_file_name()}')
     #     print(f'\tSave Options: {tex.get_save_options()}')
     #     print(f'\tVideo Format: {tex.get_video_format()}')
+
+    print('===== Target Lights =====')
+    for lit in reader.get_target_lights():
+        print(lit.get_name())
+
+        print(f'\tVisibility: {lit.get_visibility()}')
+        print(f'\tMatrix: {lit.get_world_matrix().to_const()}')
+    
+        print(f'\tType: {lit.get_type()}')
+        print(f'\tColor: {lit.get_color().to_const_rgba()}')
+        print(f'\tConstant Attenuation: {lit.get_constant_attenuation()}')
+        print(f'\tLinear Attenuation: {lit.get_linear_attenuation()}')
+        print(f'\tQuadratic Attenuation: {lit.get_quadratic_attenuation()}')
+        print(f'\tRange: {lit.get_range()}')
+        print(f'\tHot Spot: {lit.get_hot_spot()}')
+        print(f'\tFalloff: {lit.get_falloff()}')
+        print(f'\tFalloff Shape: {lit.get_falloff_shape()}')
 
     print('===== END =====')
 

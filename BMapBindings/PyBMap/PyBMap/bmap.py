@@ -227,6 +227,22 @@ BMFile_GetTexture = _create_bmap_func('BMFile_GetTexture', [bm_void_p, bm_CKDWOR
 #  @param out_id[out] Type: LibCmo::CK2::CK_ID. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
 BMFile_CreateTexture = _create_bmap_func('BMFile_CreateTexture', [bm_void_p, bm_CKID_p])
+## BMFile_GetTargetLightCount
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param out_count[out] Type: LibCmo::CKDWORD. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMFile_GetTargetLightCount = _create_bmap_func('BMFile_GetTargetLightCount', [bm_void_p, bm_CKDWORD_p])
+## BMFile_GetTargetLight
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param idx[in] Type: LibCmo::CKDWORD. 
+#  @param out_id[out] Type: LibCmo::CK2::CK_ID. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMFile_GetTargetLight = _create_bmap_func('BMFile_GetTargetLight', [bm_void_p, bm_CKDWORD, bm_CKID_p])
+## BMFile_CreateTargetLight
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param out_id[out] Type: LibCmo::CK2::CK_ID. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMFile_CreateTargetLight = _create_bmap_func('BMFile_CreateTargetLight', [bm_void_p, bm_CKID_p])
 ## BMMeshTrans_New
 #  @param out_trans[out] Type: BMap::BMMeshTransition*. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
@@ -747,42 +763,150 @@ BMMesh_GetMaterialSlot = _create_bmap_func('BMMesh_GetMaterialSlot', [bm_void_p,
 #  @param mtlid[in] Type: LibCmo::CK2::CK_ID. 
 #  @return True if no error, otherwise False.
 BMMesh_SetMaterialSlot = _create_bmap_func('BMMesh_SetMaterialSlot', [bm_void_p, bm_CKID, bm_CKDWORD, bm_CKID])
-## BM3dObject_GetWorldMatrix
+## BM3dEntity_GetWorldMatrix
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param out_mat[out] Type: LibCmo::VxMath::VxMatrix. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BM3dObject_GetWorldMatrix = _create_bmap_func('BM3dObject_GetWorldMatrix', [bm_void_p, bm_CKID, bm_VxMatrix_p])
-## BM3dObject_SetWorldMatrix
+BM3dEntity_GetWorldMatrix = _create_bmap_func('BM3dEntity_GetWorldMatrix', [bm_void_p, bm_CKID, bm_VxMatrix_p])
+## BM3dEntity_SetWorldMatrix
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param mat[in] Type: LibCmo::VxMath::VxMatrix. 
 #  @return True if no error, otherwise False.
-BM3dObject_SetWorldMatrix = _create_bmap_func('BM3dObject_SetWorldMatrix', [bm_void_p, bm_CKID, bm_VxMatrix])
-## BM3dObject_GetCurrentMesh
+BM3dEntity_SetWorldMatrix = _create_bmap_func('BM3dEntity_SetWorldMatrix', [bm_void_p, bm_CKID, bm_VxMatrix])
+## BM3dEntity_GetCurrentMesh
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param out_meshid[out] Type: LibCmo::CK2::CK_ID. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BM3dObject_GetCurrentMesh = _create_bmap_func('BM3dObject_GetCurrentMesh', [bm_void_p, bm_CKID, bm_CKID_p])
-## BM3dObject_SetCurrentMesh
+BM3dEntity_GetCurrentMesh = _create_bmap_func('BM3dEntity_GetCurrentMesh', [bm_void_p, bm_CKID, bm_CKID_p])
+## BM3dEntity_SetCurrentMesh
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param meshid[in] Type: LibCmo::CK2::CK_ID. 
 #  @return True if no error, otherwise False.
-BM3dObject_SetCurrentMesh = _create_bmap_func('BM3dObject_SetCurrentMesh', [bm_void_p, bm_CKID, bm_CKID])
-## BM3dObject_GetVisibility
+BM3dEntity_SetCurrentMesh = _create_bmap_func('BM3dEntity_SetCurrentMesh', [bm_void_p, bm_CKID, bm_CKID])
+## BM3dEntity_GetVisibility
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param out_isVisible[out] Type: bool. Use ctypes.byref(data) pass it. 
 #  @return True if no error, otherwise False.
-BM3dObject_GetVisibility = _create_bmap_func('BM3dObject_GetVisibility', [bm_void_p, bm_CKID, bm_bool_p])
-## BM3dObject_SetVisibility
+BM3dEntity_GetVisibility = _create_bmap_func('BM3dEntity_GetVisibility', [bm_void_p, bm_CKID, bm_bool_p])
+## BM3dEntity_SetVisibility
 #  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
 #  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
 #  @param is_visible[in] Type: bool. 
 #  @return True if no error, otherwise False.
-BM3dObject_SetVisibility = _create_bmap_func('BM3dObject_SetVisibility', [bm_void_p, bm_CKID, bm_bool])
+BM3dEntity_SetVisibility = _create_bmap_func('BM3dEntity_SetVisibility', [bm_void_p, bm_CKID, bm_bool])
+## BMLight_GetType
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param out_val[out] Type: LibCmo::VxMath::VXLIGHT_TYPE. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMLight_GetType = _create_bmap_func('BMLight_GetType', [bm_void_p, bm_CKID, bm_enum_p])
+## BMLight_SetType
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param val[in] Type: LibCmo::VxMath::VXLIGHT_TYPE. 
+#  @return True if no error, otherwise False.
+BMLight_SetType = _create_bmap_func('BMLight_SetType', [bm_void_p, bm_CKID, bm_enum])
+## BMLight_GetColor
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param out_val[out] Type: LibCmo::VxMath::VxColor. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMLight_GetColor = _create_bmap_func('BMLight_GetColor', [bm_void_p, bm_CKID, bm_VxColor_p])
+## BMLight_SetColor
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param col[in] Type: LibCmo::VxMath::VxColor. 
+#  @return True if no error, otherwise False.
+BMLight_SetColor = _create_bmap_func('BMLight_SetColor', [bm_void_p, bm_CKID, bm_VxColor])
+## BMLight_GetConstantAttenuation
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param out_val[out] Type: LibCmo::CKFLOAT. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMLight_GetConstantAttenuation = _create_bmap_func('BMLight_GetConstantAttenuation', [bm_void_p, bm_CKID, bm_CKFLOAT_p])
+## BMLight_SetConstantAttenuation
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param val[in] Type: LibCmo::CKFLOAT. 
+#  @return True if no error, otherwise False.
+BMLight_SetConstantAttenuation = _create_bmap_func('BMLight_SetConstantAttenuation', [bm_void_p, bm_CKID, bm_CKFLOAT])
+## BMLight_GetLinearAttenuation
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param out_val[out] Type: LibCmo::CKFLOAT. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMLight_GetLinearAttenuation = _create_bmap_func('BMLight_GetLinearAttenuation', [bm_void_p, bm_CKID, bm_CKFLOAT_p])
+## BMLight_SetLinearAttenuation
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param val[in] Type: LibCmo::CKFLOAT. 
+#  @return True if no error, otherwise False.
+BMLight_SetLinearAttenuation = _create_bmap_func('BMLight_SetLinearAttenuation', [bm_void_p, bm_CKID, bm_CKFLOAT])
+## BMLight_GetQuadraticAttenuation
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param out_val[out] Type: LibCmo::CKFLOAT. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMLight_GetQuadraticAttenuation = _create_bmap_func('BMLight_GetQuadraticAttenuation', [bm_void_p, bm_CKID, bm_CKFLOAT_p])
+## BMLight_SetQuadraticAttenuation
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param val[in] Type: LibCmo::CKFLOAT. 
+#  @return True if no error, otherwise False.
+BMLight_SetQuadraticAttenuation = _create_bmap_func('BMLight_SetQuadraticAttenuation', [bm_void_p, bm_CKID, bm_CKFLOAT])
+## BMLight_GetRange
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param out_val[out] Type: LibCmo::CKFLOAT. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMLight_GetRange = _create_bmap_func('BMLight_GetRange', [bm_void_p, bm_CKID, bm_CKFLOAT_p])
+## BMLight_SetRange
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param val[in] Type: LibCmo::CKFLOAT. 
+#  @return True if no error, otherwise False.
+BMLight_SetRange = _create_bmap_func('BMLight_SetRange', [bm_void_p, bm_CKID, bm_CKFLOAT])
+## BMLight_GetHotSpot
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param out_val[out] Type: LibCmo::CKFLOAT. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMLight_GetHotSpot = _create_bmap_func('BMLight_GetHotSpot', [bm_void_p, bm_CKID, bm_CKFLOAT_p])
+## BMLight_SetHotSpot
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param val[in] Type: LibCmo::CKFLOAT. 
+#  @return True if no error, otherwise False.
+BMLight_SetHotSpot = _create_bmap_func('BMLight_SetHotSpot', [bm_void_p, bm_CKID, bm_CKFLOAT])
+## BMLight_GetFalloff
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param out_val[out] Type: LibCmo::CKFLOAT. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMLight_GetFalloff = _create_bmap_func('BMLight_GetFalloff', [bm_void_p, bm_CKID, bm_CKFLOAT_p])
+## BMLight_SetFalloff
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param val[in] Type: LibCmo::CKFLOAT. 
+#  @return True if no error, otherwise False.
+BMLight_SetFalloff = _create_bmap_func('BMLight_SetFalloff', [bm_void_p, bm_CKID, bm_CKFLOAT])
+## BMLight_GetFalloffShape
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param out_val[out] Type: LibCmo::CKFLOAT. Use ctypes.byref(data) pass it. 
+#  @return True if no error, otherwise False.
+BMLight_GetFalloffShape = _create_bmap_func('BMLight_GetFalloffShape', [bm_void_p, bm_CKID, bm_CKFLOAT_p])
+## BMLight_SetFalloffShape
+#  @param bmfile[in] Type: BMap::BMFile*. The pointer to corresponding BMFile.
+#  @param objid[in] Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.
+#  @param val[in] Type: LibCmo::CKFLOAT. 
+#  @return True if no error, otherwise False.
+BMLight_SetFalloffShape = _create_bmap_func('BMLight_SetFalloffShape', [bm_void_p, bm_CKID, bm_CKFLOAT])
 
 ##### GENERATED FUNCTIONS END #####
 

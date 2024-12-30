@@ -28,6 +28,7 @@ public class PythonWriter {
 		cache.put("VxMatrix", "VxMatrix");
 		cache.put("CK_TEXTURE_SAVEOPTIONS", "enum");
 		cache.put("VX_PIXELFORMAT", "enum");
+		cache.put("VXLIGHT_TYPE", "enum");
 		cache.put("VXTEXTURE_BLENDMODE", "enum");
 		cache.put("VXTEXTURE_FILTERMODE", "enum");
 		cache.put("VXTEXTURE_ADDRESSMODE", "enum");

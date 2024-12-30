@@ -226,6 +226,13 @@ namespace BMapSharp.VirtoolsTypes {
         _4_ARGB8888_CLUT = 31,  /**< 4 bits indexed CLUT (ARGB)  */
     }
 
+    public enum VXLIGHT_TYPE : uint {
+        VX_LIGHTPOINT = 1,	/**< The Light is a point of light  */
+        VX_LIGHTSPOT = 2,	/**< The light is a spotlight  */
+        VX_LIGHTDIREC = 3,	/**< The light is directional light : Lights comes from an infinite point so only direction of light can be given  */
+        // VX_LIGHTPARA = 4UL,	/**< Obsolete, do not use  */
+    }
+
     public enum VXTEXTURE_BLENDMODE : uint {
         VXTEXTUREBLEND_DECAL = 1,   /**< Texture replace any material information  */
         VXTEXTUREBLEND_MODULATE = 2,    /**< Texture and material are combine. Alpha information of the texture replace material alpha component.  */

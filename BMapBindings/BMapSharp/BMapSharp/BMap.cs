@@ -453,6 +453,28 @@ namespace BMapSharp {
         [DllImport(g_DllName, EntryPoint = "BMFile_CreateTexture", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
         internal static extern bool BMFile_CreateTexture([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [Out, MarshalAs(UnmanagedType.U4)] out uint out_id);
+        /// <summary>BMFile_GetTargetLightCount</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="out_count">Type: LibCmo::CKDWORD. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMFile_GetTargetLightCount", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMFile_GetTargetLightCount([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [Out, MarshalAs(UnmanagedType.U4)] out uint out_count);
+        /// <summary>BMFile_GetTargetLight</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="idx">Type: LibCmo::CKDWORD. </param>
+        /// <param name="out_id">Type: LibCmo::CK2::CK_ID. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMFile_GetTargetLight", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMFile_GetTargetLight([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint idx, [Out, MarshalAs(UnmanagedType.U4)] out uint out_id);
+        /// <summary>BMFile_CreateTargetLight</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="out_id">Type: LibCmo::CK2::CK_ID. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMFile_CreateTargetLight", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMFile_CreateTargetLight([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [Out, MarshalAs(UnmanagedType.U4)] out uint out_id);
         /// <summary>BMMeshTrans_New</summary>
         /// <param name="out_trans">Type: BMap::BMMeshTransition*. This is OUT parameter. </param>
         /// <returns>True if no error, otherwise False.</returns>
@@ -1151,54 +1173,198 @@ namespace BMapSharp {
         [DllImport(g_DllName, EntryPoint = "BMMesh_SetMaterialSlot", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
         internal static extern bool BMMesh_SetMaterialSlot([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint index, [In, MarshalAs(UnmanagedType.U4)] uint mtlid);
-        /// <summary>BM3dObject_GetWorldMatrix</summary>
+        /// <summary>BM3dEntity_GetWorldMatrix</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
         /// <param name="out_mat">Type: LibCmo::VxMath::VxMatrix. This is OUT parameter. </param>
         /// <returns>True if no error, otherwise False.</returns>
-        [DllImport(g_DllName, EntryPoint = "BM3dObject_GetWorldMatrix", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [DllImport(g_DllName, EntryPoint = "BM3dEntity_GetWorldMatrix", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BM3dObject_GetWorldMatrix([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.Struct)] out VxMatrix out_mat);
-        /// <summary>BM3dObject_SetWorldMatrix</summary>
+        internal static extern bool BM3dEntity_GetWorldMatrix([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.Struct)] out VxMatrix out_mat);
+        /// <summary>BM3dEntity_SetWorldMatrix</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
         /// <param name="mat">Type: LibCmo::VxMath::VxMatrix. </param>
         /// <returns>True if no error, otherwise False.</returns>
-        [DllImport(g_DllName, EntryPoint = "BM3dObject_SetWorldMatrix", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [DllImport(g_DllName, EntryPoint = "BM3dEntity_SetWorldMatrix", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BM3dObject_SetWorldMatrix([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.Struct)] VxMatrix mat);
-        /// <summary>BM3dObject_GetCurrentMesh</summary>
+        internal static extern bool BM3dEntity_SetWorldMatrix([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.Struct)] VxMatrix mat);
+        /// <summary>BM3dEntity_GetCurrentMesh</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
         /// <param name="out_meshid">Type: LibCmo::CK2::CK_ID. This is OUT parameter. </param>
         /// <returns>True if no error, otherwise False.</returns>
-        [DllImport(g_DllName, EntryPoint = "BM3dObject_GetCurrentMesh", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [DllImport(g_DllName, EntryPoint = "BM3dEntity_GetCurrentMesh", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BM3dObject_GetCurrentMesh([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_meshid);
-        /// <summary>BM3dObject_SetCurrentMesh</summary>
+        internal static extern bool BM3dEntity_GetCurrentMesh([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out uint out_meshid);
+        /// <summary>BM3dEntity_SetCurrentMesh</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
         /// <param name="meshid">Type: LibCmo::CK2::CK_ID. </param>
         /// <returns>True if no error, otherwise False.</returns>
-        [DllImport(g_DllName, EntryPoint = "BM3dObject_SetCurrentMesh", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [DllImport(g_DllName, EntryPoint = "BM3dEntity_SetCurrentMesh", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BM3dObject_SetCurrentMesh([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint meshid);
-        /// <summary>BM3dObject_GetVisibility</summary>
+        internal static extern bool BM3dEntity_SetCurrentMesh([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] uint meshid);
+        /// <summary>BM3dEntity_GetVisibility</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
         /// <param name="out_isVisible">Type: bool. This is OUT parameter. </param>
         /// <returns>True if no error, otherwise False.</returns>
-        [DllImport(g_DllName, EntryPoint = "BM3dObject_GetVisibility", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [DllImport(g_DllName, EntryPoint = "BM3dEntity_GetVisibility", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BM3dObject_GetVisibility([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U1)] out bool out_isVisible);
-        /// <summary>BM3dObject_SetVisibility</summary>
+        internal static extern bool BM3dEntity_GetVisibility([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U1)] out bool out_isVisible);
+        /// <summary>BM3dEntity_SetVisibility</summary>
         /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
         /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
         /// <param name="is_visible">Type: bool. </param>
         /// <returns>True if no error, otherwise False.</returns>
-        [DllImport(g_DllName, EntryPoint = "BM3dObject_SetVisibility", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [DllImport(g_DllName, EntryPoint = "BM3dEntity_SetVisibility", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        internal static extern bool BM3dObject_SetVisibility([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U1)] bool is_visible);
+        internal static extern bool BM3dEntity_SetVisibility([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U1)] bool is_visible);
+        /// <summary>BMLight_GetType</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="out_val">Type: LibCmo::VxMath::VXLIGHT_TYPE. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_GetType", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_GetType([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.U4)] out VXLIGHT_TYPE out_val);
+        /// <summary>BMLight_SetType</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="val">Type: LibCmo::VxMath::VXLIGHT_TYPE. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_SetType", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_SetType([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.U4)] VXLIGHT_TYPE val);
+        /// <summary>BMLight_GetColor</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="out_val">Type: LibCmo::VxMath::VxColor. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_GetColor", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_GetColor([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.Struct)] out VxColor out_val);
+        /// <summary>BMLight_SetColor</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="col">Type: LibCmo::VxMath::VxColor. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_SetColor", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_SetColor([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.Struct)] VxColor col);
+        /// <summary>BMLight_GetConstantAttenuation</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="out_val">Type: LibCmo::CKFLOAT. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_GetConstantAttenuation", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_GetConstantAttenuation([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.R4)] out float out_val);
+        /// <summary>BMLight_SetConstantAttenuation</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="val">Type: LibCmo::CKFLOAT. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_SetConstantAttenuation", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_SetConstantAttenuation([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.R4)] float val);
+        /// <summary>BMLight_GetLinearAttenuation</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="out_val">Type: LibCmo::CKFLOAT. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_GetLinearAttenuation", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_GetLinearAttenuation([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.R4)] out float out_val);
+        /// <summary>BMLight_SetLinearAttenuation</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="val">Type: LibCmo::CKFLOAT. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_SetLinearAttenuation", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_SetLinearAttenuation([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.R4)] float val);
+        /// <summary>BMLight_GetQuadraticAttenuation</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="out_val">Type: LibCmo::CKFLOAT. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_GetQuadraticAttenuation", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_GetQuadraticAttenuation([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.R4)] out float out_val);
+        /// <summary>BMLight_SetQuadraticAttenuation</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="val">Type: LibCmo::CKFLOAT. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_SetQuadraticAttenuation", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_SetQuadraticAttenuation([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.R4)] float val);
+        /// <summary>BMLight_GetRange</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="out_val">Type: LibCmo::CKFLOAT. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_GetRange", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_GetRange([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.R4)] out float out_val);
+        /// <summary>BMLight_SetRange</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="val">Type: LibCmo::CKFLOAT. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_SetRange", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_SetRange([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.R4)] float val);
+        /// <summary>BMLight_GetHotSpot</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="out_val">Type: LibCmo::CKFLOAT. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_GetHotSpot", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_GetHotSpot([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.R4)] out float out_val);
+        /// <summary>BMLight_SetHotSpot</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="val">Type: LibCmo::CKFLOAT. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_SetHotSpot", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_SetHotSpot([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.R4)] float val);
+        /// <summary>BMLight_GetFalloff</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="out_val">Type: LibCmo::CKFLOAT. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_GetFalloff", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_GetFalloff([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.R4)] out float out_val);
+        /// <summary>BMLight_SetFalloff</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="val">Type: LibCmo::CKFLOAT. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_SetFalloff", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_SetFalloff([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.R4)] float val);
+        /// <summary>BMLight_GetFalloffShape</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="out_val">Type: LibCmo::CKFLOAT. This is OUT parameter. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_GetFalloffShape", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_GetFalloffShape([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [Out, MarshalAs(UnmanagedType.R4)] out float out_val);
+        /// <summary>BMLight_SetFalloffShape</summary>
+        /// <param name="bmfile">Type: BMap::BMFile*. The pointer to corresponding BMFile.</param>
+        /// <param name="objid">Type: LibCmo::CK2::CK_ID. The CKID of object you accessing.</param>
+        /// <param name="val">Type: LibCmo::CKFLOAT. </param>
+        /// <returns>True if no error, otherwise False.</returns>
+        [DllImport(g_DllName, EntryPoint = "BMLight_SetFalloffShape", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool BMLight_SetFalloffShape([In, MarshalAs(UnmanagedType.SysInt)] IntPtr bmfile, [In, MarshalAs(UnmanagedType.U4)] uint objid, [In, MarshalAs(UnmanagedType.R4)] float val);
 
         // ##### GENERATED FUNCTIONS END #####
 

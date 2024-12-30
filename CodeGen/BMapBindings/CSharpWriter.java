@@ -188,6 +188,7 @@ public class CSharpWriter {
 			break;
 		case "CK_TEXTURE_SAVEOPTIONS":
 		case "VX_PIXELFORMAT":
+		case "VXLIGHT_TYPE":
 		case "VXTEXTURE_BLENDMODE":
 		case "VXTEXTURE_FILTERMODE":
 		case "VXTEXTURE_ADDRESSMODE":
