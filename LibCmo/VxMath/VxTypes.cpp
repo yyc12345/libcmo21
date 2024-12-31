@@ -444,7 +444,7 @@ namespace LibCmo::VxMath {
 	}
 	void VxMatrix::Perspective(CKFLOAT Fov, CKFLOAT Aspect, CKFLOAT Near_plane, CKFLOAT Far_plane) {
 		Clear();
-		m_Data[0][0] = std::cosf(Fov * 0.5f) / std::sinf(Fov * 0.5f);
+		m_Data[0][0] = std::cos(Fov * 0.5f) / std::sin(Fov * 0.5f);
 		m_Data[1][1] = m_Data[0][0] * Aspect;
 		m_Data[2][2] = Far_plane / (Far_plane - Near_plane);
 		m_Data[3][2] = -m_Data[2][2] * Near_plane;
