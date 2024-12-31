@@ -1,3 +1,10 @@
+# Configure version file
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/../CMake/VTVersion.hpp.in
+    ${CMAKE_CURRENT_LIST_DIR}/VTVersion.hpp
+    @ONLY
+)
+
 # Create static library
 add_library(LibCmo STATIC "")
 # Setup static library sources
@@ -47,6 +54,7 @@ PUBLIC
 FILE_SET HEADERS
 FILES
     # Asststant header files
+	VTVersion.hpp
 	VTInternal.hpp
 	VTEncoding.hpp
 	VTUtils.hpp

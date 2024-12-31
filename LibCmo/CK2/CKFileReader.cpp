@@ -102,24 +102,27 @@ namespace LibCmo::CK2 {
 				// This is a patch for Dassault stupid programmer.
 				// 
 				// After Virtools 4.0, Dassault use a new way to compute the CRC of file.
-				// Dassault introduce a new class called CKMemoryBufferWriter which use file and memory map to handle big file properly.
+				// Dassault introduces a new class called CKMemoryBufferWriter which use file and memory map to handle big file properly.
+				// This algorithm splits the whole data body into 8 MB chunks and calculate them one by one to avoid instantaneous memory occupation.
 				// However, there is a bug in virtual function CKMemoryBufferWriter::ComputeCRC.
-				// It takes `PreviousCRC` as argument but never use it in function. In this function, the start value of CRC compution is hardcoded 0.
+				// It takes `PreviousCRC` as argument but never use it in function. 
+				// In this function, the start value of CRC compution is hardcoded 0.
 				// So, although Dassault programmer try to compute CRC for file header, header part and daat part in code, it actually only compute CRC for data part!
-				// I 100% sure this is the mistake of Dassault stupid programmer and this bug cause horrible result.
+				// I 100% sure this is the mistake of Dassault stupid programmer and this bug cause more horrible result.
 				// 
 				// In Virtools 2.1, engine will check CRC of file first. If no matched CRC, engine will reject loading file.
 				// So the obvious result is that we can not load file saved by Virtools 4.0 in Virtools 2.1.
 				// But this is not the point which makes me indignant.
-				// The real weird point is that we can use Virtools 3.5 to open file saved by Virtools 4.0 but why?
-				// After some research, I found that the programmer of Dassault totally removed CRC check when loading file since some version which I don't know!
+				// The real weird point is that we can use Virtools 3.5 to open file saved by Virtools 4.0, but why?
+				// After some researches, I found that the programmer of Dassault totally removed CRC check when loading file, since some version which I don't know, to suppress this bug!
 				// This is totally cheat and commercial-oriented behavior!
-				// I guess Dassault programmer also find that they can not load new created file in old Virtools.
-				// But they entirely don't know how to resolve it. So they just directly remove the whole of CRC checker!
-				// That's the point which makes me indignant.
+				// I guess Dassault programmer also found that they can not load new created file in old Virtools.
+				// But they didn't find out what cause this bug, and just directly remove the whole of CRC checker to resolve this bug!
+				// I can't believe that this thing happens on such official software.
+				// This is the point which makes me indignant.
 				gotten_crc = CKComputeDataCRC(parser->GetPtr(), this->m_FileInfo.DataPackSize, 0u);
 
-				// Both CRC compute methods are failed, this file may be really broken.
+				// Both CRC compute methods are failed. This file may be really broken.
 				// Report exception directly.
 				if (gotten_crc != this->m_FileInfo.Crc) {
 					this->m_Ctx->OutputToConsole(u8"Virtools file CRC error.");

@@ -128,7 +128,7 @@ SetObjectFlags(obj_flags); \
 	}
 
 	void CKCamera::ComputeProjectionMatrix(VxMath::VxMatrix& mat) const {
-		CKFLOAT aspect = m_Width / m_Height;
+		CKFLOAT aspect = static_cast<CKFLOAT>(m_Width) / m_Height;
 		if (m_ProjectType == CK_CAMERA_PROJECTION::CK_PERSPECTIVEPROJECTION) {
 			mat.Perspective(m_Fov, aspect, m_FrontPlane, m_BackPlane);
 		} else {

@@ -5,6 +5,9 @@
 *.nms
 *.vmo
 
+# Ignore CMake generated version header
+LibCmo/VTVersion.hpp
+
 # Ignore temporary Visual Studio files and folders
 temp/
 out/

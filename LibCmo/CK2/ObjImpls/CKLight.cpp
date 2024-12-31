@@ -1,5 +1,6 @@
 #include "CKLight.hpp"
 #include "../CKStateChunk.hpp"
+#include <numbers>
 
 namespace LibCmo::CK2::ObjImpls {
 
@@ -16,8 +17,8 @@ namespace LibCmo::CK2::ObjImpls {
 		m_LightData.m_Attenuation0 = 1.0f;
 		m_LightData.m_Attenuation1 = 0.0f;
 		m_LightData.m_Attenuation2 = 0.0f;
-		m_LightData.m_InnerSpotCone = 0.69813174f; // MARK: Perhaps 40 deg in rad.
-		m_LightData.m_OuterSpotCone = 0.78539819f; // MARK: Perhaps 45 deg in rad.
+		m_LightData.m_InnerSpotCone = 40.0f / 180.0f * std::numbers::pi_v<float>; // MARK: Original value is 0.69813174f. Perhaps 40 deg in rad.
+		m_LightData.m_OuterSpotCone = 45.0f / 180.0f * std::numbers::pi_v<float>; // MARK: Original value is 0.78539819f. Perhaps 45 deg in rad.
 	}
 
 	CKLight::~CKLight() {}

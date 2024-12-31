@@ -362,8 +362,8 @@ namespace Unvirt::CmdHelper {
 					throw std::invalid_argument("root node should not be inserted as child node.");
 				// check conflict
 				const auto& new_node_set = new_node_ptr->GetConflictSet();
-				for (auto& node : m_Nodes) {
-					const auto& node_set = node->GetConflictSet();
+				for (auto& child_node : m_Nodes) {
+					const auto& node_set = child_node->GetConflictSet();
 					if (new_node_set.IsConflictWith(node_set))
 						throw std::invalid_argument("try to add a conflict node. please check your code.");
 				}

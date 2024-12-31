@@ -20,6 +20,8 @@
  * They should use Virtools type anywhere, except that Virtools type can not fulfill their requirements.
 */
 
+// The version info header of LibCmo
+#include "VTVersion.hpp"
 // The base header of LibCmo.
 // It provides various convenient stuff, for example:
 // - General LibCmo specific custom exception.
