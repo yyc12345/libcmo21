@@ -3,11 +3,19 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.CommandLine;
 
 namespace BMapSharpTestbench {
     internal class Program {
 
         static void Main(string[] args) {
+            // Parse arguments
+            var resolved_args = ResolveArguments(args);
+            if (resolved_args is null) {
+                // just silent quit
+                Environment.Exit(0);
+            }
+
             // Check environment
             Console.OutputEncoding = Encoding.UTF8;
             if (!BMapSharp.BMapWrapper.Utils.IsBMapAvailable()) {
@@ -21,10 +29,10 @@ namespace BMapSharpTestbench {
             Console.ReadKey(true);
 
             // Start testbench
-            string file_name = "LightCameraTest.nmo";
-            string temp_folder = "Temp";
-            string texture_folder = "F:\\Ballance\\Ballance\\Textures";
-            string[] encodings = ["cp1252", "gb2312"];
+            string file_name = resolved_args.mFileName; // "LightCameraTest.nmo";
+            string temp_folder = resolved_args.mTempFolder; // "Temp";
+            string texture_folder = resolved_args.mTextureFolder; // "F:\\Ballance\\Ballance\\Textures";
+            string[] encodings = resolved_args.mEncodings; // ["cp1252", "gb2312"];
 
             using (var reader = new BMapSharp.BMapWrapper.BMFileReader(file_name, temp_folder, texture_folder, encodings)) {
                 TestCommon(reader);
@@ -34,6 +42,53 @@ namespace BMapSharpTestbench {
             Console.WriteLine("Press any key to quit...");
             Console.ReadKey(true);
 
+        }
+
+        class BMapSharpArguments {
+            public string mFileName;
+            public string mTempFolder;
+            public string mTextureFolder;
+            public string[] mEncodings;
+        }
+
+        static BMapSharpArguments ResolveArguments(string[] args) {
+            // define arguments
+            var fileNameOpt = new Option<string>
+                ("--file-path", "The path to input Virtools file.");
+            fileNameOpt.IsRequired = true;
+            var tempFolderOpt = new Option<string>
+                ("--temp-dir", "The temp folder used by BMap.");
+            tempFolderOpt.IsRequired = true;
+            var textureFolderOpt = new Option<string>
+                ("--texture-dir", "The texture folder containing Ballance texture resources.");
+            textureFolderOpt.IsRequired = true;
+            var encodingsOpt = new Option<IEnumerable<string>>
+                ("--encodings", "The encodings used to parse the names stroed in input Virtools file.");
+            encodingsOpt.IsRequired = true;
+            encodingsOpt.Arity = ArgumentArity.OneOrMore;
+            encodingsOpt.AllowMultipleArgumentsPerToken = true;
+
+            // init root command
+            var rootCommand = new RootCommand("The testbench of BMapSharp.");
+            rootCommand.Add(fileNameOpt);
+            rootCommand.Add(tempFolderOpt);
+            rootCommand.Add(textureFolderOpt);
+            rootCommand.Add(encodingsOpt);
+
+            // init result container
+            BMapSharpArguments ret = new BMapSharpArguments();
+            // set handler
+            rootCommand.SetHandler((context) => {
+                ret.mFileName = context.ParseResult.GetValueForOption(fileNameOpt);
+                ret.mTempFolder =  context.ParseResult.GetValueForOption(tempFolderOpt);
+                ret.mTextureFolder =  context.ParseResult.GetValueForOption(textureFolderOpt);
+                ret.mEncodings =  context.ParseResult.GetValueForOption(encodingsOpt).ToArray();
+                context.ExitCode = 61;
+            });
+
+            // execute root command and return value.
+            if (rootCommand.Invoke(args) != 61) return null;
+            return ret;
         }
 
         static void TestCommon(BMapSharp.BMapWrapper.BMFileReader reader) {
@@ -137,7 +192,7 @@ namespace BMapSharpTestbench {
                 );
                 return;
             }
-            
+
             // Prepare test variables
             var all_3dobjects = new List<BM3dObject>(reader.Get3dObjects());
             var first_3dobj = all_3dobjects[0];

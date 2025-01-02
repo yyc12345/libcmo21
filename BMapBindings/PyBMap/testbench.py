@@ -1,13 +1,14 @@
 import os
+import argparse
 import PyBMap.bmap_wrapper as bmap
 
-def main() -> None:
+def main(file_name: str, temp_folder: str, texture_folder: str, encodings: tuple[str, ...]) -> None:
     input(f'Python PID is {os.getpid()}. Waiting for debugger, press any key to continue...')
 
-    file_name: str = 'LightCameraTest.nmo'
-    temp_folder: str = 'Temp'
-    texture_folder: str = 'F:\\Ballance\\Ballance\\Textures'
-    encodings: tuple[str, ...] = ('cp1252', )
+    # file_name: str = 'LightCameraTest.nmo'
+    # temp_folder: str = 'Temp'
+    # texture_folder: str = 'F:\\Ballance\\Ballance\\Textures'
+    # encodings: tuple[str, ...] = ('cp1252', )
     with bmap.BMFileReader(file_name, temp_folder, texture_folder, encodings) as reader:
         test_common(reader)
         test_equatable(reader)
@@ -146,4 +147,32 @@ def test_equatable(reader: bmap.BMFileReader):
     assert second_3dobj in test_dict
 
 if __name__ == '__main__':
-    main()
+    # parse argument
+    parser = argparse.ArgumentParser(
+        prog='PyBMap Testbench',
+        description='The testbench of PyBMap.'
+    )
+    parser.add_argument(
+        '--file-path',
+        action='store', dest='file_path', required=True,
+        help='The path to input Virtools file.'
+    )
+    parser.add_argument(
+        '--temp-dir',
+        action='store', dest='temp_dir', required=True,
+        help='The temp folder used by BMap.'
+    )
+    parser.add_argument(
+        '--texture-dir',
+        action='store', dest='texture_dir', required=True,
+        help='The texture folder containing Ballance texture resources.'
+    )
+    parser.add_argument(
+        '--encodings',
+        action='extend', nargs='+', dest='encodings', required=True,
+        help='The encodings used to parse the names stroed in input Virtools file.'
+    )
+    args = parser.parse_args()
+
+    # run main function
+    main(args.file_path, args.temp_dir, args.texture_dir, tuple(args.encodings))
