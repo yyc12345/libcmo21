@@ -27,10 +27,6 @@
 // - General LibCmo specific custom exception.
 // - Enum Helper for convenient C++ enum class type logic operations.
 #include "VTUtils.hpp"
-// Platform independent encoding system.
-// Use native Win32 functions in Windows,
-// or Iconv in non-Windows to provide encoding convertion services.
-#include "VTEncoding.hpp"
 
 // Include CK2 types first.
 // Because it also include some types or structs used by other module.
@@ -56,6 +52,3 @@
 
 // Last, load some custom struct used in program.
 #include "CK2/CKDefines.hpp"
-
-
-

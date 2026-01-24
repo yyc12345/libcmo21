@@ -1,0 +1,2 @@
+# Ignore CMake generated version header
+VTVersion.hpp

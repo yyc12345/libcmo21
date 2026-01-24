@@ -5,11 +5,8 @@
 #error "You must define ONE of LIBCMO_BUILD_DEBUG and LIBCMO_BUILD_RELEASE to indicate build type!"
 #endif
 
-// Include YYCC helper library and check its version
-#include <YYCCommonplace.hpp>
-#if YYCC_VERCMP_NE(YYCC_VER_MAJOR, YYCC_VER_MINOR, YYCC_VER_PATCH, 1, 3, 0)
-#error "YYCC library version is not matched with our expected version. Please check your library configuration."
-#endif
+// Include YYCC library core header for all headers
+#include <yycc.hpp>
 
 // Header for this namespace implementation
 #include <string>

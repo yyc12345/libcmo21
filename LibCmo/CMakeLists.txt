@@ -11,7 +11,7 @@ add_library(LibCmo STATIC "")
 target_sources(LibCmo
 PRIVATE
 	# NeMo Shared
-	LibCmo/VTEncoding.cpp
+	LibCmo/VTUtils.cpp
 	LibCmo/VTImage.cpp
 	# CK2
 	LibCmo/CK2/CKBitmapData.cpp
@@ -57,7 +57,6 @@ FILES
 	VTAll.hpp
 	LibCmo/VTVersion.hpp
 	LibCmo/VTInternal.hpp
-	LibCmo/VTEncoding.hpp
 	LibCmo/VTUtils.hpp
 	# CK2
 	LibCmo/CK2/CKDefines.hpp

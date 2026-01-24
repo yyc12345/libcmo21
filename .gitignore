@@ -13,7 +13,6 @@ temp/
 *.vmo
 
 # Ignore CMake generated stuff
-LibCmo/LibCmo/VTVersion.hpp
 CMakeSettings.json
 
 ## ======== VSCode ========
