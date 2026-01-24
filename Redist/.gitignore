@@ -1,7 +1,0 @@
-# Disable all file and folder
-/*
-/*/
-
-# Only upload specific files
-!/.gitignore
-!/README.md
