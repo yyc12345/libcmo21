@@ -36,6 +36,9 @@ find_package(ZLIB REQUIRED)
 find_package(YYCCommonplace REQUIRED)
 find_package(STB REQUIRED)
 
+# Import package helper
+include(CMakePackageConfigHelpers)
+
 # If we are not in Windows environment, and we need to build shared library BMap,
 # we should enable PIC (position independent code), otherwise build process will fail.
 # Also we should let all symbols in final dll be hidden (not exported) in default.
@@ -57,31 +60,3 @@ endif ()
 if (NEMO_BUILD_DOC)
     add_subdirectory(Documents)
 endif ()
-
-# Install target and package
-# Install target
-install(EXPORT LibCmoTargets
-    FILE LibCmoTargets.cmake
-    NAMESPACE NeMo::
-    DESTINATION ${NEMO_INSTALL_LIB_PATH}/cmake/LibCmo
-)
-# Package configuration file
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    LibCmoConfigVersion.cmake
-    VERSION ${PACKAGE_VERSION}
-    COMPATIBILITY SameMinorVersion
-)
-configure_package_config_file(
-    ${CMAKE_CURRENT_LIST_DIR}/CMake/LibCmoConfig.cmake.in 
-    "${CMAKE_CURRENT_BINARY_DIR}/LibCmoConfig.cmake"
-    INSTALL_DESTINATION ${NEMO_INSTALL_LIB_PATH}/cmake/LibCmo
-)
-# Copy package files to install destination
-install(
-FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/LibCmoConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/LibCmoConfigVersion.cmake"
-DESTINATION
-    ${NEMO_INSTALL_LIB_PATH}/cmake/LibCmo
-)

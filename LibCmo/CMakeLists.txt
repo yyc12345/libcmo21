@@ -126,3 +126,28 @@ install(TARGETS LibCmo
     INCLUDES DESTINATION ${NEMO_INSTALL_INCLUDE_PATH}
     FILE_SET HEADERS DESTINATION ${NEMO_INSTALL_INCLUDE_PATH}
 )
+# Install target
+install(EXPORT LibCmoTargets
+    FILE LibCmoTargets.cmake
+    NAMESPACE NeMo::
+    DESTINATION ${NEMO_INSTALL_LIB_PATH}/cmake/LibCmo
+)
+# Package configuration file
+write_basic_package_version_file(
+    LibCmoConfigVersion.cmake
+    VERSION ${PACKAGE_VERSION}
+    COMPATIBILITY SameMinorVersion
+)
+configure_package_config_file(
+    ${CMAKE_CURRENT_LIST_DIR}/../CMake/LibCmoConfig.cmake.in 
+    "${CMAKE_CURRENT_BINARY_DIR}/LibCmoConfig.cmake"
+    INSTALL_DESTINATION ${NEMO_INSTALL_LIB_PATH}/cmake/LibCmo
+)
+# Copy package files to install destination
+install(
+FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/LibCmoConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/LibCmoConfigVersion.cmake"
+DESTINATION
+    ${NEMO_INSTALL_LIB_PATH}/cmake/LibCmo
+)
