@@ -73,25 +73,9 @@ So before compiling, you must make sure `doxygen` are presented in your environm
 
 ## Build and Install
 
-There are 2 different ways to build this project.
-If you are the user of this project (just want this project to make something works), please choose "User Build".
-If you are a developer (developer of this project, or use this project as dependency to develop your project), please choose "Developer Build".
+Using CMake is the only viable way to build and install this repository.
 
-### User Build
-
-"User Build" is basically how GitHub Action build this project.
-
-Under **the root directory** of this project, execute:
-
-- `Script/windows_build.bat` on Windows
-- or `Script/linux_build.sh` on Linux
-- or `Script/macos_build.sh` on macOS
-
-The final built artifact is under `Bin/install` directory.
-
-### Developer Build
-
-#### Configurable Variables
+### Configurable Variables
 
 First, there is a list listing all variables you may configure during compiling.
 
@@ -109,7 +93,7 @@ Please note that generated documentation is different in different platforms.
 * `ZLIB_ROOT`: Set to the install path of zlib.
 If you are using zlib which is not build by your own, you usually do not need specify this variable.
 
-#### Configure CMake
+### Configure CMake
 
 When configure CMake, you may use different options on different platforms.
 Following list may help you.
@@ -124,7 +108,7 @@ Additionally, you can attach any variables introduced above with `-D` option dur
 > [!NOTE]  
 > Position independent code flag is automatically added if you enable `BMap` so you don't need manually specify it. You just need to make sure that all dependencies enable this.
 
-#### Build with CMake
+### Build with CMake
 
 After configuration, you can use `cmake --build .` to build project,
 with additional options on different platforms.
@@ -135,7 +119,7 @@ Following list may help you.
 - On Linux or other POSIX systems:
     * None
 
-#### Install with CMake
+### Install with CMake
 
 After building, you can use `cmake --install . --prefix <path-to-prefix>`
 to install project into given path, with additional options on different platforms.
