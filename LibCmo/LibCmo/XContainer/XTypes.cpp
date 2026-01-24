@@ -40,11 +40,11 @@ namespace LibCmo::XContainer {
 			ba[n] = false;
 		}
 
-		template<bool _Cond>
+		template<bool BCondition>
 		static bool GeneralGetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got) {
 			CKDWORD counter = 0;
 			for (size_t i = 0; i < ba.size(); ++i) {
-				if (ba[i] == _Cond) {
+				if (ba[i] == BCondition) {
 					if (counter == n) {
 						got = static_cast<CKDWORD>(i);
 						return true;
@@ -81,18 +81,14 @@ namespace LibCmo::XContainer {
 
 	}
 
-	template<class _Ty>
-	static constexpr bool GeneralXArrayCheck_TypeCheck() {
-		return std::is_same_v<_Ty, CK2::CK_ID> || std::is_same_v<_Ty, CK2::ObjImpls::CKObject*>;
-	}
-	template<class _Ty, bool _IsPre>
-	static bool GeneralXArrayCheck_ItemCheck(const _Ty& item, CK2::CKContext* ctx) {
-		static_assert(GeneralXArrayCheck_TypeCheck<_Ty>());
+	template<class T, bool BIsPre>
+		requires (std::is_same_v<T, CK2::CK_ID> || std::is_same_v<T, CK2::ObjImpls::CKObject*>)
+	static bool GeneralXArrayCheck_ItemCheck(const T& item, CK2::CKContext* ctx) {
 		if (ctx == nullptr) return false;
 
-		if constexpr (_IsPre) {
+		if constexpr (BIsPre) {
 			CK2::ObjImpls::CKObject* obj = nullptr;
-			if constexpr (std::is_same_v<_Ty, CK2::CK_ID>) {
+			if constexpr (std::is_same_v<T, CK2::CK_ID>) {
 				obj = ctx->GetObject(item);
 				if (obj == nullptr) return false;
 			} else {
@@ -101,7 +97,7 @@ namespace LibCmo::XContainer {
 			if (obj->IsToBeDeleted()) return false;
 		} else {
 			CK2::MgrImpls::CKObjectManager* objmgr = ctx->GetObjectManager();
-			if constexpr (std::is_same_v<_Ty, CK2::CK_ID>) {
+			if constexpr (std::is_same_v<T, CK2::CK_ID>) {
 				if (!objmgr->IsObjectSafe(item)) return false;
 			} else {
 				if (!objmgr->IsObjectPointerSafe(item)) return false;
