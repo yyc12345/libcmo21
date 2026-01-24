@@ -30,27 +30,8 @@ PRIVATE
 	YYCC::YYCCommonplace
 	LibCmo
 )
-# Setup C++ standard
-set_target_properties(Unvirt
-PROPERTIES
-    CXX_STANDARD 20
-    CXX_STANDARD_REQUIRED 20
-    CXX_EXTENSION OFF
-)
-# Order Unicode charset for private using
-target_compile_definitions(Unvirt
-PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:UNICODE>
-    $<$<CXX_COMPILER_ID:MSVC>:_UNICODE>
-)
-# Order build as UTF-8 in MSVC
-target_compile_options(Unvirt
-PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:/utf-8>
-)
 
-# Install Unvirt only on Release mode
+# Install Unvirt
 install(TARGETS Unvirt
-	CONFIGURATIONS Release RelWithDebInfo MinSizeRel
     RUNTIME DESTINATION ${YYCC_INSTALL_BIN_PATH}
 )
