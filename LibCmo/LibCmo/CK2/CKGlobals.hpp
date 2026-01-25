@@ -2,6 +2,7 @@
 
 #include "CKTypes.hpp"
 #include "../XContainer/XTypes.hpp"
+#include <yycc/macro/class_copy_move.hpp>
 #include <functional>
 #include <memory>
 
@@ -146,7 +147,7 @@ namespace LibCmo::CK2 {
 			DerivationLevel(0),
 			Parents(), Children(), ToBeNotify(), CommonToBeNotify()
 		{}
-		YYCC_DEF_CLS_COPY_MOVE(CKClassDesc);
+		YYCC_DEFAULT_COPY_MOVE(CKClassDesc)
 	};
 
 	// ========== CKClass Registration ==========

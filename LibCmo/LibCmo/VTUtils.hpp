@@ -1,10 +1,5 @@
 #pragma once
 
-// Check LibCmo build type first.
-#if !(defined(LIBCMO_BUILD_DEBUG) ^ defined(LIBCMO_BUILD_RELEASE))
-#error "You must define ONE of LIBCMO_BUILD_DEBUG and LIBCMO_BUILD_RELEASE to indicate build type!"
-#endif
-
 // Include YYCC library core header for all headers
 #include <yycc.hpp>
 

@@ -5,6 +5,8 @@
 #include "MgrImpls/CKBaseManager.hpp"
 #include "MgrImpls/CKPathManager.hpp"
 #include "../VxMath/VxMemoryMappedFile.hpp"
+#include <yycc/cenum.hpp>
+#include <yycc/patch/fopen.hpp>
 #include <memory>
 
 namespace LibCmo::CK2 {
@@ -216,8 +218,8 @@ namespace LibCmo::CK2 {
 		}
 
 		// compress header if needed
-		if (YYCC::EnumHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
-			YYCC::EnumHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
+		if (yycc::cenum::has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD)
+		    || yycc::cenum::has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
 
 			CKDWORD comp_buf_size = 0;
 			void* comp_buffer = CKPackData(hdrparser->GetBase(), hdrparser->GetSize(), comp_buf_size, m_Ctx->GetCompressionLevel());
@@ -263,8 +265,8 @@ namespace LibCmo::CK2 {
 		}
 
 		// compress header if needed
-		if (YYCC::EnumHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
-			YYCC::EnumHelper::Has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
+		if (yycc::cenum::has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD)
+		    || yycc::cenum::has(fileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
 
 			CKDWORD comp_buf_size = 0;
 			void* comp_buffer = CKPackData(datparser->GetBase(), datparser->GetSize(), comp_buf_size, m_Ctx->GetCompressionLevel());
@@ -303,7 +305,7 @@ namespace LibCmo::CK2 {
 
 		// ========== Open File & Write Essential Data ==========
 		// open file and test
-		FILE* fs = YYCC::IOHelper::UTF8FOpen(u8_filename, u8"wb");
+		FILE* fs = yycc::patch::fopen::fopen(u8_filename, u8"wb");
 		if (fs == nullptr) return CKERROR::CKERR_CANTWRITETOFILE;
 		// write small header + header + data
 		std::fwrite(&rawHeader, sizeof(CKRawFileInfo), 1, fs);
@@ -363,7 +365,7 @@ namespace LibCmo::CK2 {
 
 		// try open file to check whether we can write it.
 		CKERROR err;
-		FILE* tryfile = YYCC::IOHelper::UTF8FOpen(filename, u8"ab");
+		FILE* tryfile = yycc::patch::fopen::fopen(filename, u8"ab");
 		if (tryfile == nullptr) {
 			err = CKERROR::CKERR_CANTWRITETOFILE;
 		} else {

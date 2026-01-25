@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../VTInternal.hpp"
+#include <yycc/macro/class_copy_move.hpp>
 #include <memory>
 #include <functional>
 #include <type_traits>
@@ -54,7 +55,7 @@ namespace LibCmo::CK2 {
 			LockedReadBufferDeleter() : m_Host(nullptr), m_ConsumedSize(0) {}
 			LockedReadBufferDeleter(CKStateChunk* host, CKDWORD init_size) :
 				m_Host(host), m_ConsumedSize(init_size) {}
-			YYCC_DEF_CLS_COPY_MOVE(LockedReadBufferDeleter);
+			YYCC_DEFAULT_COPY_MOVE(LockedReadBufferDeleter)
 
 			void operator()(const void* /*buf*/);
 			void SetConsumedSize(CKDWORD newsize);
@@ -68,7 +69,7 @@ namespace LibCmo::CK2 {
 			LockedWriteBufferDeleter() : m_Host(nullptr), m_ConsumedSize(0) {}
 			LockedWriteBufferDeleter(CKStateChunk* host, CKDWORD init_size) :
 				m_Host(host), m_ConsumedSize(init_size) {}
-			YYCC_DEF_CLS_COPY_MOVE(LockedWriteBufferDeleter);
+			YYCC_DEFAULT_COPY_MOVE(LockedWriteBufferDeleter)
 
 			void operator()(const void* /*buf*/);
 			void SetConsumedSize(CKDWORD newsize);
@@ -82,7 +83,7 @@ namespace LibCmo::CK2 {
 			BufferDeleter() : m_Host(nullptr), m_BufSize(0) {}
 			BufferDeleter(CKStateChunk* host, CKDWORD bufsize) :
 				m_Host(host), m_BufSize(bufsize) {}
-			YYCC_DEF_CLS_COPY_MOVE(BufferDeleter);
+			YYCC_DEFAULT_COPY_MOVE(BufferDeleter)
 
 			void operator()(const void* buf);
 			CKDWORD GetBufferSize() const;

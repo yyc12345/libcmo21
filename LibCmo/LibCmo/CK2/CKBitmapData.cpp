@@ -4,14 +4,15 @@
 #include "CKFile.hpp"
 #include "DataHandlers/CKBitmapHandler.hpp"
 #include "MgrImpls/CKPathManager.hpp"
+#include <yycc/cenum.hpp>
 #include <memory>
 
 namespace LibCmo::CK2 {
 
 #pragma region Assist RW Functions
 
-	constexpr const CKDWORD c_SpecificFmtHasTransparent = 2;
-	constexpr const CKDWORD c_SpecificFmtNoTransparent = 1;
+	constexpr CKDWORD c_SpecificFmtHasTransparent = 2;
+	constexpr CKDWORD c_SpecificFmtNoTransparent = 1;
 
 	bool CKBitmapData::ReadSpecificFormatBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot) {
 		// read transparent prop
@@ -521,7 +522,7 @@ namespace LibCmo::CK2 {
 		m_Slots.resize(count);
 
 		if (count == 0) {
-			YYCC::EnumHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_INVALID);
+			yycc::cenum::add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_INVALID);
 		}
 	}
 
@@ -535,8 +536,8 @@ namespace LibCmo::CK2 {
 		m_CurrentSlot = slot;
 
 		// NOTE: idk what the fuck this is. just interpter the IDA decompiled code.
-		if (YYCC::EnumHelper::Has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP)) {
-			YYCC::EnumHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_FORCERESTORE);
+		if (yycc::cenum::has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP)) {
+			yycc::cenum::add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_FORCERESTORE);
 		}
 	}
 
@@ -660,14 +661,14 @@ namespace LibCmo::CK2 {
 		// but we decide split the flag settings and slot. 
 		// User should set slot count manually.
 		if (is_cube) {
-			YYCC::EnumHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
+			yycc::cenum::add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
 		} else {
-			YYCC::EnumHelper::Remove(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
+			yycc::cenum::remove(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
 		}
 	}
 
 	bool CKBitmapData::IsCubeMap() const {
-		return YYCC::EnumHelper::Has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
+		return yycc::cenum::has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_CUBEMAP);
 	}
 
 	const CKBitmapProperties& CKBitmapData::GetSaveFormat() const {
@@ -688,14 +689,14 @@ namespace LibCmo::CK2 {
 
 	void CKBitmapData::SetTransparent(bool Transparency) {
 		if (Transparency) {
-			YYCC::EnumHelper::Add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
+			yycc::cenum::add(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
 		} else {
-			YYCC::EnumHelper::Remove(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
+			yycc::cenum::remove(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
 		}
 	}
 
 	bool CKBitmapData::IsTransparent() const {
-		return YYCC::EnumHelper::Has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
+		return yycc::cenum::has(m_BitmapFlags, CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT);
 	}
 
 	void CKBitmapData::SetTransparentColor(CKDWORD col) {

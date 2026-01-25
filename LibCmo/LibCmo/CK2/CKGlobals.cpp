@@ -1,15 +1,18 @@
+// Idk why I need import this first when I refactoring this file.
+// But I keep it because I don't want to raise any potential bugs.
 #include "../VTUtils.hpp"
-#if defined(YYCC_OS_WINDOWS)
-#define ZLIB_WINAPI
-#endif
+// We import zlib first to prevent any possible conflict.
 #include <zconf.h>
 #include <zlib.h>
 
+// Import self header
 #include "CKGlobals.hpp"
-
+// Import STL and YYCC headers
+#include <yycc/string/reinterpret.hpp>
 #include <algorithm>
 #include <initializer_list>
 
+// Import implementations.
 #include "ObjImpls/CKObject.hpp"
 #include "ObjImpls/CKSceneObject.hpp"
 #include "ObjImpls/CKBeObject.hpp"
@@ -128,7 +131,7 @@ namespace LibCmo::CK2 {
 
 	CKDWORD CKStrLen(CKSTRING strl) {
 		if (strl == nullptr) return 0u;
-		size_t len = std::strlen(YYCC::EncodingHelper::ToOrdinary(strl));
+		size_t len = std::strlen(yycc::string::reinterpret::as_ordinary(strl));
 		if (len > static_cast<size_t>(std::numeric_limits<CKDWORD>::max()))
 			throw RuntimeException("Exceed maximum value when cast size_t to CKDWORD.");
 		return static_cast<CKDWORD>(len);

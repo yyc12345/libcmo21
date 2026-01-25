@@ -10,7 +10,7 @@
 
 namespace LibCmo::CK2 {
 
-	constexpr const CKDWORD CK_STATESAVE_ALL = 0xFFFFFFFF;
+	constexpr CKDWORD CK_STATESAVE_ALL = 0xFFFFFFFF;
 
 	/**
 	Object

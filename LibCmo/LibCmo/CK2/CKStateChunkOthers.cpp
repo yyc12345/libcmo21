@@ -1,6 +1,7 @@
 #include "CKStateChunk.hpp"
 #include "CKFile.hpp"
 #include "CKContext.hpp"
+#include <yycc/cenum.hpp>
 
 namespace LibCmo::CK2 {
 
@@ -419,23 +420,23 @@ namespace LibCmo::CK2 {
 				std::memcpy(this->m_pData, dwbuf + bufpos, sizeof(CKDWORD) * this->m_DataDwSize);
 				bufpos += this->m_DataDwSize;
 			}
-			if (!YYCC::EnumHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE)) {
+			if (!yycc::cenum::has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE)) {
 				// forced no bind file
 				this->m_BindFile = nullptr;
 			}
-			if (YYCC::EnumHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS)) {
+			if (yycc::cenum::has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS)) {
 				this->m_ObjectList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
 				std::memcpy(this->m_ObjectList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ObjectList.size());
 				bufpos += this->m_ObjectList.size();
 			}
-			if (YYCC::EnumHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN)) {
+			if (yycc::cenum::has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN)) {
 				this->m_ChunkList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
 				std::memcpy(this->m_ChunkList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ChunkList.size());
 				bufpos += this->m_ChunkList.size();
 			}
-			if (YYCC::EnumHelper::Has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN)) {
+			if (yycc::cenum::has(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN)) {
 				this->m_ManagerList.resize(dwbuf[bufpos]);
 				bufpos += 1u;
 				std::memcpy(this->m_ManagerList.data(), dwbuf + bufpos, sizeof(CKDWORD) * this->m_ManagerList.size());
@@ -459,19 +460,19 @@ namespace LibCmo::CK2 {
 
 		if (!m_ObjectList.empty()) {
 			size += CKSizeof(CKDWORD) * static_cast<CKDWORD>(m_ObjectList.size()) + sizeof(CKDWORD);
-			YYCC::EnumHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS);
+			yycc::cenum::add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS);
 		}
 		if (!m_ChunkList.empty()) {
 			size += CKSizeof(CKDWORD) * static_cast<CKDWORD>(m_ChunkList.size()) + sizeof(CKDWORD);
-			YYCC::EnumHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN);
+			yycc::cenum::add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN);
 		}
 		if (!m_ManagerList.empty()) {
 			size += CKSizeof(CKDWORD) * static_cast<CKDWORD>(m_ManagerList.size()) + sizeof(CKDWORD);
-			YYCC::EnumHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN);
+			yycc::cenum::add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN);
 		}
 
 		if (this->m_BindFile != nullptr) {
-			YYCC::EnumHelper::Add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE);
+			yycc::cenum::add(options, CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_FILE);
 		}
 
 		// if buffer provided, write it

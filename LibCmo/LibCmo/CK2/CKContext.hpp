@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../VTInternal.hpp"
+#include <yycc/macro/class_copy_move.hpp>
 #include <map>
 #include <deque>
 #include <functional>
@@ -21,7 +22,7 @@ namespace LibCmo::CK2 {
 	public:
 		CKContext();
 		~CKContext();
-		YYCC_DEL_CLS_COPY_MOVE(CKContext);
+		YYCC_DELETE_COPY_MOVE(CKContext)
 		
 		// ========== Engine runtime ==========
 	public:

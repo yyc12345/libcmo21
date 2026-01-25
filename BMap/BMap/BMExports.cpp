@@ -6,7 +6,7 @@
 
 #pragma region Help & Save Functions
 
-static constexpr const LibCmo::CK2::CK_ID INVALID_CKID = 0;
+static constexpr LibCmo::CK2::CK_ID INVALID_CKID = 0;
 static LibCmo::CK2::CK_ID SafeGetID(LibCmo::CK2::ObjImpls::CKObject* obj) {
 	if (obj == nullptr) return INVALID_CKID;
 	else return obj->GetID();

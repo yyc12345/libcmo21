@@ -4,6 +4,8 @@
 #include "MgrImpls/CKPathManager.hpp"
 #include "../VxMath/VxMemoryMappedFile.hpp"
 #include "CKContext.hpp"
+#include <yycc/cenum.hpp>
+#include <yycc/patch/fopen.hpp>
 #include <memory>
 
 namespace LibCmo::CK2 {
@@ -234,8 +236,8 @@ namespace LibCmo::CK2 {
 		std::string name_conv;
 
 		// ========== compress feature process ==========
-		if (YYCC::EnumHelper::Has(this->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD) ||
-			YYCC::EnumHelper::Has(this->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
+		if (yycc::cenum::has(this->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD)
+		    || yycc::cenum::has(this->m_FileInfo.FileWriteMode, CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED)) {
 
 			void* decomp_buffer = CKUnPackData(this->m_FileInfo.DataUnPackSize, parser->GetPtr(), this->m_FileInfo.DataPackSize);
 			if (decomp_buffer != nullptr) {
@@ -351,7 +353,7 @@ namespace LibCmo::CK2 {
 
 				// read file body
 				XContainer::XString tempfilename = m_Ctx->GetPathManager()->GetTempFilePath(file.c_str());
-				FILE* fp = YYCC::IOHelper::UTF8FOpen(tempfilename.c_str(), u8"wb");
+				FILE* fp = yycc::patch::fopen::fopen(tempfilename.c_str(), u8"wb");
 				if (fp != nullptr) {
 					std::fwrite(parser->GetPtr(), sizeof(CKBYTE), filebodylen, fp);
 					std::fclose(fp);

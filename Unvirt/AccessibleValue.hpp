@@ -8,7 +8,7 @@
 namespace Unvirt {
 	namespace AccessibleValue {
 
-		constexpr const char8_t c_InvalidEnumName[] = u8"[undefined]";
+		constexpr char8_t c_InvalidEnumName[] = u8"[undefined]";
 
 #pragma region Size Formatter
 

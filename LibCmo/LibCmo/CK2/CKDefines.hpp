@@ -2,6 +2,7 @@
 
 #include "CKTypes.hpp"
 #include "CKGlobals.hpp"
+#include <yycc/macro/class_copy_move.hpp>
 
 namespace LibCmo::CK2 {
 
@@ -9,39 +10,39 @@ namespace LibCmo::CK2 {
 
 	// Virtools Managers GUID second DWORD must be 0
 
-	constexpr const CKDWORD OBJECT_MANAGER_GUID1 = 0x7cbb3b91;
-	constexpr const CKDWORD ATTRIBUTE_MANAGER_GUID1 = 0x3d242466;
-	constexpr const CKDWORD MESSAGE_MANAGER_GUID1 = 0x466a0fac;
-	constexpr const CKDWORD FLOOR_MANAGER_GUID1 = 0x420936f9;
-	constexpr const CKDWORD COLLISION_MANAGER_GUID1 = 0x38244712;
-	constexpr const CKDWORD GRID_MANAGER_GUID1 = 0x7f004791;
-	constexpr const CKDWORD TIME_MANAGER_GUID1 = 0x89ce7b32;
-	constexpr const CKDWORD BEHAVIOR_MANAGER_GUID1 = 0x58d621ae;
-	constexpr const CKDWORD INPUT_MANAGER_GUID1 = 0xf787c904;
-	constexpr const CKDWORD SOUND_MANAGER_GUID1 = 0xdce135f6;
-	constexpr const CKDWORD MIDI_MANAGER_GUID1 = 0x594154a6;
-	constexpr const CKDWORD INTERFACE_MANAGER_GUID1 = 0x9a4b8e3d;
-	constexpr const CKDWORD RENDER_MANAGER_GUID1 = 0xa213c8d5;
-	constexpr const CKDWORD PARAMETER_MANAGER_GUID1 = 0x9ce57ab6;
-	constexpr const CKDWORD PATH_MANAGER_GUID1 = 0x15fd54b9;
-	constexpr const CKDWORD VARIABLE_MANAGER_GUID1 = 0x98cc3cc9;
+	constexpr CKDWORD OBJECT_MANAGER_GUID1 = 0x7cbb3b91;
+	constexpr CKDWORD ATTRIBUTE_MANAGER_GUID1 = 0x3d242466;
+	constexpr CKDWORD MESSAGE_MANAGER_GUID1 = 0x466a0fac;
+	constexpr CKDWORD FLOOR_MANAGER_GUID1 = 0x420936f9;
+	constexpr CKDWORD COLLISION_MANAGER_GUID1 = 0x38244712;
+	constexpr CKDWORD GRID_MANAGER_GUID1 = 0x7f004791;
+	constexpr CKDWORD TIME_MANAGER_GUID1 = 0x89ce7b32;
+	constexpr CKDWORD BEHAVIOR_MANAGER_GUID1 = 0x58d621ae;
+	constexpr CKDWORD INPUT_MANAGER_GUID1 = 0xf787c904;
+	constexpr CKDWORD SOUND_MANAGER_GUID1 = 0xdce135f6;
+	constexpr CKDWORD MIDI_MANAGER_GUID1 = 0x594154a6;
+	constexpr CKDWORD INTERFACE_MANAGER_GUID1 = 0x9a4b8e3d;
+	constexpr CKDWORD RENDER_MANAGER_GUID1 = 0xa213c8d5;
+	constexpr CKDWORD PARAMETER_MANAGER_GUID1 = 0x9ce57ab6;
+	constexpr CKDWORD PATH_MANAGER_GUID1 = 0x15fd54b9;
+	constexpr CKDWORD VARIABLE_MANAGER_GUID1 = 0x98cc3cc9;
 
-	constexpr const CKGUID OBJECT_MANAGER_GUID { OBJECT_MANAGER_GUID1, 0 };
-	constexpr const CKGUID ATTRIBUTE_MANAGER_GUID { ATTRIBUTE_MANAGER_GUID1, 0 };
-	constexpr const CKGUID MESSAGE_MANAGER_GUID { MESSAGE_MANAGER_GUID1, 0 };
-	constexpr const CKGUID TIME_MANAGER_GUID { TIME_MANAGER_GUID1, 0 };
-	constexpr const CKGUID SOUND_MANAGER_GUID { SOUND_MANAGER_GUID1, 0 };
-	constexpr const CKGUID MIDI_MANAGER_GUID { MIDI_MANAGER_GUID1, 0 };
-	constexpr const CKGUID INPUT_MANAGER_GUID { INPUT_MANAGER_GUID1, 0 };
-	constexpr const CKGUID BEHAVIOR_MANAGER_GUID { BEHAVIOR_MANAGER_GUID1, 0 };
-	constexpr const CKGUID FLOOR_MANAGER_GUID { FLOOR_MANAGER_GUID1, 0 };
-	constexpr const CKGUID COLLISION_MANAGER_GUID { COLLISION_MANAGER_GUID1, 0 };
-	constexpr const CKGUID GRID_MANAGER_GUID { GRID_MANAGER_GUID1, 0 };
-	constexpr const CKGUID INTERFACE_MANAGER_GUID { INTERFACE_MANAGER_GUID1, 0 };
-	constexpr const CKGUID RENDER_MANAGER_GUID { RENDER_MANAGER_GUID1, 0 };
-	constexpr const CKGUID PARAMETER_MANAGER_GUID { PARAMETER_MANAGER_GUID1, 0 };
-	constexpr const CKGUID PATH_MANAGER_GUID { PATH_MANAGER_GUID1, 0 };
-	constexpr const CKGUID VARIABLE_MANAGER_GUID { VARIABLE_MANAGER_GUID1, 0 };
+	constexpr CKGUID OBJECT_MANAGER_GUID { OBJECT_MANAGER_GUID1, 0 };
+	constexpr CKGUID ATTRIBUTE_MANAGER_GUID { ATTRIBUTE_MANAGER_GUID1, 0 };
+	constexpr CKGUID MESSAGE_MANAGER_GUID { MESSAGE_MANAGER_GUID1, 0 };
+	constexpr CKGUID TIME_MANAGER_GUID { TIME_MANAGER_GUID1, 0 };
+	constexpr CKGUID SOUND_MANAGER_GUID { SOUND_MANAGER_GUID1, 0 };
+	constexpr CKGUID MIDI_MANAGER_GUID { MIDI_MANAGER_GUID1, 0 };
+	constexpr CKGUID INPUT_MANAGER_GUID { INPUT_MANAGER_GUID1, 0 };
+	constexpr CKGUID BEHAVIOR_MANAGER_GUID { BEHAVIOR_MANAGER_GUID1, 0 };
+	constexpr CKGUID FLOOR_MANAGER_GUID { FLOOR_MANAGER_GUID1, 0 };
+	constexpr CKGUID COLLISION_MANAGER_GUID { COLLISION_MANAGER_GUID1, 0 };
+	constexpr CKGUID GRID_MANAGER_GUID { GRID_MANAGER_GUID1, 0 };
+	constexpr CKGUID INTERFACE_MANAGER_GUID { INTERFACE_MANAGER_GUID1, 0 };
+	constexpr CKGUID RENDER_MANAGER_GUID { RENDER_MANAGER_GUID1, 0 };
+	constexpr CKGUID PARAMETER_MANAGER_GUID { PARAMETER_MANAGER_GUID1, 0 };
+	constexpr CKGUID PATH_MANAGER_GUID { PATH_MANAGER_GUID1, 0 };
+	constexpr CKGUID VARIABLE_MANAGER_GUID { VARIABLE_MANAGER_GUID1, 0 };
 
 #pragma endregion
 
@@ -50,17 +51,17 @@ namespace LibCmo::CK2 {
 	/**
 	 * @brief The identifier of Virtools file.
 	*/
-	constexpr const CKCHAR CKNEMOFI[] = u8"Nemo Fi";
+	constexpr CKCHAR CKNEMOFI[] = u8"Nemo Fi";
 	/**
 	 * @brief Current Version of CK Engine (Day/Month/Year)
 	*/
-	constexpr const CKDWORD CKVERSION = 0x13022002u;
+	constexpr CKDWORD CKVERSION = 0x13022002u;
 	/**
 	 * @brief Current Version of Dev
 	*/
-	constexpr const CKDWORD DEVBUILD = 0x02010001u;
-	constexpr const CKDWORD DEVVERSION = 0u;
-	constexpr const CKGUID VIRTOOLS_GUID = CKGUID(0x56495254u, 0x4f4f4c53u);
+	constexpr CKDWORD DEVBUILD = 0x02010001u;
+	constexpr CKDWORD DEVVERSION = 0u;
+	constexpr CKGUID VIRTOOLS_GUID = CKGUID(0x56495254u, 0x4f4f4c53u);
 
 #pragma endregion
 
@@ -135,7 +136,7 @@ namespace LibCmo::CK2 {
 			m_ReaderGuid(), m_Ext() {}
 		CKBitmapProperties(const CKGUID& guid, CKSTRING ext) :
 			m_ReaderGuid(guid), m_Ext(ext) {}
-		YYCC_DEF_CLS_COPY_MOVE(CKBitmapProperties);
+		YYCC_DEFAULT_COPY_MOVE(CKBitmapProperties)
 
 		CKGUID m_ReaderGuid; /**< CKGUID that uniquely identifies the reader that created this properties structure */
 		CKFileExtension m_Ext; /**< File Extension of the image being described by this structure */
