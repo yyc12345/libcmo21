@@ -1,6 +1,7 @@
 #include "CKObjectManager.hpp"
 #include "../CKContext.hpp"
 #include "../ObjImpls/CKObject.hpp"
+#include <yycc/cenum.hpp>
 
 namespace LibCmo::CK2::MgrImpls {
 
@@ -86,7 +87,7 @@ namespace LibCmo::CK2::MgrImpls {
 
 			// set to be deleted
 			CK_OBJECT_FLAGS objflag = obj->GetObjectFlags();
-			YYCC::EnumHelper::Add(objflag, CK_OBJECT_FLAGS::CK_OBJECT_TOBEDELETED);
+			yycc::cenum::add(objflag, CK_OBJECT_FLAGS::CK_OBJECT_TOBEDELETED);
 			obj->SetObjectFlags(objflag);
 
 			// collect class id

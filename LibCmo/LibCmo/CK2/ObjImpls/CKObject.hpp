@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../VTInternal.hpp"
+#include <yycc/macro/class_copy_move.hpp>
 
 /**
 CKObject virtual functions implementations help
@@ -40,7 +41,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKObject(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKObject();
-		YYCC_DEL_CLS_COPY_MOVE(CKObject);
+		YYCC_DELETE_COPY_MOVE(CKObject)
 
 		CK_ID GetID() const;
 		CKSTRING GetName() const;

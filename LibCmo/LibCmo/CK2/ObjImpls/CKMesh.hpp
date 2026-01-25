@@ -19,7 +19,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKMesh(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKMesh();
-		YYCC_DEL_CLS_COPY_MOVE(CKMesh);
+		YYCC_DELETE_COPY_MOVE(CKMesh)
 		
 		virtual CK_CLASSID GetClassID() override { 
 			return CK_CLASSID::CKCID_MESH; 

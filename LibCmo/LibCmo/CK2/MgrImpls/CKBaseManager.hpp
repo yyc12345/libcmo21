@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../VTInternal.hpp"
+#include <yycc/macro/class_copy_move.hpp>
 
 /**
 CKBaseManager virtual functions implementations help
@@ -40,7 +41,7 @@ namespace LibCmo::CK2::MgrImpls {
 			XContainer::NSXString::FromCKSTRING(m_ManagerName, name);
 		}
 		virtual ~CKBaseManager() {}
-		YYCC_DEL_CLS_COPY_MOVE(CKBaseManager);
+		YYCC_DELETE_COPY_MOVE(CKBaseManager)
 
 		/**
 		@brief Acces to Manager GUID

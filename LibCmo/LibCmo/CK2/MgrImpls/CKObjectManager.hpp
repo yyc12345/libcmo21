@@ -10,7 +10,7 @@ namespace LibCmo::CK2::MgrImpls {
 	public:
 		CKObjectManager(CKContext* ctx);
 		virtual ~CKObjectManager();
-		YYCC_DEL_CLS_COPY_MOVE(CKObjectManager);
+		YYCC_DELETE_COPY_MOVE(CKObjectManager)
 
 		// ========== Objects Management ==========
 
@@ -67,9 +67,9 @@ namespace LibCmo::CK2::MgrImpls {
 		 * The value close to zero may cause some issue.
 		 * So we add a static offset to every created CK_ID.
 		*/
-		const CK_ID c_ObjectIdOffset = 61u;
-		CKDWORD Id2Offset(CK_ID id) { return static_cast<CKDWORD>(id - c_ObjectIdOffset); }
-		CK_ID Offset2Id(CKDWORD off) { return static_cast<CK_ID>(off + c_ObjectIdOffset); }
+		static constexpr CK_ID OBJECT_ID_OFFSET = 61u;
+		CKDWORD Id2Offset(CK_ID id) { return static_cast<CKDWORD>(id - OBJECT_ID_OFFSET); }
+		CK_ID Offset2Id(CKDWORD off) { return static_cast<CK_ID>(off + OBJECT_ID_OFFSET); }
 
 		/**
 		 * @brief The real CKObject destroy worker shared by CKObjectManager::DestroyObject and CKObjectManager::~CKObjectManager

@@ -10,7 +10,7 @@ namespace LibCmo::CK2::MgrImpls {
 	public:
 		CKPathManager(CKContext* ctx);
 		virtual ~CKPathManager();
-		YYCC_DEL_CLS_COPY_MOVE(CKPathManager);
+		YYCC_DELETE_COPY_MOVE(CKPathManager)
 		
 		/**
 		 * @brief Set the temp folder of current context.

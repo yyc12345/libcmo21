@@ -1,5 +1,6 @@
 #include "CKLight.hpp"
 #include "../CKStateChunk.hpp"
+#include <yycc/cenum.hpp>
 #include <numbers>
 
 namespace LibCmo::CK2::ObjImpls {
@@ -189,24 +190,24 @@ namespace LibCmo::CK2::ObjImpls {
 	}
 
 	bool CKLight::GetActivity() const {
-		return YYCC::EnumHelper::Has(m_LightFlags, LightFlags::Active);
+		return yycc::cenum::has(m_LightFlags, LightFlags::Active);
 	}
 	void CKLight::Active(bool active) {
 		if (active) {
-			YYCC::EnumHelper::Add(m_LightFlags, LightFlags::Active);
+			yycc::cenum::add(m_LightFlags, LightFlags::Active);
 		} else {
-			YYCC::EnumHelper::Remove(m_LightFlags, LightFlags::Active);
+			yycc::cenum::remove(m_LightFlags, LightFlags::Active);
 		}
 	}
 
 	bool CKLight::GetSpecularFlag() const {
-		return YYCC::EnumHelper::Has(m_LightFlags, LightFlags::Specular);
+		return yycc::cenum::has(m_LightFlags, LightFlags::Specular);
 	}
 	void CKLight::SetSpecularFlag(bool specular) {
 		if (specular) {
-			YYCC::EnumHelper::Add(m_LightFlags, LightFlags::Specular);
+			yycc::cenum::add(m_LightFlags, LightFlags::Specular);
 		} else {
-			YYCC::EnumHelper::Remove(m_LightFlags, LightFlags::Specular);
+			yycc::cenum::remove(m_LightFlags, LightFlags::Specular);
 		}
 	}
 

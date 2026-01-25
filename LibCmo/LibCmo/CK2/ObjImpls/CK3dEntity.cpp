@@ -2,6 +2,7 @@
 #include "../CKStateChunk.hpp"
 #include "../CKContext.hpp"
 #include "CKMesh.hpp"
+#include <yycc/cenum.hpp>
 
 namespace LibCmo::CK2::ObjImpls {
 
@@ -9,7 +10,7 @@ namespace LibCmo::CK2::ObjImpls {
 		CKRenderObject(ctx, ckid, name),
 		m_PotentialMeshes(), m_CurrentMesh(nullptr),
 		m_WorldMatrix(), m_ZOrder(0),
-		m_MoveableFlags(YYCC::EnumHelper::Merge(
+	    m_MoveableFlags(yycc::cenum::merge(
 			VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_PICKABLE,
 			VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE,
 			VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_RENDERCHANNELS,
@@ -53,15 +54,15 @@ namespace LibCmo::CK2::ObjImpls {
 			// regulate self flag again
 			// MARK: originally we should check parent here.
 			// but we do not support parent and hierarchy feature, so we simply remove flag
-			YYCC::EnumHelper::Remove(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PARENTVALID);
+			yycc::cenum::remove(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PARENTVALID);
 			// MARK: originally we should check grouped into CKPlace here.
 			// but we do not support CKPlace, so we simply remove this flag
-			YYCC::EnumHelper::Remove(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PLACEVALID);
+			yycc::cenum::remove(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PLACEVALID);
 			// check z-order, if not zero, save it
 			if (m_ZOrder != 0) {
-				YYCC::EnumHelper::Add(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_ZORDERVALID);
+				yycc::cenum::add(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_ZORDERVALID);
 			} else {
-				YYCC::EnumHelper::Remove(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_ZORDERVALID);
+				yycc::cenum::remove(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_ZORDERVALID);
 			}
 
 			// write 2 flags
@@ -94,7 +95,7 @@ namespace LibCmo::CK2::ObjImpls {
 		if (!suc) return false;
 
 		// backup moveable flags
-		bool hasWorldAligned = YYCC::EnumHelper::Has(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_WORLDALIGNED);
+		bool hasWorldAligned = yycc::cenum::has(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_WORLDALIGNED);
 
 		// MARK: object animation is skipped
 
@@ -132,11 +133,11 @@ namespace LibCmo::CK2::ObjImpls {
 			chunk->ReadStruct(m_3dEntityFlags);
 			chunk->ReadStruct(m_MoveableFlags);
 			// remove some properties
-			YYCC::EnumHelper::Remove(m_3dEntityFlags,
+			yycc::cenum::remove(m_3dEntityFlags,
 				CK_3DENTITY_FLAGS::CK_3DENTITY_UPDATELASTFRAME,
 				CK_3DENTITY_FLAGS::CK_3DENTITY_RESERVED0
 			);
-			YYCC::EnumHelper::Remove(m_MoveableFlags,
+			yycc::cenum::remove(m_MoveableFlags,
 				VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_RESERVED2,
 				VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_STENCILONLY,
 				VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_DONTUPDATEFROMPARENT,
@@ -147,11 +148,11 @@ namespace LibCmo::CK2::ObjImpls {
 				VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_UPTODATE
 			);
 			if (hasWorldAligned) {
-				YYCC::EnumHelper::Add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_WORLDALIGNED);
+				yycc::cenum::add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_WORLDALIGNED);
 			}
 
 			// if order render first
-			if (YYCC::EnumHelper::Has(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_RENDERFIRST)) {
+			if (yycc::cenum::has(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_RENDERFIRST)) {
 				m_ZOrder = 10000;
 			}
 
@@ -171,47 +172,47 @@ namespace LibCmo::CK2::ObjImpls {
 			VxMath::VxVector3 crossProduct = VxMath::NSVxVector::CrossProduct(col0, col1);
 			CKFLOAT dotProduct = VxMath::NSVxVector::DotProduct(crossProduct, col2);
 			if (dotProduct >= 0.0f) {
-				YYCC::EnumHelper::Remove(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_INDIRECTMATRIX);
+				yycc::cenum::remove(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_INDIRECTMATRIX);
 			} else {
-				YYCC::EnumHelper::Add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_INDIRECTMATRIX);
+				yycc::cenum::add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_INDIRECTMATRIX);
 			}
 
 			// copy visible data
 			// process direct visible
-			if (YYCC::EnumHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE)) {
-				YYCC::EnumHelper::Add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE);
+			if (yycc::cenum::has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE)) {
+				yycc::cenum::add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE);
 			} else {
-				YYCC::EnumHelper::Remove(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE);
+				yycc::cenum::remove(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE);
 			}
 			// process indirect visible
-			if (YYCC::EnumHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE)) {
-				YYCC::EnumHelper::Add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_HIERARCHICALHIDE);
+			if (yycc::cenum::has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE)) {
+				yycc::cenum::add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_HIERARCHICALHIDE);
 			} else {
-				YYCC::EnumHelper::Remove(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_HIERARCHICALHIDE);
+				yycc::cenum::remove(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_HIERARCHICALHIDE);
 			}
 
 			// read associated CKPlace
-			if (YYCC::EnumHelper::Has(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PLACEVALID)) {
+			if (yycc::cenum::has(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PLACEVALID)) {
 				// MARK: we drop the support of CKPlace.
 				// so we just read it and skip it.
 				CK_ID placeid;
 				chunk->ReadObjectID(placeid);
 				// and remove this flag
-				YYCC::EnumHelper::Remove(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PLACEVALID);
+				yycc::cenum::remove(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PLACEVALID);
 			}
 
 			// read parent
-			if (YYCC::EnumHelper::Has(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PARENTVALID)) {
+			if (yycc::cenum::has(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PARENTVALID)) {
 				// MAKR: we drop the support of parent and the whole 3dentity hierarchy system
 				// we ignore this field.
 				CK_ID parentid;
 				chunk->ReadObjectID(parentid);
 				// and remove this flag
-				YYCC::EnumHelper::Remove(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PARENTVALID);
+				yycc::cenum::remove(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_PARENTVALID);
 			}
 
 			// read priority (non-zero zorder)
-			if (YYCC::EnumHelper::Has(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_ZORDERVALID)) {
+			if (yycc::cenum::has(m_3dEntityFlags, CK_3DENTITY_FLAGS::CK_3DENTITY_ZORDERVALID)) {
 				chunk->ReadStruct(m_ZOrder);
 			}
 			
@@ -227,16 +228,16 @@ namespace LibCmo::CK2::ObjImpls {
 	void CK3dEntity::Show(CK_OBJECT_SHOWOPTION show) {
 		CKObject::Show(show);
 
-		YYCC::EnumHelper::Remove(m_MoveableFlags,
+		yycc::cenum::remove(m_MoveableFlags,
 			VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE,
 			VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_HIERARCHICALHIDE
 		);
 		switch (show) {
 			case CK_OBJECT_SHOWOPTION::CKSHOW:
-				YYCC::EnumHelper::Add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE);
+				yycc::cenum::add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE);
 				break;
 			case CK_OBJECT_SHOWOPTION::CKHIERARCHICALHIDE:
-				YYCC::EnumHelper::Add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_HIERARCHICALHIDE);
+				yycc::cenum::add(m_MoveableFlags, VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_HIERARCHICALHIDE);
 				break;
 			case CK_OBJECT_SHOWOPTION::CKHIDE:
 				break;

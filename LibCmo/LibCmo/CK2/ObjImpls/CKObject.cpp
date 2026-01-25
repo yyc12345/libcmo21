@@ -1,5 +1,6 @@
 #include "CKObject.hpp"
 #include "../CKStateChunk.hpp"
+#include <yycc/cenum.hpp>
 
 namespace LibCmo::CK2::ObjImpls {
 
@@ -32,7 +33,7 @@ namespace LibCmo::CK2::ObjImpls {
 		m_ObjectFlags = flags;
 	}
 	bool CKObject::IsToBeDeleted() const {
-		return YYCC::EnumHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_TOBEDELETED);
+		return yycc::cenum::has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_TOBEDELETED);
 	}
 	CKContext* CKObject::GetCKContext() const {
 		return m_Context;
@@ -51,10 +52,10 @@ namespace LibCmo::CK2::ObjImpls {
 	void CKObject::PreSave(CKFileVisitor* file, CKDWORD flags) {}
 
 	bool CKObject::Save(CKStateChunk* chunk, CKFileVisitor* file, CKDWORD flags) {
-		if (YYCC::EnumHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE)) {
+		if (yycc::cenum::has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE)) {
 			// if hierarchy hidden
 			chunk->WriteIdentifier(CK_STATESAVEFLAGS_OBJECT::CK_STATESAVE_OBJECTHIERAHIDDEN);
-		} else if (!YYCC::EnumHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE)) {
+		} else if (!yycc::cenum::has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE)) {
 			// if really hidden
 			chunk->WriteIdentifier(CK_STATESAVEFLAGS_OBJECT::CK_STATESAVE_OBJECTHIDDEN);
 		}
@@ -65,20 +66,20 @@ namespace LibCmo::CK2::ObjImpls {
 
 	bool CKObject::Load(CKStateChunk* chunk, CKFileVisitor* file) {
 		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_OBJECT::CK_STATESAVE_OBJECTHIDDEN)) {
-			YYCC::EnumHelper::Remove(this->m_ObjectFlags, 
+			yycc::cenum::remove(this->m_ObjectFlags, 
 				CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE,
 				CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE
 			);
 		} else {
 			if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_OBJECT::CK_STATESAVE_OBJECTHIERAHIDDEN)) {
 				// != 0
-				YYCC::EnumHelper::Remove(this->m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
-				YYCC::EnumHelper::Add(this->m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE);
+				yycc::cenum::remove(this->m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+				yycc::cenum::add(this->m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE);
 
 			} else {
 				// == 0
-				YYCC::EnumHelper::Add(this->m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
-				YYCC::EnumHelper::Remove(this->m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE);
+				yycc::cenum::add(this->m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+				yycc::cenum::remove(this->m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE);
 
 			}
 		}
@@ -91,17 +92,17 @@ namespace LibCmo::CK2::ObjImpls {
 
 	void CKObject::Show(CK_OBJECT_SHOWOPTION show) {
 		// clear all visible data of object flags
-		YYCC::EnumHelper::Remove(m_ObjectFlags,
+		yycc::cenum::remove(m_ObjectFlags,
 			CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE,
 			CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE
 		);
 
 		switch (show) {
 			case CK_OBJECT_SHOWOPTION::CKSHOW:
-				YYCC::EnumHelper::Add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+				yycc::cenum::add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
 				break;
 			case CK_OBJECT_SHOWOPTION::CKHIERARCHICALHIDE:
-				YYCC::EnumHelper::Add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE);
+				yycc::cenum::add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_HIERACHICALHIDE);
 				break;
 			case CK_OBJECT_SHOWOPTION::CKHIDE:
 				return;
@@ -109,7 +110,7 @@ namespace LibCmo::CK2::ObjImpls {
 	}
 
 	bool CKObject::IsVisible() const {
-		return YYCC::EnumHelper::Has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+		return yycc::cenum::has(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
 	}
 
 

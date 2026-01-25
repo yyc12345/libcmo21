@@ -9,7 +9,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKTargetLight(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKTargetLight();
-		YYCC_DEL_CLS_COPY_MOVE(CKTargetLight);
+		YYCC_DELETE_COPY_MOVE(CKTargetLight)
 
 		virtual CK_CLASSID GetClassID() override {
 			return CK_CLASSID::CKCID_TARGETLIGHT;

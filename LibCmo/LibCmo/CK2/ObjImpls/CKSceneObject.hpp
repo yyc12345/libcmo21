@@ -11,7 +11,7 @@ namespace LibCmo::CK2::ObjImpls {
 			CKObject(ctx, ckid, name),
 			m_Scenes() {}
 		virtual ~CKSceneObject() {}
-		YYCC_DEL_CLS_COPY_MOVE(CKSceneObject);
+		YYCC_DELETE_COPY_MOVE(CKSceneObject)
 
 		virtual CK_CLASSID GetClassID() override { 
 			return CK_CLASSID::CKCID_SCENEOBJECT; 

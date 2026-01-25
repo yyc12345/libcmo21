@@ -2,6 +2,7 @@
 #include "../CKStateChunk.hpp"
 #include "../CKContext.hpp"
 #include "CKMaterial.hpp"
+#include <yycc/cenum.hpp>
 
 namespace LibCmo::CK2::ObjImpls {
 
@@ -21,12 +22,12 @@ namespace LibCmo::CK2::ObjImpls {
 		m_LineCount(0),
 		m_LineIndices(),
 		// init flags
-		m_Flags(YYCC::EnumHelper::Merge(
+	    m_Flags(yycc::cenum::merge(
 			VxMath::VXMESH_FLAGS::VXMESH_VISIBLE,
 			VxMath::VXMESH_FLAGS::VXMESH_RENDERCHANNELS
 		)) {
 		// set visible in default
-		YYCC::EnumHelper::Add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+		yycc::cenum::add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
 	}
 
 	CKMesh::~CKMesh() {}
@@ -145,7 +146,7 @@ namespace LibCmo::CK2::ObjImpls {
 			rawbuf += CKSizeof(CKDWORD);
 
 			// write vertex position
-			if (!YYCC::EnumHelper::Has(saveflags, VertexSaveFlags::NoPos)) {
+			if (!yycc::cenum::has(saveflags, VertexSaveFlags::NoPos)) {
 				CKDWORD consumed = CKSizeof(VxMath::VxVector3) * vtxCount;
 				std::memcpy(rawbuf, m_VertexPosition.data(), consumed);
 				rawbuf += consumed;
@@ -154,7 +155,7 @@ namespace LibCmo::CK2::ObjImpls {
 			// write color and specular color
 			{
 				CKDWORD consumed = 0;
-				if (!YYCC::EnumHelper::Has(saveflags, VertexSaveFlags::SingleColor)) {
+				if (!yycc::cenum::has(saveflags, VertexSaveFlags::SingleColor)) {
 					consumed = CKSizeof(CKDWORD) * vtxCount;
 				} else {
 					consumed = CKSizeof(CKDWORD);
@@ -165,7 +166,7 @@ namespace LibCmo::CK2::ObjImpls {
 			}
 			{
 				CKDWORD consumed = 0;
-				if (!YYCC::EnumHelper::Has(saveflags, VertexSaveFlags::SingleSpecularColor)) {
+				if (!yycc::cenum::has(saveflags, VertexSaveFlags::SingleSpecularColor)) {
 					consumed = CKSizeof(CKDWORD) * vtxCount;
 				} else {
 					consumed = CKSizeof(CKDWORD);
@@ -176,7 +177,7 @@ namespace LibCmo::CK2::ObjImpls {
 			}
 
 			// write normal
-			if (!YYCC::EnumHelper::Has(saveflags, VertexSaveFlags::NoNormal)) {
+			if (!yycc::cenum::has(saveflags, VertexSaveFlags::NoNormal)) {
 				CKDWORD consumed = CKSizeof(VxMath::VxVector3) * vtxCount;
 				std::memcpy(rawbuf, m_VertexNormal.data(), consumed);
 				rawbuf += consumed;
@@ -185,7 +186,7 @@ namespace LibCmo::CK2::ObjImpls {
 			// write uv
 			{
 				CKDWORD consumed = 0;
-				if (!YYCC::EnumHelper::Has(saveflags, VertexSaveFlags::SingleUV)) {
+				if (!yycc::cenum::has(saveflags, VertexSaveFlags::SingleUV)) {
 					consumed = CKSizeof(VxMath::VxVector2) * vtxCount;
 				} else {
 					consumed = CKSizeof(VxMath::VxVector2);
@@ -229,10 +230,10 @@ namespace LibCmo::CK2::ObjImpls {
 		// read flag
 		if (chunk->SeekIdentifier(CK_STATESAVEFLAGS_MESH::CK_STATESAVE_MESHFLAGS)) {
 			chunk->ReadStruct(m_Flags);
-			YYCC::EnumHelper::Mask(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_ALLFLAGS);
+			yycc::cenum::mask(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_ALLFLAGS);
 
 			// I don't know why, just interpter the IDA code.
-			YYCC::EnumHelper::Remove(m_Flags,
+			yycc::cenum::remove(m_Flags,
 				VxMath::VXMESH_FLAGS::VXMESH_BOUNDINGUPTODATE,
 				VxMath::VXMESH_FLAGS::VXMESH_OPTIMIZED
 			);
@@ -285,14 +286,14 @@ namespace LibCmo::CK2::ObjImpls {
 				const CKBYTE* rawbuf = static_cast<const CKBYTE*>(buf.get());
 
 				// copy position if it have
-				if (!YYCC::EnumHelper::Has(saveflags, VertexSaveFlags::NoPos)) {
+				if (!yycc::cenum::has(saveflags, VertexSaveFlags::NoPos)) {
 					CKDWORD consumed = CKSizeof(VxMath::VxVector3) * vertexCount;
 					std::memcpy(m_VertexPosition.data(), rawbuf, consumed);
 					rawbuf += consumed;
 				}
 
 				// copy color or apply single color
-				if (!YYCC::EnumHelper::Has(saveflags, VertexSaveFlags::SingleColor)) {
+				if (!yycc::cenum::has(saveflags, VertexSaveFlags::SingleColor)) {
 					CKDWORD consumed = CKSizeof(CKDWORD) * vertexCount;
 					std::memcpy(m_VertexColor.data(), rawbuf, consumed);
 					rawbuf += consumed;
@@ -309,7 +310,7 @@ namespace LibCmo::CK2::ObjImpls {
 				}
 
 				// copy specular color or apply a single color
-				if (!YYCC::EnumHelper::Has(saveflags, VertexSaveFlags::SingleSpecularColor)) {
+				if (!yycc::cenum::has(saveflags, VertexSaveFlags::SingleSpecularColor)) {
 					CKDWORD consumed = CKSizeof(CKDWORD) * vertexCount;
 					std::memcpy(m_VertexSpecularColor.data(), rawbuf, consumed);
 					rawbuf += consumed;
@@ -326,14 +327,14 @@ namespace LibCmo::CK2::ObjImpls {
 				}
 
 				// copy normals if it has
-				if (!YYCC::EnumHelper::Has(saveflags, VertexSaveFlags::NoNormal)) {
+				if (!yycc::cenum::has(saveflags, VertexSaveFlags::NoNormal)) {
 					CKDWORD consumed = CKSizeof(VxMath::VxVector3) * vertexCount;
 					std::memcpy(m_VertexNormal.data(), rawbuf, consumed);
 					rawbuf += consumed;
 				}
 
 				// copy uv or apply single uv
-				if (!YYCC::EnumHelper::Has(saveflags, VertexSaveFlags::SingleUV)) {
+				if (!yycc::cenum::has(saveflags, VertexSaveFlags::SingleUV)) {
 					CKDWORD consumed = CKSizeof(VxMath::VxVector2) * vertexCount;
 					std::memcpy(m_VertexUV.data(), rawbuf, consumed);
 					rawbuf += consumed;
@@ -407,7 +408,7 @@ namespace LibCmo::CK2::ObjImpls {
 		}
 
 		// build normals
-		if (YYCC::EnumHelper::Has(saveflags, VertexSaveFlags::NoNormal)) {
+		if (yycc::cenum::has(saveflags, VertexSaveFlags::NoNormal)) {
 			BuildNormals();
 		} else {
 			BuildFaceNormals();
@@ -425,9 +426,9 @@ namespace LibCmo::CK2::ObjImpls {
 		CKObject::Show(show);
 
 		if (show == CK_OBJECT_SHOWOPTION::CKSHOW) {
-			YYCC::EnumHelper::Add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_VISIBLE);
+			yycc::cenum::add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_VISIBLE);
 		} else {
-			YYCC::EnumHelper::Remove(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_VISIBLE);
+			yycc::cenum::remove(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_VISIBLE);
 		}
 	}
 
@@ -449,15 +450,15 @@ namespace LibCmo::CK2::ObjImpls {
 		m_Flags = flags;
 
 		// sync visibility to CKObject layer.
-		if (YYCC::EnumHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_VISIBLE)) {
-			YYCC::EnumHelper::Add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+		if (yycc::cenum::has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_VISIBLE)) {
+			yycc::cenum::add(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
 		} else {
-			YYCC::EnumHelper::Remove(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
+			yycc::cenum::remove(m_ObjectFlags, CK_OBJECT_FLAGS::CK_OBJECT_VISIBLE);
 		}
 	}
 
 	VxMath::VXMESH_LITMODE CKMesh::GetLitMode() const {
-		if (YYCC::EnumHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PRELITMODE)) {
+		if (yycc::cenum::has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PRELITMODE)) {
 			return VxMath::VXMESH_LITMODE::VX_PRELITMESH;
 		} else {
 			return VxMath::VXMESH_LITMODE::VX_LITMESH;
@@ -467,10 +468,10 @@ namespace LibCmo::CK2::ObjImpls {
 	void CKMesh::SetLitMode(VxMath::VXMESH_LITMODE mode) {
 		switch (mode) {
 			case VxMath::VXMESH_LITMODE::VX_PRELITMESH:
-				YYCC::EnumHelper::Add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PRELITMODE);
+				yycc::cenum::add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PRELITMODE);
 				break;
 			case VxMath::VXMESH_LITMODE::VX_LITMESH:
-				YYCC::EnumHelper::Remove(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PRELITMODE);
+				yycc::cenum::remove(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PRELITMODE);
 				break;
 		}
 	}
@@ -478,33 +479,33 @@ namespace LibCmo::CK2::ObjImpls {
 	VxMath::VXTEXTURE_WRAPMODE CKMesh::GetWrapMode() const {
 		VxMath::VXTEXTURE_WRAPMODE ret = VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_NONE;
 
-		if (YYCC::EnumHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPU)) {
-			YYCC::EnumHelper::Add(ret, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_U);
+		if (yycc::cenum::has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPU)) {
+			yycc::cenum::add(ret, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_U);
 		}
-		if (YYCC::EnumHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPV)) {
-			YYCC::EnumHelper::Add(ret, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_V);
+		if (yycc::cenum::has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPV)) {
+			yycc::cenum::add(ret, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_V);
 		}
 
 		return ret;
 	}
 
 	void CKMesh::SetWrapMode(VxMath::VXTEXTURE_WRAPMODE mode) {
-		if (YYCC::EnumHelper::Has(mode, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_U)) {
-			YYCC::EnumHelper::Add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPU);
+		if (yycc::cenum::has(mode, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_U)) {
+			yycc::cenum::add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPU);
 		} else {
-			YYCC::EnumHelper::Remove(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPU);
+			yycc::cenum::remove(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPU);
 		}
 
-		if (YYCC::EnumHelper::Has(mode, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_V)) {
-			YYCC::EnumHelper::Add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPV);
+		if (yycc::cenum::has(mode, VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_V)) {
+			yycc::cenum::add(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPV);
 		} else {
-			YYCC::EnumHelper::Remove(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPV);
+			yycc::cenum::remove(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_WRAPV);
 		}
 	}
 
 	CKMesh::VertexSaveFlags CKMesh::GenerateSaveFlags() {
 		// set to initial status
-		VertexSaveFlags saveflags = YYCC::EnumHelper::Merge(
+		VertexSaveFlags saveflags = yycc::cenum::merge(
 			VertexSaveFlags::SingleColor,
 			VertexSaveFlags::SingleSpecularColor,
 			VertexSaveFlags::NoNormal,
@@ -513,16 +514,16 @@ namespace LibCmo::CK2::ObjImpls {
 
 		// check no pos
 		// if position is generated, skip saving position
-		if (YYCC::EnumHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PROCEDURALPOS)) {
-			YYCC::EnumHelper::Add(saveflags, VertexSaveFlags::NoPos);
+		if (yycc::cenum::has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PROCEDURALPOS)) {
+			yycc::cenum::add(saveflags, VertexSaveFlags::NoPos);
 		}
 
 		// check uv
 		// if uv is not generated and all uv are not the same value, remove single uv
-		if (!YYCC::EnumHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PROCEDURALUV)) {
+		if (!yycc::cenum::has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_PROCEDURALUV)) {
 			for (const auto& uv : m_VertexUV) {
 				if (uv != m_VertexUV.front()) {
-					YYCC::EnumHelper::Remove(saveflags, VertexSaveFlags::SingleUV);
+					yycc::cenum::remove(saveflags, VertexSaveFlags::SingleUV);
 					break;
 				}
 			}
@@ -532,19 +533,19 @@ namespace LibCmo::CK2::ObjImpls {
 		// if all color are not the same value, remove single color
 		for (const auto& col : m_VertexColor) {
 			if (col != m_VertexColor.front()) {
-				YYCC::EnumHelper::Remove(saveflags, VertexSaveFlags::SingleColor);
+				yycc::cenum::remove(saveflags, VertexSaveFlags::SingleColor);
 				break;
 			}
 		}
 		for (const auto& col : m_VertexSpecularColor) {
 			if (col != m_VertexSpecularColor.front()) {
-				YYCC::EnumHelper::Remove(saveflags, VertexSaveFlags::SingleSpecularColor);
+				yycc::cenum::remove(saveflags, VertexSaveFlags::SingleSpecularColor);
 				break;
 			}
 		}
 
 		// if normal not changed, and position is not generated, we should consider whether we need save normal (step into if)
-		if (!YYCC::EnumHelper::Has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_NORMAL_CHANGED, VxMath::VXMESH_FLAGS::VXMESH_PROCEDURALPOS)) {
+		if (!yycc::cenum::has(m_Flags, VxMath::VXMESH_FLAGS::VXMESH_NORMAL_CHANGED, VxMath::VXMESH_FLAGS::VXMESH_PROCEDURALPOS)) {
 			// MARK: we should build face normal first
 			// then we build vertex normal like BuildNormals.
 			// then, we compare the difference between the generated normals and user specified normals, by simply using operator- (userNml - generatedNml) and abs the result.
@@ -581,7 +582,7 @@ namespace LibCmo::CK2::ObjImpls {
 			accnml /= static_cast<CKFLOAT>(m_VertexCount);
 			if (accnml.Length() > 0.001f) {
 				// too large difference, we need save normal
-				YYCC::EnumHelper::Remove(saveflags, VertexSaveFlags::NoNormal);
+				yycc::cenum::remove(saveflags, VertexSaveFlags::NoNormal);
 			}
 
 		}

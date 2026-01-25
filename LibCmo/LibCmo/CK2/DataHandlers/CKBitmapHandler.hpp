@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../VTInternal.hpp"
+#include <yycc/macro/class_copy_move.hpp>
 #include <memory>
 #include <functional>
 
@@ -30,7 +31,7 @@ namespace LibCmo::CK2::DataHandlers {
 	public:
 		CKBitmapHandler() {}
 		virtual ~CKBitmapHandler() {}
-		YYCC_DEL_CLS_COPY_MOVE(CKBitmapHandler);
+		YYCC_DELETE_COPY_MOVE(CKBitmapHandler)
 
 		/**
 		 * @brief General CKBitmapHandler getter.
@@ -102,7 +103,7 @@ namespace LibCmo::CK2::DataHandlers {
 	public:
 		CKBitmapBMPHandler();
 		virtual ~CKBitmapBMPHandler();
-		YYCC_DEL_CLS_COPY_MOVE(CKBitmapBMPHandler);
+		YYCC_DELETE_COPY_MOVE(CKBitmapBMPHandler)
 
 		static const CKBitmapProperties& GetBitmapDefaultProperties();
 
@@ -118,7 +119,7 @@ namespace LibCmo::CK2::DataHandlers {
 	public:
 		CKBitmapTGAHandler();
 		virtual ~CKBitmapTGAHandler();
-		YYCC_DEL_CLS_COPY_MOVE(CKBitmapTGAHandler);
+		YYCC_DELETE_COPY_MOVE(CKBitmapTGAHandler)
 
 		static const CKBitmapProperties& GetBitmapDefaultProperties();
 
@@ -134,7 +135,7 @@ namespace LibCmo::CK2::DataHandlers {
 	public:
 		CKBitmapJPGHandler();
 		virtual ~CKBitmapJPGHandler();
-		YYCC_DEL_CLS_COPY_MOVE(CKBitmapJPGHandler);
+		YYCC_DELETE_COPY_MOVE(CKBitmapJPGHandler)
 
 		static const CKBitmapProperties& GetBitmapDefaultProperties();
 
@@ -150,7 +151,7 @@ namespace LibCmo::CK2::DataHandlers {
 	public:
 		CKBitmapPNGHandler();
 		virtual ~CKBitmapPNGHandler();
-		YYCC_DEL_CLS_COPY_MOVE(CKBitmapPNGHandler);
+		YYCC_DELETE_COPY_MOVE(CKBitmapPNGHandler)
 
 		static const CKBitmapProperties& GetBitmapDefaultProperties();
 

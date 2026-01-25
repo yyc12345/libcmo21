@@ -9,7 +9,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKBeObject(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKBeObject();
-		YYCC_DEL_CLS_COPY_MOVE(CKBeObject);
+		YYCC_DELETE_COPY_MOVE(CKBeObject)
 
 		virtual CK_CLASSID GetClassID() override { 
 			return CK_CLASSID::CKCID_BEOBJECT; 

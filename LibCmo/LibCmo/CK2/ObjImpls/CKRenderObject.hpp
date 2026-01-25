@@ -11,7 +11,7 @@ namespace LibCmo::CK2::ObjImpls {
 			CKBeObject(ctx, ckid, name)
 		{}
 		virtual ~CKRenderObject() {}
-		YYCC_DEL_CLS_COPY_MOVE(CKRenderObject);
+		YYCC_DELETE_COPY_MOVE(CKRenderObject)
 
 		virtual CK_CLASSID GetClassID() override { 
 			return CK_CLASSID::CKCID_RENDEROBJECT; 

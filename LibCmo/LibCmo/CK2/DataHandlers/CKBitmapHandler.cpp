@@ -1,4 +1,5 @@
 #include "CKBitmapHandler.hpp"
+#include <yycc/patch/fopen.hpp>
 #include <stb_image.h>
 #include <stb_image_write.h>
 
@@ -135,7 +136,7 @@ namespace LibCmo::CK2::DataHandlers {
 
 	static bool StbReadFile(CKSTRING u8filename, VxMath::VxImageDescEx* read_image) {
 		if (u8filename == nullptr || read_image == nullptr) return false;
-		FILE* fs = YYCC::IOHelper::UTF8FOpen(u8filename, u8"rb");
+		FILE* fs = yycc::patch::fopen::fopen(u8filename, u8"rb");
 		if (fs == nullptr) return false;
 
 		// read data
@@ -210,7 +211,7 @@ namespace LibCmo::CK2::DataHandlers {
 	static bool StbSaveFile(CKSTRING u8filename, const VxMath::VxImageDescEx* write_image, bool save_alpha, SaveOperation oper) {
 		if (u8filename == nullptr || write_image == nullptr) return false;
 		if (!write_image->IsValid()) return false;
-		FILE* fs = YYCC::IOHelper::UTF8FOpen(u8filename, u8"wb");
+		FILE* fs = yycc::patch::fopen::fopen(u8filename, u8"wb");
 		if (fs == nullptr) return false;
 
 		// allocate buffer and convert data from ARGB to RGBA or RGB

@@ -10,7 +10,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKTexture(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKTexture();
-		YYCC_DEL_CLS_COPY_MOVE(CKTexture);
+		YYCC_DELETE_COPY_MOVE(CKTexture)
 
 		virtual CK_CLASSID GetClassID() override { 
 			return CK_CLASSID::CKCID_TEXTURE; 

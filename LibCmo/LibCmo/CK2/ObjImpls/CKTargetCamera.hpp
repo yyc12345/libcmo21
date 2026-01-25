@@ -9,7 +9,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKTargetCamera(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKTargetCamera();
-		YYCC_DEL_CLS_COPY_MOVE(CKTargetCamera);
+		YYCC_DELETE_COPY_MOVE(CKTargetCamera)
 
 		virtual CK_CLASSID GetClassID() override {
 			return CK_CLASSID::CKCID_TARGETCAMERA;

@@ -1,6 +1,7 @@
 #include "CKTargetLight.hpp"
 #include "../CKStateChunk.hpp"
 #include "../CKContext.hpp"
+#include <yycc/cenum.hpp>
 
 namespace LibCmo::CK2::ObjImpls {
 	
@@ -70,16 +71,16 @@ namespace LibCmo::CK2::ObjImpls {
 		CK3dEntity* old_target = static_cast<CK3dEntity*>(m_Context->GetObject(m_Target3dEntity));
 		if (old_target != nullptr) {
 			CK_3DENTITY_FLAGS old_target_flags = old_target->GetEntityFlags();
-			YYCC::EnumHelper::Remove(old_target_flags, CK_3DENTITY_FLAGS::CK_3DENTITY_TARGETLIGHT);
-			YYCC::EnumHelper::Add(old_target_flags, CK_3DENTITY_FLAGS::CK_3DENTITY_FRAME);
+			yycc::cenum::remove(old_target_flags, CK_3DENTITY_FLAGS::CK_3DENTITY_TARGETLIGHT);
+			yycc::cenum::add(old_target_flags, CK_3DENTITY_FLAGS::CK_3DENTITY_FRAME);
 			old_target->SetEntityFlags(old_target_flags);
 		}
 
 		// Then add specified target
 		if (target != nullptr) {
 			CK_3DENTITY_FLAGS new_target_flags = target->GetEntityFlags();
-			YYCC::EnumHelper::Add(new_target_flags, CK_3DENTITY_FLAGS::CK_3DENTITY_TARGETLIGHT);
-			YYCC::EnumHelper::Remove(new_target_flags, CK_3DENTITY_FLAGS::CK_3DENTITY_FRAME);
+			yycc::cenum::add(new_target_flags, CK_3DENTITY_FLAGS::CK_3DENTITY_TARGETLIGHT);
+			yycc::cenum::remove(new_target_flags, CK_3DENTITY_FLAGS::CK_3DENTITY_FRAME);
 			target->SetEntityFlags(new_target_flags);
 		}
 

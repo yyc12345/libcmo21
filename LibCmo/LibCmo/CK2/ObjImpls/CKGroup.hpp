@@ -9,7 +9,7 @@ namespace LibCmo::CK2::ObjImpls {
 	public:
 		CKGroup(CKContext* ctx, CK_ID ckid, CKSTRING name);
 		virtual ~CKGroup();
-		YYCC_DEL_CLS_COPY_MOVE(CKGroup);
+		YYCC_DELETE_COPY_MOVE(CKGroup)
 		
 		virtual CK_CLASSID GetClassID() override { 
 			return CK_CLASSID::CKCID_GROUP; 

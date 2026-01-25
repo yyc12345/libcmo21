@@ -1,12 +1,13 @@
 #include "CKCamera.hpp"
 #include "../CKStateChunk.hpp"
+#include <yycc/cenum.hpp>
 
 namespace LibCmo::CK2::ObjImpls {
 
 	// Convenient macro to mark this object is not UPTODATE.
 #define REMOVE_UPTODATE_FLAG { \
 CK_OBJECT_FLAGS obj_flags = GetObjectFlags(); \
-YYCC::EnumHelper::Remove(obj_flags, CK_OBJECT_FLAGS::CK_OBJECT_UPTODATE); \
+yycc::cenum::remove(obj_flags, CK_OBJECT_FLAGS::CK_OBJECT_UPTODATE); \
 SetObjectFlags(obj_flags); \
 }
 
