@@ -39,7 +39,7 @@ bool {{ sname }}::operator==(const {{ sname }}& rhs) const {
 }
 
 {#- Spaceship operator #}
-auto {{ sname }}::operator<=>(const {{ sname }}& rhs) const {
+std::partial_ordering {{ sname }}::operator<=>(const {{ sname }}& rhs) const {
     {%- for item in svars[:-1] %}
     if (auto cmp = {{ item }} <=> rhs.{{ item }}; cmp != 0) return cmp;
     {%- endfor %}

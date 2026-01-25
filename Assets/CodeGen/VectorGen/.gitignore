@@ -1,3 +1,17 @@
-# Result
+## ======== Personal ========
+# Ignore generated code
 VxTypes.hpp
 VxTypes.cpp
+
+## ======== Python ========
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
