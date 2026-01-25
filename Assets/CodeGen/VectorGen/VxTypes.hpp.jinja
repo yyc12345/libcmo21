@@ -10,7 +10,7 @@ struct {{ sname }} {
 	{{ sname }}({{- shared.argument_list_builder(svars) -}});
 
     {#- Default copy ctor, move ctor, copy assigner, move assigner #}
-	YYCC_DEFAULT_COPY_MOVE({{ sname }});
+	YYCC_DEFAULT_COPY_MOVE({{ sname }})
     
     {#- Offset operator #}
 	CKFLOAT& operator[](size_t i);

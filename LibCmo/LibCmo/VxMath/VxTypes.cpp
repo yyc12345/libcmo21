@@ -5,26 +5,32 @@ namespace LibCmo::VxMath {
 
 #pragma region VxVector2
 
-	VxVector2::VxVector2() :x(0.0f), y(0.0f) {}
+	VxVector2::VxVector2() : x(0.0f), y(0.0f) {}
 	VxVector2::VxVector2(CKFLOAT _x, CKFLOAT _y) : x(_x), y(_y) {}
 	CKFLOAT& VxVector2::operator[](size_t i) {
 		switch (i) {
-			case 0: return x;
-			case 1: return y;
-			default: throw LogicException("Invalid index for VxVector2::operator[].");
+			case 0:
+				return x;
+			case 1:
+				return y;
+			default:
+				throw LogicException("Invalid index for VxVector2::operator[].");
 		}
 	}
 	const CKFLOAT& VxVector2::operator[](size_t i) const {
 		switch (i) {
-			case 0: return x;
-			case 1: return y;
-			default: throw LogicException("Invalid index for VxVector2::operator[].");
+			case 0:
+				return x;
+			case 1:
+				return y;
+			default:
+				throw LogicException("Invalid index for VxVector2::operator[].");
 		}
 	}
 	bool VxVector2::operator==(const VxVector2& rhs) const {
 		return (x == rhs.x && y == rhs.y);
 	}
-	auto VxVector2::operator<=>(const VxVector2& rhs) const {
+	std::partial_ordering VxVector2::operator<=>(const VxVector2& rhs) const {
 		if (auto cmp = x <=> rhs.x; cmp != 0) return cmp;
 		return y <=> rhs.y;
 	}
@@ -99,28 +105,36 @@ namespace LibCmo::VxMath {
 
 #pragma region VxVector3
 
-	VxVector3::VxVector3() :x(0.0f), y(0.0f), z(0.0f) {}
+	VxVector3::VxVector3() : x(0.0f), y(0.0f), z(0.0f) {}
 	VxVector3::VxVector3(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z) : x(_x), y(_y), z(_z) {}
 	CKFLOAT& VxVector3::operator[](size_t i) {
 		switch (i) {
-			case 0: return x;
-			case 1: return y;
-			case 2: return z;
-			default: throw LogicException("Invalid index for VxVector3::operator[].");
+			case 0:
+				return x;
+			case 1:
+				return y;
+			case 2:
+				return z;
+			default:
+				throw LogicException("Invalid index for VxVector3::operator[].");
 		}
 	}
 	const CKFLOAT& VxVector3::operator[](size_t i) const {
 		switch (i) {
-			case 0: return x;
-			case 1: return y;
-			case 2: return z;
-			default: throw LogicException("Invalid index for VxVector3::operator[].");
+			case 0:
+				return x;
+			case 1:
+				return y;
+			case 2:
+				return z;
+			default:
+				throw LogicException("Invalid index for VxVector3::operator[].");
 		}
 	}
 	bool VxVector3::operator==(const VxVector3& rhs) const {
 		return (x == rhs.x && y == rhs.y && z == rhs.z);
 	}
-	auto VxVector3::operator<=>(const VxVector3& rhs) const {
+	std::partial_ordering VxVector3::operator<=>(const VxVector3& rhs) const {
 		if (auto cmp = x <=> rhs.x; cmp != 0) return cmp;
 		if (auto cmp = y <=> rhs.y; cmp != 0) return cmp;
 		return z <=> rhs.z;
@@ -201,30 +215,40 @@ namespace LibCmo::VxMath {
 
 #pragma region VxVector4
 
-	VxVector4::VxVector4() :x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
+	VxVector4::VxVector4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
 	VxVector4::VxVector4(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z, CKFLOAT _w) : x(_x), y(_y), z(_z), w(_w) {}
 	CKFLOAT& VxVector4::operator[](size_t i) {
 		switch (i) {
-			case 0: return x;
-			case 1: return y;
-			case 2: return z;
-			case 3: return w;
-			default: throw LogicException("Invalid index for VxVector4::operator[].");
+			case 0:
+				return x;
+			case 1:
+				return y;
+			case 2:
+				return z;
+			case 3:
+				return w;
+			default:
+				throw LogicException("Invalid index for VxVector4::operator[].");
 		}
 	}
 	const CKFLOAT& VxVector4::operator[](size_t i) const {
 		switch (i) {
-			case 0: return x;
-			case 1: return y;
-			case 2: return z;
-			case 3: return w;
-			default: throw LogicException("Invalid index for VxVector4::operator[].");
+			case 0:
+				return x;
+			case 1:
+				return y;
+			case 2:
+				return z;
+			case 3:
+				return w;
+			default:
+				throw LogicException("Invalid index for VxVector4::operator[].");
 		}
 	}
 	bool VxVector4::operator==(const VxVector4& rhs) const {
 		return (x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w);
 	}
-	auto VxVector4::operator<=>(const VxVector4& rhs) const {
+	std::partial_ordering VxVector4::operator<=>(const VxVector4& rhs) const {
 		if (auto cmp = x <=> rhs.x; cmp != 0) return cmp;
 		if (auto cmp = y <=> rhs.y; cmp != 0) return cmp;
 		if (auto cmp = z <=> rhs.z; cmp != 0) return cmp;
@@ -311,30 +335,40 @@ namespace LibCmo::VxMath {
 
 #pragma region VxQuaternion
 
-	VxQuaternion::VxQuaternion() :x(0.0f), y(0.0f), z(0.0f), w(1.0f) {} // SET YOUR CUSTOM INIT
+	VxQuaternion::VxQuaternion() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {} // SET YOUR CUSTOM INIT
 	VxQuaternion::VxQuaternion(CKFLOAT _x, CKFLOAT _y, CKFLOAT _z, CKFLOAT _w) : x(_x), y(_y), z(_z), w(_w) {}
 	CKFLOAT& VxQuaternion::operator[](size_t i) {
 		switch (i) {
-			case 0: return x;
-			case 1: return y;
-			case 2: return z;
-			case 3: return w;
-			default: throw LogicException("Invalid index for VxQuaternion::operator[].");
+			case 0:
+				return x;
+			case 1:
+				return y;
+			case 2:
+				return z;
+			case 3:
+				return w;
+			default:
+				throw LogicException("Invalid index for VxQuaternion::operator[].");
 		}
 	}
 	const CKFLOAT& VxQuaternion::operator[](size_t i) const {
 		switch (i) {
-			case 0: return x;
-			case 1: return y;
-			case 2: return z;
-			case 3: return w;
-			default: throw LogicException("Invalid index for VxQuaternion::operator[].");
+			case 0:
+				return x;
+			case 1:
+				return y;
+			case 2:
+				return z;
+			case 3:
+				return w;
+			default:
+				throw LogicException("Invalid index for VxQuaternion::operator[].");
 		}
 	}
 	bool VxQuaternion::operator==(const VxQuaternion& rhs) const {
 		return (x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w);
 	}
-	auto VxQuaternion::operator<=>(const VxQuaternion& rhs) const {
+	std::partial_ordering VxQuaternion::operator<=>(const VxQuaternion& rhs) const {
 		if (auto cmp = x <=> rhs.x; cmp != 0) return cmp;
 		if (auto cmp = y <=> rhs.y; cmp != 0) return cmp;
 		if (auto cmp = z <=> rhs.z; cmp != 0) return cmp;
@@ -348,30 +382,40 @@ namespace LibCmo::VxMath {
 
 #pragma region VxColor
 
-	VxColor::VxColor() :r(0.0f), g(0.0f), b(0.0f), a(1.0f) {} // SET YOUR CUSTOM INIT
+	VxColor::VxColor() : r(0.0f), g(0.0f), b(0.0f), a(0.0f) {} // SET YOUR CUSTOM INIT
 	VxColor::VxColor(CKFLOAT _r, CKFLOAT _g, CKFLOAT _b, CKFLOAT _a) : r(_r), g(_g), b(_b), a(_a) {}
 	CKFLOAT& VxColor::operator[](size_t i) {
 		switch (i) {
-			case 0: return r;
-			case 1: return g;
-			case 2: return b;
-			case 3: return a;
-			default: throw LogicException("Invalid index for VxColor::operator[].");
+			case 0:
+				return r;
+			case 1:
+				return g;
+			case 2:
+				return b;
+			case 3:
+				return a;
+			default:
+				throw LogicException("Invalid index for VxColor::operator[].");
 		}
 	}
 	const CKFLOAT& VxColor::operator[](size_t i) const {
 		switch (i) {
-			case 0: return r;
-			case 1: return g;
-			case 2: return b;
-			case 3: return a;
-			default: throw LogicException("Invalid index for VxColor::operator[].");
+			case 0:
+				return r;
+			case 1:
+				return g;
+			case 2:
+				return b;
+			case 3:
+				return a;
+			default:
+				throw LogicException("Invalid index for VxColor::operator[].");
 		}
 	}
 	bool VxColor::operator==(const VxColor& rhs) const {
 		return (r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a);
 	}
-	auto VxColor::operator<=>(const VxColor& rhs) const {
+	std::partial_ordering VxColor::operator<=>(const VxColor& rhs) const {
 		if (auto cmp = r <=> rhs.r; cmp != 0) return cmp;
 		if (auto cmp = g <=> rhs.g; cmp != 0) return cmp;
 		if (auto cmp = b <=> rhs.b; cmp != 0) return cmp;
@@ -379,7 +423,9 @@ namespace LibCmo::VxMath {
 	}
 
 	/* ===== BEGIN USER CUSTOM ===== */
-	VxColor::VxColor(CKDWORD argb) { FromARGB(argb); }
+	VxColor::VxColor(CKDWORD argb) {
+		FromARGB(argb);
+	}
 	VxColor::VxColor(CKFLOAT _r, CKFLOAT _g, CKFLOAT _b) : r(_r), g(_g), b(_b), a(1.0f) {}
 	void VxColor::FromARGB(CKDWORD argb) {
 		a = ((argb & 0xFF000000) >> 24) / 255.0f;
@@ -414,8 +460,12 @@ namespace LibCmo::VxMath {
 
 #pragma region VxMatrix
 
-	VxMatrix::VxMatrix() : m_Data() { SetIdentity(); }
-	VxMatrix::VxMatrix(CKFLOAT m[4][4]) : m_Data() { std::memcpy(m_Data, m, sizeof(m_Data)); }
+	VxMatrix::VxMatrix() : m_Data() {
+		SetIdentity();
+	}
+	VxMatrix::VxMatrix(CKFLOAT m[4][4]) : m_Data() {
+		std::memcpy(m_Data, m, sizeof(m_Data));
+	}
 	VxVector4& VxMatrix::operator[](size_t i) {
 		if (i >= 4) throw LogicException("Invalid index for VxMatrix::operator[].");
 		return *(reinterpret_cast<VxVector4*>(m_Data) + i);
@@ -427,7 +477,7 @@ namespace LibCmo::VxMath {
 	bool VxMatrix::operator==(const VxMatrix& rhs) const {
 		return ((*this)[0] == rhs[0] && (*this)[1] == rhs[1] && (*this)[2] == rhs[2] && (*this)[3] == rhs[3]);
 	}
-	auto VxMatrix::operator<=>(const VxMatrix& rhs) const {
+	std::partial_ordering VxMatrix::operator<=>(const VxMatrix& rhs) const {
 		if (auto cmp = (*this)[0] <=> rhs[0]; cmp != 0) return cmp;
 		if (auto cmp = (*this)[1] <=> rhs[1]; cmp != 0) return cmp;
 		if (auto cmp = (*this)[2] <=> rhs[2]; cmp != 0) return cmp;
@@ -505,11 +555,7 @@ namespace LibCmo::VxMath {
 		}
 
 		VxVector3 CrossProduct(const VxVector3& lhs, const VxVector3& rhs) {
-			return VxVector3(
-				lhs.y * rhs.z - lhs.z * rhs.y,
-				lhs.z * rhs.x - lhs.x * rhs.z,
-				lhs.x * rhs.y - lhs.y * rhs.x
-			);
+			return VxVector3(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x);
 		}
 
 		void Absolute(VxVector3& lhs) {
@@ -518,12 +564,10 @@ namespace LibCmo::VxMath {
 			lhs.z = std::fabs(lhs.z);
 		}
 
-	}
+	} // namespace NSVxVector
 
-	namespace NSVxMatrix {
-
-	}
+	namespace NSVxMatrix {}
 
 #pragma endregion
 
-}
+} // namespace LibCmo::VxMath

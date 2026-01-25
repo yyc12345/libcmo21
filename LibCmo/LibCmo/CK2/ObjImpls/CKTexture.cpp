@@ -169,7 +169,7 @@ namespace LibCmo::CK2::ObjImpls {
 			props.m_Format.Flags = static_cast<CKDWORD>(VxMath::VX_PIXELFORMAT::_32_ARGB8888);
 			props.m_Format.Width = m_ImageHost.GetWidth();
 			props.m_Format.Height = m_ImageHost.GetHeight();
-			props.m_Format.BytesPerLine = VxMath::VxImageDescEx::PixelSize * props.m_Format.Width;
+			props.m_Format.BytesPerLine = VxMath::VxImageDescEx::PIXEL_SIZE * props.m_Format.Width;
 			props.m_Format.BitsPerPixel = 32;
 
 			props.m_Format.RedMask = 0x00FF0000;

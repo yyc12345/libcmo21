@@ -16,7 +16,7 @@ namespace LibCmo::CK2::DataHandlers {
 	*/
 
 	// MARK: for std-image size, we use `n * CKSizeof(CKBYTE)` to calc offset.
-	// for virtools size, we use `VxMath::VxImageDescEx::ColorFactorSize` and `VxMath::VxImageDescEx::PixelSize` to calc offset.
+	// for virtools size, we use `VxMath::VxImageDescEx::FACTOR_SIZE` and `VxMath::VxImageDescEx::PIXEL_SIZE` to calc offset.
 
 	static void ABGRToARGB(CKDWORD count, const void* _abgr, void* _argb) {
 		const CKBYTE* abgr = static_cast<const CKBYTE*>(_abgr);
@@ -24,36 +24,36 @@ namespace LibCmo::CK2::DataHandlers {
 		// copy R
 		VxMath::VxCopyStructure(
 			count,
-			argb + (2u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize,
-			VxMath::VxImageDescEx::ColorFactorSize,
+			argb + (2u * VxMath::VxImageDescEx::FACTOR_SIZE),
+			VxMath::VxImageDescEx::PIXEL_SIZE,
+			VxMath::VxImageDescEx::FACTOR_SIZE,
 			abgr + (0u * CKSizeof(CKBYTE)),
 			4u * CKSizeof(CKBYTE)
 		);
 		// copy G
 		VxMath::VxCopyStructure(
 			count,
-			argb + (1u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize,
-			VxMath::VxImageDescEx::ColorFactorSize,
+			argb + (1u * VxMath::VxImageDescEx::FACTOR_SIZE),
+			VxMath::VxImageDescEx::PIXEL_SIZE,
+			VxMath::VxImageDescEx::FACTOR_SIZE,
 			abgr + (1u * CKSizeof(CKBYTE)),
 			4u * CKSizeof(CKBYTE)
 		);
 		// copy B
 		VxMath::VxCopyStructure(
 			count,
-			argb + (0u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize,
-			VxMath::VxImageDescEx::ColorFactorSize,
+			argb + (0u * VxMath::VxImageDescEx::FACTOR_SIZE),
+			VxMath::VxImageDescEx::PIXEL_SIZE,
+			VxMath::VxImageDescEx::FACTOR_SIZE,
 			abgr + (2u * CKSizeof(CKBYTE)),
 			4u * CKSizeof(CKBYTE)
 		);
 		// copy A
 		VxMath::VxCopyStructure(
 			count,
-			argb + (3u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize,
-			VxMath::VxImageDescEx::ColorFactorSize,
+			argb + (3u * VxMath::VxImageDescEx::FACTOR_SIZE),
+			VxMath::VxImageDescEx::PIXEL_SIZE,
+			VxMath::VxImageDescEx::FACTOR_SIZE,
 			abgr + (3u * CKSizeof(CKBYTE)),
 			4u * CKSizeof(CKBYTE)
 		);
@@ -67,36 +67,36 @@ namespace LibCmo::CK2::DataHandlers {
 			count,
 			abgr + (0u * CKSizeof(CKBYTE)),
 			4u * CKSizeof(CKBYTE),
-			VxMath::VxImageDescEx::ColorFactorSize,
-			argb + (2u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize
+			VxMath::VxImageDescEx::FACTOR_SIZE,
+			argb + (2u * VxMath::VxImageDescEx::FACTOR_SIZE),
+			VxMath::VxImageDescEx::PIXEL_SIZE
 		);
 		// copy G
 		VxMath::VxCopyStructure(
 			count,
 			abgr + (1u * CKSizeof(CKBYTE)),
 			4u * CKSizeof(CKBYTE),
-			VxMath::VxImageDescEx::ColorFactorSize,
-			argb + (1u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize
+			VxMath::VxImageDescEx::FACTOR_SIZE,
+			argb + (1u * VxMath::VxImageDescEx::FACTOR_SIZE),
+			VxMath::VxImageDescEx::PIXEL_SIZE
 		);
 		// copy B
 		VxMath::VxCopyStructure(
 			count,
 			abgr + (2u * CKSizeof(CKBYTE)),
 			4u * CKSizeof(CKBYTE),
-			VxMath::VxImageDescEx::ColorFactorSize,
-			argb + (0u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize
+			VxMath::VxImageDescEx::FACTOR_SIZE,
+			argb + (0u * VxMath::VxImageDescEx::FACTOR_SIZE),
+			VxMath::VxImageDescEx::PIXEL_SIZE
 		);
 		// copy A
 		VxMath::VxCopyStructure(
 			count,
 			abgr + (3u * CKSizeof(CKBYTE)),
 			4u * CKSizeof(CKBYTE),
-			VxMath::VxImageDescEx::ColorFactorSize,
-			argb + (3u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize
+			VxMath::VxImageDescEx::FACTOR_SIZE,
+			argb + (3u * VxMath::VxImageDescEx::FACTOR_SIZE),
+			VxMath::VxImageDescEx::PIXEL_SIZE
 		);
 	}
 
@@ -108,27 +108,27 @@ namespace LibCmo::CK2::DataHandlers {
 			count,
 			bgr + (0u * CKSizeof(CKBYTE)),
 			3u * CKSizeof(CKBYTE),
-			VxMath::VxImageDescEx::ColorFactorSize,
-			argb + (2u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize
+			VxMath::VxImageDescEx::FACTOR_SIZE,
+			argb + (2u * VxMath::VxImageDescEx::FACTOR_SIZE),
+			VxMath::VxImageDescEx::PIXEL_SIZE
 		);
 		// copy G
 		VxMath::VxCopyStructure(
 			count,
 			bgr + (1u * CKSizeof(CKBYTE)),
 			3u * CKSizeof(CKBYTE),
-			VxMath::VxImageDescEx::ColorFactorSize,
-			argb + (1u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize
+			VxMath::VxImageDescEx::FACTOR_SIZE,
+			argb + (1u * VxMath::VxImageDescEx::FACTOR_SIZE),
+			VxMath::VxImageDescEx::PIXEL_SIZE
 		);
 		// copy B
 		VxMath::VxCopyStructure(
 			count,
 			bgr + (2u * CKSizeof(CKBYTE)),
 			3u * CKSizeof(CKBYTE),
-			VxMath::VxImageDescEx::ColorFactorSize,
-			argb + (0u * VxMath::VxImageDescEx::ColorFactorSize),
-			VxMath::VxImageDescEx::PixelSize
+			VxMath::VxImageDescEx::FACTOR_SIZE,
+			argb + (0u * VxMath::VxImageDescEx::FACTOR_SIZE),
+			VxMath::VxImageDescEx::PIXEL_SIZE
 		);
 		// skip A factor
 	}

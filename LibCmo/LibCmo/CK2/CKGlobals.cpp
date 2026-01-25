@@ -1,5 +1,5 @@
 #include "../VTUtils.hpp"
-#if YYCC_OS == YYCC_OS_WINDOWS
+#if defined(YYCC_OS_WINDOWS)
 #define ZLIB_WINAPI
 #endif
 #include <zconf.h>

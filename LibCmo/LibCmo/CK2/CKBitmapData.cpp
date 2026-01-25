@@ -159,14 +159,14 @@ namespace LibCmo::CK2 {
 				if (!canSaveAlpha) {
 					// prepare alpha list
 					CKDWORD pixelCount = slot->GetPixelCount();
-					std::unique_ptr<CKBYTE[]> alphabuf(new CKBYTE[pixelCount * VxMath::VxImageDescEx::ColorFactorSize]);
+					std::unique_ptr<CKBYTE[]> alphabuf(new CKBYTE[pixelCount * VxMath::VxImageDescEx::FACTOR_SIZE]);
 					VxMath::VxCopyStructure(
 						pixelCount,
 						alphabuf.get(),
-						VxMath::VxImageDescEx::ColorFactorSize,
-						VxMath::VxImageDescEx::ColorFactorSize,
-						slot->GetImage() + 3 * VxMath::VxImageDescEx::ColorFactorSize,	// move to A factor
-						VxMath::VxImageDescEx::PixelSize
+						VxMath::VxImageDescEx::FACTOR_SIZE,
+						VxMath::VxImageDescEx::FACTOR_SIZE,
+						slot->GetImage() + 3 * VxMath::VxImageDescEx::FACTOR_SIZE,	// move to A factor
+						VxMath::VxImageDescEx::PIXEL_SIZE
 					);
 
 					// check whether alpha are the same value
@@ -174,9 +174,9 @@ namespace LibCmo::CK2 {
 					CKDWORD sameAlpha = 0;
 					for (CKDWORD i = 0; i < pixelCount; ++i) {
 						if (i == 0) {
-							sameAlpha = static_cast<CKDWORD>(alphabuf[i * VxMath::VxImageDescEx::ColorFactorSize]);
+							sameAlpha = static_cast<CKDWORD>(alphabuf[i * VxMath::VxImageDescEx::FACTOR_SIZE]);
 						} else {
-							if (sameAlpha != static_cast<CKDWORD>(alphabuf[i * VxMath::VxImageDescEx::ColorFactorSize])) {
+							if (sameAlpha != static_cast<CKDWORD>(alphabuf[i * VxMath::VxImageDescEx::FACTOR_SIZE])) {
 								isSameAlpha = false;
 								break;
 							}
@@ -192,7 +192,7 @@ namespace LibCmo::CK2 {
 					if (isSameAlpha) {
 						chk->WriteStruct(sameAlpha);
 					} else {
-						chk->WriteBuffer(alphabuf.get(), pixelCount * VxMath::VxImageDescEx::ColorFactorSize);
+						chk->WriteBuffer(alphabuf.get(), pixelCount * VxMath::VxImageDescEx::FACTOR_SIZE);
 					}
 
 					// free alphabuf
@@ -240,7 +240,7 @@ namespace LibCmo::CK2 {
 			// create 4 channel buf
 			// we always write alpha channel data.
 			CKDWORD pixelCount = slot->GetPixelCount();
-			CKDWORD bufSize = pixelCount * VxMath::VxImageDescEx::ColorFactorSize;
+			CKDWORD bufSize = pixelCount * VxMath::VxImageDescEx::FACTOR_SIZE;
 			std::unique_ptr<CKBYTE[]> redbuf(new CKBYTE[bufSize]);
 			std::unique_ptr<CKBYTE[]> greenbuf(new CKBYTE[bufSize]);
 			std::unique_ptr<CKBYTE[]> bluebuf(new CKBYTE[bufSize]);
@@ -251,37 +251,37 @@ namespace LibCmo::CK2 {
 			VxMath::VxCopyStructure(
 				pixelCount,
 				alphabuf.get(),
-				VxMath::VxImageDescEx::ColorFactorSize,
-				VxMath::VxImageDescEx::ColorFactorSize,
-				slot->GetImage() + (3 * VxMath::VxImageDescEx::ColorFactorSize),
-				VxMath::VxImageDescEx::PixelSize
+				VxMath::VxImageDescEx::FACTOR_SIZE,
+				VxMath::VxImageDescEx::FACTOR_SIZE,
+				slot->GetImage() + (3 * VxMath::VxImageDescEx::FACTOR_SIZE),
+				VxMath::VxImageDescEx::PIXEL_SIZE
 			);
 			// copy r
 			VxMath::VxCopyStructure(
 				pixelCount,
 				redbuf.get(),
-				VxMath::VxImageDescEx::ColorFactorSize,
-				VxMath::VxImageDescEx::ColorFactorSize,
-				slot->GetImage() + (2 * VxMath::VxImageDescEx::ColorFactorSize),
-				VxMath::VxImageDescEx::PixelSize
+				VxMath::VxImageDescEx::FACTOR_SIZE,
+				VxMath::VxImageDescEx::FACTOR_SIZE,
+				slot->GetImage() + (2 * VxMath::VxImageDescEx::FACTOR_SIZE),
+				VxMath::VxImageDescEx::PIXEL_SIZE
 			);
 			// copy g
 			VxMath::VxCopyStructure(
 				pixelCount,
 				greenbuf.get(),
-				VxMath::VxImageDescEx::ColorFactorSize,
-				VxMath::VxImageDescEx::ColorFactorSize,
-				slot->GetImage() + (1 * VxMath::VxImageDescEx::ColorFactorSize),
-				VxMath::VxImageDescEx::PixelSize
+				VxMath::VxImageDescEx::FACTOR_SIZE,
+				VxMath::VxImageDescEx::FACTOR_SIZE,
+				slot->GetImage() + (1 * VxMath::VxImageDescEx::FACTOR_SIZE),
+				VxMath::VxImageDescEx::PIXEL_SIZE
 			);
 			// copy b
 			VxMath::VxCopyStructure(
 				pixelCount,
 				bluebuf.get(),
-				VxMath::VxImageDescEx::ColorFactorSize,
-				VxMath::VxImageDescEx::ColorFactorSize,
-				slot->GetImage() + (0 * VxMath::VxImageDescEx::ColorFactorSize),
-				VxMath::VxImageDescEx::PixelSize
+				VxMath::VxImageDescEx::FACTOR_SIZE,
+				VxMath::VxImageDescEx::FACTOR_SIZE,
+				slot->GetImage() + (0 * VxMath::VxImageDescEx::FACTOR_SIZE),
+				VxMath::VxImageDescEx::PIXEL_SIZE
 			);
 
 			// write 4 buf

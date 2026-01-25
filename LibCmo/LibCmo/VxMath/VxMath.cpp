@@ -63,7 +63,7 @@ namespace LibCmo::VxMath {
 
 		// copy and swap data by line
 		CKDWORD height = dst->GetHeight(),
-			rowsize = VxImageDescEx::PixelSize * dst->GetWidth();
+			rowsize = VxImageDescEx::PIXEL_SIZE * dst->GetWidth();
 		for (CKDWORD row = 0; row < height; ++row) {
 			std::memcpy(
 				dst->GetMutableImage() + (row * rowsize),

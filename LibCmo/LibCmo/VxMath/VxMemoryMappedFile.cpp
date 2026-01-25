@@ -1,11 +1,16 @@
 #include "VxMemoryMappedFile.hpp"
-#include "../VTEncoding.hpp"
+#include <yycc/num/safe_cast.hpp>
+#if defined(YYCC_OS_WINDOWS)
+#include <yycc/encoding/windows.hpp>
+#else
+#include <yycc/string/reinterpret.hpp>
+#endif
 
 namespace LibCmo::VxMath {
 
 	VxMemoryMappedFile::VxMemoryMappedFile(CKSTRING u8_filepath) :
 		// Initialize members
-#if YYCC_OS == YYCC_OS_WINDOWS
+#if defined(YYCC_OS_WINDOWS)
 		// Initialize Windows specific.
 		m_hFile(NULL), m_hFileMapping(NULL), m_hFileMapView(NULL),
 		m_dwFileSize(),
@@ -22,12 +27,12 @@ namespace LibCmo::VxMath {
 		m_szFilePath = u8_filepath;
 
 		// Do real mapping work according to different platform.
-#if YYCC_OS == YYCC_OS_WINDOWS
+#if defined(YYCC_OS_WINDOWS)
 
 		// Parse file name to wchar_t
-		std::wstring w_filename;
-		if (!YYCC::EncodingHelper::UTF8ToWchar(m_szFilePath, w_filename))
-			return;
+        auto rv_w_filename = yycc::encoding::windows::to_wchar(m_szFilePath);
+        if (!rv_w_filename.has_value()) return;
+        std::wstring w_filename = std::move(rv_w_filename.value());
 
 		// Open file
 		this->m_hFile = ::CreateFileW(
@@ -80,12 +85,12 @@ namespace LibCmo::VxMath {
 		}
 		// Set base address
 		m_pMemoryMappedFileBase = m_hFileMapView;
-		
+
 #else
 		// create file
 		// we do not need provide mode_t, because is served for new created file.
 		// we are opening a existed file.
-		this->m_hFile = open(YYCC::EncodingHelper::ToOrdinary(m_szFilePath.c_str()), O_RDONLY);
+        this->m_hFile = open(yycc::string::reinterpret::as_ordinary(m_szFilePath.c_str()), O_RDONLY);
 		if (m_hFile == -1) {
 			return;
 		}
@@ -98,13 +103,15 @@ namespace LibCmo::VxMath {
 			close(m_hFile);
 			return;
 		}
-		// Setup size and check its range
+		// Setup size with checking its range
 		this->m_offFileSize = sb.st_size;
-		if (this->m_offFileSize > static_cast<off_t>(std::numeric_limits<CKDWORD>::max())) {
-			close(m_hFile);
-			return;
+        auto rv_cbFile = yycc::num::safe_cast::try_to<CKDWORD>(this->m_offFileSize);
+        if (rv_cbFile.has_value()) {
+            this->m_cbFile = rv_cbFile.value();
+        } else {
+            close(m_hFile);
+            return;
 		}
-		m_cbFile = static_cast<CKDWORD>(this->m_offFileSize);
 
 		// map file
 		this->m_pFileAddr = mmap(
@@ -120,7 +127,7 @@ namespace LibCmo::VxMath {
 			return;
 		}
 		// set base address
-		m_pMemoryMappedFileBase = m_pFileAddr;
+		this->m_pMemoryMappedFileBase = m_pFileAddr;
 		
 #endif
 
@@ -135,7 +142,7 @@ namespace LibCmo::VxMath {
 			m_cbFile = 0;
 			m_pMemoryMappedFileBase = nullptr;
 
-#if YYCC_OS == YYCC_OS_WINDOWS
+#if defined(YYCC_OS_WINDOWS)
 			UnmapViewOfFile(this->m_hFileMapView);
 			CloseHandle(m_hFileMapping);
 			CloseHandle(m_hFile);

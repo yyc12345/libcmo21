@@ -1,10 +1,11 @@
 #pragma once
 
 #include "../VTInternal.hpp"
-#if YYCC_OS == YYCC_OS_WINDOWS
-#include <YYCC/WinImportPrefix.hpp>
+#include <yycc/macro/class_copy_move.hpp>
+#if defined(YYCC_OS_WINDOWS)
+#include <yycc/windows/import_guard_head.hpp>
 #include <Windows.h>
-#include <YYCC/WinImportSuffix.hpp>
+#include <yycc/windows/import_guard_tail.hpp>
 #else
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -24,7 +25,7 @@ namespace LibCmo::VxMath {
 	*/
 	class VxMemoryMappedFile {
 	private:
-#if YYCC_OS == YYCC_OS_WINDOWS
+#if defined(YYCC_OS_WINDOWS)
 		HANDLE m_hFile;
 		LARGE_INTEGER m_dwFileSize;
 		HANDLE m_hFileMapping;
@@ -48,7 +49,7 @@ namespace LibCmo::VxMath {
 		*/
 		VxMemoryMappedFile(CKSTRING u8_filepath);
 		~VxMemoryMappedFile();
-		YYCC_DEL_CLS_COPY_MOVE(VxMemoryMappedFile);
+		YYCC_DELETE_COPY_MOVE(VxMemoryMappedFile)
 
 		/**
 		 * @brief Returns a pointer to the mapped memory buffer.
