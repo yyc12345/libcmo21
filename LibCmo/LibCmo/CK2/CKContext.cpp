@@ -267,7 +267,7 @@ namespace LibCmo::CK2 {
 		XContainer::XString result(YYCC::StringHelper::VPrintf(fmt, argptr));
 		va_end(argptr);
 
-		// use c_str(), not XContainer::NSXString::ToCKSTRING because we want make sure this paramter is not nullptr.
+		// use c_str(), not XContainer::NSXString::ToCKSTRING because we want make sure this parameter is not nullptr.
 		// we always output a valid C style string, even if no chars need to write.
 		m_OutputCallback(result.c_str());
 	}

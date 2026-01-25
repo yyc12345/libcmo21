@@ -11,8 +11,8 @@ namespace LibCmo::CK2 {
 
 #pragma region Assist RW Functions
 
-	constexpr CKDWORD c_SpecificFmtHasTransparent = 2;
-	constexpr CKDWORD c_SpecificFmtNoTransparent = 1;
+	constexpr CKDWORD SPECIFIC_FMT_HAS_TRANSPARENT = 2;
+	constexpr CKDWORD SPECIFIC_FMT_NO_TRANSPARENT = 1;
 
 	bool CKBitmapData::ReadSpecificFormatBitmap(CKStateChunk* chk, VxMath::VxImageDescEx* slot) {
 		// read transparent prop
@@ -52,7 +52,7 @@ namespace LibCmo::CK2 {
 			VxMath::VxDoBlit(&cache, slot);
 
 			// proc image alpha
-			if (transprop == c_SpecificFmtHasTransparent) {
+			if (transprop == SPECIFIC_FMT_HAS_TRANSPARENT) {
 				CKDWORD alphacount;
 				chk->ReadStruct(alphacount);
 				if (alphacount == 1) {
@@ -145,7 +145,7 @@ namespace LibCmo::CK2 {
 
 				// write basic data
 				// whether has transparent
-				chk->WriteStruct(canSaveAlpha ? c_SpecificFmtNoTransparent : c_SpecificFmtHasTransparent);
+				chk->WriteStruct(canSaveAlpha ? SPECIFIC_FMT_NO_TRANSPARENT : SPECIFIC_FMT_HAS_TRANSPARENT);
 				// write ext and guid
 				chk->WriteBufferNoSize(savefmt->m_Ext.GetExt(), savefmt->m_Ext.GetSize());
 				chk->WriteStruct(savefmt->m_ReaderGuid);

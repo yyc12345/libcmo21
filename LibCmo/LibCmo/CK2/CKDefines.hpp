@@ -73,25 +73,25 @@ namespace LibCmo::CK2 {
 	class CKFileExtension {
 	public:
 		CKFileExtension() : m_Data() {
-			std::memset(m_Data, 0, c_DataLen);
+			std::memset(m_Data, 0, DATA_LEN);
 		}
 		CKFileExtension(CKSTRING s) : CKFileExtension() {
 			SetExt(s);
 		}
 		CKFileExtension(const CKFileExtension& rhs) : CKFileExtension() {
-			std::memcpy(m_Data, rhs.m_Data, c_DataLen);
+			std::memcpy(m_Data, rhs.m_Data, DATA_LEN);
 		}
-		CKFileExtension(CKFileExtension&& rhs) : CKFileExtension() {
-			std::memmove(m_Data, rhs.m_Data, c_DataLen);
-			std::memset(rhs.m_Data, 0, c_DataLen);
+		CKFileExtension(CKFileExtension&& rhs) noexcept : CKFileExtension() {
+			std::memmove(m_Data, rhs.m_Data, DATA_LEN);
+			std::memset(rhs.m_Data, 0, DATA_LEN);
 		}
 		CKFileExtension& operator=(const CKFileExtension& rhs) {
-			std::memcpy(m_Data, rhs.m_Data, c_DataLen);
+			std::memcpy(m_Data, rhs.m_Data, DATA_LEN);
 			return *this;
 		}
-		CKFileExtension& operator=(CKFileExtension&& rhs) {
-			std::memmove(m_Data, rhs.m_Data, c_DataLen);
-			std::memset(rhs.m_Data, 0, c_DataLen);
+		CKFileExtension& operator=(CKFileExtension&& rhs) noexcept {
+			std::memmove(m_Data, rhs.m_Data, DATA_LEN);
+			std::memset(rhs.m_Data, 0, DATA_LEN);
 			return *this;
 		}
 
@@ -101,7 +101,7 @@ namespace LibCmo::CK2 {
 			} else {
 				if (s[0] == u8'.') ++s;	// skip dot
 				CKDWORD len = CKStrLen(s);
-				if (len > (c_DataLen - 1)) len = c_DataLen - 1;
+				if (len > (DATA_LEN - 1)) len = DATA_LEN - 1;
 				std::memcpy(m_Data, s, len);
 			}
 		}
@@ -111,7 +111,7 @@ namespace LibCmo::CK2 {
 		}
 
 		CKDWORD GetSize() const {
-			return c_DataLen;
+			return DATA_LEN;
 		}
 
 		bool operator==(const CKFileExtension& rhs) const {
@@ -119,8 +119,8 @@ namespace LibCmo::CK2 {
 		}
 
 	protected:
-		static constexpr size_t c_DataLen = 4u;
-		CKCHAR m_Data[c_DataLen];
+		static constexpr size_t DATA_LEN = 4u;
+		CKCHAR m_Data[DATA_LEN];
 	};
 
 	/**
