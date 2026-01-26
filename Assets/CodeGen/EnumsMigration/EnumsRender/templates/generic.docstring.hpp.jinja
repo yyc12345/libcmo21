@@ -1,0 +1,8 @@
+struct GenericReflection { const char8_t* mName; };
+template<typename T>
+    requires std::is_enum_v<T>
+using GenericReflectionArray = std::vector<std::pair<T, GenericReflection>>;
+
+{% for benum in payload.iter_enums() %}
+extern const GenericReflectionArray<LibCmo::{{ extra.parts }}::{{ benum.get_enum_name() }}> {{ benum.get_enum_name() }};
+{%- endfor %}

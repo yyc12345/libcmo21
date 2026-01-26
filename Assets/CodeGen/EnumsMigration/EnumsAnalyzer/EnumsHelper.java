@@ -29,7 +29,11 @@ public class EnumsHelper {
 			mHierarchy = new Vector<BHierarchyEnumEntry>();
 		}
 		
-		/** The list to store this CK_CLASSID inheritance relationship. */
+		/**
+		 * The list to store this CK_CLASSID inheritance relationship.
+		 * The first item is the oldest parent in inheritance.
+		 * The last item is self.
+		 */
 		public Vector<BHierarchyEnumEntry> mHierarchy;
 	}
 	

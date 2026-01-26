@@ -1,0 +1,7 @@
+{%- for benum in payload.iter_enums() %}
+const GenericReflectionArray<LibCmo::{{ extra.parts }}::{{ benum.get_enum_name() }}> {{ benum.get_enum_name() }} {
+{%- for entry in benum.iter_entries() %}
+	{ LibCmo::{{ extra.parts }}::{{ benum.get_enum_name() }}::{{ entry.get_entry_name() }}, { u8"{{ entry.get_entry_name() }}" } },
+{%- endfor %}
+};
+{%- endfor %}

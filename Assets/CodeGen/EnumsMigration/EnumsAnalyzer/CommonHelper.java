@@ -137,7 +137,11 @@ public class CommonHelper {
 
 	private static Path getRootDirectoryPath() throws Exception {
 		String rootDir = System.getenv("ENUMS_MIGRATION_ROOT");
-		return Paths.get(rootDir);
+		if (rootDir == null) {
+			throw new RuntimeException("Can not find essential environment variable ENUMS_MIGRATION_ROOT");
+		} else {
+			return Paths.get(rootDir);
+		}
 	}
 
 	public static class InputFilePair {
