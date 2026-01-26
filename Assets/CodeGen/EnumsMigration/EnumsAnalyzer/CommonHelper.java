@@ -1,7 +1,10 @@
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +38,7 @@ public class CommonHelper {
 
 	/**
 	 * Cut the head and tail of comment
-	 * 
+	 *
 	 * @param comment The comment need to be cut.
 	 * @return The cut comment.
 	 */
@@ -132,6 +135,11 @@ public class CommonHelper {
 
 	// =========== File Operations ===========
 
+	private static Path getRootDirectoryPath() throws Exception {
+		String rootDir = System.getenv("ENUMS_MIGRATION_ROOT");
+		return Paths.get(rootDir);
+	}
+
 	public static class InputFilePair {
 		public CharStream mAntlrStream;
 		public FileInputStream mUnderlyingStream;
@@ -144,6 +152,12 @@ public class CommonHelper {
 		return pair;
 	}
 
+	public static String getInputFilePath(String filename) throws Exception {
+		Path rootDir = getRootDirectoryPath();
+		Path filePath = rootDir.resolve("Input").resolve(filename);
+		return filePath.toString();
+	}
+
 	/**
 	 * Get output file for writing.
 	 * 
@@ -154,6 +168,12 @@ public class CommonHelper {
 	public static OutputStreamWriter openOutputFile(String filename) throws Exception {
 		FileOutputStream fs = new FileOutputStream(filename);
 		return new OutputStreamWriter(fs, StandardCharsets.UTF_8);
+	}
+
+	public static String getOutputFilePath(String filename) throws Exception {
+		Path rootDir = getRootDirectoryPath();
+		Path filePath = rootDir.resolve("Intermediate").resolve(filename);
+		return filePath.toString();
 	}
 
 	// =========== String Process ===========

@@ -1,6 +1,5 @@
 
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
 
 /**
  * The generic walker for collecting defines as a enum.
@@ -14,19 +13,19 @@ public class DefinesWalker extends CKDefinesParserBaseListener {
 		mCurrentEntry = null;
 	}
 	
-	public EnumsHelper.Enum_t getEnum() {
+	public EnumsHelper.BEnum getEnum() {
 		return mResult;
 	}
 	
 	private CommentsFinder mCommentsFinder;
-	private EnumsHelper.Enum_t mResult;
+	private EnumsHelper.BEnum mResult;
 
-	private EnumsHelper.Enum_t mCurrentEnum;
-	private EnumsHelper.EnumEntry_t mCurrentEntry;
+	private EnumsHelper.BEnum mCurrentEnum;
+	private EnumsHelper.BEnumEntry mCurrentEntry;
 	
 	@Override
 	public void enterProg(CKDefinesParser.ProgContext ctx) {
-		mCurrentEnum = new EnumsHelper.Enum_t();
+		mCurrentEnum = new EnumsHelper.BEnum();
 	}
 
 	@Override
@@ -37,7 +36,7 @@ public class DefinesWalker extends CKDefinesParserBaseListener {
 
 	@Override
 	public void enterDefinePair(CKDefinesParser.DefinePairContext ctx) {
-		mCurrentEntry = new EnumsHelper.EnumEntry_t();
+		mCurrentEntry = new EnumsHelper.BEnumEntry();
 	}
 
 	@Override

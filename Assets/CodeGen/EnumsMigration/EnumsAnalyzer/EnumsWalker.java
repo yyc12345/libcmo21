@@ -18,7 +18,7 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 		mCurrentEntry = null;
 	}
 
-	public EnumsHelper.EnumCollection_t getEnums() {
+	public EnumsHelper.BEnumCollection getEnums() {
 		return mResult;
 	}
 
@@ -29,15 +29,15 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 
 	private BufferedTokenStream mTokenStream;
 	private CommentsFinder mCommentsFinder;
-	private EnumsHelper.EnumCollection_t mResult;
+	private EnumsHelper.BEnumCollection mResult;
 
-	private EnumsHelper.EnumCollection_t mCurrentProg;
-	private EnumsHelper.Enum_t mCurrentEnum;
-	private EnumsHelper.EnumEntry_t mCurrentEntry;
+	private EnumsHelper.BEnumCollection mCurrentProg;
+	private EnumsHelper.BEnum mCurrentEnum;
+	private EnumsHelper.BEnumEntry mCurrentEntry;
 
 	@Override
 	public void enterProg(CKEnumsParser.ProgContext ctx) {
-		mCurrentProg = new EnumsHelper.EnumCollection_t();
+		mCurrentProg = new EnumsHelper.BEnumCollection();
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 
 	@Override
 	public void enterEnumBody(CKEnumsParser.EnumBodyContext ctx) {
-		mCurrentEnum = new EnumsHelper.Enum_t();
+		mCurrentEnum = new EnumsHelper.BEnum();
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 
 	@Override
 	public void enterEntryPair(CKEnumsParser.EntryPairContext ctx) {
-		mCurrentEntry = new EnumsHelper.EnumEntry_t();
+		mCurrentEntry = new EnumsHelper.BEnumEntry();
 	}
 
 	@Override

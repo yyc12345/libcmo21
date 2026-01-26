@@ -2,7 +2,6 @@
 import java.util.Stack;
 
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
 
 /**
  * The specialized walker for collecting CK_CLASSID and its inherit
@@ -19,7 +18,7 @@ public class ClassidWalker extends CKDefinesParserBaseListener {
 		mCurrentEntry = null;
 	}
 
-	public EnumsHelper.Enum_t getEnum() {
+	public EnumsHelper.BEnum getEnum() {
 		return mResult;
 	}
 
@@ -54,18 +53,18 @@ public class ClassidWalker extends CKDefinesParserBaseListener {
 	}
 
 	private BufferedTokenStream mTokenStream;
-	private EnumsHelper.Enum_t mResult;
+	private EnumsHelper.BEnum mResult;
 
 	private int mLevel;
-	private Stack<EnumsHelper.EnumEntryWithHierarchy_t> mLevelStack;
-	private EnumsHelper.Enum_t mCurrentEnum;
-	private EnumsHelper.EnumEntryWithHierarchy_t mCurrentEntry;
+	private Stack<EnumsHelper.BHierarchyEnumEntry> mLevelStack;
+	private EnumsHelper.BEnum mCurrentEnum;
+	private EnumsHelper.BHierarchyEnumEntry mCurrentEntry;
 
 	@Override
 	public void enterProg(CKDefinesParser.ProgContext ctx) {
 		mLevel = 0;
-		mLevelStack = new Stack<EnumsHelper.EnumEntryWithHierarchy_t>();
-		mCurrentEnum = new EnumsHelper.Enum_t();
+		mLevelStack = new Stack<EnumsHelper.BHierarchyEnumEntry>();
+		mCurrentEnum = new EnumsHelper.BEnum();
 	}
 
 	@Override
@@ -82,7 +81,7 @@ public class ClassidWalker extends CKDefinesParserBaseListener {
 
 	@Override
 	public void enterDefinePair(CKDefinesParser.DefinePairContext ctx) {
-		mCurrentEntry = new EnumsHelper.EnumEntryWithHierarchy_t();
+		mCurrentEntry = new EnumsHelper.BHierarchyEnumEntry();
 	}
 
 	@Override

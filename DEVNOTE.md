@@ -2,7 +2,7 @@
 
 This article tells the details of this project for the developer of this project.
 
-## Java and Antlr
+## Java
 
 ### Java
 
@@ -20,7 +20,7 @@ The only restriction is that you should not break this premise: use primitive wa
 
 After understanding this premise, you now can configure Java.
 The JDK I used is OpenJDK 21.
-It would be okey for you to use any JDK you like, but obviouslly JDK 1.8 is NOT recommended.
+It would be okey for you to use any JDK you like, but obviouslly JDK 8 is NOT recommended.
 
 ### Antlr
 
@@ -31,6 +31,12 @@ Basically, after configuring Antlr, you should make sure that there is 2 program
 So that you can correctly execute commands provided in each projects.
 
 The Antlr I used is Antlr 4.13.0.
+It would be okey for you to use any Antlr you like.
+
+### Gson
+
+Some Java code use Google Gson as its dependency.
+The Gson versio I used is Gson 2.10.1.
 It would be okey for you to use any Antlr you like.
 
 ## Python

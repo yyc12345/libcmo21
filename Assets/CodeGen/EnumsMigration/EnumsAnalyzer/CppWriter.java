@@ -25,31 +25,31 @@ public class CppWriter {
 	 * Internal real enum declarations writer.
 	 * 
 	 * @param writer {@linkplain java.io.OutputStreamWriter} instance for writing.
-	 * @param prog   {@linkplain EnumsHelper.EnumCollection_t} instance for writing.
+	 * @param prog   {@linkplain EnumsHelper.BEnumCollection} instance for writing.
 	 * @throws Exception
 	 */
-	private static void internalWriteEnums(OutputStreamWriter writer, EnumsHelper.EnumCollection_t prog)
+	private static void internalWriteEnums(OutputStreamWriter writer, EnumsHelper.BEnumCollection prog)
 			throws Exception {
 		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.Cpp);
-		for (EnumsHelper.Enum_t enum_t : prog.mEnums) {
+		for (EnumsHelper.BEnum benum : prog.mEnums) {
 			// write enum comment
-			indent.briefComment(enum_t.mEnumComment);
+			indent.briefComment(benum.mEnumComment);
 
 			// write enum start
-			indent.printf("enum class %s : %s {", enum_t.mEnumName, getEnumUnderlyingType(enum_t.mCanUnsigned));
+			indent.printf("enum class %s : %s {", benum.mEnumName, getEnumUnderlyingType(benum.mCanUnsigned));
 			indent.inc();
 
 			// write enum entries
-			for (EnumsHelper.EnumEntry_t enumEntry_t : enum_t.mEntries) {
+			for (EnumsHelper.BEnumEntry enumEntry : benum.mEntries) {
 				// write entry self
-				if (enumEntry_t.mEntryValue == null) {
-					indent.printf("%s,", enumEntry_t.mEntryName);
+				if (enumEntry.mEntryValue == null) {
+					indent.printf("%s,", enumEntry.mEntryName);
 				} else {
-					indent.printf("%s = %s,", enumEntry_t.mEntryName, enumEntry_t.mEntryValue);
+					indent.printf("%s = %s,", enumEntry.mEntryName, enumEntry.mEntryValue);
 				}
 
 				// write entry comment after member
-				indent.afterMemberComment(enumEntry_t.mEntryComment);
+				indent.afterMemberComment(enumEntry.mEntryComment);
 			}
 
 			// write enum tail
@@ -64,11 +64,11 @@ public class CppWriter {
 	 * Actually this is a wrapper of internal enum collection writer.
 	 * 
 	 * @param filename The name of written file.
-	 * @param prog     {@linkplain EnumsHelper.EnumCollection_t} instance for
+	 * @param prog     {@linkplain EnumsHelper.BEnumCollection} instance for
 	 *                 writing.
 	 * @throws Exception
 	 */
-	public static void writeEnums(String filename, EnumsHelper.EnumCollection_t prog) throws Exception {
+	public static void writeEnums(String filename, EnumsHelper.BEnumCollection prog) throws Exception {
 		// open file and write
 		OutputStreamWriter fs = CommonHelper.openOutputFile(filename);
 		internalWriteEnums(fs, prog);
@@ -81,13 +81,13 @@ public class CppWriter {
 	 * Actually this is a wrapper of internal enum collection writer.
 	 * 
 	 * @param filename The name of written file.
-	 * @param _enum    {@linkplain EnumsHelper.Enum_t} instance for writing.
+	 * @param _enum    {@linkplain EnumsHelper.BEnum} instance for writing.
 	 * @throws Exception
 	 */
-	public static void writeEnum(String filename, EnumsHelper.Enum_t _enum) throws Exception {
+	public static void writeEnum(String filename, EnumsHelper.BEnum _enum) throws Exception {
 		// create an collection from single enum declaration
 		// for suit the argument requirement of real writer.
-		EnumsHelper.EnumCollection_t col = new EnumsHelper.EnumCollection_t();
+		EnumsHelper.BEnumCollection col = new EnumsHelper.BEnumCollection();
 		col.mEnums.add(_enum);
 		// open file and write
 		OutputStreamWriter fs = CommonHelper.openOutputFile(filename);
@@ -101,12 +101,12 @@ public class CppWriter {
 	 * Internal real enum collection accessible value writer.
 	 * 
 	 * @param writer {@linkplain java.io.OutputStreamWriter} instance for writing.
-	 * @param prog   {@linkplain EnumsHelper.EnumCollection_t} instance for writing.
+	 * @param prog   {@linkplain EnumsHelper.BEnumCollection} instance for writing.
 	 * @param parts  The part of these enum declarations. It will indicate the
 	 *               namespace where find given enum collection.
 	 * @throws Exception
 	 */
-	private static void internalWriteAccVals(OutputStreamWriter writer, EnumsHelper.EnumCollection_t prog,
+	private static void internalWriteAccVals(OutputStreamWriter writer, EnumsHelper.BEnumCollection prog,
 			CommonHelper.CKParts parts) throws Exception {
 		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.Cpp);
 		
@@ -120,9 +120,9 @@ public class CppWriter {
 		indent.puts("");
 
 		// write declarations
-		for (EnumsHelper.Enum_t enum_t : prog.mEnums) {
+		for (EnumsHelper.BEnum benum : prog.mEnums) {
 			indent.printf("extern const GeneralReflectionArray<LibCmo::%s::%s> %s;",
-					CommonHelper.getCKPartsNamespace(parts), enum_t.mEnumName, enum_t.mEnumName);
+					CommonHelper.getCKPartsNamespace(parts), benum.mEnumName, benum.mEnumName);
 		}
 
 		indent.puts("");
@@ -130,16 +130,16 @@ public class CppWriter {
 		indent.puts("");
 
 		// write implements
-		for (EnumsHelper.Enum_t enum_t : prog.mEnums) {
+		for (EnumsHelper.BEnum benum : prog.mEnums) {
 			// write enum desc header
 			indent.printf("const GeneralReflectionArray<LibCmo::%s::%s> %s {", CommonHelper.getCKPartsNamespace(parts),
-					enum_t.mEnumName, enum_t.mEnumName);
+					benum.mEnumName, benum.mEnumName);
 			indent.inc();
 
 			// write enum desc entries
-			for (EnumsHelper.EnumEntry_t enumEntry_t : enum_t.mEntries) {
+			for (EnumsHelper.BEnumEntry enumEntry : benum.mEntries) {
 				indent.printf("{ LibCmo::%s::%s::%s, { u8\"%s\" } },", CommonHelper.getCKPartsNamespace(parts),
-						enum_t.mEnumName, enumEntry_t.mEntryName, enumEntry_t.mEntryName);
+						benum.mEnumName, enumEntry.mEntryName, enumEntry.mEntryName);
 			}
 
 			// write enum tail
@@ -155,12 +155,12 @@ public class CppWriter {
 	 * writer.
 	 * 
 	 * @param filename The name of written file.
-	 * @param prog     {@linkplain EnumsHelper.EnumCollection_t} instance for
+	 * @param prog     {@linkplain EnumsHelper.BEnumCollection} instance for
 	 *                 writing.
 	 * @param parts    The part of these enum declarations.
 	 * @throws Exception
 	 */
-	public static void writeAccVals(String filename, EnumsHelper.EnumCollection_t prog, CommonHelper.CKParts parts)
+	public static void writeAccVals(String filename, EnumsHelper.BEnumCollection prog, CommonHelper.CKParts parts)
 			throws Exception {
 		// open file and write
 		OutputStreamWriter fs = CommonHelper.openOutputFile(filename);
@@ -175,14 +175,14 @@ public class CppWriter {
 	 * writer.
 	 * 
 	 * @param filename The name of written file.
-	 * @param _enum    {@linkplain EnumsHelper.Enum_t} instance for writing.
+	 * @param _enum    {@linkplain EnumsHelper.BEnum} instance for writing.
 	 * @param parts    The part of these enum declarations.
 	 * @throws Exception
 	 */
-	public static void writeAccVal(String filename, EnumsHelper.Enum_t _enum, CommonHelper.CKParts parts)
+	public static void writeAccVal(String filename, EnumsHelper.BEnum _enum, CommonHelper.CKParts parts)
 			throws Exception {
 		// create a enum collection to fulfill the requirement of internal writer.
-		EnumsHelper.EnumCollection_t col = new EnumsHelper.EnumCollection_t();
+		EnumsHelper.BEnumCollection col = new EnumsHelper.BEnumCollection();
 		col.mEnums.add(_enum);
 		// open file and write
 		OutputStreamWriter fs = CommonHelper.openOutputFile(filename);
@@ -201,10 +201,10 @@ public class CppWriter {
 	 * common writer.
 	 * 
 	 * @param filename The name of written file.
-	 * @param errors   The {@linkplain EnumsHelper.Enum_t} instance storing CKERROR.
+	 * @param errors   The {@linkplain EnumsHelper.BEnum} instance storing CKERROR.
 	 * @throws Exception
 	 */
-	public static void writeCkErrorAccVal(String filename, EnumsHelper.Enum_t errors) throws Exception {
+	public static void writeCkErrorAccVal(String filename, EnumsHelper.BEnum errors) throws Exception {
 		OutputStreamWriter writer = CommonHelper.openOutputFile(filename);
 		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.Cpp);
 
@@ -219,7 +219,7 @@ public class CppWriter {
 		// write implementation
 		indent.puts("const CkErrorReflectionArray CKERROR {");
 		indent.inc();
-		for (EnumsHelper.EnumEntry_t entry : errors.mEntries) {
+		for (EnumsHelper.BEnumEntry entry : errors.mEntries) {
 			String comment = CommonHelper.escapeString(entry.mEntryComment);
 			if (comment == null)
 				comment = "";
@@ -240,11 +240,11 @@ public class CppWriter {
 	 * common writer.
 	 * 
 	 * @param filename The name of written file.
-	 * @param classids The {@linkplain EnumsHelper.Enum_t} instance storing
+	 * @param classids The {@linkplain EnumsHelper.BEnum} instance storing
 	 *                 CK_CLASSID.
 	 * @throws Exception
 	 */
-	public static void writeCkClassidAccVal(String filename, EnumsHelper.Enum_t classids) throws Exception {
+	public static void writeCkClassidAccVal(String filename, EnumsHelper.BEnum classids) throws Exception {
 		OutputStreamWriter writer = CommonHelper.openOutputFile(filename);
 		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.Cpp);
 
@@ -258,8 +258,8 @@ public class CppWriter {
 
 		indent.puts("const CkClassidReflectionArray CK_CLASSID {");
 		indent.inc();
-		for (EnumsHelper.EnumEntry_t entry : classids.mEntries) {
-			EnumsHelper.EnumEntryWithHierarchy_t specialized = (EnumsHelper.EnumEntryWithHierarchy_t) entry;
+		for (EnumsHelper.BEnumEntry entry : classids.mEntries) {
+			EnumsHelper.BHierarchyEnumEntry specialized = (EnumsHelper.BHierarchyEnumEntry) entry;
 
 			String hierarchy = specialized.mHierarchy.stream().map(value -> value.mEntryName)
 					.collect(Collectors.joining("\", u8\""));

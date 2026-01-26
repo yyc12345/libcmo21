@@ -24,35 +24,35 @@ public class CSharpWriter {
 	 * Internal real enum declaration writer.
 	 * 
 	 * @param writer {@linkplain java.io.OutputStreamWriter} instance for writing.
-	 * @param prog   {@linkplain EnumsHelper.EnumCollection_t} instance for writing.
+	 * @param prog   {@linkplain EnumsHelper.BEnumCollection} instance for writing.
 	 * @throws Exception
 	 */
-	private static void internalWriteEnums(OutputStreamWriter writer, EnumsHelper.EnumCollection_t prog)
+	private static void internalWriteEnums(OutputStreamWriter writer, EnumsHelper.BEnumCollection prog)
 			throws Exception {
 		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.CSharp);
-		for (EnumsHelper.Enum_t enum_t : prog.mEnums) {
+		for (EnumsHelper.BEnum benum : prog.mEnums) {
 			// write enum comment
-			indent.briefComment(enum_t.mEnumComment);
+			indent.briefComment(benum.mEnumComment);
 
 			// write enum start
 			// write flasg attribute if it is
-			if (enum_t.mUseFlags) {
+			if (benum.mUseFlags) {
 				indent.puts("[Flags]");
 			}
-			indent.printf("public enum %s : %s {", enum_t.mEnumName, getEnumUnderlyingType(enum_t.mCanUnsigned));
+			indent.printf("public enum %s : %s {", benum.mEnumName, getEnumUnderlyingType(benum.mCanUnsigned));
 			indent.inc();
 
 			// write enum entries
-			for (EnumsHelper.EnumEntry_t enumEntry_t : enum_t.mEntries) {
+			for (EnumsHelper.BEnumEntry enumEntry : benum.mEntries) {
 				// write entry self
-				if (enumEntry_t.mEntryValue == null) {
-					indent.printf("%s,", enumEntry_t.mEntryName);
+				if (enumEntry.mEntryValue == null) {
+					indent.printf("%s,", enumEntry.mEntryName);
 				} else {
-					indent.printf("%s = %s,", enumEntry_t.mEntryName, enumEntry_t.mEntryValue);
+					indent.printf("%s = %s,", enumEntry.mEntryName, enumEntry.mEntryValue);
 				}
 
 				// write entry comment after member
-				indent.afterMemberComment(enumEntry_t.mEntryComment);
+				indent.afterMemberComment(enumEntry.mEntryComment);
 			}
 
 			// write enum tail
@@ -67,11 +67,11 @@ public class CSharpWriter {
 	 * Actually this is a wrapper of internal enum declaration collection writer.
 	 * 
 	 * @param filename The name of written file.
-	 * @param prog     {@linkplain EnumsHelper.EnumCollection_t} instance for
+	 * @param prog     {@linkplain EnumsHelper.BEnumCollection} instance for
 	 *                 writing.
 	 * @throws Exception
 	 */
-	public static void writeEnums(String filename, EnumsHelper.EnumCollection_t prog) throws Exception {
+	public static void writeEnums(String filename, EnumsHelper.BEnumCollection prog) throws Exception {
 		// open file and write
 		OutputStreamWriter fs = CommonHelper.openOutputFile(filename);
 		internalWriteEnums(fs, prog);
@@ -84,12 +84,12 @@ public class CSharpWriter {
 	 * Actually this is a wrapper of internal enum declaration collection writer.
 	 * 
 	 * @param filename The name of written file.
-	 * @param _enum    {@linkplain EnumsHelper.Enum_t} instance for writing.
+	 * @param _enum    {@linkplain EnumsHelper.BEnum} instance for writing.
 	 * @throws Exception
 	 */
-	public static void writeEnum(String filename, EnumsHelper.Enum_t _enum) throws Exception {
+	public static void writeEnum(String filename, EnumsHelper.BEnum _enum) throws Exception {
 		// create collection from single enum
-		EnumsHelper.EnumCollection_t col = new EnumsHelper.EnumCollection_t();
+		EnumsHelper.BEnumCollection col = new EnumsHelper.BEnumCollection();
 		col.mEnums.add(_enum);
 		// open file and write
 		OutputStreamWriter fs = CommonHelper.openOutputFile(filename);
@@ -103,23 +103,23 @@ public class CSharpWriter {
 	 * Internal real enum accessible value writer.
 	 * 
 	 * @param writer {@linkplain java.io.OutputStreamWriter} instance for writing.
-	 * @param prog   {@linkplain EnumsHelper.EnumCollection_t} instance for writing.
+	 * @param prog   {@linkplain EnumsHelper.BEnumCollection} instance for writing.
 	 * @throws Exception
 	 */
-	private static void internalWriteAccVals(OutputStreamWriter writer, EnumsHelper.EnumCollection_t prog)
+	private static void internalWriteAccVals(OutputStreamWriter writer, EnumsHelper.BEnumCollection prog)
 			throws Exception {
 		IndentHelper indent = new IndentHelper(writer, CommonHelper.LangType.CSharp);
 		// write enum collections
-		for (EnumsHelper.Enum_t enum_t : prog.mEnums) {
+		for (EnumsHelper.BEnum benum : prog.mEnums) {
 			// write enum desc header
 			indent.printf(
 					"public static readonly System.Collections.Generic.Dictionary<%s, string> %s = new System.Collections.Generic.Dictionary<%s, string>() {",
-					enum_t.mEnumName, enum_t.mEnumName, enum_t.mEnumName);
+					benum.mEnumName, benum.mEnumName, benum.mEnumName);
 			indent.inc();
 
 			// write enum desc entries
-			for (EnumsHelper.EnumEntry_t enumEntry_t : enum_t.mEntries) {
-				indent.printf("{ %s.%s, \"%s\" },", enum_t.mEnumName, enumEntry_t.mEntryName, enumEntry_t.mEntryName);
+			for (EnumsHelper.BEnumEntry enumEntry : benum.mEntries) {
+				indent.printf("{ %s.%s, \"%s\" },", benum.mEnumName, enumEntry.mEntryName, enumEntry.mEntryName);
 			}
 
 			// write enum tail
@@ -135,11 +135,11 @@ public class CSharpWriter {
 	 * writer.
 	 * 
 	 * @param filename The name of written file.
-	 * @param prog     {@linkplain EnumsHelper.EnumCollection_t} instance for
+	 * @param prog     {@linkplain EnumsHelper.BEnumCollection} instance for
 	 *                 writing.
 	 * @throws Exception
 	 */
-	public static void writeAccVals(String filename, EnumsHelper.EnumCollection_t prog) throws Exception {
+	public static void writeAccVals(String filename, EnumsHelper.BEnumCollection prog) throws Exception {
 		// open file and write
 		OutputStreamWriter fs = CommonHelper.openOutputFile(filename);
 		internalWriteAccVals(fs, prog);
@@ -153,12 +153,12 @@ public class CSharpWriter {
 	 * writer.
 	 * 
 	 * @param filename The name of written file.
-	 * @param _enum    {@linkplain EnumsHelper.Enum_t} instance for writing.
+	 * @param _enum    {@linkplain EnumsHelper.BEnum} instance for writing.
 	 * @throws Exception
 	 */
-	public static void writeAccVal(String filename, EnumsHelper.Enum_t _enum) throws Exception {
+	public static void writeAccVal(String filename, EnumsHelper.BEnum _enum) throws Exception {
 		// create a collection with single enum.
-		EnumsHelper.EnumCollection_t col = new EnumsHelper.EnumCollection_t();
+		EnumsHelper.BEnumCollection col = new EnumsHelper.BEnumCollection();
 		col.mEnums.add(_enum);
 		// open file and write
 		OutputStreamWriter fs = CommonHelper.openOutputFile(filename);
