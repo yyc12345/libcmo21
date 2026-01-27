@@ -1,0 +1,16 @@
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class EnumDocstring():
+    display_name: str
+    """The name of this enum entry."""
+    description: str
+    """The description of this enum entry."""
+
+{% for benum in payload.iter_enums() %}
+DOCSTRING_{{ benum.get_enum_name() }}: dict[{{ benum.get_enum_name() }}, EnumDocstring] = {
+{%- for entry in benum.iter_entries() %}
+    {{ benum.get_enum_name() }}.{{ entry.get_entry_name() }}: EnumDocstring("{{ utils.extract_human_readable_entry_name(entry.get_entry_name()) }}", "{{ entry.get_entry_comment() | some_or_blank | escape_string }}"),
+{%- endfor %}
+}
+{%- endfor %}

@@ -15,7 +15,7 @@ public class JsonWriter {
 		// Export hierarchy if possible
 		if (enumEntry instanceof EnumsHelper.BHierarchyEnumEntry hierarchyEnumEntry) {
 			// We only export name in hierarchy.
-			// Otherwise we may cause recursive calling.
+			// Otherwise, we may cause recursive calling.
 			JsonArray entries = new JsonArray();
 			for (EnumsHelper.BHierarchyEnumEntry subEntry : hierarchyEnumEntry.mHierarchy) {
 				entries.add(subEntry.mEntryName);
@@ -54,7 +54,7 @@ public class JsonWriter {
 	private static void writeJson(String filename, EnumsHelper.BEnumCollection enumCollection) throws Exception {
 		OutputStreamWriter writer = CommonHelper.openOutputFile(filename);
 		//Gson gsonInstance = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-		Gson gsonInstance = new GsonBuilder().disableHtmlEscaping().create();
+		Gson gsonInstance = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
 		writer.write(gsonInstance.toJson(writeBEnumCollection(enumCollection)));
 		writer.close();
 	}

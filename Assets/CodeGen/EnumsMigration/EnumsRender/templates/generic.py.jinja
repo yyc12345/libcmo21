@@ -1,14 +1,14 @@
 import enum
 
 {% for benum in payload.iter_enums() %}
-{%- if benum.get_enum_comment() is not none %}
-/**
-{{ benum.get_enum_comment() }}
- */
-{%- endif %}
 class {{ benum.get_enum_name() }}(enum.IntEnum):
+{%- if benum.get_enum_comment() is not none %}
+"""
+{{ benum.get_enum_comment() | block_comment('') }}
+"""
+{%- endif %}
 {%- for entry in benum.iter_entries() %}
-    {{ entry.get_entry_name() }} = {% if entry.get_entry_value() is none -%} auto() {%- else -%} {{ entry.get_entry_value() }} {%- endif %} {%- if entry.get_entry_comment() is not none %}
-    """{{ entry.get_entry_comment() }}""" {%- endif %}
+    {{ entry.get_entry_name() }} = {% if entry.get_entry_value() is none -%} auto() {%- else -%} {{ utils.convert_to_python_number(entry.get_entry_value()) }} {%- endif %} {%- if entry.get_entry_comment() is not none %}
+    """{{ entry.get_entry_comment() | line_comment }}""" {%- endif %}
 {%- endfor %}
 {%- endfor %}

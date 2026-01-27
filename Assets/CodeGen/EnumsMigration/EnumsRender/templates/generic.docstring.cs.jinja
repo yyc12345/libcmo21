@@ -1,5 +1,7 @@
-{%- for benum in payload.iter_enums() %}
-public static readonly System.Collections.Generic.Dictionary<{{ benum.get_enum_name() }}, string> {{ benum.get_enum_name() }} = new System.Collections.Generic.Dictionary<{{ benum.get_enum_name() }}, string>() {
+using System.Collections.Generic;
+
+{% for benum in payload.iter_enums() %}
+public static readonly Dictionary<{{ benum.get_enum_name() }}, string> {{ benum.get_enum_name() }} = new Dictionary<{{ benum.get_enum_name() }}, string>() {
 {%- for entry in benum.iter_entries() %}
 	{ {{ benum.get_enum_name() }}.{{ entry.get_entry_name() }}, "{{ entry.get_entry_name() }}" },
 {%- endfor %}

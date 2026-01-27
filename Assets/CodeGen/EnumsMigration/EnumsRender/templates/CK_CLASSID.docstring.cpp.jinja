@@ -1,6 +1,6 @@
-{%- set benum = first(payload.iter_enums()) %}
+{%- set benum = payload.iter_enums() | first %}
 const CkClassidReflectionArray CK_CLASSID {
 {%- for entry in benum.iter_entries() %}
-	{ LibCmo::CK2::CK_CLASSID::{{ entry.get_entry_name() }}, { { {% for item in entry.iter_hierarchy(benum) %} u8"{{ item.get_enum_name() }}" {%- if not loop.last -%}, {%- endif %} {%- endfor %} } } },
+	{ LibCmo::CK2::CK_CLASSID::{{ entry.get_entry_name() }}, { { {%- for item in entry.iter_hierarchy(benum) %} u8"{{ item.get_entry_name() }}" {%- if not loop.last -%}, {%- endif %} {%- endfor %} } } },
 {%- endfor %}
 };

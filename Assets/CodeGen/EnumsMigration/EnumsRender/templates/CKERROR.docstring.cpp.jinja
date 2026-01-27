@@ -1,6 +1,6 @@
-{%- set benum = first(payload.iter_enums()) %}
+{%- set benum = payload.iter_enums() | first %}
 const CkErrorReflectionArray CKERROR {
 {%- for entry in benum.iter_entries() %}
-	{ LibCmo::CK2::CKERROR::{{ entry.get_entry_name() }}, { u8"{{ entry.get_entry_name() }}", u8"{{- entry.get_entry_comment() }}" } },
+	{ LibCmo::CK2::CKERROR::{{ entry.get_entry_name() }}, { u8"{{ entry.get_entry_name() }}", u8"{{- entry.get_entry_comment() | some_or_blank | escape_string }}" } },
 {%- endfor %}
 };
