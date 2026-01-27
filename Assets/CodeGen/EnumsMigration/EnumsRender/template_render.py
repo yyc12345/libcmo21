@@ -50,11 +50,13 @@ class RenderUtils:
     REGEX_PY_TO_LITERAL_NUMBER: typing.ClassVar[re.Pattern] = re.compile("[ulUL]+$")
 
     @staticmethod
-    def convert_to_python_number(numstr: str) -> str:
+    def to_py_num_literal(numstr: str) -> str:
         """
-        Convert accepted string into Python cupported format.
+        Convert given string into Python number literal style.
 
-        It actually just remove trail "UL".
+        Number literal declaration in C++ is different with Python.
+        Previous one allow adding suffix like "UL" to indicate its type, but Python don't allow this.
+        So this function actually just remove "UL" suffix.
 
         This function is only served for Python code generation.
 
@@ -66,9 +68,9 @@ class RenderUtils:
     REGEX_PY_EXT_HUMANRDABLE_ENTRY_NAME: typing.ClassVar[re.Pattern] = re.compile("^[a-zA-Z0-9]+_")
 
     @staticmethod
-    def extract_human_readable_entry_name(entry_name: str) -> str:
+    def underline_to_camel(entry_name: str) -> str:
         """
-        Try generate human readable name from enum entry name.
+        Convert given capital underlying name into camel name.
 
         This function is only served for Python code generation.
 
@@ -84,12 +86,8 @@ class RenderUtils:
         """
         # remove first part (any content before underline '_')
         entry_name = RenderUtils.REGEX_PY_EXT_HUMANRDABLE_ENTRY_NAME.sub("", entry_name, 1)
-
-        # lower all chars except first char
-        if len(entry_name) < 1:
-            return entry_name
-        else:
-            return entry_name[0:1] + entry_name[1:].lower()
+        # then convert result into camel
+        return ' '.join(map(lambda s: s[0:1].upper() + s[1:].lower(), entry_name.split('_')))
 
 class TemplateRender:
     """Render templates to code files"""

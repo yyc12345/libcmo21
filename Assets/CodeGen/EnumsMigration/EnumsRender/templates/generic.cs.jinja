@@ -1,8 +1,8 @@
 {%- for benum in payload.iter_enums() %}
 {%- if benum.get_enum_comment() is not none %}
 {{ benum.get_enum_comment() | block_comment('/// ') }}
-{%- endif %}
-{% if benum.get_use_flags() %}[Flags]{%- endif %}
+{%- endif %} {%- if benum.get_use_flags() %}
+[Flags]{%- endif %}
 public enum {{ benum.get_enum_name() }} : {% if benum.get_can_unsigned() -%} uint {%- else -%} int {%- endif %} {
 {%- for entry in benum.iter_entries() %}
 	{{ entry.get_entry_name() }} {%- if entry.get_entry_value() is not none %} = {{ entry.get_entry_value() }} {%- endif %}, {%- if entry.get_entry_comment() is not none %} /// {{ entry.get_entry_comment() | line_comment }} {%- endif %}
