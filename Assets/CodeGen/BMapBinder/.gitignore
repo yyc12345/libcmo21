@@ -1,0 +1,8 @@
+## ======== Personal ========
+# Ignore intermediate stuff and output stuff.
+Extracted/*
+!Extracted/*.gitkeep
+Analyzed/*
+!Analyzed/*.gitkeep
+Output/*
+!Output/*.gitkeep

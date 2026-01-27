@@ -45,10 +45,10 @@ Keep staying this directory, and execute following command to run program.
 java MainRunner
 ```
 
-After running, program will process input file located in `Input`directory, and output JSON file to `Intermediate` directory.
+After running, program will process input file located in `Input` directory, and output JSON file to `Intermediate` directory.
 
 ### Enums Render
 
-* Enter `EnumsRender` directory and setup it witl Astral UV.
+* Enter `EnumsRender` directory and setup it with Astral UV.
 * Execute `uv run main.py` to run program.
 * Program will process JSON file located in `Intermediate` directory, and output final artifacts to `Output` directory.
