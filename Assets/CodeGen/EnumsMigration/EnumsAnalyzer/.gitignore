@@ -7,7 +7,7 @@
 *.interp
 *.tokens
 
-CKGeneralLexer*.java
+CKGenericLexer*.java
 CKEnumsParser*.java
 CKDefinesParser*.java
 

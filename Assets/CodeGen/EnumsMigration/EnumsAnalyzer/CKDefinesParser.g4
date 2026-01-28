@@ -1,6 +1,6 @@
 parser grammar CKDefinesParser;
-options { tokenVocab = CKGeneralLexer; }
+options { tokenVocab = CKGenericLexer; }
 
 prog: definePair+ ;
 
-definePair: CKGENERAL_DEFINE CKGENERAL_ID (CKGENERAL_NUM | CKGENERAL_ID) ;
+definePair: CKGENERIC_DEFINE CKGENERIC_ID (CKGENERIC_NUM | CKGENERIC_ID) ;

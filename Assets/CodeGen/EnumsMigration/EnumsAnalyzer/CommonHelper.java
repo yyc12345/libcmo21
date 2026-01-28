@@ -46,7 +46,7 @@ public class CommonHelper {
 			return null;
 
 		switch (comment.getType()) {
-		case CKGeneralLexer.CKGENERAL_LINE_COMMENT: {
+		case CKGenericLexer.CKGENERIC_LINE_COMMENT: {
 			// For line comment, we start to remove "//" prefix first
 			String slashRemoved = comment.getText().substring(2);
 			// Then remove successive starts
@@ -58,7 +58,7 @@ public class CommonHelper {
 			// Okey
 			return eolRemoved;
 		}
-		case CKGeneralLexer.CKGENERAL_BLOCK_COMMENT: {
+		case CKGenericLexer.CKGENERIC_BLOCK_COMMENT: {
 			// For block comment, we first cut "/*" head and "*/" tail.
 			String blockComment = comment.getText();
 			String slashRemoved = blockComment.substring(2, blockComment.length() - 4);
@@ -103,7 +103,7 @@ public class CommonHelper {
 	// =========== Number Operations ===========
 
 	/**
-	 * Check whether Antlr captured CKGENERAL_NUM is a negative number.
+	 * Check whether Antlr captured CKGENERIC_NUM is a negative number.
 	 * 
 	 * @param numstr The captured number.
 	 * @return true if it is negative number.
@@ -113,7 +113,7 @@ public class CommonHelper {
 	}
 
 	/**
-	 * Check whether Altlr captured CKGENERAL_NUM is a hex number.
+	 * Check whether Altlr captured CKGENERIC_NUM is a hex number.
 	 *
 	 * @param numstr The captured number.
 	 * @return true if it is hex number.

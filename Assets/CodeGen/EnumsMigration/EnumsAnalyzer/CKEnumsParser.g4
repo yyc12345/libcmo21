@@ -1,14 +1,14 @@
 parser grammar CKEnumsParser;
-options { tokenVocab = CKGeneralLexer; }
+options { tokenVocab = CKGenericLexer; }
 
 prog: enumBody* ;
 
-enumBody: CKGENERAL_TYPEDEF? CKGENERAL_ENUM CKGENERAL_ID CKGENERAL_LBRACKET 
+enumBody: CKGENERIC_TYPEDEF? CKGENERIC_ENUM CKGENERIC_ID CKGENERIC_LBRACKET 
 entryPair+
-CKGENERAL_RBRACKET CKGENERAL_ID? CKGENERAL_SEMICOLON ;
+CKGENERIC_RBRACKET CKGENERIC_ID? CKGENERIC_SEMICOLON ;
 
-entryPair: CKGENERAL_ID (CKGENERAL_EQUAL entryValue)? CKGENERAL_COMMA? ;
+entryPair: CKGENERIC_ID (CKGENERIC_EQUAL entryValue)? CKGENERIC_COMMA? ;
 
-entryValue: CKGENERAL_NUM (CKGENERAL_LSHIFT CKGENERAL_NUM)?     # entryDirectValue
-| CKGENERAL_ID (CKGENERAL_OR CKGENERAL_ID)*                         # entryRelativeValue
+entryValue: CKGENERIC_NUM (CKGENERIC_LSHIFT CKGENERIC_NUM)?     # entryDirectValue
+| CKGENERIC_ID (CKGENERIC_OR CKGENERIC_ID)*                         # entryRelativeValue
 ;

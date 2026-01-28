@@ -26,7 +26,7 @@ And export them as JSON file which will be utilized by Enums Render.
 Enter `EnumsAnalyzer` directory, and execute following command to generate Antlr lexer and parser:
 
 ```
-antlr4 CKGeneralLexer.g4
+antlr4 CKGenericLexer.g4
 antlr4 CKEnumsParser.g4
 antlr4 CKDefinesParser.g4
 ```

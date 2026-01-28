@@ -23,7 +23,7 @@ public class ClassidWalker extends CKDefinesParserBaseListener {
 	}
 
 	private int getClassidLevel(Token defineHead) {
-		Token ws = CommonHelper.getPreChannelToken(mTokenStream, defineHead, CKGeneralLexer.WHITESPACE);
+		Token ws = CommonHelper.getPreChannelToken(mTokenStream, defineHead, CKGenericLexer.WHITESPACE);
 		if (ws == null)
 			return 0;
 
@@ -87,8 +87,8 @@ public class ClassidWalker extends CKDefinesParserBaseListener {
 	@Override
 	public void exitDefinePair(CKDefinesParser.DefinePairContext ctx) {
 		// fill entry info
-		mCurrentEntry.mEntryName = ctx.CKGENERAL_ID(0).getText();
-		mCurrentEntry.mEntryValue = ctx.CKGENERAL_NUM().getText();
+		mCurrentEntry.mEntryName = ctx.CKGENERIC_ID(0).getText();
+		mCurrentEntry.mEntryValue = ctx.CKGENERIC_NUM().getText();
 
 		// fill entry level info
 		int this_level = getClassidLevel(ctx.getStart());

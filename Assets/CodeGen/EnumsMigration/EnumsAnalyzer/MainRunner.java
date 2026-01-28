@@ -19,7 +19,7 @@ public class MainRunner {
 	private static EnumsHelper.BEnumCollection getEnumsCollection(String filename) throws Exception {
 		String infile = CommonHelper.getInputFilePath(filename);
 		CommonHelper.InputFilePair pair = CommonHelper.openInputFile(infile);
-		CKGeneralLexer lexer = new CKGeneralLexer(pair.mAntlrStream);
+		CKGenericLexer lexer = new CKGenericLexer(pair.mAntlrStream);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		CKEnumsParser parser = new CKEnumsParser(tokens);
 
@@ -50,7 +50,7 @@ public class MainRunner {
 	private static EnumsHelper.BEnum organiseDefines(String filename, String assignedEnumName) throws Exception {
 		String infile = CommonHelper.getInputFilePath(filename);
 		CommonHelper.InputFilePair pair = CommonHelper.openInputFile(infile);
-		CKGeneralLexer lexer = new CKGeneralLexer(pair.mAntlrStream);
+		CKGenericLexer lexer = new CKGenericLexer(pair.mAntlrStream);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		CKDefinesParser parser = new CKDefinesParser(tokens);
 
@@ -85,7 +85,7 @@ public class MainRunner {
 	private static EnumsHelper.BEnum organiseClassid(String filename) throws Exception {
 		String infile = CommonHelper.getInputFilePath(filename);
 		CommonHelper.InputFilePair pair = CommonHelper.openInputFile(infile);
-		CKGeneralLexer lexer = new CKGeneralLexer(pair.mAntlrStream);
+		CKGenericLexer lexer = new CKGenericLexer(pair.mAntlrStream);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		CKDefinesParser parser = new CKDefinesParser(tokens);
 

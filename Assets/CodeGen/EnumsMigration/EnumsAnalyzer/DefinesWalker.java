@@ -42,16 +42,16 @@ public class DefinesWalker extends CKDefinesParserBaseListener {
 	@Override
 	public void exitDefinePair(CKDefinesParser.DefinePairContext ctx) {
 		// set values
-		mCurrentEntry.mEntryName = ctx.CKGENERAL_ID(0).getText();
+		mCurrentEntry.mEntryName = ctx.CKGENERIC_ID(0).getText();
 		mCurrentEntry.mEntryComment = mCommentsFinder.getComment(ctx.getStart(), ctx.getStop());
 		
-		if (ctx.CKGENERAL_NUM() == null) {
+		if (ctx.CKGENERIC_NUM() == null) {
 			// define with id
-			mCurrentEntry.mEntryValue = ctx.CKGENERAL_ID(1).getText();
+			mCurrentEntry.mEntryValue = ctx.CKGENERIC_ID(1).getText();
 			
 		} else {
 			// define with number
-			String num = ctx.CKGENERAL_NUM().getText();
+			String num = ctx.CKGENERIC_NUM().getText();
 			mCurrentEntry.mEntryValue = num;
 
 			// check whether this enum can be unsigned

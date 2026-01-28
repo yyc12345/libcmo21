@@ -24,7 +24,7 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 
 	private String getEnumComment(Token enumHead) {
 		return CommonHelper
-				.cutComments(CommonHelper.getPreChannelTokens(mTokenStream, enumHead, CKGeneralLexer.COMMENTS));
+				.cutComments(CommonHelper.getPreChannelTokens(mTokenStream, enumHead, CKGenericLexer.COMMENTS));
 	}
 
 	private BufferedTokenStream mTokenStream;
@@ -56,7 +56,7 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 		// get enum comment
 		mCurrentEnum.mEnumComment = getEnumComment(ctx.getStart());
 		// get the last name (for typedef case)
-		List<TerminalNode> allNames = ctx.CKGENERAL_ID();
+		List<TerminalNode> allNames = ctx.CKGENERIC_ID();
 		mCurrentEnum.mEnumName = allNames.get(allNames.size() - 1).getText();
 
 		mCurrentProg.mEnums.add(mCurrentEnum);
@@ -73,7 +73,7 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 		// get entry comment
 		mCurrentEntry.mEntryComment = mCommentsFinder.getComment(ctx.getStart(), ctx.getStop());
 		// get entry name
-		mCurrentEntry.mEntryName = ctx.CKGENERAL_ID().getText();
+		mCurrentEntry.mEntryName = ctx.CKGENERIC_ID().getText();
 
 		mCurrentEnum.mEntries.add(mCurrentEntry);
 		mCurrentEntry = null;
@@ -82,7 +82,7 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 	@Override
 	public void exitEntryDirectValue(CKEnumsParser.EntryDirectValueContext ctx) {
 		// get all numbers
-		List<TerminalNode> nums = ctx.CKGENERAL_NUM();
+		List<TerminalNode> nums = ctx.CKGENERIC_NUM();
 
 		switch (nums.size()) {
 		case 1: {
@@ -120,7 +120,7 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 	@Override
 	public void exitEntryRelativeValue(CKEnumsParser.EntryRelativeValueContext ctx) {
 		// get all identifiers and join them
-		mCurrentEntry.mEntryValue = ctx.CKGENERAL_ID().stream().map(value -> value.getText())
+		mCurrentEntry.mEntryValue = ctx.CKGENERIC_ID().stream().map(value -> value.getText())
 				.collect(Collectors.joining(" | "));
 
 		// | operator appears. this enum must have flags feature

@@ -22,13 +22,13 @@ public class CommentsFinder {
 			// if we don't know where is our token,
 			// we should assume it is from precomment to postcomment
 			// and check it.
-			List<Token> precomment = CommonHelper.getPreChannelTokens(mTokenStream, preToken, CKGeneralLexer.COMMENTS);
+			List<Token> precomment = CommonHelper.getPreChannelTokens(mTokenStream, preToken, CKGenericLexer.COMMENTS);
 			if (precomment != null) {
 				mCommentsPos = CommentsPosition.Precomment;
 				return CommonHelper.cutComments(precomment);
 			}
 			
-			List<Token> postcomment = CommonHelper.getPostChannelTokens(mTokenStream, postToken, CKGeneralLexer.COMMENTS);
+			List<Token> postcomment = CommonHelper.getPostChannelTokens(mTokenStream, postToken, CKGenericLexer.COMMENTS);
 			if (postcomment != null) {
 				mCommentsPos = CommentsPosition.Postcomment;
 				return CommonHelper.cutComments(postcomment);
@@ -38,10 +38,10 @@ public class CommentsFinder {
 			return null;
 		}
 		case Precomment: {
-			return CommonHelper.cutComments(CommonHelper.getPreChannelTokens(mTokenStream, preToken, CKGeneralLexer.COMMENTS));
+			return CommonHelper.cutComments(CommonHelper.getPreChannelTokens(mTokenStream, preToken, CKGenericLexer.COMMENTS));
 		}
 		case Postcomment: {
-			return CommonHelper.cutComments(CommonHelper.getPostChannelTokens(mTokenStream, postToken, CKGeneralLexer.COMMENTS));
+			return CommonHelper.cutComments(CommonHelper.getPostChannelTokens(mTokenStream, postToken, CKGenericLexer.COMMENTS));
 		}
 		default:
 			return null;
