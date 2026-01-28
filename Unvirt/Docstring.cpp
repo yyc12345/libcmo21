@@ -1,16 +1,14 @@
-#include "AccessibleValue.hpp"
+#include "Docstring.hpp"
 #include <vector>
 #include <array>
 
-namespace Unvirt::AccessibleValue {
+namespace Unvirt::Docstring {
 
 #pragma region Size Formatter
 
 	std::u8string GetReadableFileSize(uint64_t _size) {
 		static constexpr double base = 1024.0;
-		static const std::vector<const char8_t*> units {
-			u8"B", u8"KiB", u8"MiB", u8"GiB", u8"TiB", u8"PiB", u8"EiB"
-		};
+		static const std::vector<const char8_t*> units{u8"B", u8"KiB", u8"MiB", u8"GiB", u8"TiB", u8"PiB", u8"EiB"};
 
 		double size = static_cast<double>(_size);
 		size_t unit_index = 0u;
@@ -20,21 +18,26 @@ namespace Unvirt::AccessibleValue {
 			++unit_index;
 		}
 
-		return YYCC::StringHelper::Printf(u8"%.2lf%s", size, units[unit_index]);
+		return yycc::string::op::printf(u8"%.2lf%s", size, units[unit_index]);
 	}
 
 #pragma endregion
 
 #pragma region CKERROR CK_CLASSID Data
 
-	struct CkClassidReflection { std::vector<const char8_t*> mHierarchy; };
+	struct CkClassidReflection {
+		std::vector<const char8_t*> mHierarchy;
+	};
 	using CkClassidReflectionArray = std::vector<std::pair<LibCmo::CK2::CK_CLASSID, CkClassidReflection>>;
 
-	struct CkErrorReflection { const char8_t* mName; const char8_t* mDescription; };
+	struct CkErrorReflection {
+		const char8_t* mName;
+		const char8_t* mDescription;
+	};
 	using CkErrorReflectionArray = std::vector<std::pair<LibCmo::CK2::CKERROR, CkErrorReflection>>;
 
-	namespace EnumDesc {
-
+	namespace Arrays {
+		// clang-format off
 		const CkClassidReflectionArray CK_CLASSID {
 			{ LibCmo::CK2::CK_CLASSID::CKCID_OBJECT, { { u8"CKCID_OBJECT" } } },
 			{ LibCmo::CK2::CK_CLASSID::CKCID_PARAMETERIN, { { u8"CKCID_OBJECT", u8"CKCID_PARAMETERIN" } } },
@@ -158,15 +161,15 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::CK2::CKERROR::CKERR_INVALIDINDEX, { u8"CKERR_INVALIDINDEX", u8"attemp to acces an animation key with an invalid index " } },
 			{ LibCmo::CK2::CKERROR::CKERR_INVALIDANIMATION, { u8"CKERR_INVALIDANIMATION", u8"the animation is invalid (no entity associated or zero length) " } },
 		};
-
-	}
+		// clang-format on
+	} // namespace Arrays
 
 #pragma endregion
 
 #pragma region CKERROR CK_CLASSID Process
 
 	static const CkErrorReflection* GetCkError(LibCmo::CK2::CKERROR err) {
-		for (auto& item : EnumDesc::CKERROR) {
+		for (auto& item : Arrays::CKERROR) {
 			if (item.first == err) {
 				return &item.second;
 			}
@@ -177,17 +180,17 @@ namespace Unvirt::AccessibleValue {
 	std::u8string GetCkErrorName(LibCmo::CK2::CKERROR err) {
 		const CkErrorReflection* node = GetCkError(err);
 		if (node != nullptr) return node->mName;
-		else return c_InvalidEnumName;
+		else return INVALID_ENUM_NAME;
 	}
 
 	std::u8string GetCkErrorDescription(LibCmo::CK2::CKERROR err) {
 		const CkErrorReflection* node = GetCkError(err);
 		if (node != nullptr) return node->mDescription;
-		else return c_InvalidEnumName;
+		else return INVALID_ENUM_NAME;
 	}
 
 	static const CkClassidReflection* GetCkClassid(LibCmo::CK2::CK_CLASSID cls) {
-		for (auto& item : EnumDesc::CK_CLASSID) {
+		for (auto& item : Arrays::CK_CLASSID) {
 			if (item.first == cls) {
 				return &item.second;
 			}
@@ -197,13 +200,13 @@ namespace Unvirt::AccessibleValue {
 
 	std::u8string GetClassIdName(LibCmo::CK2::CK_CLASSID cls) {
 		const CkClassidReflection* node = GetCkClassid(cls);
-		if (node == nullptr) return c_InvalidEnumName;
+		if (node == nullptr) return INVALID_ENUM_NAME;
 		else return node->mHierarchy.back();
 	}
 
 	std::u8string GetClassIdHierarchy(LibCmo::CK2::CK_CLASSID cls) {
 		const CkClassidReflection* node = GetCkClassid(cls);
-		if (node == nullptr) return c_InvalidEnumName;
+		if (node == nullptr) return INVALID_ENUM_NAME;
 
 		std::u8string ret;
 		for (const auto* hierarchy_node : node->mHierarchy) {
@@ -218,15 +221,15 @@ namespace Unvirt::AccessibleValue {
 #pragma region Other Enums
 
 	namespace EnumDesc {
-
-		const GeneralReflectionArray<LibCmo::CK2::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE {
+		// clang-format off
+		const GenericReflectionArray<LibCmo::CK2::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE {
 			{ LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED, { u8"CKFILE_UNCOMPRESSED" } },
 			{ LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_CHUNKCOMPRESSED_OLD, { u8"CKFILE_CHUNKCOMPRESSED_OLD" } },
 			{ LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_EXTERNALTEXTURES_OLD, { u8"CKFILE_EXTERNALTEXTURES_OLD" } },
 			{ LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_FORVIEWER, { u8"CKFILE_FORVIEWER" } },
 			{ LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_WHOLECOMPRESSED, { u8"CKFILE_WHOLECOMPRESSED" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_LOAD_FLAGS> CK_LOAD_FLAGS {
+		const GenericReflectionArray<LibCmo::CK2::CK_LOAD_FLAGS> CK_LOAD_FLAGS {
 			{ LibCmo::CK2::CK_LOAD_FLAGS::CK_LOAD_ANIMATION, { u8"CK_LOAD_ANIMATION" } },
 			{ LibCmo::CK2::CK_LOAD_FLAGS::CK_LOAD_GEOMETRY, { u8"CK_LOAD_GEOMETRY" } },
 			{ LibCmo::CK2::CK_LOAD_FLAGS::CK_LOAD_DEFAULT, { u8"CK_LOAD_DEFAULT" } },
@@ -238,20 +241,20 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::CK2::CK_LOAD_FLAGS::CK_LOAD_CHECKDEPENDENCIES, { u8"CK_LOAD_CHECKDEPENDENCIES" } },
 			{ LibCmo::CK2::CK_LOAD_FLAGS::CK_LOAD_ONLYBEHAVIORS, { u8"CK_LOAD_ONLYBEHAVIORS" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_FO_OPTIONS> CK_FO_OPTIONS {
+		const GenericReflectionArray<LibCmo::CK2::CK_FO_OPTIONS> CK_FO_OPTIONS {
 			{ LibCmo::CK2::CK_FO_OPTIONS::CK_FO_DEFAULT, { u8"CK_FO_DEFAULT" } },
 			{ LibCmo::CK2::CK_FO_OPTIONS::CK_FO_RENAMEOBJECT, { u8"CK_FO_RENAMEOBJECT" } },
 			{ LibCmo::CK2::CK_FO_OPTIONS::CK_FO_REPLACEOBJECT, { u8"CK_FO_REPLACEOBJECT" } },
 			{ LibCmo::CK2::CK_FO_OPTIONS::CK_FO_DONTLOADOBJECT, { u8"CK_FO_DONTLOADOBJECT" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_LOADMODE> CK_LOADMODE {
+		const GenericReflectionArray<LibCmo::CK2::CK_LOADMODE> CK_LOADMODE {
 			{ LibCmo::CK2::CK_LOADMODE::CKLOAD_INVALID, { u8"CKLOAD_INVALID" } },
 			{ LibCmo::CK2::CK_LOADMODE::CKLOAD_OK, { u8"CKLOAD_OK" } },
 			{ LibCmo::CK2::CK_LOADMODE::CKLOAD_REPLACE, { u8"CKLOAD_REPLACE" } },
 			{ LibCmo::CK2::CK_LOADMODE::CKLOAD_RENAME, { u8"CKLOAD_RENAME" } },
 			{ LibCmo::CK2::CK_LOADMODE::CKLOAD_USECURRENT, { u8"CKLOAD_USECURRENT" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_OBJECTCREATION_OPTIONS> CK_OBJECTCREATION_OPTIONS {
+		const GenericReflectionArray<LibCmo::CK2::CK_OBJECTCREATION_OPTIONS> CK_OBJECTCREATION_OPTIONS {
 			{ LibCmo::CK2::CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_NONAMECHECK, { u8"CK_OBJECTCREATION_NONAMECHECK" } },
 			{ LibCmo::CK2::CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_REPLACE, { u8"CK_OBJECTCREATION_REPLACE" } },
 			{ LibCmo::CK2::CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_RENAME, { u8"CK_OBJECTCREATION_RENAME" } },
@@ -262,7 +265,7 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::CK2::CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_ACTIVATE, { u8"CK_OBJECTCREATION_ACTIVATE" } },
 			{ LibCmo::CK2::CK_OBJECTCREATION_OPTIONS::CK_OBJECTCREATION_NONAMECOPY, { u8"CK_OBJECTCREATION_NONAMECOPY" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_PLUGIN_TYPE> CK_PLUGIN_TYPE {
+		const GenericReflectionArray<LibCmo::CK2::CK_PLUGIN_TYPE> CK_PLUGIN_TYPE {
 			{ LibCmo::CK2::CK_PLUGIN_TYPE::CKPLUGIN_BITMAP_READER, { u8"CKPLUGIN_BITMAP_READER" } },
 			{ LibCmo::CK2::CK_PLUGIN_TYPE::CKPLUGIN_SOUND_READER, { u8"CKPLUGIN_SOUND_READER" } },
 			{ LibCmo::CK2::CK_PLUGIN_TYPE::CKPLUGIN_MODEL_READER, { u8"CKPLUGIN_MODEL_READER" } },
@@ -272,7 +275,7 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::CK2::CK_PLUGIN_TYPE::CKPLUGIN_MOVIE_READER, { u8"CKPLUGIN_MOVIE_READER" } },
 			{ LibCmo::CK2::CK_PLUGIN_TYPE::CKPLUGIN_EXTENSION_DLL, { u8"CKPLUGIN_EXTENSION_DLL" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_STATECHUNK_CHUNKOPTIONS> CK_STATECHUNK_CHUNKOPTIONS {
+		const GenericReflectionArray<LibCmo::CK2::CK_STATECHUNK_CHUNKOPTIONS> CK_STATECHUNK_CHUNKOPTIONS {
 			{ LibCmo::CK2::CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_IDS, { u8"CHNK_OPTION_IDS" } },
 			{ LibCmo::CK2::CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_MAN, { u8"CHNK_OPTION_MAN" } },
 			{ LibCmo::CK2::CK_STATECHUNK_CHUNKOPTIONS::CHNK_OPTION_CHN, { u8"CHNK_OPTION_CHN" } },
@@ -282,7 +285,7 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::CK2::CK_STATECHUNK_CHUNKOPTIONS::CHNK_DONTDELETE_PTR, { u8"CHNK_DONTDELETE_PTR" } },
 			{ LibCmo::CK2::CK_STATECHUNK_CHUNKOPTIONS::CHNK_DONTDELETE_PARSER, { u8"CHNK_DONTDELETE_PARSER" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_STATECHUNK_DATAVERSION> CK_STATECHUNK_DATAVERSION {
+		const GenericReflectionArray<LibCmo::CK2::CK_STATECHUNK_DATAVERSION> CK_STATECHUNK_DATAVERSION {
 			{ LibCmo::CK2::CK_STATECHUNK_DATAVERSION::CHUNKDATA_OLDVERSION, { u8"CHUNKDATA_OLDVERSION" } },
 			{ LibCmo::CK2::CK_STATECHUNK_DATAVERSION::CHUNKDATA_BASEVERSION, { u8"CHUNKDATA_BASEVERSION" } },
 			{ LibCmo::CK2::CK_STATECHUNK_DATAVERSION::CHUNK_WAVESOUND_VERSION2, { u8"CHUNK_WAVESOUND_VERSION2" } },
@@ -296,19 +299,19 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::CK2::CK_STATECHUNK_DATAVERSION::CHUNK_DEV_2_1, { u8"CHUNK_DEV_2_1" } },
 			{ LibCmo::CK2::CK_STATECHUNK_DATAVERSION::CHUNKDATA_CURRENTVERSION, { u8"CHUNKDATA_CURRENTVERSION" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_STATECHUNK_CHUNKVERSION> CK_STATECHUNK_CHUNKVERSION {
+		const GenericReflectionArray<LibCmo::CK2::CK_STATECHUNK_CHUNKVERSION> CK_STATECHUNK_CHUNKVERSION {
 			{ LibCmo::CK2::CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSIONBASE, { u8"CHUNK_VERSIONBASE" } },
 			{ LibCmo::CK2::CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION1, { u8"CHUNK_VERSION1" } },
 			{ LibCmo::CK2::CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION2, { u8"CHUNK_VERSION2" } },
 			{ LibCmo::CK2::CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION3, { u8"CHUNK_VERSION3" } },
 			{ LibCmo::CK2::CK_STATECHUNK_CHUNKVERSION::CHUNK_VERSION4, { u8"CHUNK_VERSION4" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_OBJECT_SHOWOPTION> CK_OBJECT_SHOWOPTION {
+		const GenericReflectionArray<LibCmo::CK2::CK_OBJECT_SHOWOPTION> CK_OBJECT_SHOWOPTION {
 			{ LibCmo::CK2::CK_OBJECT_SHOWOPTION::CKHIDE, { u8"CKHIDE" } },
 			{ LibCmo::CK2::CK_OBJECT_SHOWOPTION::CKSHOW, { u8"CKSHOW" } },
 			{ LibCmo::CK2::CK_OBJECT_SHOWOPTION::CKHIERARCHICALHIDE, { u8"CKHIERARCHICALHIDE" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_OBJECT_FLAGS> CK_OBJECT_FLAGS {
+		const GenericReflectionArray<LibCmo::CK2::CK_OBJECT_FLAGS> CK_OBJECT_FLAGS {
 			{ LibCmo::CK2::CK_OBJECT_FLAGS::CK_OBJECT_INTERFACEOBJ, { u8"CK_OBJECT_INTERFACEOBJ" } },
 			{ LibCmo::CK2::CK_OBJECT_FLAGS::CK_OBJECT_PRIVATE, { u8"CK_OBJECT_PRIVATE" } },
 			{ LibCmo::CK2::CK_OBJECT_FLAGS::CK_OBJECT_INTERFACEMARK, { u8"CK_OBJECT_INTERFACEMARK" } },
@@ -343,7 +346,7 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::CK2::CK_OBJECT_FLAGS::CKBEHAVIORLINK_ACTIVATEDLASTFRAME, { u8"CKBEHAVIORLINK_ACTIVATEDLASTFRAME" } },
 			{ LibCmo::CK2::CK_OBJECT_FLAGS::CK_OBJECT_BEHAVIORLINKMASK, { u8"CK_OBJECT_BEHAVIORLINKMASK" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_3DENTITY_FLAGS> CK_3DENTITY_FLAGS {
+		const GenericReflectionArray<LibCmo::CK2::CK_3DENTITY_FLAGS> CK_3DENTITY_FLAGS {
 			{ LibCmo::CK2::CK_3DENTITY_FLAGS::CK_3DENTITY_DUMMY, { u8"CK_3DENTITY_DUMMY" } },
 			{ LibCmo::CK2::CK_3DENTITY_FLAGS::CK_3DENTITY_FRAME, { u8"CK_3DENTITY_FRAME" } },
 			{ LibCmo::CK2::CK_3DENTITY_FLAGS::CK_3DENTITY_RESERVED0, { u8"CK_3DENTITY_RESERVED0" } },
@@ -362,19 +365,19 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::CK2::CK_3DENTITY_FLAGS::CK_3DENTITY_ZORDERVALID, { u8"CK_3DENTITY_ZORDERVALID" } },
 			{ LibCmo::CK2::CK_3DENTITY_FLAGS::CK_3DENTITY_CHARACTERDOPROCESS, { u8"CK_3DENTITY_CHARACTERDOPROCESS" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS> CK_TEXTURE_SAVEOPTIONS {
+		const GenericReflectionArray<LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS> CK_TEXTURE_SAVEOPTIONS {
 			{ LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_RAWDATA, { u8"CKTEXTURE_RAWDATA" } },
 			{ LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_EXTERNAL, { u8"CKTEXTURE_EXTERNAL" } },
 			{ LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_IMAGEFORMAT, { u8"CKTEXTURE_IMAGEFORMAT" } },
 			{ LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_USEGLOBAL, { u8"CKTEXTURE_USEGLOBAL" } },
 			{ LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_INCLUDEORIGINALFILE, { u8"CKTEXTURE_INCLUDEORIGINALFILE" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_SOUND_SAVEOPTIONS> CK_SOUND_SAVEOPTIONS {
+		const GenericReflectionArray<LibCmo::CK2::CK_SOUND_SAVEOPTIONS> CK_SOUND_SAVEOPTIONS {
 			{ LibCmo::CK2::CK_SOUND_SAVEOPTIONS::CKSOUND_EXTERNAL, { u8"CKSOUND_EXTERNAL" } },
 			{ LibCmo::CK2::CK_SOUND_SAVEOPTIONS::CKSOUND_INCLUDEORIGINALFILE, { u8"CKSOUND_INCLUDEORIGINALFILE" } },
 			{ LibCmo::CK2::CK_SOUND_SAVEOPTIONS::CKSOUND_USEGLOBAL, { u8"CKSOUND_USEGLOBAL" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_BITMAPDATA_FLAGS> CK_BITMAPDATA_FLAGS {
+		const GenericReflectionArray<LibCmo::CK2::CK_BITMAPDATA_FLAGS> CK_BITMAPDATA_FLAGS {
 			{ LibCmo::CK2::CK_BITMAPDATA_FLAGS::CKBITMAPDATA_INVALID, { u8"CKBITMAPDATA_INVALID" } },
 			{ LibCmo::CK2::CK_BITMAPDATA_FLAGS::CKBITMAPDATA_TRANSPARENT, { u8"CKBITMAPDATA_TRANSPARENT" } },
 			{ LibCmo::CK2::CK_BITMAPDATA_FLAGS::CKBITMAPDATA_FORCERESTORE, { u8"CKBITMAPDATA_FORCERESTORE" } },
@@ -383,12 +386,12 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::CK2::CK_BITMAPDATA_FLAGS::CKBITMAPDATA_FREEVIDEOMEMORY, { u8"CKBITMAPDATA_FREEVIDEOMEMORY" } },
 			{ LibCmo::CK2::CK_BITMAPDATA_FLAGS::CKBITMAPDATA_DYNAMIC, { u8"CKBITMAPDATA_DYNAMIC" } },
 		};
-		const GeneralReflectionArray<LibCmo::CK2::CK_CAMERA_PROJECTION> CK_CAMERA_PROJECTION {
+		const GenericReflectionArray<LibCmo::CK2::CK_CAMERA_PROJECTION> CK_CAMERA_PROJECTION {
 			{ LibCmo::CK2::CK_CAMERA_PROJECTION::CK_PERSPECTIVEPROJECTION, { u8"CK_PERSPECTIVEPROJECTION" } },
 			{ LibCmo::CK2::CK_CAMERA_PROJECTION::CK_ORTHOGRAPHICPROJECTION, { u8"CK_ORTHOGRAPHICPROJECTION" } },
 		};
 
-		const GeneralReflectionArray<LibCmo::VxMath::VX_PIXELFORMAT> VX_PIXELFORMAT {
+		const GenericReflectionArray<LibCmo::VxMath::VX_PIXELFORMAT> VX_PIXELFORMAT {
 			{ LibCmo::VxMath::VX_PIXELFORMAT::UNKNOWN_PF, { u8"UNKNOWN_PF" } },
 			{ LibCmo::VxMath::VX_PIXELFORMAT::_32_ARGB8888, { u8"_32_ARGB8888" } },
 			{ LibCmo::VxMath::VX_PIXELFORMAT::_32_RGB888, { u8"_32_RGB888" } },
@@ -422,13 +425,13 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::VxMath::VX_PIXELFORMAT::_4_ABGR8888_CLUT, { u8"_4_ABGR8888_CLUT" } },
 			{ LibCmo::VxMath::VX_PIXELFORMAT::_4_ARGB8888_CLUT, { u8"_4_ARGB8888_CLUT" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXLIGHT_TYPE> VXLIGHT_TYPE {
+		const GenericReflectionArray<LibCmo::VxMath::VXLIGHT_TYPE> VXLIGHT_TYPE {
 			{ LibCmo::VxMath::VXLIGHT_TYPE::VX_LIGHTPOINT, { u8"VX_LIGHTPOINT" } },
 			{ LibCmo::VxMath::VXLIGHT_TYPE::VX_LIGHTSPOT, { u8"VX_LIGHTSPOT" } },
 			{ LibCmo::VxMath::VXLIGHT_TYPE::VX_LIGHTDIREC, { u8"VX_LIGHTDIREC" } },
 			{ LibCmo::VxMath::VXLIGHT_TYPE::VX_LIGHTPARA, { u8"VX_LIGHTPARA" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXTEXTURE_BLENDMODE> VXTEXTURE_BLENDMODE {
+		const GenericReflectionArray<LibCmo::VxMath::VXTEXTURE_BLENDMODE> VXTEXTURE_BLENDMODE {
 			{ LibCmo::VxMath::VXTEXTURE_BLENDMODE::VXTEXTUREBLEND_DECAL, { u8"VXTEXTUREBLEND_DECAL" } },
 			{ LibCmo::VxMath::VXTEXTURE_BLENDMODE::VXTEXTUREBLEND_MODULATE, { u8"VXTEXTUREBLEND_MODULATE" } },
 			{ LibCmo::VxMath::VXTEXTURE_BLENDMODE::VXTEXTUREBLEND_DECALALPHA, { u8"VXTEXTUREBLEND_DECALALPHA" } },
@@ -441,7 +444,7 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::VxMath::VXTEXTURE_BLENDMODE::VXTEXTUREBLEND_MAX, { u8"VXTEXTUREBLEND_MAX" } },
 			{ LibCmo::VxMath::VXTEXTURE_BLENDMODE::VXTEXTUREBLEND_MASK, { u8"VXTEXTUREBLEND_MASK" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXTEXTURE_FILTERMODE> VXTEXTURE_FILTERMODE {
+		const GenericReflectionArray<LibCmo::VxMath::VXTEXTURE_FILTERMODE> VXTEXTURE_FILTERMODE {
 			{ LibCmo::VxMath::VXTEXTURE_FILTERMODE::VXTEXTUREFILTER_NEAREST, { u8"VXTEXTUREFILTER_NEAREST" } },
 			{ LibCmo::VxMath::VXTEXTURE_FILTERMODE::VXTEXTUREFILTER_LINEAR, { u8"VXTEXTUREFILTER_LINEAR" } },
 			{ LibCmo::VxMath::VXTEXTURE_FILTERMODE::VXTEXTUREFILTER_MIPNEAREST, { u8"VXTEXTUREFILTER_MIPNEAREST" } },
@@ -451,7 +454,7 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::VxMath::VXTEXTURE_FILTERMODE::VXTEXTUREFILTER_ANISOTROPIC, { u8"VXTEXTUREFILTER_ANISOTROPIC" } },
 			{ LibCmo::VxMath::VXTEXTURE_FILTERMODE::VXTEXTUREFILTER_MASK, { u8"VXTEXTUREFILTER_MASK" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXBLEND_MODE> VXBLEND_MODE {
+		const GenericReflectionArray<LibCmo::VxMath::VXBLEND_MODE> VXBLEND_MODE {
 			{ LibCmo::VxMath::VXBLEND_MODE::VXBLEND_ZERO, { u8"VXBLEND_ZERO" } },
 			{ LibCmo::VxMath::VXBLEND_MODE::VXBLEND_ONE, { u8"VXBLEND_ONE" } },
 			{ LibCmo::VxMath::VXBLEND_MODE::VXBLEND_SRCCOLOR, { u8"VXBLEND_SRCCOLOR" } },
@@ -467,7 +470,7 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::VxMath::VXBLEND_MODE::VXBLEND_BOTHINVSRCALPHA, { u8"VXBLEND_BOTHINVSRCALPHA" } },
 			{ LibCmo::VxMath::VXBLEND_MODE::VXBLEND_MASK, { u8"VXBLEND_MASK" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXTEXTURE_ADDRESSMODE> VXTEXTURE_ADDRESSMODE {
+		const GenericReflectionArray<LibCmo::VxMath::VXTEXTURE_ADDRESSMODE> VXTEXTURE_ADDRESSMODE {
 			{ LibCmo::VxMath::VXTEXTURE_ADDRESSMODE::VXTEXTURE_ADDRESSWRAP, { u8"VXTEXTURE_ADDRESSWRAP" } },
 			{ LibCmo::VxMath::VXTEXTURE_ADDRESSMODE::VXTEXTURE_ADDRESSMIRROR, { u8"VXTEXTURE_ADDRESSMIRROR" } },
 			{ LibCmo::VxMath::VXTEXTURE_ADDRESSMODE::VXTEXTURE_ADDRESSCLAMP, { u8"VXTEXTURE_ADDRESSCLAMP" } },
@@ -475,19 +478,19 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::VxMath::VXTEXTURE_ADDRESSMODE::VXTEXTURE_ADDRESSMIRRORONCE, { u8"VXTEXTURE_ADDRESSMIRRORONCE" } },
 			{ LibCmo::VxMath::VXTEXTURE_ADDRESSMODE::VXTEXTURE_ADDRESSMASK, { u8"VXTEXTURE_ADDRESSMASK" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXFILL_MODE> VXFILL_MODE {
+		const GenericReflectionArray<LibCmo::VxMath::VXFILL_MODE> VXFILL_MODE {
 			{ LibCmo::VxMath::VXFILL_MODE::VXFILL_POINT, { u8"VXFILL_POINT" } },
 			{ LibCmo::VxMath::VXFILL_MODE::VXFILL_WIREFRAME, { u8"VXFILL_WIREFRAME" } },
 			{ LibCmo::VxMath::VXFILL_MODE::VXFILL_SOLID, { u8"VXFILL_SOLID" } },
 			{ LibCmo::VxMath::VXFILL_MODE::VXFILL_MASK, { u8"VXFILL_MASK" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXSHADE_MODE> VXSHADE_MODE {
+		const GenericReflectionArray<LibCmo::VxMath::VXSHADE_MODE> VXSHADE_MODE {
 			{ LibCmo::VxMath::VXSHADE_MODE::VXSHADE_FLAT, { u8"VXSHADE_FLAT" } },
 			{ LibCmo::VxMath::VXSHADE_MODE::VXSHADE_GOURAUD, { u8"VXSHADE_GOURAUD" } },
 			{ LibCmo::VxMath::VXSHADE_MODE::VXSHADE_PHONG, { u8"VXSHADE_PHONG" } },
 			{ LibCmo::VxMath::VXSHADE_MODE::VXSHADE_MASK, { u8"VXSHADE_MASK" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXCMPFUNC> VXCMPFUNC {
+		const GenericReflectionArray<LibCmo::VxMath::VXCMPFUNC> VXCMPFUNC {
 			{ LibCmo::VxMath::VXCMPFUNC::VXCMP_NEVER, { u8"VXCMP_NEVER" } },
 			{ LibCmo::VxMath::VXCMPFUNC::VXCMP_LESS, { u8"VXCMP_LESS" } },
 			{ LibCmo::VxMath::VXCMPFUNC::VXCMP_EQUAL, { u8"VXCMP_EQUAL" } },
@@ -498,7 +501,7 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::VxMath::VXCMPFUNC::VXCMP_ALWAYS, { u8"VXCMP_ALWAYS" } },
 			{ LibCmo::VxMath::VXCMPFUNC::VXCMP_MASK, { u8"VXCMP_MASK" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VX_EFFECT> VX_EFFECT {
+		const GenericReflectionArray<LibCmo::VxMath::VX_EFFECT> VX_EFFECT {
 			{ LibCmo::VxMath::VX_EFFECT::VXEFFECT_NONE, { u8"VXEFFECT_NONE" } },
 			{ LibCmo::VxMath::VX_EFFECT::VXEFFECT_TEXGEN, { u8"VXEFFECT_TEXGEN" } },
 			{ LibCmo::VxMath::VX_EFFECT::VXEFFECT_TEXGENREF, { u8"VXEFFECT_TEXGENREF" } },
@@ -508,7 +511,7 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::VxMath::VX_EFFECT::VXEFFECT_3TEXTURES, { u8"VXEFFECT_3TEXTURES" } },
 			{ LibCmo::VxMath::VX_EFFECT::VXEFFECT_MASK, { u8"VXEFFECT_MASK" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VX_MOVEABLE_FLAGS> VX_MOVEABLE_FLAGS {
+		const GenericReflectionArray<LibCmo::VxMath::VX_MOVEABLE_FLAGS> VX_MOVEABLE_FLAGS {
 			{ LibCmo::VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_PICKABLE, { u8"VX_MOVEABLE_PICKABLE" } },
 			{ LibCmo::VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_VISIBLE, { u8"VX_MOVEABLE_VISIBLE" } },
 			{ LibCmo::VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_UPTODATE, { u8"VX_MOVEABLE_UPTODATE" } },
@@ -531,7 +534,7 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_CHARACTERRENDERED, { u8"VX_MOVEABLE_CHARACTERRENDERED" } },
 			{ LibCmo::VxMath::VX_MOVEABLE_FLAGS::VX_MOVEABLE_RESERVED2, { u8"VX_MOVEABLE_RESERVED2" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXMESH_FLAGS> VXMESH_FLAGS {
+		const GenericReflectionArray<LibCmo::VxMath::VXMESH_FLAGS> VXMESH_FLAGS {
 			{ LibCmo::VxMath::VXMESH_FLAGS::VXMESH_BOUNDINGUPTODATE, { u8"VXMESH_BOUNDINGUPTODATE" } },
 			{ LibCmo::VxMath::VXMESH_FLAGS::VXMESH_VISIBLE, { u8"VXMESH_VISIBLE" } },
 			{ LibCmo::VxMath::VXMESH_FLAGS::VXMESH_OPTIMIZED, { u8"VXMESH_OPTIMIZED" } },
@@ -556,11 +559,11 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::VxMath::VXMESH_FLAGS::VXMESH_BWEIGHTS_CHANGED, { u8"VXMESH_BWEIGHTS_CHANGED" } },
 			{ LibCmo::VxMath::VXMESH_FLAGS::VXMESH_ALLFLAGS, { u8"VXMESH_ALLFLAGS" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXMESH_LITMODE> VXMESH_LITMODE {
+		const GenericReflectionArray<LibCmo::VxMath::VXMESH_LITMODE> VXMESH_LITMODE {
 			{ LibCmo::VxMath::VXMESH_LITMODE::VX_PRELITMESH, { u8"VX_PRELITMESH" } },
 			{ LibCmo::VxMath::VXMESH_LITMODE::VX_LITMESH, { u8"VX_LITMESH" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXCHANNEL_FLAGS> VXCHANNEL_FLAGS {
+		const GenericReflectionArray<LibCmo::VxMath::VXCHANNEL_FLAGS> VXCHANNEL_FLAGS {
 			{ LibCmo::VxMath::VXCHANNEL_FLAGS::VXCHANNEL_ACTIVE, { u8"VXCHANNEL_ACTIVE" } },
 			{ LibCmo::VxMath::VXCHANNEL_FLAGS::VXCHANNEL_SAMEUV, { u8"VXCHANNEL_SAMEUV" } },
 			{ LibCmo::VxMath::VXCHANNEL_FLAGS::VXCHANNEL_NOTLIT, { u8"VXCHANNEL_NOTLIT" } },
@@ -568,14 +571,15 @@ namespace Unvirt::AccessibleValue {
 			{ LibCmo::VxMath::VXCHANNEL_FLAGS::VXCHANNEL_RESERVED1, { u8"VXCHANNEL_RESERVED1" } },
 			{ LibCmo::VxMath::VXCHANNEL_FLAGS::VXCHANNEL_LAST, { u8"VXCHANNEL_LAST" } },
 		};
-		const GeneralReflectionArray<LibCmo::VxMath::VXTEXTURE_WRAPMODE> VXTEXTURE_WRAPMODE {
+		const GenericReflectionArray<LibCmo::VxMath::VXTEXTURE_WRAPMODE> VXTEXTURE_WRAPMODE {
 			{ LibCmo::VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_NONE, { u8"VXTEXTUREWRAP_NONE" } },
 			{ LibCmo::VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_U, { u8"VXTEXTUREWRAP_U" } },
 			{ LibCmo::VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_V, { u8"VXTEXTUREWRAP_V" } },
 			{ LibCmo::VxMath::VXTEXTURE_WRAPMODE::VXTEXTUREWRAP_UV, { u8"VXTEXTUREWRAP_UV" } },
 		};
-	}
+		// clang-format on
+	} // namespace EnumDesc
 
 #pragma endregion
 
-}
+} // namespace Unvirt::Docstring

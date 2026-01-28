@@ -3,7 +3,7 @@ add_executable(Unvirt "")
 # Setup sources
 target_sources(Unvirt
 PRIVATE
-	AccessibleValue.cpp
+	Docstring.cpp
 	CmdHelper.cpp
 	StructFormatter.cpp
 	UnvirtContext.cpp
@@ -14,7 +14,7 @@ target_sources(Unvirt
 PRIVATE
 FILE_SET HEADERS
 FILES
-	AccessibleValue.hpp
+	Docstring.hpp
 	CmdHelper.hpp
 	StructFormatter.hpp
 	UnvirtContext.hpp
