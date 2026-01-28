@@ -27,6 +27,8 @@
 // - General LibCmo specific custom exception.
 // - Enum Helper for convenient C++ enum class type logic operations.
 #include "VTUtils.hpp"
+// Encoding convertion header.
+#include "VTEncoding.hpp"
 
 // Include CK2 types first.
 // Because it also include some types or structs used by other module.

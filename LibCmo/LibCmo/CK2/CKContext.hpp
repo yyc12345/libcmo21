@@ -147,7 +147,7 @@ namespace LibCmo::CK2 {
 		bool IsValidEncoding();
 		
 	protected:
-		XContainer::XArray<EncodingHelper::EncodingToken> m_NameEncoding;
+		XContainer::XArray<EncodingPair> m_NameEncoding;
 
 		// ========== Print utilities ==========
 	public:

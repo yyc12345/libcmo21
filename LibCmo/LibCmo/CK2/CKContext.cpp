@@ -3,6 +3,7 @@
 #include "MgrImpls/CKBaseManager.hpp"
 #include "MgrImpls/CKObjectManager.hpp"
 #include "MgrImpls/CKPathManager.hpp"
+#include <yycc/string/op.hpp>
 #include <cstdarg>
 
 namespace LibCmo::CK2 {
@@ -264,7 +265,7 @@ namespace LibCmo::CK2 {
 
 		va_list argptr;
 		va_start(argptr, fmt);
-		XContainer::XString result(YYCC::StringHelper::VPrintf(fmt, argptr));
+		XContainer::XString result(yycc::string::op::vprintf(fmt, argptr));
 		va_end(argptr);
 
 		// use c_str(), not XContainer::NSXString::ToCKSTRING because we want make sure this parameter is not nullptr.
@@ -282,10 +283,10 @@ namespace LibCmo::CK2 {
 
 	bool CKContext::GetUTF8String(const std::string& native_name, XContainer::XString& u8_name) {
 		bool conv_success = false, has_valid_token = false;
-		for (const auto& token : this->m_NameEncoding) {
-			if (token == EncodingHelper::INVALID_ENCODING_TOKEN) continue;
+		for (auto& enc_pair : this->m_NameEncoding) {
+			if (!enc_pair.IsValid()) continue;
 			has_valid_token = true;
-			conv_success = EncodingHelper::ToUTF8(native_name, u8_name, token);
+			conv_success = enc_pair.ToUTF8(native_name, u8_name);
 			if (conv_success) break;
 		}
 		// fallback if failed.
@@ -303,10 +304,10 @@ namespace LibCmo::CK2 {
 
 	bool CKContext::GetOrdinaryString(const XContainer::XString& u8_name, std::string& native_name) {
 		bool conv_success = false, has_valid_token = false;
-		for (const auto& token : this->m_NameEncoding) {
-			if (token == EncodingHelper::INVALID_ENCODING_TOKEN) continue;
+		for (auto& enc_pair : this->m_NameEncoding) {
+			if (!enc_pair.IsValid()) continue;
 			has_valid_token = true;
-			conv_success = EncodingHelper::ToOrdinary(u8_name, native_name, token);
+			conv_success = enc_pair.ToOrdinary(u8_name, native_name);
 			if (conv_success) break;
 		}
 		// fallback if failed.
@@ -326,22 +327,18 @@ namespace LibCmo::CK2 {
 		// free all current series
 		this->ClearEncoding();
 		// add new encoding
-		for (const auto& encoding_str : encoding_seq) {
-			this->m_NameEncoding.emplace_back(LibCmo::EncodingHelper::CreateEncodingToken(encoding_str));
+		for (auto& encoding_str : encoding_seq) {
+			this->m_NameEncoding.emplace_back(EncodingPair(encoding_str));
 		}
 	}
 
 	void CKContext::ClearEncoding() {
-		for (const auto& token : this->m_NameEncoding) {
-			if (token == EncodingHelper::INVALID_ENCODING_TOKEN) continue;
-			LibCmo::EncodingHelper::DestroyEncodingToken(token);
-		}
 		this->m_NameEncoding.clear();
 	}
 
 	bool CKContext::IsValidEncoding() {
-		for (const auto& token : this->m_NameEncoding) {
-			if (token != EncodingHelper::INVALID_ENCODING_TOKEN) return true;
+		for (const auto& enc_pair : this->m_NameEncoding) {
+			if (enc_pair.IsValid()) return true;
 		}
 		return false;
 	}
