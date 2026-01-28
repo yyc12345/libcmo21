@@ -1,4 +1,5 @@
 import java.util.Collections;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ExpFctsWalker extends ExpFctsParserBaseListener {
@@ -32,8 +33,7 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 		// set name
 		mCurrentFct.mFctName = ctx.EXPFCTS_IDENTIFIER().getText();
 		// check return type
-		if (!mCurrentFct.mFctRetType.isValid() || mCurrentFct.mFctRetType.isPointer()
-				|| !mCurrentFct.mFctRetType.getBaseType().equals("bool"))
+		if (!Objects.equals(mCurrentFct.mFctRvType, "bool"))
 			throw new IllegalArgumentException("invalid interface function return type. must be bool.");
 		
 		// add into list
@@ -47,7 +47,7 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 		param.mVarName = ctx.EXPFCTS_IDENTIFIER().getText();
 		param.mVarDesc = "The pointer to corresponding BMFile.";
 		param.mIsInput = true;
-		param.mVarType.fromCType("BMap::BMFile*");
+		param.mVarType = "BMap::BMFile*";
 		mCurrentFct.mFctParams.add(param);
 	}
 
@@ -57,7 +57,7 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 		param.mVarName = ctx.EXPFCTS_IDENTIFIER().getText();
 		param.mVarDesc = "The pointer to corresponding BMMeshTransition.";
 		param.mIsInput = true;
-		param.mVarType.fromCType("BMap::BMMeshTransition*");
+		param.mVarType = "BMap::BMMeshTransition*";
 		mCurrentFct.mFctParams.add(param);
 	}
 
@@ -67,14 +67,14 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 		firstParam.mVarName = ctx.EXPFCTS_IDENTIFIER(0).getText();
 		firstParam.mVarDesc = "The pointer to corresponding BMFile.";
 		firstParam.mIsInput = true;
-		firstParam.mVarType.fromCType("BMap::BMFile*");
+		firstParam.mVarType = "BMap::BMFile*";
 		mCurrentFct.mFctParams.add(firstParam);
 
 		ExpFctsHelper.ExpFctParam secondParam = new ExpFctsHelper.ExpFctParam();
 		secondParam.mVarName = ctx.EXPFCTS_IDENTIFIER(1).getText();
 		secondParam.mVarDesc = "The CKID of object you accessing.";
 		secondParam.mIsInput = true;
-		secondParam.mVarType.fromCType("LibCmo::CK2::CK_ID");
+		secondParam.mVarType = "LibCmo::CK2::CK_ID";
 		mCurrentFct.mFctParams.add(secondParam);
 	}
 
@@ -118,12 +118,15 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 			ctype += String.join("", Collections.nCopies(ctx.EXPFCTS_STAR().size(), "*"));
 		}
 
-		if (!mCurrentFct.mFctRetType.isValid()) {
+		// if there is function return value is not filled,
+		// we fill it first because return value type is the first captured type in function statement.
+		// otherwise we fill parameter type.
+		if (mCurrentFct.mFctRvType.isEmpty()) {
 			// fill function ret type first
-			mCurrentFct.mFctRetType.fromCType(ctype);
+			mCurrentFct.mFctRvType = ctype;
 		} else {
 			// otherwise, fill param data
-			mCurrentParam.mVarType.fromCType(ctype);
+			mCurrentParam.mVarType = ctype;
 		}
 	}
 

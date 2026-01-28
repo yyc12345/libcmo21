@@ -1,5 +1,10 @@
+import json_loader
+import utils
+
 def main():
-    print("Hello from exp-fcts-render!")
+    fcts = json_loader.load_fcts("BMExports.json")
+
+    print("Done")
 
 
 if __name__ == "__main__":

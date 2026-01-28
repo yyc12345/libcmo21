@@ -8,26 +8,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class JsonWriter {
-	
-	private static JsonObject writeVariableType(ExpFctsHelper.VariableType vt) {
-		JsonObject data = new JsonObject();
-		
-		JsonArray hierarchy = new JsonArray();
-		for (String item : vt.getBaseTypeHierarchy()) {
-			hierarchy.add(item);
-		}
-		data.add("hierarchy", hierarchy);
-		data.addProperty("pointer_level", vt.getPointerLevel());
-		
-		return data;
-	}
-	
+
 	private static JsonObject writeExpFctParam(ExpFctsHelper.ExpFctParam param) {
 		JsonObject data = new JsonObject();
+		data.addProperty("type", param.mVarType);
 		data.addProperty("name", param.mVarName);
 		data.addProperty("is_input", param.mIsInput);
 		data.addProperty("desc", param.mVarDesc);
-		data.add("type", writeVariableType(param.mVarType));
 		
 		return data;
 	}
@@ -35,7 +22,7 @@ public class JsonWriter {
 	private static JsonObject writeExpFct(ExpFctsHelper.ExpFct fct) {
 		JsonObject data = new JsonObject();
 		data.addProperty("name", fct.mFctName);
-		data.add("return", writeVariableType(fct.mFctRetType));
+		data.addProperty("return", fct.mFctRvType);
 		
 		JsonArray paramList = new JsonArray();
 		for (ExpFctsHelper.ExpFctParam param : fct.mFctParams) {
