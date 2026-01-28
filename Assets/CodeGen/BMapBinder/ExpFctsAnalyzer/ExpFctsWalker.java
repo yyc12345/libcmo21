@@ -1,34 +1,30 @@
 import java.util.Collections;
-import java.util.Vector;
 import java.util.stream.Collectors;
-
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
 
 public class ExpFctsWalker extends ExpFctsParserBaseListener {
 
 	public ExpFctsWalker() {
-		mFctList = new Vector<ExpFctDecl>();
+		mFctCollection = null;
 		mCurrentFct = null;
 		mCurrentParam = null;
 	}
 
-	public Vector<ExpFctDecl> getResult() {
-		return mFctList;
+	public ExpFctsHelper.ExpFctCollection getResult() {
+		return mFctCollection;
 	}
 
-	private Vector<ExpFctDecl> mFctList;
-	private ExpFctDecl mCurrentFct;
-	private ExpFctParamDecl mCurrentParam;
+	private ExpFctsHelper.ExpFctCollection mFctCollection;
+	private ExpFctsHelper.ExpFct mCurrentFct;
+	private ExpFctsHelper.ExpFctParam mCurrentParam;
 
 	@Override
 	public void enterProgram(ExpFctsParser.ProgramContext ctx) {
-		mFctList.clear();
+		mFctCollection = new ExpFctsHelper.ExpFctCollection();
 	}
 
 	@Override
 	public void enterFctDecl(ExpFctsParser.FctDeclContext ctx) {
-		mCurrentFct = new ExpFctDecl();
+		mCurrentFct = new ExpFctsHelper.ExpFct();
 	}
 
 	@Override
@@ -41,50 +37,50 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 			throw new IllegalArgumentException("invalid interface function return type. must be bool.");
 		
 		// add into list
-		mFctList.add(mCurrentFct);
+		mFctCollection.mFcts.add(mCurrentFct);
 		mCurrentFct = null;
 	}
 
 	@Override
 	public void exitFctArgFileDecl(ExpFctsParser.FctArgFileDeclContext ctx) {
-		ExpFctParamDecl decl = new ExpFctParamDecl();
-		decl.mVarName = ctx.EXPFCTS_IDENTIFIER().getText();
-		decl.mVarDesc = "The pointer to corresponding BMFile.";
-		decl.mIsInput = true;
-		decl.mVarType.fromCType("BMap::BMFile*");
-		mCurrentFct.mFctParams.add(decl);
+		ExpFctsHelper.ExpFctParam param = new ExpFctsHelper.ExpFctParam();
+		param.mVarName = ctx.EXPFCTS_IDENTIFIER().getText();
+		param.mVarDesc = "The pointer to corresponding BMFile.";
+		param.mIsInput = true;
+		param.mVarType.fromCType("BMap::BMFile*");
+		mCurrentFct.mFctParams.add(param);
 	}
 
 	@Override
 	public void exitFctArgMeshTransDecl(ExpFctsParser.FctArgMeshTransDeclContext ctx) {
-		ExpFctParamDecl decl = new ExpFctParamDecl();
-		decl.mVarName = ctx.EXPFCTS_IDENTIFIER().getText();
-		decl.mVarDesc = "The pointer to corresponding BMMeshTransition.";
-		decl.mIsInput = true;
-		decl.mVarType.fromCType("BMap::BMMeshTransition*");
-		mCurrentFct.mFctParams.add(decl);
+		ExpFctsHelper.ExpFctParam param = new ExpFctsHelper.ExpFctParam();
+		param.mVarName = ctx.EXPFCTS_IDENTIFIER().getText();
+		param.mVarDesc = "The pointer to corresponding BMMeshTransition.";
+		param.mIsInput = true;
+		param.mVarType.fromCType("BMap::BMMeshTransition*");
+		mCurrentFct.mFctParams.add(param);
 	}
 
 	@Override
 	public void exitFctArgObjDecl(ExpFctsParser.FctArgObjDeclContext ctx) {
-		ExpFctParamDecl first_decl = new ExpFctParamDecl();
-		first_decl.mVarName = ctx.EXPFCTS_IDENTIFIER(0).getText();
-		first_decl.mVarDesc = "The pointer to corresponding BMFile.";
-		first_decl.mIsInput = true;
-		first_decl.mVarType.fromCType("BMap::BMFile*");
-		mCurrentFct.mFctParams.add(first_decl);
+		ExpFctsHelper.ExpFctParam firstParam = new ExpFctsHelper.ExpFctParam();
+		firstParam.mVarName = ctx.EXPFCTS_IDENTIFIER(0).getText();
+		firstParam.mVarDesc = "The pointer to corresponding BMFile.";
+		firstParam.mIsInput = true;
+		firstParam.mVarType.fromCType("BMap::BMFile*");
+		mCurrentFct.mFctParams.add(firstParam);
 
-		ExpFctParamDecl second_decl = new ExpFctParamDecl();
-		second_decl.mVarName = ctx.EXPFCTS_IDENTIFIER(1).getText();
-		second_decl.mVarDesc = "The CKID of object you accessing.";
-		second_decl.mIsInput = true;
-		second_decl.mVarType.fromCType("LibCmo::CK2::CK_ID");
-		mCurrentFct.mFctParams.add(second_decl);
+		ExpFctsHelper.ExpFctParam secondParam = new ExpFctsHelper.ExpFctParam();
+		secondParam.mVarName = ctx.EXPFCTS_IDENTIFIER(1).getText();
+		secondParam.mVarDesc = "The CKID of object you accessing.";
+		secondParam.mIsInput = true;
+		secondParam.mVarType.fromCType("LibCmo::CK2::CK_ID");
+		mCurrentFct.mFctParams.add(secondParam);
 	}
 
 	@Override
 	public void enterFctArgParamIn(ExpFctsParser.FctArgParamInContext ctx) {
-		mCurrentParam = new ExpFctParamDecl();
+		mCurrentParam = new ExpFctsHelper.ExpFctParam();
 	}
 
 	@Override
@@ -98,7 +94,7 @@ public class ExpFctsWalker extends ExpFctsParserBaseListener {
 
 	@Override
 	public void enterFctArgParamOut(ExpFctsParser.FctArgParamOutContext ctx) {
-		mCurrentParam = new ExpFctParamDecl();
+		mCurrentParam = new ExpFctsHelper.ExpFctParam();
 	}
 
 	@Override

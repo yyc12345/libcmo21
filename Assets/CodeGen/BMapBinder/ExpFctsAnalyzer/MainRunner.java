@@ -9,9 +9,9 @@ public class MainRunner {
 
 	public static void main(String[] args) throws Exception {
 		// get interface structure
-		FileInputStream fs = new FileInputStream("dest/BMExports.hpp");
-		CharStream antlrfs = CharStreams.fromStream(fs, StandardCharsets.UTF_8);
-		ExpFctsLexer lexer = new ExpFctsLexer(antlrfs);
+		FileInputStream fs = new FileInputStream(CommonHelper.getInputFilePath("BMExports.hpp"));
+		CharStream antlrStream = CharStreams.fromStream(fs, StandardCharsets.UTF_8);
+		ExpFctsLexer lexer = new ExpFctsLexer(antlrStream);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		ExpFctsParser parser = new ExpFctsParser(tokens);
 
@@ -23,12 +23,10 @@ public class MainRunner {
 		fs.close();
 
 		// get data and write them
-		Vector<ExpFctDecl> result = worker.getResult();
-		PythonWriter.writePythonCode(result);
-		CSharpWriter.writeCSharpCode(result);
+		ExpFctsHelper.ExpFctCollection result = worker.getResult();
 		JsonWriter.writeJson(result);
 		
 		// print message.
-		System.out.println("DONE!");
+		System.out.println("Done");
 	}
 }

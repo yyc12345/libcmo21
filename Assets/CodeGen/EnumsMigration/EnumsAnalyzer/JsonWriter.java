@@ -53,7 +53,7 @@ public class JsonWriter {
 
 	private static void writeJson(String filename, EnumsHelper.BEnumCollection enumCollection) throws Exception {
 		OutputStreamWriter writer = CommonHelper.openOutputFile(filename);
-		//Gson gsonInstance = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+		//Gson gsonInstance = new GsonBuilder().serializeNulls().setPrettyPrinting().disableHtmlEscaping().create();
 		Gson gsonInstance = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
 		writer.write(gsonInstance.toJson(writeBEnumCollection(enumCollection)));
 		writer.close();

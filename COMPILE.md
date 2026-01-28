@@ -41,8 +41,6 @@ Following these steps to prepare stb:
 
 ### zlib
 
-If you are in Windows, you should download zlib source code and build it with given Visual Studio solution files. The final file we needed is `zlibwapi.dll` with `ZlibDllRelease` build type.
-
 If you are running on non-Windows system. You usually do not need to do anything. Because zlib development environment may be configured by your package manager correctly.
 
 If you are in Windows, or in Linux but want to use specific zlib version due to various reasons, following these steps to prepare zlib:
@@ -89,7 +87,7 @@ If you are coming from my another project [BallanceBlenderPlugin](https://github
 It may be useful for the developer who firstly use this project in their own projects.
 Please note that generated documentation is different in different platforms.
 * `YYCCommonplace_ROOT`: Set to the install path of YYCCommonplace.
-* `stb_ROOT`: Set to the root directory of stb.
+* `STB_ROOT`: Set to the root directory of stb.
 * `ZLIB_ROOT`: Set to the install path of zlib.
 If you are using zlib which is not build by your own, you usually do not need specify this variable.
 

@@ -1,5 +1,7 @@
+import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Vector;
+import java.nio.charset.StandardCharsets;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
@@ -7,7 +9,7 @@ import com.google.gson.GsonBuilder;
 
 public class JsonWriter {
 	
-	private static JsonObject writeVariableType(VariableType vt) {
+	private static JsonObject writeVariableType(ExpFctsHelper.VariableType vt) {
 		JsonObject data = new JsonObject();
 		
 		JsonArray hierarchy = new JsonArray();
@@ -20,41 +22,44 @@ public class JsonWriter {
 		return data;
 	}
 	
-	private static JsonObject writeExpFctParamDecl(ExpFctParamDecl paramdecl) {
+	private static JsonObject writeExpFctParam(ExpFctsHelper.ExpFctParam param) {
 		JsonObject data = new JsonObject();
-		data.addProperty("name", paramdecl.mVarName);
-		data.addProperty("is_input", paramdecl.mIsInput);
-		data.addProperty("desc", paramdecl.mVarDesc);
-		data.add("type", writeVariableType(paramdecl.mVarType));
+		data.addProperty("name", param.mVarName);
+		data.addProperty("is_input", param.mIsInput);
+		data.addProperty("desc", param.mVarDesc);
+		data.add("type", writeVariableType(param.mVarType));
 		
 		return data;
 	}
 	
-	private static JsonObject writeExpFctDecl(ExpFctDecl fctdecl) {
+	private static JsonObject writeExpFct(ExpFctsHelper.ExpFct fct) {
 		JsonObject data = new JsonObject();
-		data.addProperty("name", fctdecl.mFctName);
-		data.add("return", writeVariableType(fctdecl.mFctRetType));
+		data.addProperty("name", fct.mFctName);
+		data.add("return", writeVariableType(fct.mFctRetType));
 		
-		JsonArray paramlist = new JsonArray();
-		for (ExpFctParamDecl paramdecl : fctdecl.mFctParams) {
-			paramlist.add(writeExpFctParamDecl(paramdecl));
+		JsonArray paramList = new JsonArray();
+		for (ExpFctsHelper.ExpFctParam param : fct.mFctParams) {
+			paramList.add(writeExpFctParam(param));
 		}
-		data.add("params", paramlist);
+		data.add("params", paramList);
 		
 		return data;
 	}
-	
-	public static void writeJson(Vector<ExpFctDecl> data) throws Exception {
-		OutputStreamWriter writer = CommonHelper.openWriter("dest/BMExports.json");
-		//Gson gson_instance = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-		Gson gson_instance = new GsonBuilder().disableHtmlEscaping().create();
-		
-		JsonArray fcts = new JsonArray();
-		for (ExpFctDecl fctdecl : data) {
-			fcts.add(writeExpFctDecl(fctdecl));
+
+	private static JsonArray writeExpFctCollection(ExpFctsHelper.ExpFctCollection fctCollection) {
+		JsonArray data = new JsonArray();
+		for (ExpFctsHelper.ExpFct fct : fctCollection.mFcts) {
+			data.add(writeExpFct(fct));
 		}
-		
-		writer.write(gson_instance.toJson(fcts));
+		return data;
+	}
+
+	public static void writeJson(ExpFctsHelper.ExpFctCollection data) throws Exception {
+		FileOutputStream fs = new FileOutputStream(CommonHelper.getOutputFilePath("BMExports.json"));
+		OutputStreamWriter writer = new OutputStreamWriter(fs, StandardCharsets.UTF_8);
+		//Gson gsonInstance = new GsonBuilder().serializeNulls().setPrettyPrinting().disableHtmlEscaping().create();
+		Gson gsonInstance = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
+		writer.write(gsonInstance.toJson(writeExpFctCollection(data)));
 		writer.close();
 	}
 }

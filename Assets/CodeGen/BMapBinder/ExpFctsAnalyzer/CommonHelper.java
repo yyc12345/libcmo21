@@ -3,29 +3,32 @@ import java.io.FileOutputStream;
 //import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class CommonHelper {
 
-//	public static InputStreamReader openReader(String filename) throws Exception {
-//		FileInputStream fs = new FileInputStream(filename);
-//		return new InputStreamReader(fs, StandardCharsets.UTF_8);
-//	}
+	// =========== File Operations ===========
 
-	public static OutputStreamWriter openWriter(String filename) throws Exception {
-		FileOutputStream fs = new FileOutputStream(filename);
-		return new OutputStreamWriter(fs, StandardCharsets.UTF_8);
+	private static Path getRootDirectoryPath() throws Exception {
+		String rootDir = System.getenv("BMAP_BINDER_ROOT");
+		if (rootDir == null) {
+			throw new RuntimeException("Can not find essential environment variable BMAP_BINDER_ROOT");
+		} else {
+			return Paths.get(rootDir);
+		}
 	}
 
-//	public static void writeSnippet(OutputStreamWriter writer, String snippet_path) throws Exception {
-//		// open snippet
-//		InputStreamReader reader = openReader(snippet_path);
-//		// write into writer
-//		reader.transferTo(writer);
-//		reader.close();
-//	}
-	
-	public static String getDoxygenInOutStr(boolean isInput) {
-		return isInput ? "in" : "out";
+	public static String getInputFilePath(String filename) throws Exception {
+		Path rootDir = getRootDirectoryPath();
+		Path filePath = rootDir.resolve("Extracted").resolve(filename);
+		return filePath.toString();
+	}
+
+	public static String getOutputFilePath(String filename) throws Exception {
+		Path rootDir = getRootDirectoryPath();
+		Path filePath = rootDir.resolve("Analyzed").resolve(filename);
+		return filePath.toString();
 	}
 
 }
