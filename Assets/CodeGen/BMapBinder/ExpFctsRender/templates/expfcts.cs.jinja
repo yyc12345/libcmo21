@@ -1,0 +1,16 @@
+{%- for fct in payload.fcts %}
+/// <summary>{{ fct.fct_name }}</summary>
+{%- for param in fct.fct_params %}
+/// <param name="{{ param.var_name }}">Direction: {% if param.is_input -%} input {%- else -%} output {%- endif %}. C++ type: {{ param.var_type.to_c_type() }}. {{ param.var_desc }}</param>
+{%- endfor %}
+/// <returns>True if no error, otherwise False.</returns>
+[DllImport(g_DllName, EntryPoint = "{{ fct.fct_name }}", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
+[return: MarshalAs(UnmanagedType.U1)]
+internal static extern bool {{ fct.fct_name }}(
+{%- for param in fct.fct_params -%}
+{%- set param_cs_interop_type = utils.get_cs_interop_type(param) -%}
+[{% if param.is_input -%} In {%- else -%} Out {%- endif %}, MarshalAs({{ param_cs_interop_type.marshal_as }})] {% if not param.is_input %}out {% endif %} {{- param_cs_interop_type.cs_type }} {{ param.var_name }}
+{%- if not loop.last %}, {% endif %}
+{%- endfor -%}
+);
+{%- endfor %}

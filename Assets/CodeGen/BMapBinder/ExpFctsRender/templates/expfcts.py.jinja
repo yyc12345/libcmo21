@@ -1,0 +1,17 @@
+{%- for fct in payload.fcts %}
+{{ fct.fct_name }} = _create_bmap_func('{{ fct.fct_name }}', [
+{%- for param in fct.fct_params %}
+{{- utils.get_python_type(param) }}
+{%- if not loop.last %}, {% endif %} 
+{%- endfor -%}
+])
+"""
+{{ fct.fct_name }}
+{% for param in fct.fct_params %}
+:param {{ param.var_name }}: Direction: {% if param.is_input -%} input {%- else -%} output {%- endif %}. {{ param.var_desc }}
+:type {{ param.var_name }}: {{ utils.get_python_type(param) }} ({{ param.var_type.to_c_type() }} in C++). {% if param.is_input -%} Use ctypes.byref() pass it. {%- endif %}
+{%- endfor %}
+:return: True if no error, otherwise False.
+:rtype: bool
+"""
+{%- endfor %}
