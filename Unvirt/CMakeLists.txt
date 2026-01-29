@@ -3,6 +3,7 @@ add_executable(Unvirt "")
 # Setup sources
 target_sources(Unvirt
 PRIVATE
+	Utils.cpp
 	Docstring.cpp
 	StructFmt.cpp
 	CmdHelper.cpp
@@ -14,6 +15,7 @@ target_sources(Unvirt
 PRIVATE
 FILE_SET HEADERS
 FILES
+	Utils.hpp
 	Docstring.hpp
 	StructFmt.hpp
 	CmdHelper.hpp

@@ -1,5 +1,6 @@
 #include "StructFmt.hpp"
 #include "Docstring.hpp"
+#include "Utils.hpp"
 #include <yycc/string/op.hpp>
 #include <yycc/carton/termcolor.hpp>
 #include <yycc/carton/tabulate.hpp>
@@ -12,6 +13,8 @@ using namespace yycc::patch::stream;
 namespace strop = yycc::string::op;
 namespace termcolor = yycc::carton::termcolor;
 namespace tabulate = yycc::carton::tabulate;
+using termcolor::Color;
+using Unvirt::Utils::PageBreaker;
 
 namespace Unvirt::StructFmt {
 
@@ -20,10 +23,10 @@ namespace Unvirt::StructFmt {
 	static std::u8string PrintCKSTRING(LibCmo::CKSTRING name) {
 		std::u8string ret;
 		if (name == nullptr) {
-			ret = termcolor::colored(u8"<anonymous>", termcolor::Color::LightMagenta);
+			ret = termcolor::colored(u8"<anonymous>", Color::LightMagenta);
 		} else {
 			if (name[0] == u8'\0') {
-				ret = termcolor::colored(u8"<blank>", termcolor::Color::LightMagenta);
+				ret = termcolor::colored(u8"<blank>", Color::LightMagenta);
 			} else {
 				ret = name;
 			}
@@ -33,7 +36,7 @@ namespace Unvirt::StructFmt {
 	static std::u8string PrintPointer(const void* ptr) {
 		std::u8string ret;
 		if (ptr == nullptr) {
-			ret = termcolor::colored(u8"<null>", termcolor::Color::LightCyan);
+			ret = termcolor::colored(u8"<null>", Color::LightCyan);
 		} else {
 			ret = strop::printf(u8"<0x%" PRIXPTR_LPAD PRIxPTR ">", reinterpret_cast<uintptr_t>(ptr));
 		}
@@ -46,7 +49,7 @@ namespace Unvirt::StructFmt {
 		return (v ? u8"true" : u8"false");
 	}
 	static std::u8string PrintColorfulBool(bool v) {
-		return (v ? termcolor::colored(u8"Yes", termcolor::Color::LightGreen) : termcolor::colored(u8"No", termcolor::Color::LightRed));
+		return (v ? termcolor::colored(u8"Yes", Color::LightGreen) : termcolor::colored(u8"No", Color::LightRed));
 	}
 	static std::u8string PrintColor(LibCmo::CKDWORD argb) {
 		LibCmo::CKDWORD a = (argb & 0xFF000000) >> 24,
@@ -92,39 +95,57 @@ namespace Unvirt::StructFmt {
 
 #pragma region Page Helper
 
-	template<class T>
-	static void GeneralPrintList(
-		const std::vector<T>& data, size_t page, size_t pageitems,
-		std::function<void()> printHdrFct, std::function<void(size_t, const T&)> printEntryFct) {
-
-		// check page overflow
-		if (page * pageitems >= data.size()) {
-			console::write_line(YYCC_COLOR_LIGHT_RED(u8"Page out of range."));
-			return;
+	/**
+	 * @brief 
+	 * @param pager 
+	 * @param page 
+	 * @return True if given page index is valid, otherwise false.
+	 */
+	static bool CheckPageHeader(const PageBreaker& pager, size_t page) {
+		bool good_page = pager.IsValidPage(page);
+		if (!good_page) {
+			termcolor::cprint(u8"Page out of range.", Color::LightRed);
 		}
-
-		// calc page data
-		size_t fulllen = data.size(),
-			startpos = page * pageitems,
-			fullpage = (fulllen + (pageitems - 1)) / pageitems;	// to solve `fulllen / pageitems` empty page issue. like CKStateChunk::GetCeilDwordSize function (+3 /4 to get DWORD size).
-
-		// print header
-		printHdrFct();
-
-		// print body
-		for (size_t counter = startpos; counter < fulllen && (counter - startpos) < pageitems; ++counter) {
-			printEntryFct(counter, data[counter]);
-		}
-
-		console::format_line(u8"Page %" PRIuSIZET " of %" PRIuSIZET, page + 1, fullpage);
+		return good_page;
 	}
+
+	static void WritePageFooter(const PageBreaker& pager, size_t page) {
+		std::cout << strop::printf(u8"Page %" PRIuSIZET " of %" PRIuSIZET, page + 1, pager.GetMaxPage() + 1) << std::endl;
+	}
+
+	//template<class T>
+	//static void GeneralPrintList(
+	//	const std::vector<T>& data, size_t page, size_t pageitems,
+	//	std::function<void()> printHdrFct, std::function<void(size_t, const T&)> printEntryFct) {
+
+	//	// check page overflow
+	//	if (page * pageitems >= data.size()) {
+	//		console::write_line(YYCC_COLOR_LIGHT_RED(u8"Page out of range."));
+	//		return;
+	//	}
+
+	//	// calc page data
+	//	size_t fulllen = data.size(),
+	//		startpos = page * pageitems,
+	//		fullpage = (fulllen + (pageitems - 1)) / pageitems;	// to solve `fulllen / pageitems` empty page issue. like CKStateChunk::GetCeilDwordSize function (+3 /4 to get DWORD size).
+
+	//	// print header
+	//	printHdrFct();
+
+	//	// print body
+	//	for (size_t counter = startpos; counter < fulllen && (counter - startpos) < pageitems; ++counter) {
+	//		printEntryFct(counter, data[counter]);
+	//	}
+
+	//	console::format_line(u8"Page %" PRIuSIZET " of %" PRIuSIZET, page + 1, fullpage);
+	//}
 
 #pragma endregion
 
 #pragma region Object Printer
 
 	static void PrintCKObjectDetail(LibCmo::CK2::ObjImpls::CKObject* obj) {
-		termcolor::cprintln(u8"CKObject", termcolor::Color::LightYellow);
+		termcolor::cprintln(u8"CKObject", Color::LightYellow);
 		// print name
 		std::cout << strop::printf(u8"Name: %s", PrintCKSTRING(obj->GetName()).c_str()) << std::endl;
 		// print id
@@ -141,19 +162,19 @@ namespace Unvirt::StructFmt {
 
 	static void PrintCKSceneObjectDetail(LibCmo::CK2::ObjImpls::CKSceneObject* obj) {
 		PrintCKObjectDetail(obj);
-		termcolor::cprintln(u8"CKSceneObject", termcolor::Color::LightYellow);
-		termcolor::cprintln(u8"No Data", termcolor::Color::LightRed);
+		termcolor::cprintln(u8"CKSceneObject", Color::LightYellow);
+		termcolor::cprintln(u8"No Data", Color::LightRed);
 	}
 
 	static void PrintCKBeObjectDetail(LibCmo::CK2::ObjImpls::CKBeObject* obj) {
 		PrintCKSceneObjectDetail(obj);
-		termcolor::cprintln(u8"CKBeObject", termcolor::Color::LightYellow);
-		termcolor::cprintln(u8"No Data", termcolor::Color::LightRed);
+		termcolor::cprintln(u8"CKBeObject", Color::LightYellow);
+		termcolor::cprintln(u8"No Data", Color::LightRed);
 	}
 
 	static void PrintCKGroupDetail(LibCmo::CK2::ObjImpls::CKGroup* obj) {
 		PrintCKBeObjectDetail(obj);
-		termcolor::cprintln(u8"CKGroup", termcolor::Color::LightYellow);
+		termcolor::cprintln(u8"CKGroup", Color::LightYellow);
 
 		LibCmo::CKDWORD count = obj->GetObjectCount();
 		std::cout << strop::printf(u8"Group Object Count: %" PRIuCKDWORD, count) << std::endl;
@@ -176,16 +197,16 @@ namespace Unvirt::StructFmt {
 
 	static void PrintCKRenderObjectDetail(LibCmo::CK2::ObjImpls::CKRenderObject* obj) {
 		PrintCKBeObjectDetail(obj);
-		termcolor::cprintln(u8"CKRenderObject", termcolor::Color::LightYellow);
-		termcolor::cprintln(u8"No Data", termcolor::Color::LightRed);
+		termcolor::cprintln(u8"CKRenderObject", Color::LightYellow);
+		termcolor::cprintln(u8"No Data", Color::LightRed);
 	}
 
 	static void PrintCK3dEntityDetail(LibCmo::CK2::ObjImpls::CK3dEntity* obj) {
 		PrintCKRenderObjectDetail(obj);
-		termcolor::cprintln(u8"CK3dEntity", termcolor::Color::LightYellow);
+		termcolor::cprintln(u8"CK3dEntity", Color::LightYellow);
 
 		std::cout << u8"== World Matrix ==" << std::endl;
-		auto mat = obj->GetWorldMatrix();
+		const auto& mat = obj->GetWorldMatrix();
 		auto matrix_table = CreateGridTable(4);
 		for (LibCmo::CKDWORD i = 0; i < 4; ++i) {
 			matrix_table.add_row({
@@ -227,7 +248,7 @@ namespace Unvirt::StructFmt {
 	
 	static void PrintCKLightDetail(LibCmo::CK2::ObjImpls::CKLight* obj) {
 		PrintCK3dEntityDetail(obj);
-		termcolor::cprintln(u8"CKLight", termcolor::Color::LightYellow);
+		termcolor::cprintln(u8"CKLight", Color::LightYellow);
 		
 		std::cout << u8"== Basics ==" << std::endl;
 		std::cout << u8"Type: " << Docstring::GetEnumName(obj->GetType()) << std::endl;
@@ -259,13 +280,13 @@ namespace Unvirt::StructFmt {
 	
 	static void PrintCKTargetLightDetail(LibCmo::CK2::ObjImpls::CKTargetLight* obj) {
 		PrintCKLightDetail(obj);
-		termcolor::cprintln(u8"CKTargetLight", termcolor::Color::LightYellow);
-		termcolor::cprintln(u8"No Data", termcolor::Color::LightRed);
+		termcolor::cprintln(u8"CKTargetLight", Color::LightYellow);
+		termcolor::cprintln(u8"No Data", Color::LightRed);
 	}
 	
 	static void PrintCKCameraDetail(LibCmo::CK2::ObjImpls::CKCamera* obj) {
 		PrintCK3dEntityDetail(obj);
-		termcolor::cprintln(u8"CKCamera", termcolor::Color::LightYellow);
+		termcolor::cprintln(u8"CKCamera", Color::LightYellow);
 		
 		std::cout << u8"== Basics ==" << std::endl;
 		std::cout << u8"Projection Type: " << Docstring::GetEnumName(obj->GetProjectionType()) << std::endl;
@@ -287,19 +308,19 @@ namespace Unvirt::StructFmt {
 
 	static void PrintCKTargetCameraDetail(LibCmo::CK2::ObjImpls::CKTargetCamera* obj) {
 		PrintCKCameraDetail(obj);
-		termcolor::cprintln(u8"CKTargetCamera", termcolor::Color::LightYellow);
-		termcolor::cprintln(u8"No Data", termcolor::Color::LightRed);
+		termcolor::cprintln(u8"CKTargetCamera", Color::LightYellow);
+		termcolor::cprintln(u8"No Data", Color::LightRed);
 	}
 
 	static void PrintCK3dObjectDetail(LibCmo::CK2::ObjImpls::CK3dObject* obj) {
 		PrintCK3dEntityDetail(obj);
-		termcolor::cprintln(u8"CK3dObject", termcolor::Color::LightYellow);
-		termcolor::cprintln(u8"No Data", termcolor::Color::LightRed);
+		termcolor::cprintln(u8"CK3dObject", Color::LightYellow);
+		termcolor::cprintln(u8"No Data", Color::LightRed);
 	}
 
 	static void PrintCKTextureDetail(LibCmo::CK2::ObjImpls::CKTexture* obj) {
 		PrintCKBeObjectDetail(obj);
-		termcolor::cprintln(u8"CKTexture", termcolor::Color::LightYellow);
+		termcolor::cprintln(u8"CKTexture", Color::LightYellow);
 
 		// texture
 		std::cout << u8"== Texture ==" << std::endl;
@@ -344,7 +365,7 @@ namespace Unvirt::StructFmt {
 
 	static void PrintCKMaterialDetail(LibCmo::CK2::ObjImpls::CKMaterial* obj) {
 		PrintCKBeObjectDetail(obj);
-		termcolor::cprintln(u8"CKMaterial", termcolor::Color::LightYellow);
+		termcolor::cprintln(u8"CKMaterial", Color::LightYellow);
 
 		// color
 		std::cout << u8"== Color ==" << std::endl;
@@ -407,7 +428,7 @@ namespace Unvirt::StructFmt {
 
 	static void PrintCKMeshDetail(LibCmo::CK2::ObjImpls::CKMesh* obj) {
 		PrintCKBeObjectDetail(obj);
-		termcolor::cprintln(u8"CKMesh", termcolor::Color::LightYellow);
+		termcolor::cprintln(u8"CKMesh", Color::LightYellow);
 
 		std::cout << u8"== Flags ==" << std::endl;
 		std::cout << u8"Mesh Flags:" << std::endl;
@@ -493,185 +514,229 @@ namespace Unvirt::StructFmt {
 
 
 	void PrintCKFileInfo(const LibCmo::CK2::CKFileInfo& fileinfo) {
-
-		console::write_line(YYCC_COLOR_LIGHT_YELLOW(u8"CKFileInfo"));
-		console::format_line(u8"FileVersion: %" PRIuCKDWORD, fileinfo.FileVersion);
+		termcolor::cprint(u8"CKFileInfo", Color::LightYellow);
+		std::cout << strop::printf(u8"FileVersion: %" PRIuCKDWORD, fileinfo.FileVersion) << std::endl;
 		LibCmo::CKDWORD ck_series[3] {
 			(fileinfo.CKVersion >> 24) & 0xFF,
 			(fileinfo.CKVersion >> 16) & 0xFF,
 			(fileinfo.CKVersion >> 0) & 0xFFFF
 		};
-		console::format_line(u8"CKVersion: %02" PRIxCKDWORD "/%02" PRIxCKDWORD "/%04" PRIxCKDWORD,
-			ck_series[0], ck_series[1], ck_series[2]
-		);
+		std::cout << strop::printf(u8"CKVersion: %02" PRIxCKDWORD "/%02" PRIxCKDWORD "/%04" PRIxCKDWORD,
+		                           ck_series[0],
+		                           ck_series[1],
+		                           ck_series[2])
+		          << std::endl;
 		LibCmo::CKDWORD product_series[4] {
 			(fileinfo.ProductBuild >> 24) & 0xFF,
 			(fileinfo.ProductBuild >> 16) & 0xFF,
 			(fileinfo.ProductBuild >> 8) & 0xFF,
 			(fileinfo.ProductBuild >> 0) & 0xFF,
 		};
-		console::format_line(u8"Product (Version / Build): %" PRIuCKDWORD " / %" PRIuCKDWORD ".%" PRIuCKDWORD ".%" PRIuCKDWORD ".%" PRIuCKDWORD,
-			fileinfo.ProductVersion, product_series[0], product_series[1], product_series[2], product_series[3]
-		);
+		std::cout << strop::printf(u8"Product (Version / Build): %" PRIuCKDWORD " / %" PRIuCKDWORD ".%" PRIuCKDWORD ".%" PRIuCKDWORD ".%" PRIuCKDWORD,
+		                           fileinfo.ProductVersion,
+		                           product_series[0],
+		                           product_series[1],
+		                           product_series[2],
+		                           product_series[3])
+		          << std::endl;
 
-		console::format_line(u8"Save Flags: %s",
-			Docstring::GetFlagEnumName(fileinfo.FileWriteMode, u8", ").c_str()
-		);
+		std::cout << u8"Save Flags: " << Docstring::GetFlagEnumName(fileinfo.FileWriteMode, u8", ") << std::endl;
 
-		console::format_line(u8"File Size: %s", Docstring::GetReadableFileSize(fileinfo.FileSize).c_str());
+		std::cout << u8"File Size: " << Docstring::GetReadableFileSize(fileinfo.FileSize) << std::endl;
 
-		console::format_line(u8"Crc: 0x%" PRIxCKDWORD, fileinfo.Crc);
-		console::write_line(u8"");
+		std::cout << strop::printf(u8"Crc: 0x%" PRIxCKDWORD, fileinfo.Crc) << std::endl << std::endl;
 
+		std::cout << strop::printf(u8"Hdr1 (Pack / UnPack): %s / %s",
+		                           Docstring::GetReadableFileSize(fileinfo.Hdr1PackSize).c_str(),
+		                           Docstring::GetReadableFileSize(fileinfo.Hdr1UnPackSize).c_str())
+		          << std::endl;
 
-		console::format_line(u8"Hdr1 (Pack / UnPack): %s / %s",
-			Docstring::GetReadableFileSize(fileinfo.Hdr1PackSize).c_str(),
-			Docstring::GetReadableFileSize(fileinfo.Hdr1UnPackSize).c_str()
-		);
-
-		console::format_line(u8"Data (Pack / UnPack): %s / %s",
-			Docstring::GetReadableFileSize(fileinfo.DataPackSize).c_str(),
-			Docstring::GetReadableFileSize(fileinfo.DataUnPackSize).c_str()
-		);
-		console::write_line(u8"");
+		std::cout << strop::printf(u8"Data (Pack / UnPack): %s / %s",
+		                           Docstring::GetReadableFileSize(fileinfo.DataPackSize).c_str(),
+		                           Docstring::GetReadableFileSize(fileinfo.DataUnPackSize).c_str())
+		          << std::endl
+		          << std::endl;
 
 
-		console::format_line(u8"Manager Count: %" PRIuCKDWORD, fileinfo.ManagerCount);
-		console::format_line(u8"Object Count: %" PRIuCKDWORD, fileinfo.ObjectCount);
-		console::format_line(u8"Max ID Saved: %" PRIuCKID, fileinfo.MaxIDSaved);
+		std::cout << strop::printf(u8"Manager Count: %" PRIuCKDWORD, fileinfo.ManagerCount) << std::endl;
+		std::cout << strop::printf(u8"Object Count: %" PRIuCKDWORD, fileinfo.ObjectCount) << std::endl;
+		std::cout << strop::printf(u8"Max ID Saved: %" PRIuCKID, fileinfo.MaxIDSaved) << std::endl;
 
 	}
 
 #pragma region Object List Printer
 
-	static void PrintObjectListHeader(bool full_detail) {
+	static tabulate::Tabulate CreateObjectListTable(bool full_detail) {
 		if (full_detail) {
-			console::write_line(u8"SaveFlags\tOptions\tCK ID\tFile CK ID\tFile Index\tPack Size\tIndex\tType\tCKObject\tCKStateChunk\tName");
+			return CreateStandardTable({
+			    u8"SaveFlags",
+			    u8"Options",
+			    u8"CK ID",
+			    u8"File CK ID",
+			    u8"File Index",
+			    u8"Pack Size",
+			    u8"Index",
+			    u8"Type",
+			    u8"CKObject",
+			    u8"CKStateChunk",
+			    u8"Name",
+			});
 		} else {
-			console::write_line(u8"Index\tType\tObject\tChunk\tName");
+			return CreateStandardTable({
+			    u8"Index",
+			    u8"Type",
+			    u8"Object",
+			    u8"Chunk",
+			    u8"Name",
+			});
 		}
 	}
-	static void PrintObjectListEntry(const LibCmo::CK2::CKFileObject& obj, const LibCmo::CK2::CKFileInfo& fileinfo, size_t entry_index, bool full_detail) {
-		if (full_detail) {
-			Console::Format(u8"0x%08" PRIxCKDWORD "\t", obj.SaveFlags);
-			Console::Format(u8"%s\t", Docstring::GetEnumName(obj.Options).c_str());
+	static void FillObjectListTable(tabulate::Tabulate& table,
+	                                const LibCmo::CK2::CKFileObject& obj,
+	                                const LibCmo::CK2::CKFileInfo& fileinfo,
+	                                size_t entry_index,
+	                                bool full_detail) {
+		// Prepare simple layout data first
+		auto col_index = strop::printf(u8"#%" PRIuSIZET, entry_index);
+		auto col_type = Docstring::GetClassIdName(obj.ObjectCid);
+		auto col_object = PrintColorfulBool(obj.ObjPtr != nullptr);
+		auto col_chunk = PrintColorfulBool(obj.Data != nullptr);
+		auto col_name = PrintCKSTRING(LibCmo::XContainer::NSXString::ToCKSTRING(obj.Name));
 
-			Console::Format(u8"%" PRIuCKID "\t%" PRIuCKID "\t",
-				obj.CreatedObjectId,
-				obj.ObjectId
-			);
-
-			Console::Format(u8"0x%08" PRIxCKDWORD " (Rel: 0x%08" PRIxCKDWORD ")\t",
-				obj.FileIndex,
-				obj.FileIndex - CKSizeof(LibCmo::CK2::CKRawFileInfo) - fileinfo.Hdr1UnPackSize
-			);
-			Console::Format(u8"0x%08" PRIxCKDWORD "\t", obj.PackSize);
+		// Return first if we are simple layout
+		if (!full_detail) {
+			table.add_row({
+			    col_index,
+			    col_type,
+			    col_object,
+			    col_chunk,
+			    col_name,
+			});
+			return;
 		}
-		// following items are shared by full details and simple layout
-		console::format_line(u8"#%" PRIuSIZET "\t%s\t%s\t%s\t%s",
-			entry_index,
-			Docstring::GetClassIdName(obj.ObjectCid).c_str(),
-			PrintColorfulBool(obj.ObjPtr != nullptr).c_str(),
-			PrintColorfulBool(obj.Data != nullptr).c_str(),
-			PrintCKSTRING(LibCmo::XContainer::NSXString::ToCKSTRING(obj.Name)).c_str()
-		);
+
+		// Prepare full detail data
+		auto col_save_flag = strop::printf(u8"0x%08" PRIxCKDWORD, obj.SaveFlags);
+		auto col_options = Docstring::GetEnumName(obj.Options);
+		auto col_ckid = strop::printf(u8"%" PRIuCKID, obj.CreatedObjectId);
+		auto col_file_ckid = strop::printf(u8"%" PRIuCKID, obj.ObjectId);
+		auto col_file_index = strop::printf(u8"0x%08" PRIxCKDWORD " (RVA: 0x%08" PRIxCKDWORD ")",
+		                                    obj.FileIndex,
+		                                    obj.FileIndex - CKSizeof(LibCmo::CK2::CKRawFileInfo) - fileinfo.Hdr1UnPackSize);
+		auto col_pack_size = strop::printf(u8"0x%08" PRIxCKDWORD, obj.PackSize);
+
+		// Return full info layout
+		table.add_row({
+		    col_save_flag,
+		    col_options,
+		    col_ckid,
+		    col_file_ckid,
+		    col_file_index,
+		    col_pack_size,
+		    col_index,
+		    col_type,
+		    col_object,
+		    col_chunk,
+		    col_name,
+		});
 	}
-	void PrintObjectList(
-		const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileObject>& ls,
-		const LibCmo::CK2::CKFileInfo& fileinfo,
-		size_t page, size_t pageitems,
-		bool full_detail) {
+	void PrintObjectList(const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileObject>& ls,
+	                     const LibCmo::CK2::CKFileInfo& fileinfo,
+	                     size_t page,
+	                     size_t pageitems,
+	                     bool full_detail) {
+		termcolor::cprint(u8"CKFileObject", Color::LightYellow);
 
-		console::write_line(YYCC_COLOR_LIGHT_YELLOW(u8"CKFileObject"));
-		GeneralPrintList<LibCmo::CK2::CKFileObject>(ls, page, pageitems,
-			[full_detail]() -> void {
-				PrintObjectListHeader(full_detail);
-			},
-			[&fileinfo, full_detail](size_t index, const LibCmo::CK2::CKFileObject& obj) -> void {
-				PrintObjectListEntry(obj, fileinfo, index, full_detail);
-			}
-			);
+		PageBreaker pager(ls.size(), pageitems);
+		if (!CheckPageHeader(pager, page)) return;
 
+		auto table = CreateObjectListTable(full_detail);
+		for (size_t i = pager.GetPageBeginIndex(page); i < pager.GetPageEndIndex(page); ++i) {
+			FillObjectListTable(table, ls[i], fileinfo, i, full_detail);
+		}
+		table.print();
+
+		WritePageFooter(pager, page);
 	}
-	void PrintSearchedObjectList(
-		const LibCmo::XContainer::XArray<size_t>& idxls,
-		const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileObject>& ls,
-		const LibCmo::CK2::CKFileInfo& fileinfo,
-		size_t page, size_t pageitems,
-		bool full_detail) {
+	void PrintSearchedObjectList(const LibCmo::XContainer::XArray<size_t>& idxls,
+	                             const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileObject>& ls,
+	                             const LibCmo::CK2::CKFileInfo& fileinfo,
+	                             size_t page,
+	                             size_t pageitems,
+	                             bool full_detail) {
+		termcolor::cprint(u8"CKFileObject Searching Result", Color::LightYellow);
 
-		console::write_line(YYCC_COLOR_LIGHT_YELLOW(u8"CKFileObject Searching Result"));
-		GeneralPrintList<size_t>(idxls, page, pageitems,
-			[full_detail]() -> void {
-				PrintObjectListHeader(full_detail);
-			},
-			[&ls, &fileinfo, full_detail](size_t, const size_t& index_to_obj) -> void {
-				// resolve index to real item.
-				// and pass the entry index, not the page index.
-				PrintObjectListEntry(ls[index_to_obj], fileinfo, index_to_obj, full_detail);
-			}
-			);
+		PageBreaker pager(idxls.size(), pageitems);
+		if (!pager.IsValidPage(page)) return;
 
+		auto table = CreateObjectListTable(full_detail);
+		for (size_t i = pager.GetPageBeginIndex(page); i < pager.GetPageEndIndex(page); ++i) {
+			FillObjectListTable(table, ls[idxls[i]], fileinfo, i, full_detail);
+		}
+		table.print();
+
+		WritePageFooter(pager, page);
 	}
 
 #pragma endregion
 
 #pragma region Manager List Printer
 
-	static void PrintManagerListHeader(bool full_detail) {
+	static tabulate::Tabulate CreateManagerListTable(bool full_detail) {
 		// manager list now do not affected by list style because it is enough short
-		console::write_line(u8"Index\tCKGUID\tCKStateChunk");
+		return CreateStandardTable({
+		    u8"Index",
+		    u8"CKGUID",
+		    u8"CKStateChunk",
+		});
 	}
-	static void PrintManagerListEntry(const LibCmo::CK2::CKFileManagerData& mgr, size_t entry_index, bool full_detail) {
+	static void FillManagerListTable(tabulate::Tabulate& table, const LibCmo::CK2::CKFileManagerData& mgr, size_t entry_index, bool full_detail) {
 		// not affected by list style.
-		console::format_line(u8"#%" PRIuSIZET "\t%s\t%s",
-			entry_index,
-			PrintCKGUID(mgr.Manager).c_str(),
-			PrintPointer(mgr.Data).c_str()
-		);
+		auto col_index = strop::printf(u8"#%" PRIuSIZET, entry_index);
+		auto col_ckguid = PrintCKGUID(mgr.Manager);
+		auto col_ckstatechunk = PrintPointer(mgr.Data);
 	}
-	void PrintManagerList(
-		const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileManagerData>& ls,
-		size_t page, size_t pageitems,
-		bool full_detail) {
+	void PrintManagerList(const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileManagerData>& ls,
+	                      size_t page,
+	                      size_t pageitems,
+	                      bool full_detail) {
+		termcolor::cprint(u8"CKFileManager", Color::LightYellow);
 
-		console::write_line(YYCC_COLOR_LIGHT_YELLOW(u8"CKFileManager"));
-		GeneralPrintList<LibCmo::CK2::CKFileManagerData>(ls, page, pageitems,
-			[full_detail]() -> void {
-				// print header
-				PrintManagerListHeader(full_detail);
-			},
-			[full_detail](size_t index, const LibCmo::CK2::CKFileManagerData& mgr) -> void {
-				// print body
-				PrintManagerListEntry(mgr, index, full_detail);
-			}
-			);
+		PageBreaker pager(ls.size(), pageitems);
+		if (!pager.IsValidPage(page)) return;
 
+		auto table = CreateObjectListTable(full_detail);
+		for (size_t i = pager.GetPageBeginIndex(page); i < pager.GetPageEndIndex(page); ++i) {
+			FillManagerListTable(table, ls[i], i, full_detail);
+		}
+		table.print();
+
+		WritePageFooter(pager, page);
 	}
-	void PrintSearchedManagerList(
-		const LibCmo::XContainer::XArray<size_t>& idxls,
-		const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileManagerData>& ls,
-		size_t page, size_t pageitems,
-		bool full_detail) {
+	void PrintSearchedManagerList(const LibCmo::XContainer::XArray<size_t>& idxls,
+	                              const LibCmo::XContainer::XArray<LibCmo::CK2::CKFileManagerData>& ls,
+	                              size_t page,
+	                              size_t pageitems,
+	                              bool full_detail) {
+		termcolor::cprint(u8"CKFileManager Searching Result", Color::LightYellow);
 
-		console::write_line(YYCC_COLOR_LIGHT_YELLOW(u8"CKFileManager Searching Result"));
-		GeneralPrintList<size_t>(idxls, page, pageitems,
-			[full_detail]() -> void {
-				PrintManagerListHeader(full_detail);
-			},
-			[&ls, full_detail](size_t, const size_t& index_to_mgr) -> void {
-				// resolve index to real one
-				PrintManagerListEntry(ls[index_to_mgr], index_to_mgr, full_detail);
-			}
-			);
+		PageBreaker pager(ls.size(), pageitems);
+		if (!pager.IsValidPage(page)) return;
 
+		auto table = CreateObjectListTable(full_detail);
+		for (size_t i = pager.GetPageBeginIndex(page); i < pager.GetPageEndIndex(page); ++i) {
+			FillManagerListTable(table, ls[idxls[i]], i, full_detail);
+		}
+		table.print();
+
+		WritePageFooter(pager, page);
 	}
 
 #pragma endregion
 
 	void PrintCKObject(const LibCmo::CK2::ObjImpls::CKObject* obj) {
 		if (obj == nullptr) {
-			console::write_line(YYCC_COLOR_LIGHT_RED(u8"Null Object"));
+			termcolor::cprint(u8"Null Object", Color::LightRed);
 			return;
 		}
 
@@ -720,26 +785,26 @@ namespace Unvirt::StructFmt {
 				PrintCKMeshDetail(static_cast<LibCmo::CK2::ObjImpls::CKMesh*>(mobj));
 				break;
 			default:
-				console::write_line(YYCC_COLOR_LIGHT_RED(u8"Not Implemented."));
+				termcolor::cprint(u8"Not Implemented.", Color::LightRed);
 				break;
 		}
 
 	}
 
 	void PrintCKBaseManager(const LibCmo::CK2::MgrImpls::CKBaseManager* mgr) {
-		console::write_line(YYCC_COLOR_LIGHT_YELLOW(u8"CKBaseManager"));
+		termcolor::cprint(u8"CKBaseManager", Color::LightYellow);
 		if (mgr == nullptr) {
-			console::write_line(YYCC_COLOR_LIGHT_RED(u8"Null Manager"));
+			termcolor::cprint(u8"Null Manager", Color::LightRed);
 			return;
 		}
 
-		console::write_line(YYCC_COLOR_LIGHT_RED(u8"Not Implemented."));
+		termcolor::cprint(u8"Not Implemented.", Color::LightRed);
 	}
 
 	void PrintCKStateChunk(const LibCmo::CK2::CKStateChunk* chunk) {
-		console::write_line(YYCC_COLOR_LIGHT_YELLOW(u8"CKStateChunk"));
+		termcolor::cprint(u8"CKStateChunk", Color::LightYellow);
 		if (chunk == nullptr) {
-			console::write_line(YYCC_COLOR_LIGHT_RED(u8"Null Chunk"));
+			termcolor::cprint(u8"Null Chunk", Color::LightRed);
 			return;
 		}
 
@@ -749,41 +814,47 @@ namespace Unvirt::StructFmt {
 		// write profile
 		const auto profile = operchunk->GetStateChunkProfile();
 
-		console::format_line(u8"Type: %s", Docstring::GetClassIdName(profile.m_ClassId).c_str());
+		std::cout << u8"Type: " << Docstring::GetClassIdName(profile.m_ClassId) << std::endl;
 
-		console::format_line(u8"Version (Data / Chunk): %" PRIuCKDWORD " (%s) / %" PRIuCKDWORD " (%s)",
-			static_cast<LibCmo::CKDWORD>(profile.m_DataVersion), Docstring::GetEnumName(profile.m_DataVersion).c_str(),
-			static_cast<LibCmo::CKDWORD>(profile.m_ChunkVersion), Docstring::GetEnumName(profile.m_ChunkVersion).c_str()
-		);
-		console::format_line(u8"List (Object / Chunk / Manager): %" PRIuCKDWORD " / %" PRIuCKDWORD " / %" PRIuCKDWORD,
-			static_cast<LibCmo::CKDWORD>(profile.m_ObjectListSize),
-			static_cast<LibCmo::CKDWORD>(profile.m_ChunkListSize),
-			static_cast<LibCmo::CKDWORD>(profile.m_ManagerListSize)
-		);
+		std::cout << strop::printf(u8"Version (Data / Chunk): %" PRIuCKDWORD " (%s) / %" PRIuCKDWORD " (%s)",
+		                           static_cast<LibCmo::CKDWORD>(profile.m_DataVersion),
+		                           Docstring::GetEnumName(profile.m_DataVersion).c_str(),
+		                           static_cast<LibCmo::CKDWORD>(profile.m_ChunkVersion),
+		                           Docstring::GetEnumName(profile.m_ChunkVersion).c_str())
+		          << std::endl;
+		std::cout << strop::printf(u8"List (Object / Chunk / Manager): %" PRIuCKDWORD " / %" PRIuCKDWORD " / %" PRIuCKDWORD,
+		                           static_cast<LibCmo::CKDWORD>(profile.m_ObjectListSize),
+		                           static_cast<LibCmo::CKDWORD>(profile.m_ChunkListSize),
+		                           static_cast<LibCmo::CKDWORD>(profile.m_ManagerListSize))
+		          << std::endl;
 
-		console::format_line(u8"Data: %s (0x%" PRIxCKDWORD " DWORD)",
-			PrintPointer(profile.m_pData).c_str(),
-			profile.m_DataDwSize
-		);
+		std::cout << strop::printf(u8"Data: %s (0x%" PRIxCKDWORD " DWORD)", PrintPointer(profile.m_pData).c_str(), profile.m_DataDwSize)
+		          << std::endl;
 
-		console::format_line(u8"Bind CKFile: %s", PrintPointer(profile.m_BindFile).c_str());
-		console::format_line(u8"Bind CKContext: %s", PrintPointer(profile.m_BindContext).c_str());
+		std::cout << u8"Bind CKFile: " << PrintPointer(profile.m_BindFile) << std::endl;
+		std::cout << u8"Bind CKContext: " << PrintPointer(profile.m_BindContext) << std::endl;
 
 		// write identifiers
 		operchunk->StartRead();
 		const auto collection = operchunk->GetIdentifiersProfile();
 		operchunk->StopRead();
-		console::write_line(YYCC_COLOR_LIGHT_YELLOW(u8"Identifiers"));
-		console::write_line(u8"Identifier\tData Pointer\tData Size");
+		termcolor::cprint(u8"Identifiers", Color::LightYellow);
+		auto ident_table = CreateStandardTable({
+		    u8"Identifier",
+		    u8"Data Address",
+		    u8"Data Size",
+		});
 		for (const auto& ident : collection) {
-			console::format_line(u8"0x%08" PRIxCKDWORD "\t%s\t%" PRIuCKDWORD " (%" PRIuCKDWORD " DWORD + %" PRIuCKDWORD ")",
-				ident.m_Identifier,
-				PrintPointer(ident.m_DataPtr).c_str(),
-				ident.m_AreaSize,
-				ident.m_AreaSize / CKSizeof(LibCmo::CKDWORD),
-				ident.m_AreaSize % CKSizeof(LibCmo::CKDWORD)
-			);
+			ident_table.add_row({
+			    strop::printf(u8"0x%08" PRIxCKDWORD, ident.m_Identifier),
+			    PrintPointer(ident.m_DataPtr),
+			    strop::printf(u8"%" PRIuCKDWORD " (%" PRIuCKDWORD " DWORD + %" PRIuCKDWORD ")",
+			                  ident.m_AreaSize,
+			                  ident.m_AreaSize / CKSizeof(LibCmo::CKDWORD),
+			                  ident.m_AreaSize % CKSizeof(LibCmo::CKDWORD)),
+			});
 		}
+		ident_table.print();
 	}
 
 }
