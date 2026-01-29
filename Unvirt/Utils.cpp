@@ -12,7 +12,7 @@ namespace Unvirt::Utils {
 
 	bool PageBreaker::IsValidPage(size_t page) const {
 		if (page == 0) return true;
-		else return page < this->GetMaxPage();
+		else return page <= this->GetMaxPage();
 	}
 
 	size_t PageBreaker::GetMaxPage() const {

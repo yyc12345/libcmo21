@@ -28,24 +28,24 @@ namespace Unvirt::Context {
 	    m_Ctx(nullptr), m_FileReader(nullptr), m_IsShallowRead(true) {
 
 		// Set up commander with our callback.
-		m_Commander.SetLoadDelegate(std::bind(UnvirtContext::HandleLoad, this, ph::_1));
-		m_Commander.SetUnloadDelegate(std::bind(UnvirtContext::HandleUnLoad, this, ph::_1));
-		m_Commander.SetSaveDelegate(std::bind(UnvirtContext::HandleSave, this, ph::_1));
-		m_Commander.SetInfoDelegate(std::bind(UnvirtContext::HandleInfo, this, ph::_1));
-		m_Commander.SetLsDelegate(std::bind(UnvirtContext::HandleLs, this, ph::_1));
-		m_Commander.SetDataDelegate(std::bind(UnvirtContext::HandleData, this, ph::_1));
-		m_Commander.SetChunkDelegate(std::bind(UnvirtContext::HandleChunk, this, ph::_1));
-		m_Commander.SetSearchDelegate(std::bind(UnvirtContext::HandleSearch, this, ph::_1));
-		m_Commander.SetItemsDelegate(std::bind(UnvirtContext::HandleItems, this, ph::_1));
-		m_Commander.SetStyleDelegate(std::bind(UnvirtContext::HandleStyle, this, ph::_1));
-		m_Commander.SetEncodingDelegate(std::bind(UnvirtContext::HandleEncoding, this, ph::_1));
-		m_Commander.SetTempDelegate(std::bind(UnvirtContext::HandleTemp, this, ph::_1));
-		m_Commander.SetRscClearDelegate(std::bind(UnvirtContext::HandleRscClear, this, ph::_1));
-		m_Commander.SetRscAddDelegate(std::bind(UnvirtContext::HandleRscAdd, this, ph::_1));
-		m_Commander.SetTestDelegate(std::bind(UnvirtContext::HandleTest, this, ph::_1));
-		m_Commander.SetVersionDelegate(std::bind(UnvirtContext::HandleVersion, this, ph::_1));
-		m_Commander.SetHelpDelegate(std::bind(UnvirtContext::HandleHelp, this, ph::_1));
-		m_Commander.SetExitDelegate(std::bind(UnvirtContext::HandleExit, this, ph::_1));
+		m_Commander.SetLoadDelegate(std::bind(&UnvirtContext::HandleLoad, this, ph::_1));
+		m_Commander.SetUnloadDelegate(std::bind(&UnvirtContext::HandleUnLoad, this, ph::_1));
+		m_Commander.SetSaveDelegate(std::bind(&UnvirtContext::HandleSave, this, ph::_1));
+		m_Commander.SetInfoDelegate(std::bind(&UnvirtContext::HandleInfo, this, ph::_1));
+		m_Commander.SetLsDelegate(std::bind(&UnvirtContext::HandleLs, this, ph::_1));
+		m_Commander.SetDataDelegate(std::bind(&UnvirtContext::HandleData, this, ph::_1));
+		m_Commander.SetChunkDelegate(std::bind(&UnvirtContext::HandleChunk, this, ph::_1));
+		m_Commander.SetSearchDelegate(std::bind(&UnvirtContext::HandleSearch, this, ph::_1));
+		m_Commander.SetItemsDelegate(std::bind(&UnvirtContext::HandleItems, this, ph::_1));
+		m_Commander.SetStyleDelegate(std::bind(&UnvirtContext::HandleStyle, this, ph::_1));
+		m_Commander.SetEncodingDelegate(std::bind(&UnvirtContext::HandleEncoding, this, ph::_1));
+		m_Commander.SetTempDelegate(std::bind(&UnvirtContext::HandleTemp, this, ph::_1));
+		m_Commander.SetRscClearDelegate(std::bind(&UnvirtContext::HandleRscClear, this, ph::_1));
+		m_Commander.SetRscAddDelegate(std::bind(&UnvirtContext::HandleRscAdd, this, ph::_1));
+		m_Commander.SetTestDelegate(std::bind(&UnvirtContext::HandleTest, this, ph::_1));
+		m_Commander.SetVersionDelegate(std::bind(&UnvirtContext::HandleVersion, this, ph::_1));
+		m_Commander.SetHelpDelegate(std::bind(&UnvirtContext::HandleHelp, this, ph::_1));
+		m_Commander.SetExitDelegate(std::bind(&UnvirtContext::HandleExit, this, ph::_1));
 
 		// initialize CK engine and create context
 		LibCmo::CK2::CKERROR err = LibCmo::CK2::CKStartUp();
@@ -116,7 +116,7 @@ namespace Unvirt::Context {
 	void UnvirtContext::Run() {
 		// Enable terminal color feature
 #if defined(YYCC_OS_WINDOWS)
-		yycc::windows::console::colorful_console();
+		auto suc = yycc::windows::console::colorful_console();
 #endif
 
 		// Show banner

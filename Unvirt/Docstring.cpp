@@ -220,7 +220,7 @@ namespace Unvirt::Docstring {
 
 #pragma region Other Enums
 
-	namespace EnumDesc {
+	namespace Arrays {
 		// clang-format off
 		const GenericReflectionArray<LibCmo::CK2::CK_FILE_WRITEMODE> CK_FILE_WRITEMODE {
 			{ LibCmo::CK2::CK_FILE_WRITEMODE::CKFILE_UNCOMPRESSED, { u8"CKFILE_UNCOMPRESSED" } },

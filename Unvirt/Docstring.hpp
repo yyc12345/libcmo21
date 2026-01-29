@@ -134,7 +134,7 @@ namespace Unvirt::Docstring {
 				return strl;
 			}
 		}
-		yycc::string::op::printf(strl, u8"%s (0x%08" PRIXCKDWORD ")", INVALID_ENUM_NAME, static_cast<LibCmo::CKDWORD>(val));
+		strl = yycc::string::op::printf(u8"%s (0x%08" PRIXCKDWORD ")", INVALID_ENUM_NAME, static_cast<LibCmo::CKDWORD>(val));
 		return strl;
 	}
 
@@ -145,7 +145,7 @@ namespace Unvirt::Docstring {
 		for (auto& item : GetEnumReflectionArray<T>()) {
 			// if it have exacelt same entry, return directly
 			if (item.first == val) {
-				yycc::string::op::printf(strl, u8"%s (0x%08" PRIXCKDWORD ")", item.second.mName, static_cast<LibCmo::CKDWORD>(item.first));
+				strl = yycc::string::op::printf(u8"%s (0x%08" PRIXCKDWORD ")", item.second.mName, static_cast<LibCmo::CKDWORD>(item.first));
 				return strl;
 			}
 
@@ -162,14 +162,14 @@ namespace Unvirt::Docstring {
 				}
 
 				// add value self.
-				yycc::string::op::printf(cache, u8"%s (0x%08" PRIXCKDWORD ")", item.second.mName, static_cast<LibCmo::CKDWORD>(item.first));
+				cache = yycc::string::op::printf(u8"%s (0x%08" PRIXCKDWORD ")", item.second.mName, static_cast<LibCmo::CKDWORD>(item.first));
 				strl += cache;
 			}
 		}
 
 		// if nothing was gotten. set to undefined
 		if (strl.size() == 0u) {
-			yycc::string::op::printf(strl, u8"%s (0x%08" PRIXCKDWORD ")", INVALID_ENUM_NAME, static_cast<LibCmo::CKDWORD>(val));
+			strl = yycc::string::op::printf(u8"%s (0x%08" PRIXCKDWORD ")", INVALID_ENUM_NAME, static_cast<LibCmo::CKDWORD>(val));
 		}
 
 		return strl;

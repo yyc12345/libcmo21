@@ -8,7 +8,7 @@ namespace Unvirt::CmdHelper {
 
 	static std::optional<LoadStage> ParseLoadStage(const std::u8string_view &sv) {
 		if (sv == u8"shallow") return LoadStage::Shallow;
-		else if (sv == u8"deel") return LoadStage::Deep;
+		else if (sv == u8"deep") return LoadStage::Deep;
 		else return std::nullopt;
 	}
 
