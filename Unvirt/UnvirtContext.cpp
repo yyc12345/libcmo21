@@ -1,226 +1,58 @@
 #include "UnvirtContext.hpp"
-
-#include <YYCCommonplace.hpp>
-#include <CK2/MgrImpls/CKPathManager.hpp>
+#include "Docstring.hpp"
+#include "StructFmt.hpp"
+#include <LibCmo/CK2/MgrImpls/CKPathManager.hpp>
+#include <yycc/string/op.hpp>
+#include <yycc/string/reinterpret.hpp>
+#include <yycc/carton/termcolor.hpp>
+#include <yycc/patch/stream.hpp>
+#include <yycc/windows/console.hpp>
+#include <iostream>
 #include <cstdarg>
 #include <regex>
 
+using namespace yycc::patch::stream;
+namespace strop = yycc::string::op;
+namespace termcolor = yycc::carton::termcolor;
+namespace ph = std::placeholders;
+
 namespace Unvirt::Context {
-
-#pragma region Specialized for CmdHelper
-
-	class EncodingListArgument : public CmdHelper::Nodes::AbstractArgument {
-	public:
-		using ArgValue_t = CmdHelper::AMItems::StringArrayItem;
-	public:
-		EncodingListArgument(const std::u8string_view& argname) :
-			AbstractArgument(argname) {}
-		virtual ~EncodingListArgument() {}
-		YYCC_DEF_CLS_COPY_MOVE(EncodingListArgument);
-
-	protected:
-		virtual bool BeginConsume(const std::u8string& cur_cmd, CmdHelper::ArgumentsMap& am) override {
-			// split given argument
-			std::vector<std::u8string> encs = YYCC::StringHelper::Split(cur_cmd, u8",");
-			// check each parts is a valid encoding name
-			for (const auto& item : encs) {
-				if (!LibCmo::EncodingHelper::IsValidEncodingName(item))
-					return false;
-			}
-			// okey, add into map
-			am.Add<ArgValue_t>(m_ArgumentName, encs);
-			return true;
-		}
-	};
-
-	static YYCC::Constraints::Constraint<size_t> GetOneBasedIndexConstraint() {
-		return YYCC::Constraints::Constraint<size_t> {
-			[](const size_t& val) -> bool {
-				return val > 0u;
-			}
-		};
-	}
-
-#pragma endregion
 
 #pragma region UnvirtContext Misc
 
 	UnvirtContext::UnvirtContext() :
-		m_Splitter(), m_Parser(), m_Help(),
-		m_PageLen(10u), m_ListStyleIsFull(true), m_OrderExit(false),
-		m_SearchPart(SearchPart::None), m_SearchIdxResult(),
-		m_Ctx(nullptr), m_FileReader(nullptr), m_IsShallowRead(true) {
+	    // Initialize command processor
+	    m_Commander(), m_OrderExit(false), m_ItemPerPage(10u), m_ListStyle(CmdHelper::StyleLevel::Full), m_IsSearching(false),
+	    m_SearchPart(CmdHelper::SearchPart::Object), m_SearchIdxResult(),
+	    // Initialize Virtools
+	    m_Ctx(nullptr), m_FileReader(nullptr), m_IsShallowRead(true) {
 
-		// Setup command parser
-		// get root node first
-		CmdHelper::Nodes::RootNode& root = m_Parser.GetRoot();
-		// setup tree
-		root
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"load")
-			.Then<CmdHelper::Nodes::Choice>(CmdHelper::Nodes::Choice(u8"stage", { u8"deep", u8"shallow"})
-				.Comment(u8"The stage of loading. 'deep' will load to CKObject stage. 'shallow' will load to CKStateChunk stage.")
-				.Then<CmdHelper::Nodes::StringArgument>(CmdHelper::Nodes::StringArgument(u8"filepath")
-					.Comment(u8"The path to loading file.")
-					.Executes(
-						std::bind(&UnvirtContext::ProcLoad, this, std::placeholders::_1),
-						u8"Load a Virtools composition."
-					)
-				)
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"unload")
-			.Executes(
-				std::bind(&UnvirtContext::ProcUnLoad, this, std::placeholders::_1),
-				u8"Release loaded Virtools composition."
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"save")
-			.Then<CmdHelper::Nodes::StringArgument>(CmdHelper::Nodes::StringArgument(u8"filepath")
-				.Comment(u8"The path to save file.")
-				.Executes(
-					std::bind(&UnvirtContext::ProcSave, this, std::placeholders::_1),
-					u8"Save the loaded file into a new file."
-				)
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"info")
-			.Executes(
-				std::bind(&UnvirtContext::ProcInfo, this, std::placeholders::_1),
-				u8"Show the header info of loaded Virtools composition."
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"ls")
-			.Then<CmdHelper::Nodes::Choice>(CmdHelper::Nodes::Choice(u8"part", { u8"obj", u8"mgr", u8"search"})
-				.Comment(u8"Which list you want to list.")
-				.Then<CmdHelper::Nodes::ArithmeticArgument<size_t>>(CmdHelper::Nodes::ArithmeticArgument<size_t>(u8"page", GetOneBasedIndexConstraint())
-					.Comment(u8"The page index. Start with 1.")
-					.Executes(
-						std::bind(&UnvirtContext::ProcLs, this, std::placeholders::_1),
-						u8"List something about loaded Virtools composition."
-					)
-				)
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"data")
-			.Then<CmdHelper::Nodes::Choice>(CmdHelper::Nodes::Choice(u8"part", { u8"obj", u8"mgr"})
-				.Comment(u8"Which list you want to show data.")
-				.Then<CmdHelper::Nodes::ArithmeticArgument<size_t>>(CmdHelper::Nodes::ArithmeticArgument<size_t>(u8"index")
-					.Comment(u8"The index. Start with 0.")
-					.Executes(
-						std::bind(&UnvirtContext::ProcData, this, std::placeholders::_1),
-						u8"Show the specific CKObject / CKBaseManager data."
-					)
-				)
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"chunk")
-			.Then<CmdHelper::Nodes::Choice>(CmdHelper::Nodes::Choice(u8"part", { u8"obj", u8"mgr"})
-				.Comment(u8"Which list you want to show chunk.")
-				.Then<CmdHelper::Nodes::ArithmeticArgument<size_t>>(CmdHelper::Nodes::ArithmeticArgument<size_t>(u8"index")
-					.Comment(u8"The index. Start with 0.")
-					.Executes(
-						std::bind(&UnvirtContext::ProcChunk, this, std::placeholders::_1),
-						u8"Show the specific CKStateChunk data."
-					)
-				)
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"search")
-			.Then<CmdHelper::Nodes::Choice>(CmdHelper::Nodes::Choice(u8"part", { u8"obj", u8"mgr"})
-				.Comment(u8"Which list you want to search.")
-				.Then<CmdHelper::Nodes::Choice>(CmdHelper::Nodes::Choice(u8"mode", { u8"plain", u8"re"})
-					.Comment(u8"The search mode. `plain` will search by substring and `re` will do regex search.")
-					.Then<CmdHelper::Nodes::StringArgument>(CmdHelper::Nodes::StringArgument(u8"text")
-						.Comment(u8"The text or regex to search.")
-						.Executes(
-							std::bind(&UnvirtContext::ProcSearch, this, std::placeholders::_1),
-							u8"Search object or manager by text or regex. Please note that the regex have limited UTF8 support and may cause undefined behavior."
-						)
-					)
-				)
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"items")
-			.Then<CmdHelper::Nodes::ArithmeticArgument<size_t>>(CmdHelper::Nodes::ArithmeticArgument<size_t>(u8"count", GetOneBasedIndexConstraint())
-				.Comment(u8"The count of items you want to show in one page.")
-				.Executes(
-					std::bind(&UnvirtContext::ProcItems, this, std::placeholders::_1),
-					u8"Set up how many items should be listed in one page when using 'ls' command."
-				)
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"style")
-			.Then<CmdHelper::Nodes::Choice>(CmdHelper::Nodes::Choice(u8"level", { u8"full", u8"simple"})
-				.Comment(u8"The amount of showen content.")
-				.Executes(
-					std::bind(&UnvirtContext::ProcStyle, this, std::placeholders::_1),
-					u8"Change the detail level of showen data in `ls` command."
-				)
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"encoding")
-			.Then<EncodingListArgument>(EncodingListArgument(u8"enc")
-				.Comment(u8"CKContext used encoding splitted by ','. Support mutiple encoding.")
-				.Executes(
-					std::bind(&UnvirtContext::ProcEncoding, this, std::placeholders::_1),
-					u8"Set the encoding series for CKContext."
-				)
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"temp")
-			.Then<CmdHelper::Nodes::StringArgument>(CmdHelper::Nodes::StringArgument(u8"temppath")
-				.Comment(u8"The path to Temp folder.")
-				.Executes(
-					std::bind(&UnvirtContext::ProcTemp, this, std::placeholders::_1),
-					u8"Set the Temp path for CKContext."
-				)
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"rsc")
-			.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"clear")
-				.Executes(
-					std::bind(&UnvirtContext::ProcRsc, this, std::placeholders::_1, true),
-					u8"Clear all data resources paths."
-				)
-			)
-			.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"add")
-				.Then<CmdHelper::Nodes::StringArgument>(CmdHelper::Nodes::StringArgument(u8"datares")
-					.Comment(u8"The data resources path .")
-					.Executes(
-						std::bind(&UnvirtContext::ProcRsc, this, std::placeholders::_1, false),
-						u8"Add a path to let Virtools find resources."
-					)
-				)
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"test")
-			.Executes(
-				std::bind(&UnvirtContext::ProcTest, this, std::placeholders::_1),
-				u8"Call custom debugging function (only available in Debug mode)."
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"help")
-			.Executes(
-				std::bind(&UnvirtContext::ProcHelp, this, std::placeholders::_1),
-				u8"Output this help page."
-			)
-		)
-		.Then<CmdHelper::Nodes::Literal>(CmdHelper::Nodes::Literal(u8"exit")
-			.Executes(
-				std::bind(&UnvirtContext::ProcExit, this, std::placeholders::_1),
-				u8"Exit program."
-			)
-		);
-
-		// create help document
-		m_Help = m_Parser.Help();
+		// Set up commander with our callback.
+		m_Commander.SetLoadDelegate(std::bind(UnvirtContext::HandleLoad, this, ph::_1));
+		m_Commander.SetUnloadDelegate(std::bind(UnvirtContext::HandleUnLoad, this, ph::_1));
+		m_Commander.SetSaveDelegate(std::bind(UnvirtContext::HandleSave, this, ph::_1));
+		m_Commander.SetInfoDelegate(std::bind(UnvirtContext::HandleInfo, this, ph::_1));
+		m_Commander.SetLsDelegate(std::bind(UnvirtContext::HandleLs, this, ph::_1));
+		m_Commander.SetDataDelegate(std::bind(UnvirtContext::HandleData, this, ph::_1));
+		m_Commander.SetChunkDelegate(std::bind(UnvirtContext::HandleChunk, this, ph::_1));
+		m_Commander.SetSearchDelegate(std::bind(UnvirtContext::HandleSearch, this, ph::_1));
+		m_Commander.SetItemsDelegate(std::bind(UnvirtContext::HandleItems, this, ph::_1));
+		m_Commander.SetStyleDelegate(std::bind(UnvirtContext::HandleStyle, this, ph::_1));
+		m_Commander.SetEncodingDelegate(std::bind(UnvirtContext::HandleEncoding, this, ph::_1));
+		m_Commander.SetTempDelegate(std::bind(UnvirtContext::HandleTemp, this, ph::_1));
+		m_Commander.SetRscClearDelegate(std::bind(UnvirtContext::HandleRscClear, this, ph::_1));
+		m_Commander.SetRscAddDelegate(std::bind(UnvirtContext::HandleRscAdd, this, ph::_1));
+		m_Commander.SetTestDelegate(std::bind(UnvirtContext::HandleTest, this, ph::_1));
+		m_Commander.SetVersionDelegate(std::bind(UnvirtContext::HandleVersion, this, ph::_1));
+		m_Commander.SetHelpDelegate(std::bind(UnvirtContext::HandleHelp, this, ph::_1));
+		m_Commander.SetExitDelegate(std::bind(UnvirtContext::HandleExit, this, ph::_1));
 
 		// initialize CK engine and create context
 		LibCmo::CK2::CKERROR err = LibCmo::CK2::CKStartUp();
 		if (err != LibCmo::CK2::CKERROR::CKERR_OK)
 			throw std::runtime_error("fail to initialize CK2 engine.");
 		m_Ctx = new LibCmo::CK2::CKContext();
-		m_Ctx->SetOutputCallback(std::bind(&UnvirtContext::PrintContextMsg, this, std::placeholders::_1));
+		m_Ctx->SetOutputCallback(std::bind(&UnvirtContext::PrintContextMsg, this, ph::_1));
 		m_Ctx->SetGlobalImagesSaveOptions(LibCmo::CK2::CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_EXTERNAL);
 	}
 
@@ -231,6 +63,10 @@ namespace Unvirt::Context {
 		LibCmo::CK2::CKShutdown();
 	}
 
+#pragma endregion
+
+#pragma region Virtools Controller
+
 	bool UnvirtContext::HasOpenedFile() {
 		return m_FileReader != nullptr;
 	}
@@ -238,7 +74,8 @@ namespace Unvirt::Context {
 	void UnvirtContext::ClearDocument() {
 		if (m_FileReader == nullptr) return;
 		// clear search result
-		m_SearchPart = SearchPart::None;
+		m_IsSearching = false;
+		m_SearchPart = CmdHelper::SearchPart::Object;
 		m_SearchIdxResult.clear();
 		// delete reader
 		delete m_FileReader;
@@ -250,58 +87,72 @@ namespace Unvirt::Context {
 
 	void UnvirtContext::PrintContextMsg(LibCmo::CKSTRING msg) {
 		if (msg != nullptr) {
-			YYCC::ConsoleHelper::FormatLine(YYCC_COLOR_LIGHT_YELLOW(u8"[CKContext] ") "%s", msg);
+			termcolor::cprintln(msg, termcolor::Color::LightYellow);
 		}
 	}
 
-	void UnvirtContext::PrintCommonInfo(const char8_t* u8_fmt, ...) {
+#pragma endregion
+
+#pragma region Message Printer
+
+	void UnvirtContext::PrintInfo(const char8_t* u8_fmt, ...) {
 		va_list argptr;
 		va_start(argptr, u8_fmt);
-		YYCC::ConsoleHelper::WriteLine(
-			YYCC::StringHelper::VPrintf(u8_fmt, argptr).c_str()
-		);
+		std::cout << strop::vprintf(u8_fmt, argptr) << std::endl;
 		va_end(argptr);
 	}
 
-	void UnvirtContext::PrintCommonError(const char8_t* u8_fmt, ...) {
+	void UnvirtContext::PrintError(const char8_t* u8_fmt, ...) {
 		va_list argptr;
 		va_start(argptr, u8_fmt);
-		YYCC::ConsoleHelper::FormatLine(YYCC_COLOR_LIGHT_RED(u8"%s"),
-			YYCC::StringHelper::VPrintf(u8_fmt, argptr).c_str()
-		);
+		termcolor::cprintln(strop::vprintf(u8_fmt, argptr), termcolor::Color::LightRed);
 		va_end(argptr);
 	}
 
 #pragma endregion
 
-#pragma region Main Run
+#pragma region Main Runner
 
 	void UnvirtContext::Run() {
 		// Enable terminal color feature
-		YYCC::ConsoleHelper::EnableColorfulConsole();
+#if defined(YYCC_OS_WINDOWS)
+		yycc::windows::console::colorful_console();
+#endif
 
 		// Show banner
-		YYCC::ConsoleHelper::WriteLine(YYCC_COLOR_LIGHT_YELLOW(u8"Unvirt") " (based on LibCmo " LIBCMO_VER_STR ") built at " __DATE__ " " __TIME__);
-		YYCC::ConsoleHelper::WriteLine(u8"Type 'help' for more infomation. Type 'exit' to quit.");
+		std::cout << termcolor::colored(u8"Unvirt", termcolor::Color::LightYellow)
+		          << " (based on LibCmo " LIBCMO_VER_STR ") built at " __DATE__ " " __TIME__ << std::endl
+		          << u8"Type 'help' for more infomation. Type 'exit' to quit." << std::endl;
 
 		// start process loop
 		while (true) {
 			// get command
-			YYCC::ConsoleHelper::Write(YYCC_COLOR_GREEN(u8"> "));
-			std::u8string u8cmd = YYCC::ConsoleHelper::ReadLine();
+			termcolor::cprint(u8"> ", termcolor::Color::Green);
+			std::string cmd;
+			if (std::getline(std::cin, cmd).fail()) continue;
+			auto u8cmd = yycc::string::reinterpret::as_utf8_view(cmd);
 
-			// lex command line first
-			if (!m_Splitter.Lex(u8cmd)) {
-				this->PrintCommonError(u8"Lexer error \"%s\".\nType 'help' for usage.", u8cmd.c_str());
-				continue;
-			}
-			// if result is empty, skip to next one
-			auto cmds = m_Splitter.GetResult();
-			if (cmds.empty()) continue;
-
-			// run command parser
-			if (!m_Parser.Parse(cmds)) {
-				this->PrintCommonError(u8"Parser error \"%s\".\nType 'help' for usage.", u8cmd.c_str());
+			// pass to commander
+			auto rv = this->m_Commander.Dispatch(u8cmd);
+			if (!rv.has_value()) {
+				switch (rv.error()) { 
+					case CmdHelper::Error::Lexer:
+						this->PrintError(u8"Lexer error.");
+						break;
+					case CmdHelper::Error::BadVerb:
+						this->PrintError(u8"Unknown verb.");
+						break;
+					case CmdHelper::Error::BadArg:
+						this->PrintError(u8"Bad argument.");
+						break;
+					case CmdHelper::Error::TooLessParam:
+						this->PrintError(u8"Given arguments are too less.");
+						break;
+					case CmdHelper::Error::TooMuchParam:
+						this->PrintError(u8"Given arguments are too much.");
+						break;
+				}
+				this->PrintError(u8"Please type 'help' for usage.");
 			}
 
 			// check whether sub processor need exit.
@@ -313,48 +164,48 @@ namespace Unvirt::Context {
 
 #pragma endregion
 
-#pragma region Proc Detail
+#pragma region Handler
 
-	void UnvirtContext::ProcLoad(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::HandleLoad(const CmdHelper::LoadParam& param) {
 		// check pre-requirement
 		if (HasOpenedFile()) {
-			PrintCommonError(u8"Already have a opened file. Close it before calling 'load'.");
+			PrintError(u8"Already have a opened file. Close it before calling 'load'.");
 			return;
 		}
 		if (!m_Ctx->IsValidEncoding()) {
-			PrintCommonError(u8"You have not set encoding properly. Set it before loading by calling 'encoding'.");
+			PrintError(u8"You have not set encoding properly. Set it before loading by calling 'encoding'.");
 			return;
 		}
 
-		// get argument
-		std::u8string filepath = amap.Get<CmdHelper::Nodes::StringArgument::ArgValue_t>(u8"filepath").Get();
-		bool is_deep = amap.Get<CmdHelper::Nodes::Choice::ArgValue_t>(u8"stage").Get() == 0u;
-
-		// proc
+		// load file
 		m_FileReader = new LibCmo::CK2::CKFileReader(m_Ctx);
 		LibCmo::CK2::CKERROR err;
-		if (is_deep) {
-			err = m_FileReader->DeepLoad(filepath.c_str());
-			m_IsShallowRead = false;
-		} else {
-			err = m_FileReader->ShallowLoad(filepath.c_str());
-			m_IsShallowRead = true;
+		switch (param.stage) {
+			case CmdHelper::LoadStage::Shallow:
+				err = m_FileReader->ShallowLoad(param.filepath.c_str());
+				m_IsShallowRead = true;
+				break;
+			case CmdHelper::LoadStage::Deep:
+				err = m_FileReader->DeepLoad(param.filepath.c_str());
+				m_IsShallowRead = false;
+				break;
+			default:
+				throw std::runtime_error("unreachable code");
 		}
 		if (err != LibCmo::CK2::CKERROR::CKERR_OK) {
 			// fail to load. release all.
-			PrintCommonError(u8"Fail to load file. Function return: %s\n\t%s",
-				Unvirt::AccessibleValue::GetCkErrorName(err).c_str(),
-				Unvirt::AccessibleValue::GetCkErrorDescription(err).c_str()
-			);
+			PrintError(u8"Fail to load file. Function return: %s (%s)",
+			           Docstring::GetCkErrorName(err).c_str(),
+			           Docstring::GetCkErrorDescription(err).c_str());
 
 			ClearDocument();
 		}
 	}
 
-	void UnvirtContext::ProcUnLoad(const CmdHelper::ArgumentsMap&) {
+	void UnvirtContext::HandleUnLoad(const CmdHelper::UnloadParam& param) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
-			this->PrintCommonError(u8"No loaded file.");
+			this->PrintError(u8"No loaded file.");
 			return;
 		}
 
@@ -362,18 +213,16 @@ namespace Unvirt::Context {
 		ClearDocument();
 	}
 
-	void Unvirt::Context::UnvirtContext::ProcSave(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::HandleSave(const CmdHelper::SaveParam& param) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
-			PrintCommonError(u8"No loaded file.");
+			PrintError(u8"No loaded file.");
 			return;
 		}
 		if (!m_Ctx->IsValidEncoding()) {
-			PrintCommonError(u8"You have not set encoding properly. Set it before saving by calling 'encoding'.");
+			PrintError(u8"You have not set encoding properly. Set it before saving by calling 'encoding'.");
 			return;
 		}
-
-		std::u8string filepath = amap.Get<CmdHelper::Nodes::StringArgument::ArgValue_t>(u8"filepath").Get();
 
 		// construct writer from reader
 		LibCmo::CK2::CKFileWriter writer(m_Ctx, m_FileReader, m_IsShallowRead);
@@ -384,12 +233,12 @@ namespace Unvirt::Context {
 		m_Ctx->SetFileWriteMode(m_FileReader->GetFileInfo().FileWriteMode);
 
 		// run writer
-		LibCmo::CK2::CKERROR err = writer.Save(filepath.c_str());
+		LibCmo::CK2::CKERROR err = writer.Save(param.filepath.c_str());
 		if (err != LibCmo::CK2::CKERROR::CKERR_OK) {
 			// fail to load. release all.
-			PrintCommonError(u8"Fail to save file. Function return: %s\n\t%s",
-				Unvirt::AccessibleValue::GetCkErrorName(err).c_str(),
-				Unvirt::AccessibleValue::GetCkErrorDescription(err).c_str()
+			PrintError(u8"Fail to save file. Function return: %s\n\t%s",
+				Docstring::GetCkErrorName(err).c_str(),
+				Docstring::GetCkErrorDescription(err).c_str()
 			);
 		}
 
@@ -398,80 +247,70 @@ namespace Unvirt::Context {
 
 	}
 
-	void UnvirtContext::ProcInfo(const CmdHelper::ArgumentsMap&) {
+	void UnvirtContext::HandleInfo(const CmdHelper::InfoParam& param) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
-			PrintCommonError(u8"No loaded file.");
+			PrintError(u8"No loaded file.");
 			return;
 		}
 
 		// print
-		Unvirt::StructFormatter::PrintCKFileInfo(m_FileReader->GetFileInfo());
+		StructFmt::PrintCKFileInfo(m_FileReader->GetFileInfo());
 	}
 
-	void UnvirtContext::ProcLs(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::HandleLs(const CmdHelper::LsParam& param) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
-			PrintCommonError(u8"No loaded file.");
+			PrintError(u8"No loaded file.");
 			return;
 		}
 
 		// get 0 based page (-1)
-		size_t page = amap.Get<CmdHelper::Nodes::ArithmeticArgument<size_t>::ArgValue_t>(u8"page").Get() - 1u;
+		size_t page = param.page - 1;
+		bool full_detail = m_ListStyle == CmdHelper::StyleLevel::Full;
 
 		// show list
-		switch (amap.Get<CmdHelper::Nodes::Choice::ArgValue_t>(u8"part").Get()) {
-			case 0u:
-			{
+		switch (param.part) {
+			case CmdHelper::LsPart::Object: {
 				// obj list
-				Unvirt::StructFormatter::PrintObjectList(
-					m_FileReader->GetFileObjects(),
-					m_FileReader->GetFileInfo(),
-					page, this->m_PageLen,
-					m_ListStyleIsFull
-				);
+				StructFmt::PrintObjectList(m_FileReader->GetFileObjects(),
+				                           m_FileReader->GetFileInfo(),
+				                           page,
+				                           this->m_ItemPerPage,
+				                           full_detail);
 				break;
 			}
-			case 1u:
-			{
+			case CmdHelper::LsPart::Manager: {
 				// mgr list
-				Unvirt::StructFormatter::PrintManagerList(
-					m_FileReader->GetManagersData(),
-					page, this->m_PageLen,
-					m_ListStyleIsFull
-				);
+				StructFmt::PrintManagerList(m_FileReader->GetManagersData(), page, this->m_ItemPerPage, full_detail);
 				break;
 			}
-			case 2u:
-			{
+			case CmdHelper::LsPart::Search: {
 				// search list
-				switch (m_SearchPart) {
-					case SearchPart::None:
-					{
-						PrintCommonError(u8"No search result to list.");
-						break;
+				if (m_IsSearching) {
+					switch (m_SearchPart) {
+						case CmdHelper::SearchPart::Object: {
+							StructFmt::PrintSearchedObjectList(m_SearchIdxResult,
+							                                   m_FileReader->GetFileObjects(),
+							                                   m_FileReader->GetFileInfo(),
+							                                   page,
+							                                   this->m_ItemPerPage,
+							                                   full_detail);
+							break;
+						}
+						case CmdHelper::SearchPart::Manager: {
+							StructFmt::PrintSearchedManagerList(m_SearchIdxResult,
+							                                    m_FileReader->GetManagersData(),
+							                                    page,
+							                                    this->m_ItemPerPage,
+							                                    full_detail);
+							break;
+						}
+						default:
+							throw std::runtime_error("unreachable code");
 					}
-					case SearchPart::Object:
-					{
-						Unvirt::StructFormatter::PrintSearchedObjectList(
-							m_SearchIdxResult,
-							m_FileReader->GetFileObjects(),
-							m_FileReader->GetFileInfo(),
-							page, this->m_PageLen,
-							m_ListStyleIsFull
-						);
-						break;
-					}
-					case SearchPart::Manager:
-					{
-						Unvirt::StructFormatter::PrintSearchedManagerList(
-							m_SearchIdxResult,
-							m_FileReader->GetManagersData(),
-							page, this->m_PageLen,
-							m_ListStyleIsFull
-						);
-						break;
-					}
+				} else {
+					PrintError(u8"No search result to list.");
 				}
 				break;
 			}
@@ -480,36 +319,36 @@ namespace Unvirt::Context {
 		}
 	}
 
-	void UnvirtContext::ProcData(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::HandleData(const CmdHelper::DataParam& param) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
-			PrintCommonError(u8"No loaded file.");
+			PrintError(u8"No loaded file.");
 			return;
 		}
 
 		// get index
-		size_t index = amap.Get<CmdHelper::Nodes::ArithmeticArgument<size_t>::ArgValue_t>(u8"index").Get();
+		size_t index = param.index;
 
 		// show data
-		switch (amap.Get<CmdHelper::Nodes::Choice::ArgValue_t>(u8"part").Get()) {
-			case 0u:
+		switch (param.part) {
+			case CmdHelper::DataPart::Object:
 			{
 				if (index >= m_FileReader->GetFileObjects().size()) {
-					PrintCommonError(u8"Index out of range.");
+					PrintError(u8"Index out of range.");
 					return;
 				}
-				Unvirt::StructFormatter::PrintCKObject(m_FileReader->GetFileObjects()[index].ObjPtr);
+				StructFmt::PrintCKObject(m_FileReader->GetFileObjects()[index].ObjPtr);
 				break;
 			}
-			case 1u:
+			case CmdHelper::DataPart::Manager:
 			{
 				if (index >= m_FileReader->GetManagersData().size()) {
-					PrintCommonError(u8"Index out of range.");
+					PrintError(u8"Index out of range.");
 					return;
 				}
 				// todo: finish manager display
-				PrintCommonError(u8"Not supported now.");
-				//Unvirt::StructFormatter::PrintCKBaseManager(m_FileReader->GetManagersData()[index].Data);
+				PrintError(u8"Not supported now.");
+				//StructFmt::PrintCKBaseManager(m_FileReader->GetManagersData()[index].Data);
 				break;
 			}
 			default:
@@ -517,34 +356,34 @@ namespace Unvirt::Context {
 		}
 	}
 
-	void UnvirtContext::ProcChunk(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::HandleChunk(const CmdHelper::ChunkParam& param) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
-			PrintCommonError(u8"No loaded file.");
+			PrintError(u8"No loaded file.");
 			return;
 		}
 
 		// get index
-		size_t index = amap.Get<CmdHelper::Nodes::ArithmeticArgument<size_t>::ArgValue_t>(u8"index").Get();
+		size_t index = param.index;
 
 		// show data
-		switch (amap.Get<CmdHelper::Nodes::Choice::ArgValue_t>(u8"part").Get()) {
-			case 0:
+		switch (param.part) {
+			case CmdHelper::ChunkPart::Object:
 			{
 				if (index >= m_FileReader->GetFileObjects().size()) {
-					PrintCommonError(u8"Index out of range.");
+					PrintError(u8"Index out of range.");
 					return;
 				}
-				Unvirt::StructFormatter::PrintCKStateChunk(m_FileReader->GetFileObjects()[index].Data);
+				StructFmt::PrintCKStateChunk(m_FileReader->GetFileObjects()[index].Data);
 				break;
 			}
-			case 1:
+			case CmdHelper::ChunkPart::Manager:
 			{
 				if (index >= m_FileReader->GetManagersData().size()) {
-					PrintCommonError(u8"Index out of range.");
+					PrintError(u8"Index out of range.");
 					return;
 				}
-				Unvirt::StructFormatter::PrintCKStateChunk(m_FileReader->GetManagersData()[index].Data);
+				StructFmt::PrintCKStateChunk(m_FileReader->GetManagersData()[index].Data);
 				break;
 			}
 			default:
@@ -552,20 +391,20 @@ namespace Unvirt::Context {
 		}
 	}
 
-	void UnvirtContext::ProcSearch(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::HandleSearch(const CmdHelper::SearchParam& param) {
 		// check pre-requirement
 		if (!HasOpenedFile()) {
-			PrintCommonError(u8"No loaded file.");
+			PrintError(u8"No loaded file.");
 			return;
 		}
 
-		// get search text *amap->Get<CmdHelper::StringArgument::vType>("text")
-		std::u8string search_text = amap.Get<CmdHelper::Nodes::StringArgument::ArgValue_t>(u8"text").Get();
+		// get search text
+		std::u8string search_text = param.text;
 
 		// analyse search mode
 		std::function<bool(const LibCmo::XContainer::XString&)> search_fct = nullptr;
-		switch (amap.Get<CmdHelper::Nodes::Choice::ArgValue_t>(u8"mode").Get()) {
-			case 0u:
+		switch (param.mode) {
+			case CmdHelper::SearchMode::PlainText:
 			{
 				// plain mode
 				search_fct = [&search_text](const LibCmo::XContainer::XString& cmp) -> bool {
@@ -573,18 +412,18 @@ namespace Unvirt::Context {
 				};
 				break;
 			}
-			case 1u:
+			case CmdHelper::SearchMode::Regex:
 			{
 				// regex mode
 
 				// get ordinary search text
-				std::string ordinary_search_text = YYCC::EncodingHelper::ToOrdinary(search_text);
+				std::string ordinary_search_text = yycc::string::reinterpret::as_ordinary(search_text);
 				// try construct regex
 				std::regex re;
 				try {
 					re = std::regex(ordinary_search_text, std::regex_constants::ECMAScript);
 				} catch (const std::regex_error& e) {
-					PrintCommonError(u8"Invalid regular expressions: %s", e.what());
+					PrintError(u8"Invalid regular expressions: %s", e.what());
 					return;
 				}
 
@@ -592,7 +431,7 @@ namespace Unvirt::Context {
 				// because re will be freed when exiting this switch.
 				search_fct = [re](const LibCmo::XContainer::XString& cmp) -> bool {
 					// get ordinary name and comapre
-					std::string ordinary_cmp = YYCC::EncodingHelper::ToOrdinary(cmp);
+					std::string ordinary_cmp = yycc::string::reinterpret::as_ordinary(cmp);
 					return std::regex_search(ordinary_cmp, re);
 				};
 				break;
@@ -602,11 +441,12 @@ namespace Unvirt::Context {
 		}
 
 		// start search
-		switch (amap.Get<CmdHelper::Nodes::Choice::ArgValue_t>(u8"part").Get()) {
-			case 0u:
+		m_IsSearching = true;
+		m_SearchPart = param.part;
+		switch (param.part) {
+			case CmdHelper::SearchPart::Object:
 			{
 				// object
-				m_SearchPart = SearchPart::Object;
 				m_SearchIdxResult.clear();
 
 				size_t counter = 0;
@@ -619,12 +459,11 @@ namespace Unvirt::Context {
 
 				break;
 			}
-			case 1u:
+			case CmdHelper::SearchPart::Manager:
 			{
 				// manager
-				m_SearchPart = SearchPart::Manager;
 				m_SearchIdxResult.clear();
-				PrintCommonError(u8"Not supported now.");
+				PrintError(u8"Not supported now.");
 				// todo: remove this return when fixing manager searching.
 				return;
 				break;
@@ -635,62 +474,44 @@ namespace Unvirt::Context {
 
 		// report search result
 		if (m_SearchIdxResult.empty()) {
-			PrintCommonInfo(u8"Search done, but no result.");
+			PrintInfo(u8"Search done, but no result.");
 		} else {
-			PrintCommonInfo(u8"Search done with %" PRIuSIZET " results. Use `ls search` to check them.", m_SearchIdxResult.size());
+			PrintInfo(u8"Search done with %" PRIuSIZET " results. Use `ls search` to check them.", m_SearchIdxResult.size());
 		}
 	}
 
-	void UnvirtContext::ProcItems(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::HandleItems(const CmdHelper::ItemsParam& param) {
 		// assign
-		m_PageLen = amap.Get<CmdHelper::Nodes::ArithmeticArgument<size_t>::ArgValue_t>(u8"count").Get();
+		m_ItemPerPage = param.count;
 	}
 
-	void UnvirtContext::ProcStyle(const CmdHelper::ArgumentsMap& amap) {
-		// set list style level
-		switch (amap.Get<CmdHelper::Nodes::Choice::ArgValue_t>(u8"level").Get()) {
-			case 0u:
-			{
-				// full level
-				m_ListStyleIsFull = true;
-				break;
-			}
-			case 1u:
-			{
-				// simple level
-				m_ListStyleIsFull = false;
-				break;
-			}
-			default:
-				throw std::runtime_error("unreachable code");
-		}
-	}
-
-	void UnvirtContext::ProcEncoding(const CmdHelper::ArgumentsMap& amap) {
-		const auto& encodings = amap.Get<EncodingListArgument::ArgValue_t>(u8"enc").Get();
-		m_Ctx->SetEncoding(encodings);
-	}
-
-	void UnvirtContext::ProcTemp(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::HandleStyle(const CmdHelper::StyleParam& param) {
 		// assign
-		std::u8string temp_path = amap.Get<CmdHelper::Nodes::StringArgument::ArgValue_t>(u8"temppath").Get();
-		if (!m_Ctx->GetPathManager()->SetTempFolder(temp_path.c_str())) {
-			PrintCommonError(u8"Set temp folder failed. Check your path first.");
+		m_ListStyle = param.level;
+	}
+
+	void UnvirtContext::HandleEncoding(const CmdHelper::EncodingParam& param) {
+		m_Ctx->SetEncoding(param.enc);
+	}
+
+	void UnvirtContext::HandleTemp(const CmdHelper::TempParam& param) {
+		// assign
+		if (!m_Ctx->GetPathManager()->SetTempFolder(param.dirpath.c_str())) {
+			PrintError(u8"Set temp folder failed. Check your path first.");
 		}
 	}
 
-	void Unvirt::Context::UnvirtContext::ProcRsc(const CmdHelper::ArgumentsMap& amap, bool is_clear) {
-		if (is_clear) {
-			m_Ctx->GetPathManager()->ClearPath();
-		} else {
-			std::u8string data_res = amap.Get<CmdHelper::Nodes::StringArgument::ArgValue_t>(u8"datares").Get();
-			if (!m_Ctx->GetPathManager()->AddPath(data_res.c_str())) {
-				PrintCommonError(u8"Set data resource folder failed. Check your path first.");
-			}
+	void UnvirtContext::HandleRscClear(const CmdHelper::RscClearParam& param) {
+		m_Ctx->GetPathManager()->ClearPath();
+	}
+
+	void UnvirtContext::HandleRscAdd(const CmdHelper::RscAddParam& param) {
+		if (!m_Ctx->GetPathManager()->AddPath(param.dirpath.c_str())) {
+			PrintError(u8"Set data resource folder failed. Check your path first.");
 		}
 	}
 
-	void Unvirt::Context::UnvirtContext::ProcTest(const CmdHelper::ArgumentsMap& amap) {
+	void UnvirtContext::HandleTest(const CmdHelper::TestParam& param) {
 #if defined(LIBCMO_BUILD_DEBUG)
 		// MARK: Add the debug code here.
 
@@ -699,11 +520,11 @@ namespace Unvirt::Context {
 
 		// check pre-requirement
 		if (!HasOpenedFile()) {
-			PrintCommonError(u8"No loaded file.");
+			PrintError(u8"No loaded file.");
 			return;
 		}
 		if (!m_IsShallowRead) {
-			PrintCommonError(u8"Transparent Column Fixer only accept shallow loaded file.");
+			PrintError(u8"Transparent Column Fixer only accept shallow loaded file.");
 			return;
 		}
 
@@ -732,15 +553,25 @@ namespace Unvirt::Context {
 		}
 
 #else
-		PrintCommonError(u8"Test command only available in Debug mode.");
+		PrintError(u8"Test command only available in Debug mode.");
 #endif
 	}
 
-	void Unvirt::Context::UnvirtContext::ProcHelp(const CmdHelper::ArgumentsMap&) {
-		m_Help.Print();
+	void UnvirtContext::HandleVersion(const CmdHelper::VersionParam& param) {
+		// MARK: Copied from splash at Main Runner.
+		std::cout << termcolor::colored(u8"Unvirt", termcolor::Color::LightYellow)
+		          << " (based on LibCmo " LIBCMO_VER_STR ") built at " __DATE__ " " __TIME__ << std::endl;
 	}
 
-	void UnvirtContext::ProcExit(const CmdHelper::ArgumentsMap&) {
+	void UnvirtContext::HandleHelp(const CmdHelper::HelpParam& param) {
+		std::cout << u8"version: Show version info about this program." << std::endl
+		          << u8"help: Print this page." << std::endl
+		          << u8"exit: Quit this program." << std::endl
+		          << std::endl
+		          << u8"See manual provided with this program for more commands because it is so long." << std::endl;
+	}
+
+	void UnvirtContext::HandleExit(const CmdHelper::ExitParam& param) {
 		m_OrderExit = true;
 	}
 

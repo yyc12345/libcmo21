@@ -1,6 +1,7 @@
 #include "StructFmt.hpp"
 #include "Docstring.hpp"
 #include "Utils.hpp"
+#include <yycc.hpp>
 #include <yycc/string/op.hpp>
 #include <yycc/carton/termcolor.hpp>
 #include <yycc/carton/tabulate.hpp>
@@ -104,7 +105,7 @@ namespace Unvirt::StructFmt {
 	static bool CheckPageHeader(const PageBreaker& pager, size_t page) {
 		bool good_page = pager.IsValidPage(page);
 		if (!good_page) {
-			termcolor::cprint(u8"Page out of range.", Color::LightRed);
+			termcolor::cprintln(u8"Page out of range.", Color::LightRed);
 		}
 		return good_page;
 	}
@@ -514,7 +515,7 @@ namespace Unvirt::StructFmt {
 
 
 	void PrintCKFileInfo(const LibCmo::CK2::CKFileInfo& fileinfo) {
-		termcolor::cprint(u8"CKFileInfo", Color::LightYellow);
+		termcolor::cprintln(u8"CKFileInfo", Color::LightYellow);
 		std::cout << strop::printf(u8"FileVersion: %" PRIuCKDWORD, fileinfo.FileVersion) << std::endl;
 		LibCmo::CKDWORD ck_series[3] {
 			(fileinfo.CKVersion >> 24) & 0xFF,
@@ -645,7 +646,7 @@ namespace Unvirt::StructFmt {
 	                     size_t page,
 	                     size_t pageitems,
 	                     bool full_detail) {
-		termcolor::cprint(u8"CKFileObject", Color::LightYellow);
+		termcolor::cprintln(u8"CKFileObject", Color::LightYellow);
 
 		PageBreaker pager(ls.size(), pageitems);
 		if (!CheckPageHeader(pager, page)) return;
@@ -664,7 +665,7 @@ namespace Unvirt::StructFmt {
 	                             size_t page,
 	                             size_t pageitems,
 	                             bool full_detail) {
-		termcolor::cprint(u8"CKFileObject Searching Result", Color::LightYellow);
+		termcolor::cprintln(u8"CKFileObject Searching Result", Color::LightYellow);
 
 		PageBreaker pager(idxls.size(), pageitems);
 		if (!pager.IsValidPage(page)) return;
@@ -700,7 +701,7 @@ namespace Unvirt::StructFmt {
 	                      size_t page,
 	                      size_t pageitems,
 	                      bool full_detail) {
-		termcolor::cprint(u8"CKFileManager", Color::LightYellow);
+		termcolor::cprintln(u8"CKFileManager", Color::LightYellow);
 
 		PageBreaker pager(ls.size(), pageitems);
 		if (!pager.IsValidPage(page)) return;
@@ -718,7 +719,7 @@ namespace Unvirt::StructFmt {
 	                              size_t page,
 	                              size_t pageitems,
 	                              bool full_detail) {
-		termcolor::cprint(u8"CKFileManager Searching Result", Color::LightYellow);
+		termcolor::cprintln(u8"CKFileManager Searching Result", Color::LightYellow);
 
 		PageBreaker pager(ls.size(), pageitems);
 		if (!pager.IsValidPage(page)) return;
@@ -736,7 +737,7 @@ namespace Unvirt::StructFmt {
 
 	void PrintCKObject(const LibCmo::CK2::ObjImpls::CKObject* obj) {
 		if (obj == nullptr) {
-			termcolor::cprint(u8"Null Object", Color::LightRed);
+			termcolor::cprintln(u8"Null Object", Color::LightRed);
 			return;
 		}
 
@@ -785,26 +786,26 @@ namespace Unvirt::StructFmt {
 				PrintCKMeshDetail(static_cast<LibCmo::CK2::ObjImpls::CKMesh*>(mobj));
 				break;
 			default:
-				termcolor::cprint(u8"Not Implemented.", Color::LightRed);
+				termcolor::cprintln(u8"Not Implemented.", Color::LightRed);
 				break;
 		}
 
 	}
 
 	void PrintCKBaseManager(const LibCmo::CK2::MgrImpls::CKBaseManager* mgr) {
-		termcolor::cprint(u8"CKBaseManager", Color::LightYellow);
+		termcolor::cprintln(u8"CKBaseManager", Color::LightYellow);
 		if (mgr == nullptr) {
-			termcolor::cprint(u8"Null Manager", Color::LightRed);
+			termcolor::cprintln(u8"Null Manager", Color::LightRed);
 			return;
 		}
 
-		termcolor::cprint(u8"Not Implemented.", Color::LightRed);
+		termcolor::cprintln(u8"Not Implemented.", Color::LightRed);
 	}
 
 	void PrintCKStateChunk(const LibCmo::CK2::CKStateChunk* chunk) {
-		termcolor::cprint(u8"CKStateChunk", Color::LightYellow);
+		termcolor::cprintln(u8"CKStateChunk", Color::LightYellow);
 		if (chunk == nullptr) {
-			termcolor::cprint(u8"Null Chunk", Color::LightRed);
+			termcolor::cprintln(u8"Null Chunk", Color::LightRed);
 			return;
 		}
 
@@ -838,7 +839,7 @@ namespace Unvirt::StructFmt {
 		operchunk->StartRead();
 		const auto collection = operchunk->GetIdentifiersProfile();
 		operchunk->StopRead();
-		termcolor::cprint(u8"Identifiers", Color::LightYellow);
+		termcolor::cprintln(u8"Identifiers", Color::LightYellow);
 		auto ident_table = CreateStandardTable({
 		    u8"Identifier",
 		    u8"Data Address",

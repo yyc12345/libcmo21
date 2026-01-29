@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <type_traits>
+#include <yycc.hpp>
 #include <yycc/string/op.hpp>
 #include <yycc/cenum.hpp>
 

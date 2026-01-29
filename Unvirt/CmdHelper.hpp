@@ -36,7 +36,7 @@ namespace Unvirt::CmdHelper {
 
 	struct LsParam {
 		LsPart part;
-		size_t page;
+		size_t page; ///< One-based page.
 	};
 
 	enum class DataPart {
@@ -46,7 +46,7 @@ namespace Unvirt::CmdHelper {
 
 	struct DataParam {
 		DataPart part;
-		size_t index;
+		size_t index; ///< Zero-based index
 	};
 
 	enum class ChunkPart {
@@ -56,7 +56,7 @@ namespace Unvirt::CmdHelper {
 
 	struct ChunkParam {
 		ChunkPart part;
-		size_t index;
+		size_t index; ///< Zero-based index
 	};
 
 	enum class SearchPart {
@@ -76,7 +76,7 @@ namespace Unvirt::CmdHelper {
 	};
 
 	struct ItemsParam {
-		size_t count;
+		size_t count; ///< The lowest value is one.
 	};
 
 	enum class StyleLevel {
