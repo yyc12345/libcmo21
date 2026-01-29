@@ -1,574 +1,453 @@
 #include "CmdHelper.hpp"
-#include <VTAll.hpp>
-#include <algorithm>
+#include <yycc/carton/lexer61.hpp>
+#include <yycc/num/parse.hpp>
 
 namespace Unvirt::CmdHelper {
 
-#pragma region CmdSplitter
+#pragma region Enums Parser
 
-	const std::deque<std::u8string>& CmdSplitter::GetResult() const {
-		if (!m_ValidResult)
-			throw std::runtime_error("try to get result from an invalid CmdSplitter.");
-		return m_Result;
+	static std::optional<LoadStage> ParseLoadStage(const std::u8string_view &sv) {
+		if (sv == u8"shallow") return LoadStage::Shallow;
+		else if (sv == u8"deel") return LoadStage::Deep;
+		else return std::nullopt;
 	}
 
-	bool CmdSplitter::Lex(const std::u8string& u8cmd) {
-		// Clear variables
-		m_ValidResult = false;
-		m_Result.clear();
-		m_Buffer.clear();
-		m_CurrentChar = u8'\0';
-		m_State = m_PrevState = StateType::SPACE;
+	static std::optional<LsPart> ParseLsPart(const std::u8string_view &sv) { 
+		if (sv == u8"mgr") return LsPart::Manager;
+		else if (sv == u8"obj") return LsPart::Object;
+		else if (sv == u8"search") return LsPart::Search;
+		else return std::nullopt;
+	}
 
-		// split
-		for (char8_t c : u8cmd) {
-			m_CurrentChar = c;
+	static std::optional<DataPart> ParseDataPart(const std::u8string_view &sv) { 
+		if (sv == u8"mgr") return DataPart::Manager;
+		else if (sv == u8"obj") return DataPart::Object;
+		else return std::nullopt;
+	}
 
-			// skip all invalid characters (ascii code unit lower than space char)
-			// thus UTF8 code unit can directly accepted.
-			if (m_CurrentChar < u8' ')
-				continue;
+	static std::optional<ChunkPart> ParseChunkPart(const std::u8string_view &sv) { 
+		if (sv == u8"mgr") return ChunkPart::Manager;
+		else if (sv == u8"obj") return ChunkPart::Object;
+		else return std::nullopt;
+	}
 
-			switch (m_State) {
-				case StateType::SPACE:
-					ProcSpace();
-					break;
-				case StateType::SINGLE:
-					ProcSingle();
-					break;
-				case StateType::DOUBLE:
-					ProcDouble();
-					break;
-				case StateType::ESCAPE:
-					ProcEscape();
-					break;
-				case StateType::NORMAL:
-					ProcNormal();
-					break;
-			}
-		}
+	static std::optional<SearchPart> ParseSearchPart(const std::u8string_view &sv) { 
+		if (sv == u8"mgr") return SearchPart::Manager;
+		else if (sv == u8"obj") return SearchPart::Object;
+		else return std::nullopt;
+	}
 
-		// final proc
-		bool is_success = false;
-		switch (m_State) {
-			case StateType::SPACE:
-				is_success = true;
-				break;
-			case StateType::NORMAL:
-				// push the last one
-				m_Result.emplace_back(m_Buffer);
-				is_success = true;
-				break;
-			case StateType::SINGLE:
-			case StateType::DOUBLE:
-			case StateType::ESCAPE:
-				// error
-				is_success = false;
-				break;
-			default:
-				throw std::runtime_error("unreachable code.");
-		}
+	static std::optional<SearchMode> ParseSearchMode(const std::u8string_view &sv) {
+		if (sv == u8"plain") return SearchMode::PlainText;
+		else if (sv == u8"re") return SearchMode::Regex;
+		else return std::nullopt;
+	}
 
-		// check success
-		if (is_success) {
-			m_ValidResult = true;
-			return true;
+	static std::optional<StyleLevel> ParseStyleLevel(const std::u8string_view &sv) { 
+		if (sv == u8"simple") return StyleLevel::Simple;
+		else if (sv == u8"full") return StyleLevel::Full;
+		else return std::nullopt;
+	}
+
+#pragma endregion
+
+#pragma region Parameter Stack
+
+	ParamStack::ParamStack(std::vector<std::u8string> &&params) : params(std::move(params)), cursor(0) {}
+
+	ParamStack::~ParamStack() {}
+
+	std::optional<std::u8string_view> ParamStack::Next() {
+		if (this->cursor >= this->params.size()) {
+			return std::nullopt;
 		} else {
-			m_Result.clear();
-			return false;
-		}
-	}
-
-	void CmdSplitter::ProcSpace() {
-		switch (m_CurrentChar) {
-			case u8'\'':
-				m_State = StateType::SINGLE;
-				break;
-			case u8'"':
-				m_State = StateType::DOUBLE;
-				break;
-			case u8'\\':
-				m_State = StateType::ESCAPE;
-				m_PrevState = StateType::NORMAL;
-				break;
-			case u8' ':
-				break;	// skip blank
-			default:
-				m_Buffer.push_back(m_CurrentChar);
-				m_State = StateType::NORMAL;
-				break;
-		}
-	}
-	void CmdSplitter::ProcSingle() {
-		switch (m_CurrentChar) {
-			case u8'\'':
-				m_State = StateType::NORMAL;
-				break;
-			case u8'"':
-				m_Buffer.push_back('"');
-				break;
-			case u8'\\':
-				m_State = StateType::ESCAPE;
-				m_PrevState = StateType::SINGLE;
-				break;
-			case u8' ':
-				m_Buffer.push_back(u8' ');
-				break;
-			default:
-				m_Buffer.push_back(m_CurrentChar);
-				break;
-		}
-	}
-	void CmdSplitter::ProcDouble() {
-		switch (m_CurrentChar) {
-			case u8'\'':
-				m_Buffer.push_back(u8'\'');
-				break;
-			case u8'"':
-				m_State = StateType::NORMAL;
-				break;
-			case u8'\\':
-				m_State = StateType::ESCAPE;
-				m_PrevState = StateType::DOUBLE;
-				break;
-			case u8' ':
-				m_Buffer.push_back(u8' ');
-				break;
-			default:
-				m_Buffer.push_back(m_CurrentChar);
-				break;
-		}
-	}
-	void CmdSplitter::ProcEscape() {
-		// add itself
-		m_Buffer.push_back(m_CurrentChar);
-		// restore state
-		m_State = m_PrevState;
-	}
-	void CmdSplitter::ProcNormal() {
-		switch (m_CurrentChar) {
-			case u8'\'':
-				m_Buffer.push_back(u8'\'');
-				break;
-			case u8'"':
-				m_Buffer.push_back(u8'"');
-				break;
-			case u8'\\':
-				m_State = StateType::ESCAPE;
-				m_PrevState = StateType::NORMAL;
-				break;
-			case u8' ':
-				m_Result.emplace_back(m_Buffer);
-				m_Buffer.clear();
-				m_State = StateType::SPACE;
-				break;
-			default:
-				m_Buffer.push_back(m_CurrentChar);
-				break;
-		}
-	}
-#pragma endregion
-
-#pragma region Arguments Map
-
-	ArgumentsMap::ArgumentsMap() : m_Data() {}
-
-	ArgumentsMap::~ArgumentsMap() {}
-
-#pragma endregion
-
-#pragma region Help Document
-
-	HelpDocument::HelpDocument() : m_Stack(), m_Results() {}
-
-	HelpDocument::~HelpDocument() {}
-
-	HelpDocument::StackItem::StackItem() : m_Name(), m_Desc() {}
-
-	HelpDocument::StackItem::StackItem(const std::u8string& name, const std::u8string& desc) : m_Name(name), m_Desc(desc) {}
-
-	HelpDocument::ResultItem::ResultItem() : m_CmdDesc(), m_ArgDesc() {}
-
-	HelpDocument::ResultItem::ResultItem(const std::u8string& cmd_desc, const std::deque<StackItem>& arg_desc) :
-		m_CmdDesc(cmd_desc), m_ArgDesc(arg_desc.begin(), arg_desc.end()) {}
-
-	void HelpDocument::Push(const std::u8string& arg_name, const std::u8string& arg_desc) {
-		m_Stack.emplace_back(StackItem { arg_name, arg_desc });
-	}
-
-	void HelpDocument::Pop() {
-		if (m_Stack.empty())
-			throw std::runtime_error("try pop back on an empty help document.");
-		m_Stack.pop_back();
-	}
-
-	void HelpDocument::Terminate(std::u8string& command_desc) {
-		// create new result
-		ResultItem result(command_desc, this->m_Stack);
-		// add into result
-		m_Results.emplace_back(std::move(result));
-	}
-
-	void HelpDocument::Print() {
-		for (auto& cmd : m_Results) {
-			// syntax
-			// check whether all description of argument are emtpty.
-			bool empty_arg_desc = true;
-			YYCC::ConsoleHelper::Write(YYCC_COLOR_LIGHT_YELLOW(u8"Syntax: "));
-			for (const auto& arg : cmd.m_ArgDesc) {
-				if (!arg.m_Desc.empty()) empty_arg_desc = false;
-				YYCC::ConsoleHelper::Format(u8"%s ", arg.m_Name.c_str());
-			}
-			YYCC::ConsoleHelper::WriteLine(u8"");
-			// command description
-			if (!cmd.m_CmdDesc.empty()) {
-				YYCC::ConsoleHelper::FormatLine(YYCC_COLOR_LIGHT_YELLOW(u8"Description: ") "%s", cmd.m_CmdDesc.c_str());
-			}
-			// argument description
-			if (!empty_arg_desc) {
-				YYCC::ConsoleHelper::WriteLine(YYCC_COLOR_LIGHT_YELLOW(u8"Arguments:"));
-				for (auto& arg : cmd.m_ArgDesc) {
-					if (!arg.m_Desc.empty()) {
-						YYCC::ConsoleHelper::FormatLine(u8"\t" YYCC_COLOR_LIGHT_GREEN("%s") ": % s",
-							arg.m_Name.c_str(), arg.m_Desc.c_str()
-						);
-					}
-				}
-			}
-			// space between each commands
-			YYCC::ConsoleHelper::WriteLine(u8"");
+			return this->params[this->cursor++];
 		}
 	}
 
 #pragma endregion
 
-#pragma region Conflict Set
+#pragma region Commander
 
-	ConflictSet::ConflictSet() : m_ConflictSet() {}
+	Commander::Commander() {}
 
-	ConflictSet::~ConflictSet() {}
+	Commander::~Commander() {}
 
-	void ConflictSet::AddLiteral(const std::u8string_view& value) {
-		if (value.empty())
-			throw std::invalid_argument("try to insert empty item to conflict set.");
-		auto result = m_ConflictSet.emplace(u8"literal:" + std::u8string(value));
-		if (!result.second)
-			throw std::runtime_error("try to insert duplicated item in conflict set.");
+	Result<void> Commander::Dispatch(const std::u8string_view &cmd) const {
+		auto stack = this->BuildStack(cmd);
+		if (stack.has_value()) {
+			return this->Branch(stack.value());
+		} else {
+			return std::unexpected(stack.error());
+		}
 	}
 
-	void ConflictSet::AddArgument(const std::u8string_view& value) {
-		if (value.empty())
-			throw std::invalid_argument("try to insert empty item to conflict set.");
-		auto result = m_ConflictSet.emplace(u8"argument:" + std::u8string(value));
-		if (!result.second)
-			throw std::runtime_error("try to insert duplicated item in conflict set.");
+	Result<ParamStack> Commander::BuildStack(const std::u8string_view &cmd) const {
+		yycc::carton::lexer61::Lexer61 lexer;
+		auto rv = lexer.lex(cmd);
+		if (rv.has_value()) {
+			return ParamStack(std::move(rv.value()));
+		} else {
+			return std::unexpected(Error::Lexer);
+		}
 	}
 
-	bool ConflictSet::IsConflictWith(const ConflictSet& rhs) const {
-		// create a cache to store computed intersection
-		std::vector<std::u8string> intersection;
-		// compute intersection
-		std::set_intersection(
-			this->m_ConflictSet.begin(), this->m_ConflictSet.end(),
-			rhs.m_ConflictSet.begin(), rhs.m_ConflictSet.begin(),
-			std::back_inserter(intersection)
-		);
-		// check whether it is empty intersection
-		return !intersection.empty();
+#pragma region Branch
+
+#define CHECK_NO_MORE_PARAM(stack) \
+	if (stack.Next().has_value()) { \
+		return std::unexpected(Error::TooMuchParam); \
+	}
+#define SAFE_CALL_DELEGATE(delegate, payload) \
+	if ((delegate) != nullptr) { \
+		(delegate)(payload); \
 	}
 
-#pragma endregion
+	Result<void> Commander::Branch(ParamStack &stack) const {
+		auto param = stack.Next();
+		if (param.has_value()) {
+			const auto &verb = param.value();
 
-	namespace Nodes {
-
-#pragma region Abstract Node
-
-		AbstractNode::AbstractNode() :
-			m_Execution(nullptr), m_Comment(), m_Nodes() {}
-
-		AbstractNode::~AbstractNode() {}
-
-		AbstractNode& AbstractNode::Executes(FctExecution_t fct, const std::u8string_view& exec_desc) {
-			if (this->IsRootNode())
-				throw std::logic_error("root node should not have execution.");
-			if (m_Execution != nullptr)
-				throw std::invalid_argument("you should not assign execution multiuple times.");
-			if (fct == nullptr)
-				throw std::invalid_argument("the function passed for executing should not be nullptr.");
-			m_Execution = fct;
-			m_ExecutionDesc = exec_desc;
-			return *this;
-		}
-
-		AbstractNode& AbstractNode::Comment(const std::u8string_view& comment) {
-			if (this->IsRootNode())
-				throw std::logic_error("root node should not have comment.");
-			m_Comment = comment;
-			return *this;
-		}
-
-		void AbstractNode::Help(HelpDocument& doc) {
-			// If this node is not root node
-			if (!this->IsRootNode()) {
-				// Push self symbol to help document stack.
-				if (!this->IsRootNode()) {
-					doc.Push(GetHelpSymbol(), m_Comment);
-				}
-
-				// Check whether this node is terminal.
-				// If it is, terminate it once.
-				if (m_Execution != nullptr) {
-					doc.Terminate(m_ExecutionDesc);
-				}
-			}
-
-			// Then process its children nodes (both root node and common node).
-			for (auto& node : m_Nodes) {
-				node->Help(doc);
-			}
-
-			// Pop self from help document stack
-			// if this node is not root node
-			if (!this->IsRootNode()) {
-				doc.Pop();
-			}
-		}
-
-		bool AbstractNode::Consume(CmdSplitter::Result_t& al, ArgumentsMap& am) {
-			// If no command to be consumed, return directly.
-			if (al.empty()) return false;
-
-			// Process for self if we are not root node
-			std::u8string cur_cmd;
-			if (!this->IsRootNode()) {
-				// Backup the top item in command stack for personal consume.
-				cur_cmd = al.front();
-				// Try to consume it for self.
-				if (!BeginConsume(cur_cmd, am)) {
-					// Fail to consume self.
-					// It means that this command is not matched with self.
-					// Return directly.
-					return false;
-				}
-				// Yes, command matched, we try consume it for child nodes.
-				// Pop the top item of command stack for child nodes processing.
-				al.pop_front();
-			}
-
-			// Define free function if we are not the root node.
-			// Because we just pop the top item of command stack.
-#define CONSUME_DEFER \
-if (!this->IsRootNode()) { \
-	al.emplace_front(cur_cmd); \
-	EndConsume(am); \
-}
-
-			if (al.empty()) {
-				// Root node do not have execution, return false directly
-				if (this->IsRootNode()) {
-					CONSUME_DEFER;
-					return false;
-				}
-				// If no more data for parsing, this is must be a terminal.
-				// Check whether we have execution if we are not root node.
-				if (m_Execution == nullptr) {
-					CONSUME_DEFER;
-					return false;
-				} else {
-					m_Execution(am);
-					CONSUME_DEFER;
-					return true;
-				}
+			if (verb == u8"load") {
+				return this->LoadBranch(stack);
+			} else if (verb == u8"unload") {
+				return this->UnloadBranch(stack);
+			} else if (verb == u8"save") {
+				return this->SaveBranch(stack);
+			} else if (verb == u8"info") {
+				return this->InfoBranch(stack);
+			} else if (verb == u8"ls") {
+				return this->LsBranch(stack);
+			} else if (verb == u8"data") {
+				return this->DataBranch(stack);
+			} else if (verb == u8"chunk") {
+				return this->ChunkBranch(stack);
+			} else if (verb == u8"search") {
+				return this->SearchBranch(stack);
+			} else if (verb == u8"items") {
+				return this->ItemsBranch(stack);
+			} else if (verb == u8"style") {
+				return this->StyleBranch(stack);
+			} else if (verb == u8"encoding") {
+				return this->EncodingBranch(stack);
+			} else if (verb == u8"temp") {
+				return this->TempBranch(stack);
+			} else if (verb == u8"rsc") {
+				return this->RscBranch(stack);
+			} else if (verb == u8"test") {
+				return this->TestBranch(stack);
+			} else if (verb == u8"version") {
+				return this->VersionBranch(stack);
+			} else if (verb == u8"help") {
+				return this->HelpBranch(stack);
+			} else if (verb == u8"exit") {
+				return this->ExitBranch(stack);
 			} else {
-				// Command stack still item to be consumed.
-				// To consume them, we need iterate node list and find the real terminal.
-				// However, we need iterate literal and choice first, the iterate argument.
-				for (auto& node : m_Nodes) {
-					if (node->IsArgument()) continue;
-					if (node->Consume(al, am)) {
-						CONSUME_DEFER;
-						return true;
-					}
-				}
-				for (auto& node : m_Nodes) {
-					if (!node->IsArgument()) continue;
-					if (node->Consume(al, am)) {
-						CONSUME_DEFER;
-						return true;
-					}
-				}
-
-				// If all node can not consume it, 
-				// it means that this command can not match this node tree.
-				// Return false directly.
-				CONSUME_DEFER;
-				return false;
+				return std::unexpected(Error::BadVerb);
 			}
-
-#undef CONSUME_DEFER
-
+		} else {
+			return std::unexpected(Error::TooLessParam);
 		}
+	}
+	Result<void> Commander::LoadBranch(ParamStack &stack) const {
+		auto stage_param = stack.Next();
+		if (!stage_param.has_value()) return std::unexpected(Error::TooLessParam);
+		auto stage_arg = ParseLoadStage(stage_param.value());
+		if (!stage_arg.has_value()) return std::unexpected(Error::BadArg);
 
-#pragma endregion
+		auto filepath_arg = stack.Next();
+		if (!filepath_arg.has_value()) return std::unexpected(Error::TooLessParam);
 
-#pragma region Root Node
+		CHECK_NO_MORE_PARAM(stack)
 
-		RootNode::RootNode() : AbstractNode() {}
-		RootNode::~RootNode() {}
+		LoadParam param {
+			.stage = stage_arg.value(),
+		    .filepath = std::u8string(filepath_arg.value()),
+		};
+		SAFE_CALL_DELEGATE(this->load_delegate, param)
+		return {};
+	}
+	Result<void> Commander::UnloadBranch(ParamStack &stack) const {
+		CHECK_NO_MORE_PARAM(stack)
+		SAFE_CALL_DELEGATE(this->unload_delegate, UnloadParam{})
+		return {};
+	}
+	Result<void> Commander::SaveBranch(ParamStack &stack) const {
+		auto filepath_arg = stack.Next();
+		if (!filepath_arg.has_value()) return std::unexpected(Error::TooLessParam);
 
-		bool RootNode::IsRootNode() { return true; }
-		bool RootNode::IsArgument() { throw std::logic_error("this function is not allowed on root function."); }
-		const ConflictSet& RootNode::GetConflictSet() { throw std::logic_error("this function is not allowed on root function."); }
-		std::u8string RootNode::GetHelpSymbol() { throw std::logic_error("this function is not allowed on root function."); }
-		bool RootNode::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) { throw std::logic_error("this function is not allowed on root function."); }
-		void RootNode::EndConsume(ArgumentsMap& am) { throw std::logic_error("this function is not allowed on root function."); }
+		CHECK_NO_MORE_PARAM(stack)
 
-#pragma endregion
+		SaveParam param {
+			.filepath = std::u8string(filepath_arg.value()),
+		};
+		SAFE_CALL_DELEGATE(this->save_delegate, param)
+		return {};
+	}
+	Result<void> Commander::InfoBranch(ParamStack &stack) const {
+		CHECK_NO_MORE_PARAM(stack)
+		SAFE_CALL_DELEGATE(this->info_delegate, InfoParam{})
+		return {};
+	}
+	Result<void> Commander::LsBranch(ParamStack &stack) const {
+		auto part_param = stack.Next();
+		if (!part_param.has_value()) return std::unexpected(Error::TooLessParam);
+		auto part_arg = ParseLsPart(part_param.value());
+		if (!part_arg.has_value()) return std::unexpected(Error::BadArg);
 
-#pragma region Literal
+		auto page_param = stack.Next();
+		if (!page_param.has_value()) return std::unexpected(Error::TooLessParam);
+		auto page_arg = yycc::num::parse::parse<size_t>(page_param.value());
+		if (!page_arg.has_value()) return std::unexpected(Error::BadArg);
+		if (page_arg.value() < 1) return std::unexpected(Error::BadArg);
 
-		Literal::Literal(const std::u8string_view& words) :
-			AbstractNode(), m_Literal(words), m_ConflictSet() {
-			// check argument
-			if (words.empty())
-				throw std::invalid_argument("The word of literal node should not be empty.");
-			// set conflict set
-			m_ConflictSet.AddLiteral(m_Literal);
+		CHECK_NO_MORE_PARAM(stack)
+
+		LsParam param {
+			.part = part_arg.value(),
+			.page = page_arg.value(),
+		};
+		SAFE_CALL_DELEGATE(this->ls_delegate, param)
+		return {};
+	}
+	Result<void> Commander::DataBranch(ParamStack &stack) const {
+		auto part_param = stack.Next();
+		if (!part_param.has_value()) return std::unexpected(Error::TooLessParam);
+		auto part_arg = ParseDataPart(part_param.value());
+		if (!part_arg.has_value()) return std::unexpected(Error::BadArg);
+
+		auto index_param = stack.Next();
+		if (!index_param.has_value()) return std::unexpected(Error::TooLessParam);
+		auto index_arg = yycc::num::parse::parse<size_t>(index_param.value());
+		if (!index_arg.has_value()) return std::unexpected(Error::BadArg);
+
+		CHECK_NO_MORE_PARAM(stack)
+
+		DataParam param {
+			.part = part_arg.value(),
+			.index = index_arg.value(),
+		};
+		SAFE_CALL_DELEGATE(this->data_delegate, param)
+		return {};
+	}
+	Result<void> Commander::ChunkBranch(ParamStack &stack) const {
+		auto part_param = stack.Next();
+		if (!part_param.has_value()) return std::unexpected(Error::TooLessParam);
+		auto part_arg = ParseChunkPart(part_param.value());
+		if (!part_arg.has_value()) return std::unexpected(Error::BadArg);
+
+		auto index_param = stack.Next();
+		if (!index_param.has_value()) return std::unexpected(Error::TooLessParam);
+		auto index_arg = yycc::num::parse::parse<size_t>(index_param.value());
+		if (!index_arg.has_value()) return std::unexpected(Error::BadArg);
+
+		CHECK_NO_MORE_PARAM(stack)
+
+		ChunkParam param {
+			.part = part_arg.value(),
+			.index = index_arg.value(),
+		};
+		SAFE_CALL_DELEGATE(this->chunk_delegate, param)
+		return {};
+	}
+	Result<void> Commander::SearchBranch(ParamStack &stack) const {
+		auto part_param = stack.Next();
+		if (!part_param.has_value()) return std::unexpected(Error::TooLessParam);
+		auto part_arg = ParseSearchPart(part_param.value());
+		if (!part_arg.has_value()) return std::unexpected(Error::BadArg);
+
+		auto mode_param = stack.Next();
+		if (!mode_param.has_value()) return std::unexpected(Error::TooLessParam);
+		auto mode_arg = ParseSearchMode(mode_param.value());
+		if (!mode_arg.has_value()) return std::unexpected(Error::BadArg);
+
+		auto text_arg = stack.Next();
+		if (!text_arg.has_value()) return std::unexpected(Error::TooLessParam);
+
+		CHECK_NO_MORE_PARAM(stack)
+
+		SearchParam param {
+			.part = part_arg.value(),
+			.mode = mode_arg.value(),
+			.text = std::u8string(text_arg.value()),
+		};
+		SAFE_CALL_DELEGATE(this->search_delegate, param)
+		return {};
+	}
+	Result<void> Commander::ItemsBranch(ParamStack &stack) const {
+		auto count_param = stack.Next();
+		if (!count_param.has_value()) return std::unexpected(Error::TooLessParam);
+		auto count_arg = yycc::num::parse::parse<size_t>(count_param.value());
+		if (!count_arg.has_value()) return std::unexpected(Error::BadArg);
+		if (count_arg.value() < 1) return std::unexpected(Error::BadArg);
+
+		CHECK_NO_MORE_PARAM(stack)
+
+		ItemsParam param {
+			.count = count_arg.value(),
+		};
+		SAFE_CALL_DELEGATE(this->items_delegate, param)
+		return {};
+	}
+	Result<void> Commander::StyleBranch(ParamStack &stack) const {
+		auto level_param = stack.Next();
+		if (!level_param.has_value()) return std::unexpected(Error::TooLessParam);
+		auto level_arg = ParseStyleLevel(level_param.value());
+		if (!level_arg.has_value()) return std::unexpected(Error::BadArg);
+
+		CHECK_NO_MORE_PARAM(stack)
+
+		StyleParam param {
+			.level = level_arg.value(),
+		};
+		SAFE_CALL_DELEGATE(this->style_delegate, param)
+		return {};
+	}
+	Result<void> Commander::EncodingBranch(ParamStack &stack) const {
+		std::vector<std::u8string> collector;
+		while (true) {
+			auto param = stack.Next();
+			if (param.has_value()) collector.emplace_back(param.value());
+			else break;
 		}
-		Literal::~Literal() {}
+		if (collector.empty()) return std::unexpected(Error::TooLessParam);
 
-		bool Literal::IsRootNode() { return false; }
-		bool Literal::IsArgument() { return false; }
-		const ConflictSet& Literal::GetConflictSet() { return m_ConflictSet; }
-		std::u8string Literal::GetHelpSymbol() { return m_Literal; }
-		bool Literal::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) { return cur_cmd == m_Literal; }
-		void Literal::EndConsume(ArgumentsMap& am) {}
+		EncodingParam param{
+		    .enc = std::move(collector),
+		};
+		SAFE_CALL_DELEGATE(this->encoding_delegate, param)
+		return {};
+	}
+	Result<void> Commander::TempBranch(ParamStack &stack) const {
+		auto dirpath_arg = stack.Next();
+		if (!dirpath_arg.has_value()) return std::unexpected(Error::TooLessParam);
 
-#pragma endregion
+		CHECK_NO_MORE_PARAM(stack)
 
-#pragma region Choice
+		TempParam param {
+			.dirpath = std::u8string(dirpath_arg.value()),
+		};
+		SAFE_CALL_DELEGATE(this->temp_delegate, param)
+		return {};
+	}
+	Result<void> Commander::RscBranch(ParamStack &stack) const {
+		auto param = stack.Next();
+		if (param.has_value()) {
+			const auto &verb = param.value();
 
-		Choice::Choice(const std::u8string_view& argname, const std::initializer_list<std::u8string>& vocabulary) :
-			AbstractNode(),
-			m_ChoiceName(argname), m_Vocabulary(vocabulary),
-			m_ConflictSet() {
-			// check argument
-			if (argname.empty())
-				throw std::invalid_argument("Choice argument name should not be empty.");
-			if (m_Vocabulary.size() < 2u)
-				throw std::invalid_argument("Too less vocabulary for choice. At least 2 items.");
-			std::set<std::u8string> vocabulary_set(m_Vocabulary.begin(), m_Vocabulary.end());
-			if (vocabulary_set.size() != m_Vocabulary.size())
-				throw std::invalid_argument("Vocabulary of choice should not have duplicated items.");
-			// init conflict set
-			m_ConflictSet.AddArgument(m_ChoiceName);
-			for (const auto& word : m_Vocabulary) {
-				m_ConflictSet.AddLiteral(word);
+			if (verb == u8"clear") {
+				return this->RscClearBranch(stack);
+			} else if (verb == u8"add") {
+				return this->RscAddBranch(stack);
+			} else {
+				return std::unexpected(Error::BadVerb);
 			}
+		} else {
+			return std::unexpected(Error::TooLessParam);
 		}
-		Choice::~Choice() {}
+	}
+	Result<void> Commander::RscClearBranch(ParamStack &stack) const {
+		CHECK_NO_MORE_PARAM(stack)
+		SAFE_CALL_DELEGATE(this->rsc_clear_delegate, RscClearParam{})
+		return {};
+	}
+	Result<void> Commander::RscAddBranch(ParamStack &stack) const {
+		auto dirpath_arg = stack.Next();
+		if (!dirpath_arg.has_value()) return std::unexpected(Error::TooLessParam);
 
-		bool Choice::IsRootNode() { return false; }
-		bool Choice::IsArgument() { return false; }
-		const ConflictSet& Choice::GetConflictSet() { return m_ConflictSet; }
-		std::u8string Choice::GetHelpSymbol() {
-			return YYCC::StringHelper::Printf(u8"[%s]",
-				YYCC::StringHelper::Join(m_Vocabulary.begin(), m_Vocabulary.end(), u8" | ").c_str()
-			);
-		}
-		bool Choice::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) {
-			for (size_t i = 0; i < m_Vocabulary.size(); ++i) {
-				if (cur_cmd == m_Vocabulary[i]) {
-					am.Add<ArgValue_t>(m_ChoiceName, i);
-					return true;
-				}
-			}
-			return false;
-		}
-		void Choice::EndConsume(ArgumentsMap& am) { am.Remove(m_ChoiceName); }
+		CHECK_NO_MORE_PARAM(stack)
 
-#pragma endregion
-
-#pragma region Abstract Argument
-
-		AbstractArgument::AbstractArgument(const std::u8string_view& argname) :
-			AbstractNode(),
-			m_ArgumentName(argname), m_ConflictSet() {
-			// check argument
-			if (argname.empty())
-				throw std::invalid_argument("Argument name should not be empty.");
-			// setup conflict set
-			m_ConflictSet.AddArgument(m_ArgumentName);
-		}
-		AbstractArgument::~AbstractArgument() {}
-
-		bool AbstractArgument::IsRootNode() { return false; }
-		bool AbstractArgument::IsArgument() { return true; }
-		const ConflictSet& AbstractArgument::GetConflictSet() { return m_ConflictSet; }
-		std::u8string AbstractArgument::GetHelpSymbol() {
-			return YYCC::StringHelper::Printf(u8"<%s>", m_ArgumentName.c_str());
-		}
-		//bool AbstractArgument::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) { return false; }
-		void AbstractArgument::EndConsume(ArgumentsMap& am) { am.Remove(m_ArgumentName); }
-
-#pragma endregion
-
-#pragma region Arithmetic Argument
-
-		// It's a template class
-		// We are forced to implement it in header file.
-
-#pragma endregion
-
-#pragma region String Argument
-
-		StringArgument::StringArgument(const std::u8string_view& argname, Constraint_t constraint) :
-			AbstractArgument(argname), m_Constraint(constraint) {}
-
-		StringArgument::~StringArgument() {}
-
-		bool StringArgument::BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) {
-			// check constraint
-			if (m_Constraint.IsValid() && !m_Constraint.m_CheckFct(cur_cmd))
-				return false;
-			// accept
-			am.Add<ArgValue_t>(m_ArgumentName, cur_cmd);
-			return true;
-		}
-
-#pragma endregion
-
+		RscAddParam param {
+			.dirpath = std::u8string(dirpath_arg.value()),
+		};
+		SAFE_CALL_DELEGATE(this->rsc_add_delegate, param)
+		return {};
+	}
+	Result<void> Commander::TestBranch(ParamStack &stack) const {
+		CHECK_NO_MORE_PARAM(stack)
+		SAFE_CALL_DELEGATE(this->test_delegate, TestParam{})
+		return {};
+	}
+	Result<void> Commander::VersionBranch(ParamStack &stack) const {
+		CHECK_NO_MORE_PARAM(stack)
+		SAFE_CALL_DELEGATE(this->version_delegate, VersionParam{})
+		return {};
+	}
+	Result<void> Commander::HelpBranch(ParamStack &stack) const {
+		CHECK_NO_MORE_PARAM(stack)
+		SAFE_CALL_DELEGATE(this->help_delegate, HelpParam{})
+		return {};
+	}
+	Result<void> Commander::ExitBranch(ParamStack &stack) const {
+		CHECK_NO_MORE_PARAM(stack)
+		SAFE_CALL_DELEGATE(this->exit_delegate, ExitParam{})
+		return {};
 	}
 
-#pragma region Command Parser
+#undef SAFE_CALL_DELEGATE
+#undef CHECK_NO_MORE_PARAM
 
-	CommandParser::CommandParser() {}
+#pragma endregion
 
-	CommandParser::~CommandParser() {}
+#pragma region Delegate Setter
 
-	bool CommandParser::Parse(const CmdSplitter::Result_t& cmds) {
-		// Create a copy of given command
-		CmdSplitter::Result_t al(cmds);
-		// Create argument map
-		ArgumentsMap am;
-
-		// Call root node Consume function and return its result.
-		return m_RootNode.Consume(al, am);
+	void Commander::SetLoadDelegate(LoadDelegate &&delegate) {
+		this->load_delegate = std::move(delegate);
 	}
-
-	HelpDocument CommandParser::Help() {
-		// Create help docuemnt
-		HelpDocument doc;
-		// use node tree to fill help document.
-		m_RootNode.Help(doc);
-		// return result.
-		return doc;
+	void Commander::SetUnloadDelegate(UnloadDelegate &&delegate) {
+		this->unload_delegate = std::move(delegate);
 	}
-
-	Nodes::RootNode& CommandParser::GetRoot() {
-		return m_RootNode;
+	void Commander::SetSaveDelegate(SaveDelegate &&delegate) {
+		this->save_delegate = std::move(delegate);
+	}
+	void Commander::SetInfoDelegate(InfoDelegate &&delegate) {
+		this->info_delegate = std::move(delegate);
+	}
+	void Commander::SetLsDelegate(LsDelegate &&delegate) {
+		this->ls_delegate = std::move(delegate);
+	}
+	void Commander::SetDataDelegate(DataDelegate &&delegate) {
+		this->data_delegate = std::move(delegate);
+	}
+	void Commander::SetChunkDelegate(ChunkDelegate &&delegate) {
+		this->chunk_delegate = std::move(delegate);
+	}
+	void Commander::SetSearchDelegate(SearchDelegate &&delegate) {
+		this->search_delegate = std::move(delegate);
+	}
+	void Commander::SetItemsDelegate(ItemsDelegate &&delegate) {
+		this->items_delegate = std::move(delegate);
+	}
+	void Commander::SetStyleDelegate(StyleDelegate &&delegate) {
+		this->style_delegate = std::move(delegate);
+	}
+	void Commander::SetEncodingDelegate(EncodingDelegate &&delegate) {
+		this->encoding_delegate = std::move(delegate);
+	}
+	void Commander::SetTempDelegate(TempDelegate &&delegate) {
+		this->temp_delegate = std::move(delegate);
+	}
+	void Commander::SetRscClearDelegate(RscClearDelegate &&delegate) {
+		this->rsc_clear_delegate = std::move(delegate);
+	}
+	void Commander::SetRscAddDelegate(RscAddDelegate &&delegate) {
+		this->rsc_add_delegate = std::move(delegate);
+	}
+	void Commander::SetTestDelegate(TestDelegate &&delegate) {
+		this->test_delegate = std::move(delegate);
+	}
+	void Commander::SetVersionDelegate(VersionDelegate &&delegate) {
+		this->version_delegate = std::move(delegate);
+	}
+	void Commander::SetHelpDelegate(HelpDelegate &&delegate) {
+		this->help_delegate = std::move(delegate);
+	}
+	void Commander::SetExitDelegate(ExitDelegate &&delegate) {
+		this->exit_delegate = std::move(delegate);
 	}
 
 #pragma endregion
 
-}
+#pragma endregion
+
+} // namespace Unvirt::CmdHelper

@@ -1,526 +1,241 @@
 #pragma once
 
-#include <YYCCommonplace.hpp>
+#include <yycc.hpp>
+#include <yycc/macro/class_copy_move.hpp>
 #include <string>
+#include <string_view>
 #include <vector>
-#include <deque>
-#include <map>
-#include <set>
 #include <functional>
-#include <initializer_list>
-#include <type_traits>
-#include <stdexcept>
-#include <memory>
+#include <optional>
+#include <expected>
 
 namespace Unvirt::CmdHelper {
 
-	class CmdSplitter {
-	public:
-		using Result_t = std::deque<std::u8string>;
-	private:
-		enum class StateType : int {
-			SPACE,
-			SINGLE,
-			DOUBLE,
-			ESCAPE,
-			NORMAL
-		};
+#pragma region Delegate Parameters
 
-	public:
-		CmdSplitter() :
-			m_CurrentChar(u8'\0'), m_Buffer(), m_Result(), m_ValidResult(false),
-			m_State(StateType::NORMAL), m_PrevState(StateType::NORMAL) {}
-		~CmdSplitter() {}
-		YYCC_DEF_CLS_COPY_MOVE(CmdSplitter);
+	enum class LoadStage { Shallow, Deep };
 
-		bool Lex(const std::u8string& u8cmd);
-		const Result_t& GetResult() const;
-
-	private:
-		void ProcSpace();
-		void ProcSingle();
-		void ProcDouble();
-		void ProcEscape();
-		void ProcNormal();
-
-		char8_t m_CurrentChar;
-		std::u8string m_Buffer;
-		Result_t m_Result;
-		bool m_ValidResult;
-		StateType m_State, m_PrevState;
+	struct LoadParam {
+		LoadStage stage;
+		std::u8string filepath;
 	};
 
-	namespace AMItems {
+	struct UnloadParam {};
 
-		class AbstractItem {
-		public:
-			AbstractItem() {}
-			virtual ~AbstractItem() {}
-			YYCC_DEF_CLS_COPY_MOVE(AbstractItem);
-		};
-
-		template<typename _Ty, std::enable_if_t<std::is_arithmetic_v<_Ty>, int> = 0>
-		class ArithmeticItem : public AbstractItem {
-		public:
-			ArithmeticItem(_Ty value) : AbstractItem(), m_Data(value) {}
-			virtual ~ArithmeticItem() {}
-			YYCC_DEF_CLS_COPY_MOVE(ArithmeticItem);
-		public:
-			_Ty Get() const { return m_Data; }
-		protected:
-			_Ty m_Data;
-		};
-
-		template<typename _Ty, std::enable_if_t<std::is_arithmetic_v<_Ty>, int> = 0>
-		class ArithmeticArrayItem : public AbstractItem {
-		public:
-			ArithmeticArrayItem(const std::vector<_Ty>& values) : AbstractItem(), m_Data(values) {}
-			virtual ~ArithmeticArrayItem() {}
-			YYCC_DEF_CLS_COPY_MOVE(ArithmeticArrayItem);
-		public:
-			const std::vector<_Ty>& Get() const { return m_Data; }
-		protected:
-			std::vector<_Ty> m_Data;
-		};
-
-		class StringItem : public AbstractItem {
-		public:
-			StringItem(const std::u8string_view& value) : AbstractItem(), m_Data(value) {}
-			virtual ~StringItem() {}
-			YYCC_DEF_CLS_COPY_MOVE(StringItem);
-		public:
-			const std::u8string& Get() const { return m_Data; }
-		protected:
-			std::u8string m_Data;
-		};
-
-		class StringArrayItem : public AbstractItem {
-		public:
-			StringArrayItem(const std::vector<std::u8string>& value) : AbstractItem(), m_Data(value) {}
-			virtual ~StringArrayItem() {}
-			YYCC_DEF_CLS_COPY_MOVE(StringArrayItem);
-		public:
-			const std::vector<std::u8string>& Get() const { return m_Data; }
-		protected:
-			std::vector<std::u8string> m_Data;
-		};
-
-	}
-
-	class ArgumentsMap {
-	public:
-		ArgumentsMap();
-		~ArgumentsMap();
-		YYCC_DEF_CLS_COPY_MOVE(ArgumentsMap);
-
-	protected:
-		std::map<std::u8string, std::shared_ptr<AMItems::AbstractItem>> m_Data;
-
-	public:
-		template<class _Ty, class... _Types, std::enable_if_t<std::is_base_of_v<AMItems::AbstractItem, _Ty>, int> = 0>
-		void Add(const std::u8string_view& key, _Types&&... args) {
-			// check argument
-			if (key.empty())
-				throw std::invalid_argument("argument key should not be empty");
-			// insert into data
-			auto result = m_Data.try_emplace(std::u8string(key), std::make_shared<_Ty>(std::forward<_Types>(args)...));
-			if (!result.second)
-				throw std::runtime_error("try to add an existing key.");
-		}
-		template<class _Ty, std::enable_if_t<std::is_base_of_v<AMItems::AbstractItem, _Ty>, int> = 0>
-		const _Ty& Get(const std::u8string_view& key) const {
-			// check argument
-			if (key.empty())
-				throw std::invalid_argument("argument key should not be empty");
-			// find key first
-			auto finder = m_Data.find(std::u8string(key));
-			if (finder == m_Data.end())
-				throw std::runtime_error("try to get a non-existent key.");
-			// get stored value data
-			const _Ty* value = static_cast<const _Ty*>(finder->second.get());
-			return *value;
-		}
-		void Remove(const std::u8string_view& key) {
-			// check argument
-			if (key.empty())
-				throw std::invalid_argument("argument key should not be empty");
-			// remove it from map and check whether remove item
-			if (m_Data.erase(std::u8string(key)) == 0u)
-				throw std::runtime_error("try to delete a non-existent key.");
-		}
+	struct SaveParam {
+		std::u8string filepath;
 	};
 
-	// Forward declaration for Nodes::AbstractNode
-	namespace Nodes { class AbstractNode; }
+	struct InfoParam {};
 
-	class HelpDocument {
-		friend class Nodes::AbstractNode;
-	public:
-		HelpDocument();
-		~HelpDocument();
-		YYCC_DEF_CLS_COPY_MOVE(HelpDocument);
-
-	public:
-		void Print();
-
-		// AbstractNode used
-	protected:
-		void Push(const std::u8string& arg_name, const std::u8string& arg_desc);
-		void Pop();
-		void Terminate(std::u8string& command_desc);
-
-	protected:
-		struct StackItem {
-			StackItem();
-			StackItem(const std::u8string& name, const std::u8string& desc);
-			YYCC_DEF_CLS_COPY_MOVE(StackItem);
-
-			std::u8string m_Name;
-			std::u8string m_Desc;
-		};
-		std::deque<StackItem> m_Stack;
-
-		struct ResultItem {
-			ResultItem();
-			ResultItem(const std::u8string& cmd_desc, const std::deque<StackItem>& arg_desc);
-			YYCC_DEF_CLS_COPY_MOVE(ResultItem);
-
-			std::u8string m_CmdDesc;
-			std::vector<StackItem> m_ArgDesc;
-		};
-		std::vector<ResultItem> m_Results;
+	enum class LsPart {
+		Object,
+		Manager,
+		Search,
 	};
 
-	class ConflictSet {
-	public:
-		ConflictSet();
-		~ConflictSet();
-		YYCC_DEF_CLS_COPY_MOVE(ConflictSet);
-
-	public:
-		/**
-		 * @brief Add literal item into conflict set.
-		 * @param[in] value Literal item.
-		 * @remarks
-		 * \li Literal item is the string input in command line.
-		 * \li The word in Literal, and the vocabulary in Choice should be put by this function.
-		 * \li Added item will add \c literal: prefix to make it in literal scope,
-		 * so that it will not be compared with argument name items.
-		 * Because we allow 2 literal item and argument name item have same name.
-		*/
-		void AddLiteral(const std::u8string_view& value);
-		/**
-		 * @brief Add argument name item into conflict
-		 * @param[in] value Argument name item.
-		 * @remarks
-		 * \li Argument name item is the key name put in ArgumentsMap.
-		 * \li The argument name in Choice and Argument should be put by this function.
-		 * \li Added item will add \c argument: prefix to make it in argument name scope,
-		 * so that it will not be compared with literal items.
-		 * Because we allow 2 literal item and argument name item have same name.
-		*/
-		void AddArgument(const std::u8string_view& value);
-		/**
-		 * @brief Check whether this set is conflict with another.
-		 * @param[in] rhs The set to be compared.
-		 * @return True if they have conflict.
-		 * @remarks
-		 * This function simply compute the intersection of two set.
-		 * If the result is not empty, it means that there is a conflict.
-		*/
-		bool IsConflictWith(const ConflictSet& rhs) const;
-
-	protected:
-		std::set<std::u8string> m_ConflictSet;
+	struct LsParam {
+		LsPart part;
+		size_t page;
 	};
 
-	// Forward declaration of CommandParser for Nodes::RootNode
-	class CommandParser;
+	enum class DataPart {
+		Object,
+		Manager,
+	};
 
-	namespace Nodes {
+	struct DataParam {
+		DataPart part;
+		size_t index;
+	};
 
-		class AbstractNode {
-		public:
-			using FctExecution_t = std::function<void(const ArgumentsMap&)>;
+	enum class ChunkPart {
+		Object,
+		Manager,
+	};
 
-		public:
-			AbstractNode();
-			virtual ~AbstractNode();
-			YYCC_DEF_CLS_COPY_MOVE(AbstractNode);
+	struct ChunkParam {
+		ChunkPart part;
+		size_t index;
+	};
 
-		protected:
-			std::vector<std::shared_ptr<AbstractNode>> m_Nodes;
-			FctExecution_t m_Execution;
-			std::u8string m_ExecutionDesc;
-			std::u8string m_Comment;
+	enum class SearchPart {
+		Object,
+		Manager,
+	};
 
-		protected:
-			/**
-			 * @brief The core function to generate help document by following hierarchy.
-			 * @param[in] doc The generating help document.
-			*/
-			void Help(HelpDocument& doc);
-			/**
-			 * @brief The core function to consume splitted commands by following hierarchy.
-			 * @param[in] al The splitted commands deque.
-			 * @param[in] am Argument map for operating.
-			 * @return True if we reach a legal terminal, otherwise false.
-			 * Once this function return true, there is no need to process other nodes.
-			 * Because the final command processor has been executed when this function return true.
-			*/
-			bool Consume(CmdSplitter::Result_t& al, ArgumentsMap& am);
+	enum class SearchMode {
+		PlainText,
+		Regex,
+	};
 
-		protected:
-			/**
-			 * @brief Check whether current node is root node.
-			 * @return True if it is, otherwise false.
-			 * @remarks
-			 * This function usually return false.
-			 * It only return true when using special node called root node with CommandParser.
-			*/
-			virtual bool IsRootNode() = 0;
-			/**
-			 * @brief Check whether current node is argument.
-			 * @return True if it is, otherwise false.
-			 * @remakrs
-			 * \li Sub-class must implement this function.
-			 * \li This function is used internally because when consuming nodes,
-			 * we need consume literal and choice first, then consume argument.
-			*/
-			virtual bool IsArgument() = 0;
-			/**
-			 * @brief Get a set of identifier used for checking node conflict.
-			 * @return The set of identifier.
-			 * @remarks
-			 * Sub-class must implement this function.
-			 * \par
-			 * This function return the reference to the set.
-			 * It means that sub-class need allocate some memory by themselves
-			 * to store the value returned by this function.
-			 * \par
-			 * When adding new nodes, we use this function to check whether there is conflict.
-			 * If the intersection between 2 sets coming from different nodes is not empty,
-			 * it means that they have conflict, the process of adding will be aborted.
-			 * \par
-			 * In details:
-			 * \li Literal: Put its literal in set directly.
-			 * \li Choice: Put its vocabulary and associated argument name in set.
-			 * \li Argument: Put its argument name in set.
-			*/
-			virtual const ConflictSet& GetConflictSet() = 0;
-			/**
-			 * @brief Get the string presented in syntax part in help messages.
-			 * @return The string presented in syntax part in help messages.
-			 * @remarks Sub-class must implement this function.
-			 * \li Literal: Return its literal directly.
-			 * \li Choice: Join vocabulary with \c \| then brack it with square bracker.
-			 * \li Argument: Bracket its argument name with sharp bracket.
-			*/
-			virtual std::u8string GetHelpSymbol() = 0;
-			/**
-			 * @brief Try consume given command for this node.
-			 * @param[in] cur_cmd The command hope to be accepted.
-			 * @param[in] am Argument map for operating.
-			 * @return True if this node accept this command.
-			 * @remarks
-			 * Sub-class must implement this function.
-			 * \par
-			 * For choice and argument, if given command is accepted,
-			 * implementation should insert data into argument map.
-			 * So that user can visit it.
-			*/
-			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) = 0;
-			/**
-			 * @brief End the consume of this node.
-			 * @param[in] am Argument map for operating.
-			 * @remarks
-			 * Sub-class must implement this function.
-			 * \par
-			 * If BeginConsume() return false, this function will not be called.
-			 * \par
-			 * For choice and argument, if you have accepted one command,
-			 * implementation should remove data from argument map.
-			 * So that following nodes (not belongs to this tree) may add the argument with same name.
-			*/
-			virtual void EndConsume(ArgumentsMap& am) = 0;
+	struct SearchParam {
+		SearchPart part;
+		SearchMode mode;
+		std::u8string text;
+	};
 
-		public:
-			/**
-			 * @brief Add a new node as child nodes for this node.
-			 * @tparam _Ty The child class type of AbstractNode.
-			 * @param[in] node The node instance to be added.
-			 * @return Return self for chain calling.
-			*/
-			template<class _Ty, std::enable_if_t<std::is_base_of_v<AbstractNode, _Ty> && !std::is_same_v<AbstractNode, _Ty>, int> = 0>
-			AbstractNode& Then(AbstractNode& node) {
-				// create node first
-				auto new_node = std::make_shared<_Ty>(static_cast<_Ty&>(node));
-				// get its abstract pointer for checking
-				AbstractNode* new_node_ptr = new_node.get();
-				// check root node.
-				if (new_node_ptr->IsRootNode())
-					throw std::invalid_argument("root node should not be inserted as child node.");
-				// check conflict
-				const auto& new_node_set = new_node_ptr->GetConflictSet();
-				for (auto& child_node : m_Nodes) {
-					const auto& node_set = child_node->GetConflictSet();
-					if (new_node_set.IsConflictWith(node_set))
-						throw std::invalid_argument("try to add a conflict node. please check your code.");
-				}
-				// add into list
-				m_Nodes.emplace_back(std::move(new_node));
-				return *this;
-			}
-			/**
-			 * @brief Setup execution infomation for this node.
-			 * @param[in] fct Associated execution function. nullptr is not allowed.
-			 * @param[in] exec_desc Associated execution message presented in help message.
-			 * @return Return self for chain calling.
-			 * @remarks This function only can be called once for one node.
-			*/
-			AbstractNode& Executes(FctExecution_t fct, const std::u8string_view& exec_desc = u8"");
-			/**
-			 * @brief Setup command for this node.
-			 * @param[in] comment The command of current node.
-			 * @return Return self for chain calling.
-			*/
-			AbstractNode& Comment(const std::u8string_view& comment = u8"");
+	struct ItemsParam {
+		size_t count;
+	};
 
-		};
+	enum class StyleLevel {
+		Full,
+		Simple,
+	};
 
-		class RootNode : public AbstractNode {
-			friend class ::Unvirt::CmdHelper::CommandParser;
-		public:
-			RootNode();
-			virtual ~RootNode();
-			YYCC_DEF_CLS_COPY_MOVE(RootNode);
+	struct StyleParam {
+		StyleLevel level;
+	};
 
-		protected:
-			virtual bool IsRootNode() override;
-			virtual bool IsArgument() override;
-			virtual const ConflictSet& GetConflictSet() override;
-			virtual std::u8string GetHelpSymbol() override;
-			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
-			virtual void EndConsume(ArgumentsMap& am) override;
-		};
+	struct EncodingParam {
+		std::vector<std::u8string> enc;
+	};
 
-		class Literal : public AbstractNode {
-		public:
-			Literal(const std::u8string_view& words);
-			virtual ~Literal();
-			YYCC_DEF_CLS_COPY_MOVE(Literal);
+	struct TempParam {
+		std::u8string dirpath;
+	};
 
-		protected:
-			virtual bool IsRootNode() override;
-			virtual bool IsArgument() override;
-			virtual const ConflictSet& GetConflictSet() override;
-			virtual std::u8string GetHelpSymbol() override;
-			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
-			virtual void EndConsume(ArgumentsMap& am) override;
+	struct RscClearParam {};
+	struct RscAddParam {
+		std::u8string dirpath;
+	};
 
-			std::u8string m_Literal;
-			ConflictSet m_ConflictSet;
-		};
+	struct TestParam {};
 
-		class Choice : public AbstractNode {
-		public:
-			using ArgValue_t = AMItems::ArithmeticItem<size_t>;
-		public:
-			Choice(const std::u8string_view& argname, const std::initializer_list<std::u8string>& vocabulary);
-			virtual ~Choice();
-			YYCC_DEF_CLS_COPY_MOVE(Choice);
+	struct VersionParam {};
 
-		protected:
-			virtual bool IsRootNode() override;
-			virtual bool IsArgument() override;
-			virtual const ConflictSet& GetConflictSet() override;
-			virtual std::u8string GetHelpSymbol() override;
-			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
-			virtual void EndConsume(ArgumentsMap& am) override;
+	struct HelpParam {};
 
-			std::u8string m_ChoiceName;
-			std::vector<std::u8string> m_Vocabulary;
-			ConflictSet m_ConflictSet;
-		};
+	struct ExitParam {};
 
-		class AbstractArgument : public AbstractNode {
-		public:
-			AbstractArgument(const std::u8string_view& argname);
-			virtual ~AbstractArgument();
-			YYCC_DEF_CLS_COPY_MOVE(AbstractArgument);
+#pragma endregion
 
-			// AbstractArgument do not implement BeginConsume().
-			// Because it involve the detail of data parsing.
-			// However, other parts are shared by all argument type.
+#pragma region Delegates
 
-		protected:
-			virtual bool IsRootNode() override;
-			virtual bool IsArgument() override;
-			virtual const ConflictSet& GetConflictSet() override;
-			virtual std::u8string GetHelpSymbol() override;
-			//virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
-			virtual void EndConsume(ArgumentsMap& am) override;
+	using LoadDelegate = std::function<void(const LoadParam &)>;
+	using UnloadDelegate = std::function<void(const UnloadParam &)>;
+	using SaveDelegate = std::function<void(const SaveParam &)>;
+	using InfoDelegate = std::function<void(const InfoParam &)>;
+	using LsDelegate = std::function<void(const LsParam &)>;
+	using DataDelegate = std::function<void(const DataParam &)>;
+	using ChunkDelegate = std::function<void(const ChunkParam &)>;
+	using SearchDelegate = std::function<void(const SearchParam &)>;
+	using ItemsDelegate = std::function<void(const ItemsParam &)>;
+	using StyleDelegate = std::function<void(const StyleParam &)>;
+	using EncodingDelegate = std::function<void(const EncodingParam &)>;
+	using TempDelegate = std::function<void(const TempParam &)>;
+	using RscClearDelegate = std::function<void(const RscClearParam &)>;
+	using RscAddDelegate = std::function<void(const RscAddParam &)>;
+	using TestDelegate = std::function<void(const TestParam &)>;
+	using VersionDelegate = std::function<void(const VersionParam &)>;
+	using HelpDelegate = std::function<void(const HelpParam &)>;
+	using ExitDelegate = std::function<void(const ExitParam &)>;
 
-			std::u8string m_ArgumentName;
-			ConflictSet m_ConflictSet;
-		};
+#pragma endregion
 
-		template<typename _Ty, std::enable_if_t<std::is_arithmetic_v<_Ty>, int> = 0>
-		class ArithmeticArgument : public AbstractArgument {
-		public:
-			using ArgValue_t = AMItems::ArithmeticItem<_Ty>;
-			using Constraint_t = YYCC::Constraints::Constraint<_Ty>;
-		public:
-			ArithmeticArgument(const std::u8string_view& argname, Constraint_t constraint = Constraint_t {}) :
-				AbstractArgument(argname), m_Constraint(constraint) {}
-			virtual ~ArithmeticArgument() {}
-			YYCC_DEF_CLS_COPY_MOVE(ArithmeticArgument);
+#pragma region Error Types
 
-		protected:
-			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override {
-				// try parse
-				_Ty result;
-				if (!YYCC::ParserHelper::TryParse<_Ty>(cur_cmd, result))
-					return false;
-				// check constraint
-				if (m_Constraint.IsValid() && !m_Constraint.m_CheckFct(result))
-					return false;
-				// okey
-				am.Add<ArgValue_t>(m_ArgumentName, result);
-				return true;
-			}
-		protected:
-			Constraint_t m_Constraint;
-		};
+	enum class Error {
+		Lexer,        ///< Fail to do lexer.
+		TooMuchParam, ///< The count of parameter is larger than expected.
+		TooLessParam, ///< The count of parameter is to less as expected.
+		BadArg,       ///< The format of argument is wrong.
+		BadVerb,      ///< Given verb do not match with any existing items.
+	};
 
-		class StringArgument : public AbstractArgument {
-		public:
-			using ArgValue_t = AMItems::StringItem;
-			using Constraint_t = YYCC::Constraints::Constraint<std::u8string>;
-		public:
-			StringArgument(const std::u8string_view& argname, Constraint_t constraint = Constraint_t {});
-			virtual ~StringArgument();
-			YYCC_DEF_CLS_COPY_MOVE(StringArgument);
+	template<typename T>
+	using Result = std::expected<T, Error>;
 
-		protected:
-			virtual bool BeginConsume(const std::u8string& cur_cmd, ArgumentsMap& am) override;
-			Constraint_t m_Constraint;
-		};
+#pragma endregion
 
-	}
-
-	class CommandParser {
+	class ParamStack {
 	public:
-		CommandParser();
-		~CommandParser();
+		ParamStack(std::vector<std::u8string>&& params);
+		~ParamStack();
+		YYCC_DEFAULT_COPY_MOVE(ParamStack)
 
 	public:
-		bool Parse(const CmdSplitter::Result_t& cmds);
-		HelpDocument Help();
-		Nodes::RootNode& GetRoot();
+		std::optional<std::u8string_view> Next();
 
 	private:
-		Nodes::RootNode m_RootNode;
+		std::vector<std::u8string> params;
+		size_t cursor;
 	};
 
-}
+	class Commander {
+	public:
+		Commander();
+		~Commander();
+		YYCC_DELETE_COPY_MOVE(Commander)
+
+	public:
+		Result<void> Dispatch(const std::u8string_view &cmd) const;
+
+	private:
+		Result<ParamStack> BuildStack(const std::u8string_view &cmd) const;
+
+	private:
+		Result<void> Branch(ParamStack &stack) const;
+		Result<void> LoadBranch(ParamStack &stack) const;
+		Result<void> UnloadBranch(ParamStack &stack) const;
+		Result<void> SaveBranch(ParamStack &stack) const;
+		Result<void> InfoBranch(ParamStack &stack) const;
+		Result<void> LsBranch(ParamStack &stack) const;
+		Result<void> DataBranch(ParamStack &stack) const;
+		Result<void> ChunkBranch(ParamStack &stack) const;
+		Result<void> SearchBranch(ParamStack &stack) const;
+		Result<void> ItemsBranch(ParamStack &stack) const;
+		Result<void> StyleBranch(ParamStack &stack) const;
+		Result<void> EncodingBranch(ParamStack &stack) const;
+		Result<void> TempBranch(ParamStack &stack) const;
+		Result<void> RscBranch(ParamStack &stack) const;
+		Result<void> RscClearBranch(ParamStack &stack) const;
+		Result<void> RscAddBranch(ParamStack &stack) const;
+		Result<void> TestBranch(ParamStack &stack) const;
+		Result<void> VersionBranch(ParamStack &stack) const;
+		Result<void> HelpBranch(ParamStack &stack) const;
+		Result<void> ExitBranch(ParamStack &stack) const;
+
+	public:
+		void SetLoadDelegate(LoadDelegate &&delegate);
+		void SetUnloadDelegate(UnloadDelegate &&delegate);
+		void SetSaveDelegate(SaveDelegate &&delegate);
+		void SetInfoDelegate(InfoDelegate &&delegate);
+		void SetLsDelegate(LsDelegate &&delegate);
+		void SetDataDelegate(DataDelegate &&delegate);
+		void SetChunkDelegate(ChunkDelegate &&delegate);
+		void SetSearchDelegate(SearchDelegate &&delegate);
+		void SetItemsDelegate(ItemsDelegate &&delegate);
+		void SetStyleDelegate(StyleDelegate &&delegate);
+		void SetEncodingDelegate(EncodingDelegate &&delegate);
+		void SetTempDelegate(TempDelegate &&delegate);
+		void SetRscClearDelegate(RscClearDelegate &&delegate);
+		void SetRscAddDelegate(RscAddDelegate &&delegate);
+		void SetTestDelegate(TestDelegate &&delegate);
+		void SetVersionDelegate(VersionDelegate &&delegate);
+		void SetHelpDelegate(HelpDelegate &&delegate);
+		void SetExitDelegate(ExitDelegate &&delegate);
+
+	private:
+		LoadDelegate load_delegate;
+		UnloadDelegate unload_delegate;
+		SaveDelegate save_delegate;
+		InfoDelegate info_delegate;
+		LsDelegate ls_delegate;
+		DataDelegate data_delegate;
+		ChunkDelegate chunk_delegate;
+		SearchDelegate search_delegate;
+		ItemsDelegate items_delegate;
+		StyleDelegate style_delegate;
+		EncodingDelegate encoding_delegate;
+		TempDelegate temp_delegate;
+		RscClearDelegate rsc_clear_delegate;
+		RscAddDelegate rsc_add_delegate;
+		TestDelegate test_delegate;
+		VersionDelegate version_delegate;
+		HelpDelegate help_delegate;
+		ExitDelegate exit_delegate;
+	};
+
+} // namespace Unvirt::CmdHelper
