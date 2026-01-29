@@ -2,7 +2,7 @@
 
 #include <VTAll.hpp>
 
-namespace Unvirt::StructFormatter {
+namespace Unvirt::StructFmt {
 	
 #define PRIuSIZET "zu"
 

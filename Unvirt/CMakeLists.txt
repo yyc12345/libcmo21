@@ -4,8 +4,8 @@ add_executable(Unvirt "")
 target_sources(Unvirt
 PRIVATE
 	Docstring.cpp
+	StructFmt.cpp
 	CmdHelper.cpp
-	StructFormatter.cpp
 	UnvirtContext.cpp
 	Unvirt.cpp
 )
@@ -15,8 +15,8 @@ PRIVATE
 FILE_SET HEADERS
 FILES
 	Docstring.hpp
+	StructFmt.hpp
 	CmdHelper.hpp
-	StructFormatter.hpp
 	UnvirtContext.hpp
 )
 # Setup header infomation
