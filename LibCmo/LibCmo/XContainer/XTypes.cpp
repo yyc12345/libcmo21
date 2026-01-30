@@ -41,7 +41,7 @@ namespace LibCmo::XContainer {
 		}
 
 		template<bool BCondition>
-		static bool GeneralGetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got) {
+		static bool GenericGetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got) {
 			CKDWORD counter = 0;
 			for (size_t i = 0; i < ba.size(); ++i) {
 				if (ba[i] == BCondition) {
@@ -58,11 +58,11 @@ namespace LibCmo::XContainer {
 		}
 
 		bool GetSetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got) {
-			return GeneralGetBitPosition<true>(ba, n, got);
+			return GenericGetBitPosition<true>(ba, n, got);
 		}
 
 		bool GetUnsetBitPosition(const XBitArray& ba, CKDWORD n, CKDWORD& got) {
-			return GeneralGetBitPosition<false>(ba, n, got);
+			return GenericGetBitPosition<false>(ba, n, got);
 		}
 
 	}
@@ -83,7 +83,7 @@ namespace LibCmo::XContainer {
 
 	template<class T, bool BIsPre>
 		requires (std::is_same_v<T, CK2::CK_ID> || std::is_same_v<T, CK2::ObjImpls::CKObject*>)
-	static bool GeneralXArrayCheck_ItemCheck(const T& item, CK2::CKContext* ctx) {
+	static bool GenericXArrayCheck_ItemCheck(const T& item, CK2::CKContext* ctx) {
 		if (ctx == nullptr) return false;
 
 		if constexpr (BIsPre) {
@@ -111,14 +111,14 @@ namespace LibCmo::XContainer {
 		void PreDeletedCheck(XObjectArray& objarray, CK2::CKContext* ctx) {
 			if (ctx == nullptr) return;
 			std::erase_if(objarray, [ctx](const CK2::CK_ID& item) -> bool {
-				return GeneralXArrayCheck_ItemCheck<CK2::CK_ID, true>(item, ctx);
+				return GenericXArrayCheck_ItemCheck<CK2::CK_ID, true>(item, ctx);
 				});
 		}
 
 		void PostDeletedCheck(XObjectArray& objarray, CK2::CKContext* ctx) {
 			if (ctx == nullptr) return;
 			std::erase_if(objarray, [ctx](const CK2::CK_ID& item) -> bool {
-				return GeneralXArrayCheck_ItemCheck<CK2::CK_ID, false>(item, ctx);
+				return GenericXArrayCheck_ItemCheck<CK2::CK_ID, false>(item, ctx);
 				});
 		}
 		
@@ -126,14 +126,14 @@ namespace LibCmo::XContainer {
 		void PreDeletedCheck(XList<CK2::CK_ID>& objarray, CK2::CKContext* ctx) {
 			if (ctx == nullptr) return;
 			std::erase_if(objarray, [ctx](const CK2::CK_ID& item) -> bool {
-				return GeneralXArrayCheck_ItemCheck<CK2::CK_ID, true>(item, ctx);
+				return GenericXArrayCheck_ItemCheck<CK2::CK_ID, true>(item, ctx);
 				});
 		}
 
 		void PostDeletedCheck(XList<CK2::CK_ID>& objarray, CK2::CKContext* ctx) {
 			if (ctx == nullptr) return;
 			std::erase_if(objarray, [ctx](const CK2::CK_ID& item) -> bool {
-				return GeneralXArrayCheck_ItemCheck<CK2::CK_ID, false>(item, ctx);
+				return GenericXArrayCheck_ItemCheck<CK2::CK_ID, false>(item, ctx);
 				});
 		}
 
@@ -153,14 +153,14 @@ namespace LibCmo::XContainer {
 		void PreDeletedCheck(XObjectPointerArray& objarray, CK2::CKContext* ctx) {
 			if (ctx == nullptr) return;
 			std::erase_if(objarray, [ctx](CK2::ObjImpls::CKObject* const& item) -> bool {
-				return GeneralXArrayCheck_ItemCheck<CK2::ObjImpls::CKObject*, true>(item, ctx);
+				return GenericXArrayCheck_ItemCheck<CK2::ObjImpls::CKObject*, true>(item, ctx);
 				});
 		}
 
 		void PostDeletedCheck(XObjectPointerArray& objarray, CK2::CKContext* ctx) {
 			if (ctx == nullptr) return;
 			std::erase_if(objarray, [ctx](CK2::ObjImpls::CKObject* const& item) -> bool {
-				return GeneralXArrayCheck_ItemCheck<CK2::ObjImpls::CKObject*, false>(item, ctx);
+				return GenericXArrayCheck_ItemCheck<CK2::ObjImpls::CKObject*, false>(item, ctx);
 				});
 		}
 
@@ -168,14 +168,14 @@ namespace LibCmo::XContainer {
 		void PreDeletedCheck(XList<CK2::ObjImpls::CKObject*>& objarray, CK2::CKContext* ctx) {
 			if (ctx == nullptr) return;
 			std::erase_if(objarray, [ctx](CK2::ObjImpls::CKObject* const& item) -> bool {
-				return GeneralXArrayCheck_ItemCheck<CK2::ObjImpls::CKObject*, true>(item, ctx);
+				return GenericXArrayCheck_ItemCheck<CK2::ObjImpls::CKObject*, true>(item, ctx);
 				});
 		}
 
 		void PostDeletedCheck(XList<CK2::ObjImpls::CKObject*>& objarray, CK2::CKContext* ctx) {
 			if (ctx == nullptr) return;
 			std::erase_if(objarray, [ctx](CK2::ObjImpls::CKObject* const& item) -> bool {
-				return GeneralXArrayCheck_ItemCheck<CK2::ObjImpls::CKObject*, false>(item, ctx);
+				return GenericXArrayCheck_ItemCheck<CK2::ObjImpls::CKObject*, false>(item, ctx);
 				});
 		}
 

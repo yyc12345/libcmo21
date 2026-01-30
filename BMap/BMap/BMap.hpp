@@ -1,6 +1,8 @@
 #pragma once
 
 #include <VTAll.hpp>
+#include <yycc.hpp>
+#include <yycc/macro/class_copy_move.hpp>
 #include <vector>
 #include <cstdint>
 #include <cinttypes>
@@ -14,7 +16,7 @@ namespace BMap {
 	public:
 		BMFile(LibCmo::CKSTRING temp_folder, LibCmo::CKSTRING texture_folder, NakedOutputCallback raw_callback, LibCmo::CKDWORD encoding_count, LibCmo::CKSTRING* encodings, bool is_reader);
 		~BMFile();
-		YYCC_DEL_CLS_COPY_MOVE(BMFile);
+		YYCC_DELETE_COPY_MOVE(BMFile)
 
 		// ===== Safe Check Function ===== 
 
@@ -160,7 +162,7 @@ namespace BMap {
 	public:
 		BMMeshTransition();
 		~BMMeshTransition();
-		YYCC_DEL_CLS_COPY_MOVE(BMMeshTransition);
+		YYCC_DELETE_COPY_MOVE(BMMeshTransition)
 
 		bool PrepareVertexCount(LibCmo::CKDWORD count);
 		LibCmo::VxMath::VxVector3* PrepareVertex();

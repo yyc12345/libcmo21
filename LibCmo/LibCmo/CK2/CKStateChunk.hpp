@@ -274,11 +274,13 @@ namespace LibCmo::CK2 {
 	public:
 		bool SeekIdentifierDword(CKDWORD identifier);
 		bool SeekIdentifierDwordAndReturnSize(CKDWORD identifier, CKDWORD* out_size);
-		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+		template<typename TEnum>
+			requires std::is_enum_v<TEnum>
 		inline bool SeekIdentifier(TEnum enum_v) {
 			return SeekIdentifierDword(static_cast<CKDWORD>(enum_v));
 		}
-		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+		template<typename TEnum>
+			requires std::is_enum_v<TEnum>
 		inline bool SeekIdentifierAndReturnSize(TEnum enum_v, CKDWORD* out_size) {
 			return SeekIdentifierDwordAndReturnSize(static_cast<CKDWORD>(enum_v), out_size);
 		}
@@ -564,7 +566,8 @@ namespace LibCmo::CK2 {
 
 	public:
 		bool WriteIdentifierDword(CKDWORD identifier);
-		template<typename TEnum, std::enable_if_t<std::is_enum_v<TEnum>, int> = 0>
+		template<typename TEnum>
+			requires std::is_enum_v<TEnum>
 		inline bool WriteIdentifier(TEnum enum_v) {
 			return WriteIdentifierDword(static_cast<CKDWORD>(enum_v));
 		}

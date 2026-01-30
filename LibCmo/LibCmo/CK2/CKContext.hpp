@@ -69,7 +69,7 @@ namespace LibCmo::CK2 {
 		void ExecuteManagersOnSequenceDeleted(const CK_ID* objids, CKDWORD count);
 
 	protected:
-		void ExecuteManagersGeneral(std::function<void(MgrImpls::CKBaseManager*)> fct);
+		void ExecuteGenericManagers(std::function<void(MgrImpls::CKBaseManager*)> fct);
 		XContainer::XArray<MgrImpls::CKBaseManager*> m_ManagerList;
 
 		MgrImpls::CKObjectManager* m_ObjectManager;

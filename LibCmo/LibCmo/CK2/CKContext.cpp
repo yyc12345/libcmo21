@@ -169,30 +169,30 @@ namespace LibCmo::CK2 {
 	}
 
 	void CKContext::ExecuteManagersOnPreClearAll() {
-		ExecuteManagersGeneral([](MgrImpls::CKBaseManager* mgr) -> void {
+		ExecuteGenericManagers([](MgrImpls::CKBaseManager* mgr) -> void {
 			mgr->PreClearAll();
 			});
 	}
 
 	void CKContext::ExecuteManagersOnPostClearAll() {
-		ExecuteManagersGeneral([](MgrImpls::CKBaseManager* mgr) -> void {
+		ExecuteGenericManagers([](MgrImpls::CKBaseManager* mgr) -> void {
 			mgr->PostClearAll();
 			});
 	}
 
 	void CKContext::ExecuteManagersOnSequenceToBeDeleted(const CK_ID* objids, CKDWORD count) {
-		ExecuteManagersGeneral([objids, count](MgrImpls::CKBaseManager* mgr) -> void {
+		ExecuteGenericManagers([objids, count](MgrImpls::CKBaseManager* mgr) -> void {
 			mgr->SequenceToBeDeleted(objids, count);
 			});
 	}
 
 	void CKContext::ExecuteManagersOnSequenceDeleted(const CK_ID* objids, CKDWORD count) {
-		ExecuteManagersGeneral([objids, count](MgrImpls::CKBaseManager* mgr) -> void {
+		ExecuteGenericManagers([objids, count](MgrImpls::CKBaseManager* mgr) -> void {
 			mgr->SequenceDeleted(objids, count);
 			});
 	}
 
-	void CKContext::ExecuteManagersGeneral(std::function<void(MgrImpls::CKBaseManager*)> fct) {
+	void CKContext::ExecuteGenericManagers(std::function<void(MgrImpls::CKBaseManager*)> fct) {
 		for (auto& mgrptr : m_ManagerList) {
 			fct(mgrptr);
 		}

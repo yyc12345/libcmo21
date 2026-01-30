@@ -114,33 +114,6 @@ namespace Unvirt::StructFmt {
 		std::cout << strop::printf(u8"Page %" PRIuSIZET " of %" PRIuSIZET, page + 1, pager.GetMaxPage() + 1) << std::endl;
 	}
 
-	//template<class T>
-	//static void GeneralPrintList(
-	//	const std::vector<T>& data, size_t page, size_t pageitems,
-	//	std::function<void()> printHdrFct, std::function<void(size_t, const T&)> printEntryFct) {
-
-	//	// check page overflow
-	//	if (page * pageitems >= data.size()) {
-	//		console::write_line(YYCC_COLOR_LIGHT_RED(u8"Page out of range."));
-	//		return;
-	//	}
-
-	//	// calc page data
-	//	size_t fulllen = data.size(),
-	//		startpos = page * pageitems,
-	//		fullpage = (fulllen + (pageitems - 1)) / pageitems;	// to solve `fulllen / pageitems` empty page issue. like CKStateChunk::GetCeilDwordSize function (+3 /4 to get DWORD size).
-
-	//	// print header
-	//	printHdrFct();
-
-	//	// print body
-	//	for (size_t counter = startpos; counter < fulllen && (counter - startpos) < pageitems; ++counter) {
-	//		printEntryFct(counter, data[counter]);
-	//	}
-
-	//	console::format_line(u8"Page %" PRIuSIZET " of %" PRIuSIZET, page + 1, fullpage);
-	//}
-
 #pragma endregion
 
 #pragma region Object Printer

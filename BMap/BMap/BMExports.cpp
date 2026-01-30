@@ -1,5 +1,5 @@
 #include "BMExports.hpp"
-#include <YYCCommonplace.hpp>
+#include <yycc.hpp>
 #include <set>
 #include <type_traits>
 #include <memory>
@@ -28,8 +28,9 @@ bool CheckBMMeshTrans(BMap::BMMeshTransition* possible_trans) {
 	return (g_IsInited && possible_trans != nullptr && g_AllBMMeshTrans.contains(possible_trans));
 }
 
-template<class _Ty, std::enable_if_t<std::is_pointer_v<_Ty>, int> = 0>
-_Ty CheckGeneralObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possible_id, LibCmo::CK2::CK_CLASSID expected_cid) {
+template<class T>
+    requires std::is_pointer_v<T>
+T CheckGenericObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possible_id, LibCmo::CK2::CK_CLASSID expected_cid) {
 	// check bm file self.
 	if (!CheckBMFile(possible_bmfile)) return nullptr;
 	// check id
@@ -37,18 +38,18 @@ _Ty CheckGeneralObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possibl
 	// check id validation and class id
 	if (obj == nullptr || !LibCmo::CK2::CKIsChildClassOf(obj->GetClassID(), expected_cid)) return nullptr;
 
-	return static_cast<_Ty>(obj);
+	return static_cast<T>(obj);
 }
 
-#define CheckCKObject(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_OBJECT)
-#define CheckCKGroup(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKGroup*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_GROUP)
-#define CheckCK3dEntity(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CK3dEntity*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_3DENTITY)
-#define CheckCK3dObject(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CK3dObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT)
-#define CheckCKMesh(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKMesh*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_MESH)
-#define CheckCKMaterial(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKMaterial*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL)
-#define CheckCKTexture(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKTexture*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE)
-#define CheckCKLight(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKLight*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_LIGHT)
-#define CheckCKTargetLight(bmfile, objid) CheckGeneralObject<LibCmo::CK2::ObjImpls::CKTargetLight*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT)
+#define CheckCKObject(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_OBJECT)
+#define CheckCKGroup(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKGroup*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_GROUP)
+#define CheckCK3dEntity(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CK3dEntity*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_3DENTITY)
+#define CheckCK3dObject(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CK3dObject*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT)
+#define CheckCKMesh(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKMesh*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_MESH)
+#define CheckCKMaterial(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKMaterial*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL)
+#define CheckCKTexture(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKTexture*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE)
+#define CheckCKLight(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKLight*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_LIGHT)
+#define CheckCKTargetLight(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKTargetLight*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT)
 
 #pragma endregion
 
