@@ -5,6 +5,7 @@ target_sources(BMapInspector
 PRIVATE
 	BMapInspector.cpp
 	Utils.cpp
+	Ruleset.cpp
 )
 # Setup headers
 target_sources(BMapInspector
@@ -12,7 +13,7 @@ PRIVATE
 FILE_SET HEADERS
 FILES
 	Utils.hpp
-	Rule.hpp
+	Ruleset.hpp
 )
 # Setup header infomation
 target_include_directories(BMapInspector
