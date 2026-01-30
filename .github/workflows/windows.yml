@@ -1,4 +1,4 @@
-name: YYCC Windows Build
+name: LibCmo Windows Build
 
 on: [workflow_dispatch]
 
@@ -25,14 +25,9 @@ jobs:
     - name: Build YYCCommonplace
       shell: cmd
       run: |
-        :: Enter directory
         cd extern/YYCCommonplace
-        :: Build library
-        ..\..\.github\scripts\yycc-windows.bat
-        :: Fetch install directory
-        cd install
-        echo set YYCCommonplace_ROOT=%CD% > ../../envs.bat
-        cd ..
+        call ..\..\.github\scripts\yycc-windows.bat
+        echo set YYCCommonplace_ROOT=%YYCCommonplace_ROOT% > ../envs.bat
         cd ../..
     - name: Fetch ZLIB
       uses: actions/checkout@v4
@@ -43,14 +38,9 @@ jobs:
     - name: Build ZLIB
       shell: cmd
       run: |
-        :: Enter directory
         cd extern/zlib
-        :: Build library
         ..\..\.github\scripts\zlib-windows.bat
-        :: Fetch install directory
-        cd install
-        echo set ZLIB_ROOT=%CD% >> ../../envs.bat
-        cd ..
+        echo set ZLIB_ROOT=%ZLIB_ROOT% >> ../envs.bat
         cd ../..
     - name: Fetch STB
       uses: actions/checkout@v4
@@ -61,10 +51,9 @@ jobs:
     - name: Build STB
       shell: cmd
       run: |
-        :: Enter directory
         cd extern/stb
-        :: Fetch install directory
-        echo set STB_ROOT=%CD% >> ../envs.bat
+        ..\..\.github\scripts\stb-windows.bat
+        echo set STB_ROOT=%STB_ROOT% >> ../envs.bat
         cd ../..
     - name: Build LibCmo
       shell: cmd
@@ -77,7 +66,7 @@ jobs:
         :: Extract saved environment variables
         call .\extern\envs.bat
         :: Build Project
-        .\.github\script\windows.bat
+        .\.github\scripts\windows.bat
     - name: Upload Built Artifact
       uses: actions/upload-artifact@v4
       with:

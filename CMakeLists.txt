@@ -8,10 +8,10 @@ project(NeMo
 
 # Provide options
 option(NEMO_BUILD_UNVIRT "Build Unvirt, the console interface operator of LibCmo." ON)
-option(NEMO_BUILD_BALLANCE "Build Ballance stuff, including BMap and BMapInspector." OFF)
+option(NEMO_BUILD_BALLANCE "Build Ballance artifacts, including BMap and BMapInspector." OFF)
 option(NEMO_BUILD_BMAP "Build BMap, the example use of LibCmo which can read and write Ballance game map." OFF)
 option(NEMO_BUILD_BMAPINSPECTOR "Build BMapInspector, the example use of LibCmo which can validate Ballance game map." OFF)
-option(NEMO_BUILD_DOC "Build document of LibCmo and all related stuff." OFF)
+option(NEMO_BUILD_DOC "Build document of LibCmo." OFF)
 
 # Set C++ standards
 set(CMAKE_CXX_STANDARD 23)

@@ -80,9 +80,14 @@ First, there is a list listing all variables you may configure during compiling.
 * `NEMO_BUILD_UNVIRT`: Set it to `ON` to build `Unvirt`. `ON` in default.
 This is an interactive tool for loading, saving Virtools file.
 It is extremely useful for debugging this project.
+* `NEMO_BUILD_BALLANCE`: Set it to `ON` to build Ballance related artifacts. `OFF` in default.
+If you disable this, Ballance related artifacts, BMap and BMapInspector, will not be built.
 * `NEMO_BUILD_BMAP`: Set it to `ON` to build `BMap`. `OFF` in default.
 It is a dynamic library specific used for loading Ballance map file.
 If you are coming from my another project [BallanceBlenderPlugin](https://github.com/yyc12345/BallanceBlenderHelper), this is what you need.
+* `NEMO_BUILD_BMAPINSPECTOR`: Set it to `ON` to build `BMapInspector`. `OFF` in default.
+It is a executable specific used for checking whether given Ballance map file is valid for playing.
+Usually you do not need this except you are a mapper in Ballance.
 * `NEMO_BUILD_DOC`: Set it to `ON` to build documentation. `OFF` in default.
 It may be useful for the developer who firstly use this project in their own projects.
 Please note that generated documentation is different in different platforms.
