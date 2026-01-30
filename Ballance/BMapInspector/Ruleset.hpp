@@ -1,4 +1,6 @@
 #pragma once
+#include "Utils.hpp"
+#include <VTAll.hpp>
 #include <yycc.hpp>
 #include <yycc/macro/class_copy_move.hpp>
 #include <string>
@@ -15,7 +17,7 @@ namespace BMapInspector::Ruleset {
 
 	public:
 		virtual std::u8string_view GetRuleName() const = 0;
-		virtual void Check() const = 0;
+		virtual void Check(Utils::Reporter& reporter) const = 0;
 	};
 
 	class RuleCollection {
@@ -25,6 +27,7 @@ namespace BMapInspector::Ruleset {
 		YYCC_DELETE_COPY_MOVE(RuleCollection)
 
 	public:
+		size_t GetRuleCount() const;
 		const std::vector<IRule *> &GetRules() const;
 
 	private:

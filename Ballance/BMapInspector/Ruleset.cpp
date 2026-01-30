@@ -18,6 +18,10 @@ namespace BMapInspector::Ruleset {
 
 	RuleCollection::~RuleCollection() {}
 
+	size_t RuleCollection::GetRuleCount() const {
+		return this->rules.size();
+	}
+
 	const std::vector<IRule*>& RuleCollection::GetRules() const {
 		return this->rules;
 	}

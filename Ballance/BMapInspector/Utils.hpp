@@ -5,6 +5,8 @@
 #include <string_view>
 #include <vector>
 
+#define PRIuSIZET "zu"
+
 namespace BMapInspector::Utils {
 
 	enum class ReportKind { Error, Warning, Info };
@@ -34,7 +36,7 @@ namespace BMapInspector::Utils {
 
 	public:
 		void PrintConclusion() const;
-		void PrintDetails() const;
+		void PrintReport() const;
 
 	private:
 		std::vector<Report> reports;

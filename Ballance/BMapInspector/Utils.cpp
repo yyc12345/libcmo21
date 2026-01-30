@@ -9,8 +9,6 @@ using namespace yycc::patch::stream;
 namespace strop = yycc::string::op;
 namespace termcolor = yycc::carton::termcolor;
 
-#define PRIuSIZET "zu"
-
 namespace BMapInspector::Utils {
 
 #pragma region Reporter
@@ -84,7 +82,7 @@ namespace BMapInspector::Utils {
 		                    termcolor::Color::LightBlue);
 	}
 
-	void Reporter::PrintDetails() const {
+	void Reporter::PrintReport() const {
 		// Print all entries by different color
 		for (const auto &report : this->reports) {
 			switch (report.kind) {
