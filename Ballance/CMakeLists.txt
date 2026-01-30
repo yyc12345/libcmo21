@@ -1,0 +1,6 @@
+if (NEMO_BUILD_BMAP)
+    add_subdirectory(BMap)
+endif ()
+if (NEMO_BUILD_BMAPINSPECTOR)
+    add_subdirectory(BMapInspector)
+endif ()

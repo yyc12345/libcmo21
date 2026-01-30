@@ -1,10 +1,10 @@
 ## ======== Personal ========
 # Ignore build resources
-out/
-build/
-install/
-extern/
-temp/
+[Oo]ut/
+[Bb]uild/
+[Ii]nstall/
+[Ee]xtern/
+[Tt]emp/
 
 # Ignore all possible test used Virtools files
 *.nmo

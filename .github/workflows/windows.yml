@@ -1,0 +1,87 @@
+name: YYCC Windows Build
+
+on: [workflow_dispatch]
+
+jobs:
+  windows-build:
+
+    strategy:
+      matrix:
+        include:
+          - vs: '2022'
+            msvc_arch: 'x64'
+
+    runs-on: windows-2022
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - name: Fetch YYCCommonplace
+      uses: actions/checkout@v4
+      with:
+        repository: 'yyc12345/YYCCommonplace'
+        ref: 'master'
+        path: 'extern/YYCCommonplace'
+    - name: Build YYCCommonplace
+      shell: cmd
+      run: |
+        :: Enter directory
+        cd extern/YYCCommonplace
+        :: Build library
+        ..\..\.github\scripts\yycc-windows.bat
+        :: Fetch install directory
+        cd install
+        echo set YYCCommonplace_ROOT=%CD% > ../../envs.bat
+        cd ..
+        cd ../..
+    - name: Fetch ZLIB
+      uses: actions/checkout@v4
+      with:
+        repository: 'madler/zlib'
+        ref: 'v1.3.1'
+        path: 'extern/zlib'
+    - name: Build ZLIB
+      shell: cmd
+      run: |
+        :: Enter directory
+        cd extern/zlib
+        :: Build library
+        ..\..\.github\scripts\zlib-windows.bat
+        :: Fetch install directory
+        cd install
+        echo set ZLIB_ROOT=%CD% >> ../../envs.bat
+        cd ..
+        cd ../..
+    - name: Fetch STB
+      uses: actions/checkout@v4
+      with:
+        repository: 'nothings/stb'
+        ref: '2e2bef463a5b53ddf8bb788e25da6b8506314c08'
+        path: 'extern/stb'
+    - name: Build STB
+      shell: cmd
+      run: |
+        :: Enter directory
+        cd extern/stb
+        :: Fetch install directory
+        echo set STB_ROOT=%CD% >> ../envs.bat
+        cd ../..
+    - name: Build LibCmo
+      shell: cmd
+      run: |
+        :: Prepare Visual Studio
+        set VS=${{ matrix.vs }}
+        set VCVARS="C:\Program Files (x86)\Microsoft Visual Studio\%VS%\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"
+        if not exist %VCVARS% set VCVARS="C:\Program Files\Microsoft Visual Studio\%VS%\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"
+        call %VCVARS% ${{ matrix.msvc_arch }}
+        :: Extract saved environment variables
+        call .\extern\envs.bat
+        :: Build Project
+        .\.github\script\windows.bat
+    - name: Upload Built Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LibCmo-windows-build
+        path: bin/install/*
+        retention-days: 30
+        

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BMapSharp/BMapSharp.csproj" />
+  <Project Path="BMapSharpTestbench/BMapSharpTestbench.csproj" />
+</Solution>

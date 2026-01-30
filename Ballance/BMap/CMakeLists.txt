@@ -53,7 +53,7 @@ write_basic_package_version_file(
     COMPATIBILITY SameMinorVersion
 )
 configure_package_config_file(
-    ${CMAKE_CURRENT_LIST_DIR}/../CMake/BMapConfig.cmake.in 
+    ${CMAKE_CURRENT_LIST_DIR}/../../CMake/BMapConfig.cmake.in 
     "${CMAKE_CURRENT_BINARY_DIR}/BMapConfig.cmake"
     INSTALL_DESTINATION ${NEMO_INSTALL_LIB_PATH}/cmake/BMap
 )

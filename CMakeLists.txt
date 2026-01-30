@@ -8,7 +8,9 @@ project(NeMo
 
 # Provide options
 option(NEMO_BUILD_UNVIRT "Build Unvirt, the console interface operator of LibCmo." ON)
+option(NEMO_BUILD_BALLANCE "Build Ballance stuff, including BMap and BMapInspector." OFF)
 option(NEMO_BUILD_BMAP "Build BMap, the example use of LibCmo which can read and write Ballance game map." OFF)
+option(NEMO_BUILD_BMAPINSPECTOR "Build BMapInspector, the example use of LibCmo which can validate Ballance game map." OFF)
 option(NEMO_BUILD_DOC "Build document of LibCmo and all related stuff." OFF)
 
 # Set C++ standards
@@ -54,8 +56,8 @@ add_subdirectory(LibCmo)
 if (NEMO_BUILD_UNVIRT)
     add_subdirectory(Unvirt)
 endif ()
-if (NEMO_BUILD_BMAP)
-    add_subdirectory(BMap)
+if (NEMO_BUILD_BALLANCE)
+    add_subdirectory(Ballance)
 endif ()
 if (NEMO_BUILD_DOC)
     add_subdirectory(Documents)
