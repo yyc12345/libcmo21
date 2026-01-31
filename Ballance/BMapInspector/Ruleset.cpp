@@ -2,6 +2,28 @@
 
 namespace BMapInspector::Ruleset {
 
+#pragma region Rule Context
+
+	RuleContext::RuleContext() : m_Ctx(nullptr) {}
+
+	RuleContext::~RuleContext() {}
+
+	LibCmo::CK2::CKContext* RuleContext::GetCKContext() {
+		return this->m_Ctx;
+	}
+
+	YYCC_IMPL_MOVE_CTOR(RuleContext, rhs) : m_Ctx(rhs.m_Ctx) {
+		rhs.m_Ctx = nullptr;
+	}
+
+	YYCC_IMPL_MOVE_OPER(RuleContext, rhs) {
+		this->m_Ctx = rhs.m_Ctx;
+		rhs.m_Ctx = nullptr;
+		return *this;
+	}
+
+#pragma endregion
+
 #pragma region IRule
 
 	IRule::IRule() {}

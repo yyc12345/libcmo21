@@ -6,12 +6,18 @@
 #include <string_view>
 #include <vector>
 
-namespace BMapInspector {
+namespace BMapInspector::Reporter {
 
 	struct Report {
-		Utils::ReportLevel level;       ///< The level of this report.
-		std::u8string rule;    ///< The name of rule adding this report.
-		std::u8string content; ///< The content of this report.
+		Utils::ReportLevel level; ///< The level of this report.
+		std::u8string rule;       ///< The name of rule adding this report.
+		std::u8string content;    ///< The content of this report.
+	};
+
+	struct ReporterDigest {
+		size_t cnt_err;  ///< The count of error report.
+		size_t cnt_warn; ///< The count of warning report.
+		size_t cnt_info; ///< The count of info report.
 	};
 
 	class Reporter {
@@ -32,11 +38,11 @@ namespace BMapInspector {
 		void FormatError(const std::u8string_view& rule, const char8_t* fmt, ...);
 
 	public:
-		void PrintConclusion() const;
-		void PrintReport() const;
+		ReporterDigest GetDigest() const;
+		const std::vector<Report>& GetReports() const;
 
 	private:
 		std::vector<Report> reports;
 	};
 
-} // namespace BMapInspector::Utils
+} // namespace BMapInspector

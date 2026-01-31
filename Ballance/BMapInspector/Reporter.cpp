@@ -1,15 +1,10 @@
 #include "Reporter.hpp"
-#include <yycc/carton/termcolor.hpp>
 #include <yycc/string/op.hpp>
-#include <yycc/patch/stream.hpp>
-#include <iostream>
 #include <cstdarg>
 
-using namespace yycc::patch::stream;
 namespace strop = yycc::string::op;
-namespace termcolor = yycc::carton::termcolor;
 
-namespace BMapInspector {
+namespace BMapInspector::Reporter {
 
 #pragma region Reporter
 
@@ -57,51 +52,28 @@ namespace BMapInspector {
 		va_end(argptr);
 	}
 
-	void Reporter::PrintConclusion() const {
-		// Conclude count
-		size_t cnt_err = 0, cnt_warn = 0, cnt_info = 0;
+	ReporterDigest Reporter::GetDigest() const {
+		ReporterDigest digest{.cnt_err = 0, .cnt_warn = 0, .cnt_info = 0};
 		for (const auto &report : this->reports) {
 			switch (report.level) {
 				case Utils::ReportLevel::Error:
-					++cnt_err;
+					++digest.cnt_err;
 					break;
 				case Utils::ReportLevel::Warning:
-					++cnt_warn;
+					++digest.cnt_warn;
 					break;
 				case Utils::ReportLevel::Info:
-					++cnt_info;
+					++digest.cnt_info;
 					break;
 			}
 		}
-
-		// Show in console
-		termcolor::cprintln(strop::printf(u8"Total %" PRIuSIZET " error(s), %" PRIuSIZET " warning(s) and %" PRIuSIZET " info(s).",
-		                                  cnt_err,
-		                                  cnt_warn,
-		                                  cnt_info),
-		                    termcolor::Color::LightBlue);
+		return digest;
 	}
 
-	void Reporter::PrintReport() const {
-		// Print all entries by different color
-		for (const auto &report : this->reports) {
-			switch (report.level) {
-				case Utils::ReportLevel::Error:
-					termcolor::cprintln(strop::printf(u8"[ERROR] [RULE: %s] %s", report.rule.c_str(), report.content.c_str()),
-					                    termcolor::Color::LightRed);
-					break;
-				case Utils::ReportLevel::Warning:
-					termcolor::cprintln(strop::printf(u8"[WARNING] [RULE: %s] %s", report.rule.c_str(), report.content.c_str()),
-					                    termcolor::Color::LightYellow);
-					break;
-				case Utils::ReportLevel::Info:
-					termcolor::cprintln(strop::printf(u8"[INFO] [RULE: %s] %s", report.rule.c_str(), report.content.c_str()),
-					                    termcolor::Color::Default);
-					break;
-			}
-		}
+	const std::vector<Report> &Reporter::GetReports() const {
+		return this->reports;
 	}
 
 #pragma endregion
 
-} // namespace BMapInspector::Utils
+} // namespace BMapInspector::Reporter

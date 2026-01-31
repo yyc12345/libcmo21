@@ -10,6 +10,20 @@
 
 namespace BMapInspector::Ruleset {
 
+	class RuleContext {
+	public:
+		RuleContext();
+		~RuleContext();
+		YYCC_DELETE_COPY(RuleContext)
+		YYCC_DECL_MOVE(RuleContext)
+
+	public:
+		LibCmo::CK2::CKContext *GetCKContext();
+
+	private:
+		LibCmo::CK2::CKContext *m_Ctx;
+	};
+
 	class IRule {
 	public:
 		IRule();
@@ -18,7 +32,7 @@ namespace BMapInspector::Ruleset {
 
 	public:
 		virtual std::u8string_view GetRuleName() const = 0;
-		virtual void Check(Reporter& reporter) const = 0;
+		virtual void Check(Reporter::Reporter& reporter, RuleContext& ctx) const = 0;
 	};
 
 	class RuleCollection {

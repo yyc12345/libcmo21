@@ -54,7 +54,7 @@ This field is required.)"));
 This field is required.)"));
 		auto opt_encoding = opt_collection.add_option(
 		    clap::option::Option(u8"e", u8"encoding", u8"ENC", u8R"(The encoding used when loading this map file.
-Frequently used encoding is "cp1252" and "gbk".
+Frequently used encodings are "cp1252" and "gbk".
 Default value is "cp1252".)"));
 		auto opt_level = opt_collection.add_option(
 		    clap::option::Option(u8"l", u8"level", u8"LEVEL", u8R"(Set the filter level for checker output.
