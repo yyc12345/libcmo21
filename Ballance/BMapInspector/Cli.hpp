@@ -9,45 +9,11 @@
 
 namespace BMapInspector::Cli {
 
-	enum class RequestKind {
-		Help,
-		Version,
-		Work,
-	};
-
-	class Request {
-	public:
-		static Request FromHelpRequest();
-		static Request FromVersionRequest();
-		static Request FromWorkRequest(Utils::ReportLevel level,
-		                               const std::u8string_view& file_path,
-		                               const std::u8string_view& encoding,
-		                               const std::u8string_view& ballance_path);
-
-	private:
-		Request(RequestKind kind,
-		        std::optional<Utils::ReportLevel> level,
-		        std::optional<std::u8string_view> file_path,
-		        std::optional<std::u8string_view> encoding,
-		        std::optional<std::u8string_view> ballance_path);
-
-	public:
-		~Request();
-		YYCC_DEFAULT_COPY_MOVE(Request)
-
-	public:
-		RequestKind GetRequestKind() const;
-		Utils::ReportLevel GetLevel() const;
-		std::u8string_view GetFilePath() const;
-		std::u8string_view GetEncoding() const;
-		std::u8string_view GetBallancePath() const;
-
-	private:
-		RequestKind kind;                           ///< The kind of this request.
-		std::optional<Utils::ReportLevel> level;    ///< The filter level.
-		std::optional<std::u8string> file_path;     ///< The path to loaded map file.
-		std::optional<std::u8string> encoding;      ///< The encoding used when loading map file.
-		std::optional<std::u8string> ballance_path; ///< The path to Ballance root directory for loading resources.
+	struct Args {
+		Utils::ReportLevel level;    ///< The filter level.
+		std::u8string file_path;     ///< The path to loaded map file.
+		std::u8string encoding;      ///< The encoding used when loading map file.
+		std::u8string ballance_path; ///< The path to Ballance root directory for loading resources.
 	};
 
 	enum class Error {
@@ -63,6 +29,6 @@ namespace BMapInspector::Cli {
 	template<typename T>
 	using Result = std::expected<T, Error>;
 
-	Result<Request> parse();
+	Result<std::optional<Args>> parse();
 
 } // namespace BMapInspector::Cli

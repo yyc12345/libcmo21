@@ -1,62 +1,11 @@
 #include "Cli.hpp"
 #include <yycc.hpp>
 #include <yycc/carton/clap.hpp>
+#include <filesystem>
 
 namespace clap = yycc::carton::clap;
 
 namespace BMapInspector::Cli {
-
-#pragma region Request
-
-	Request Request::FromHelpRequest() {
-		return Request(RequestKind::Help, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-	}
-
-	Request Request::FromVersionRequest() {
-		return Request(RequestKind::Version, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-	}
-
-	Request Request::FromWorkRequest(Utils::ReportLevel level,
-	                                 const std::u8string_view& file_path,
-	                                 const std::u8string_view& encoding,
-	                                 const std::u8string_view& ballance_path) {
-		return Request(RequestKind::Work, level, file_path, encoding, ballance_path);
-	}
-
-	Request::Request(RequestKind kind,
-	                 std::optional<Utils::ReportLevel> level,
-	                 std::optional<std::u8string_view> file_path,
-	                 std::optional<std::u8string_view> encoding,
-	                 std::optional<std::u8string_view> ballance_path) :
-	    kind(kind), level(level), file_path(file_path), encoding(encoding), ballance_path(ballance_path) {}
-
-	Request::~Request() {}
-
-	RequestKind Request::GetRequestKind() const {
-		return this->kind;
-	}
-
-	Utils::ReportLevel Request::GetLevel() const {
-		if (this->level.has_value()) return this->level.value();
-		else throw std::logic_error("can not visit this property in current kind");
-	}
-
-	std::u8string_view Request::GetFilePath() const {
-		if (this->file_path.has_value()) return this->file_path.value();
-		else throw std::logic_error("can not visit this property in current kind");
-	}
-
-	std::u8string_view Request::GetEncoding() const {
-		if (this->encoding.has_value()) return this->encoding.value();
-		else throw std::logic_error("can not visit this property in current kind");
-	}
-
-	std::u8string_view Request::GetBallancePath() const {
-		if (this->ballance_path.has_value()) return this->ballance_path.value();
-		else throw std::logic_error("can not visit this property in current kind");
-	}
-
-#pragma endregion
 
 #pragma region Custom Validators
 
@@ -65,10 +14,36 @@ namespace BMapInspector::Cli {
 		std::optional<ReturnType> validate(const std::u8string_view& sv) const { return Utils::ParseReportLevel(sv); }
 	};
 
+	struct MapFileValidator {
+		using ReturnType = std::u8string;
+		std::optional<ReturnType> validate(const std::u8string_view& sv) const {
+			std::filesystem::path p(sv);
+			if (std::filesystem::is_regular_file(p)) return std::u8string(sv);
+			else return std::nullopt;
+		}
+	};
+
+	struct BlcDirValidator {
+		using ReturnType = std::u8string;
+		std::optional<ReturnType> validate(const std::u8string_view& sv) const {
+			std::filesystem::path p(sv);
+			auto tdb = p / u8"Database.tdb";
+			if (std::filesystem::is_directory(p) && std::filesystem::is_regular_file(tdb)) return std::u8string(sv);
+			else return std::nullopt;
+		}
+	};
+
+	struct EncNameValidator {
+		using ReturnType = std::u8string;
+		std::optional<ReturnType> validate(const std::u8string_view& sv) const { 
+			// TODO: use checker for checking this name first.
+			return std::u8string(sv);
+		}
+	};
+
 #pragma endregion
 
-
-	Result<Request> parse() {
+	Result<std::optional<Args>> parse() {
 		// Create options
 		clap::option::OptionCollection opt_collection;
 		auto opt_file = opt_collection.add_option(
@@ -94,6 +69,8 @@ Default value is "info".)"));
 		clap::summary::Summary summary(u8"" BMAPINSP_NAME, u8"yyc12345", u8"Universal", u8"" BMAPINSP_DESC);
 		// Create application
 		clap::application::Application app(std::move(summary), std::move(opt_collection), std::move(var_collection));
+		// Create manual
+		clap::manual::Manual manual(app);
 
 		// Create parser and parse command line arguments
 		auto rv_parser = clap::parser::Parser::from_system(app);
@@ -101,17 +78,19 @@ Default value is "info".)"));
 		auto& parser = rv_parser.value();
 
 		// Check version and help first
-		if (auto help_flag = parser.get_flag_option(opt_help); help_flag.has_value()) {
-			return Request::FromHelpRequest();
+		if (auto help_flag = parser.get_flag_option(opt_help); help_flag.has_value() && help_flag.value()) {
+			manual.print_help();
+			return std::nullopt;
 		}
-		if (auto version_flag = parser.get_flag_option(opt_version); version_flag.has_value()) {
-			return Request::FromVersionRequest();
+		if (auto version_flag = parser.get_flag_option(opt_version); version_flag.has_value() && version_flag.value()) {
+			manual.print_version();
+			return std::nullopt;
 		}
 
 		// Check other args
 		std::u8string file_rv;
 		if (parser.has_option(opt_file)) {
-			auto file_value = parser.get_value_option<clap::validator::StringValidator>(opt_file);
+			auto file_value = parser.get_value_option<MapFileValidator>(opt_file);
 			if (!file_value.has_value()) return std::unexpected(Error::BadFile);
 			file_rv = std::move(file_value.value());
 		} else {
@@ -119,7 +98,7 @@ Default value is "info".)"));
 		}
 		std::u8string ballance_rv;
 		if (parser.has_option(opt_ballance)) {
-			auto ballance_value = parser.get_value_option<clap::validator::StringValidator>(opt_ballance);
+			auto ballance_value = parser.get_value_option<BlcDirValidator>(opt_ballance);
 			if (!ballance_value.has_value()) return std::unexpected(Error::BadBallance);
 			ballance_rv = std::move(ballance_value.value());
 		} else {
@@ -127,7 +106,7 @@ Default value is "info".)"));
 		}
 		std::u8string encoding_rv;
 		if (parser.has_option(opt_encoding)) {
-			auto encoding_value = parser.get_value_option<clap::validator::StringValidator>(opt_encoding);
+			auto encoding_value = parser.get_value_option<EncNameValidator>(opt_encoding);
 			if (!encoding_value.has_value()) return std::unexpected(Error::BadEncoding);
 			encoding_rv = std::move(encoding_value.value());
 		} else {
@@ -143,7 +122,12 @@ Default value is "info".)"));
 		}
 
 		// Return result
-		return Request::FromWorkRequest(level_rv, file_rv, encoding_rv, ballance_rv);
+		return Args{
+		    .level = level_rv,
+		    .file_path = file_rv,
+		    .encoding = encoding_rv,
+		    .ballance_path = ballance_rv,
+		};
 	}
 
 } // namespace BMapInspector::Cli

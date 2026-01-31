@@ -1,5 +1,6 @@
 #pragma once
 #include "Utils.hpp"
+#include "Reporter.hpp"
 #include <VTAll.hpp>
 #include <yycc.hpp>
 #include <yycc/macro/class_copy_move.hpp>
@@ -17,7 +18,7 @@ namespace BMapInspector::Ruleset {
 
 	public:
 		virtual std::u8string_view GetRuleName() const = 0;
-		virtual void Check(Utils::Reporter& reporter) const = 0;
+		virtual void Check(Reporter& reporter) const = 0;
 	};
 
 	class RuleCollection {
