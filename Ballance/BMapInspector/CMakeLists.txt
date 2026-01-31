@@ -5,6 +5,8 @@ target_sources(BMapInspector
 PRIVATE
 	BMapInspector.cpp
 	Utils.cpp
+	Reporter.cpp
+	Cli.cpp
 	Ruleset.cpp
 )
 # Setup headers
@@ -13,6 +15,8 @@ PRIVATE
 FILE_SET HEADERS
 FILES
 	Utils.hpp
+	Reporter.hpp
+	Cli.hpp
 	Ruleset.hpp
 )
 # Setup header infomation
