@@ -1,6 +1,5 @@
 #pragma once
 #include "Utils.hpp"
-#include "Reporter.hpp"
 #include <yycc.hpp>
 #include <yycc/macro/class_copy_move.hpp>
 #include <string>
@@ -17,13 +16,13 @@ namespace BMapInspector::Cli {
 	};
 
 	enum class Error {
-		BadParse, ///< Error occurs when executing parser.
-		NoFile, ///< User do not specify file path for loading.
-		BadFile, ///< User specified file path is bad.
-		NoBallance, ///< User do not specify Ballance directory for loading.
+		BadParse,    ///< Error occurs when executing parser.
+		NoFile,      ///< User do not specify file path for loading.
+		BadFile,     ///< User specified file path is bad.
+		NoBallance,  ///< User do not specify Ballance directory for loading.
 		BadBallance, ///< User specified Ballance directory is bad.
 		BadEncoding, ///< User given encoding value is bad.
-		BadLevel, ///< User given level name is bad.
+		BadLevel,    ///< User given level name is bad.
 	};
 
 	template<typename T>

@@ -7,7 +7,8 @@ PRIVATE
 	Utils.cpp
 	Reporter.cpp
 	Cli.cpp
-	Ruleset.cpp
+	Map.cpp
+	Rule.cpp
 )
 # Setup headers
 target_sources(BMapInspector
@@ -17,7 +18,8 @@ FILES
 	Utils.hpp
 	Reporter.hpp
 	Cli.hpp
-	Ruleset.hpp
+	Map.hpp
+	Rule.hpp
 )
 # Setup header infomation
 target_include_directories(BMapInspector

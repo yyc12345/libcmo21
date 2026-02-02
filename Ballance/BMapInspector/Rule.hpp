@@ -1,6 +1,7 @@
 #pragma once
 #include "Utils.hpp"
 #include "Reporter.hpp"
+#include "Map.hpp"
 #include <VTAll.hpp>
 #include <yycc.hpp>
 #include <yycc/macro/class_copy_move.hpp>
@@ -8,21 +9,7 @@
 #include <string_view>
 #include <vector>
 
-namespace BMapInspector::Ruleset {
-
-	class RuleContext {
-	public:
-		RuleContext();
-		~RuleContext();
-		YYCC_DELETE_COPY(RuleContext)
-		YYCC_DECL_MOVE(RuleContext)
-
-	public:
-		LibCmo::CK2::CKContext *GetCKContext();
-
-	private:
-		LibCmo::CK2::CKContext *m_Ctx;
-	};
+namespace BMapInspector::Rule {
 
 	class IRule {
 	public:
@@ -32,14 +19,14 @@ namespace BMapInspector::Ruleset {
 
 	public:
 		virtual std::u8string_view GetRuleName() const = 0;
-		virtual void Check(Reporter::Reporter& reporter, RuleContext& ctx) const = 0;
+		virtual void Check(Reporter::Reporter& reporter, Map::Level& ctx) const = 0;
 	};
 
-	class RuleCollection {
+	class Ruleset {
 	public:
-		RuleCollection();
-		~RuleCollection();
-		YYCC_DELETE_COPY_MOVE(RuleCollection)
+		Ruleset();
+		~Ruleset();
+		YYCC_DELETE_COPY_MOVE(Ruleset)
 
 	public:
 		size_t GetRuleCount() const;

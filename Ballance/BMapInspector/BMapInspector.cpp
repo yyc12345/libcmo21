@@ -1,7 +1,8 @@
 #include "Utils.hpp"
-#include "Cli.hpp"
 #include "Reporter.hpp"
-#include "Ruleset.hpp"
+#include "Cli.hpp"
+#include "Map.hpp"
+#include "Rule.hpp"
 #include <VTAll.hpp>
 #include <yycc.hpp>
 #include <yycc/carton/termcolor.hpp>
@@ -24,7 +25,7 @@ static void PrintSplash() {
 static std::optional<BMapInspector::Cli::Args> AcceptArgs() {
 	auto request = BMapInspector::Cli::parse();
 	if (request.has_value()) {
-		return request.value();
+		return std::move(request.value());
 	} else {
 		using BMapInspector::Cli::Error;
 
@@ -62,23 +63,51 @@ static std::optional<BMapInspector::Cli::Args> AcceptArgs() {
 	}
 }
 
-static std::optional<BMapInspector::Ruleset::RuleContext> LoadVirtools(BMapInspector::Cli::Args& args) {
-	return std::nullopt;
+static std::optional<BMapInspector::Map::Level> LoadLevel(BMapInspector::Cli::Args& args) {
+	auto level = BMapInspector::Map::load(args);
+	if (level.has_value()) {
+		return std::move(level.value());
+	} else {
+		using BMapInspector::Map::Error;
+
+		std::u8string err_words;
+		switch (level.error()) {
+			case Error::BadTempDir:
+				err_words = u8"Can not set temporary directory for loading.";
+				break;
+			case Error::BadBallance:
+				err_words = u8"Can not find Ballance texture directory.";
+				break;
+			case Error::BadEncoding:
+				err_words = u8"Can not set encoding with your given name.";
+				break;
+			case Error::BadMap:
+				err_words = u8"Can not load your given map file.";
+				break;
+			default:
+				err_words = u8"Unknown error.";
+				break;
+		}
+
+		termcolor::cprintln(err_words, Color::Red);
+		termcolor::cprintln(u8"Please carefully check your map file and parameters for loading this map file.", Color::Red);
+		return std::nullopt;
+	}
 }
 
-static void CheckRules(BMapInspector::Ruleset::RuleContext& ctx) {
+static void CheckRules(BMapInspector::Cli::Args& args, BMapInspector::Map::Level& level) {
 	// Create reporter
 	BMapInspector::Reporter::Reporter reporter;
 
 	// Get rule collection
-	BMapInspector::Ruleset::RuleCollection rule_collection;
+	BMapInspector::Rule::Ruleset ruleset;
 	// Show rule infos
-	std::cout << strop::printf(u8"Total %" PRIuSIZET " rule(s) are loaded.", rule_collection.GetRuleCount()) << std::endl
+	std::cout << strop::printf(u8"Total %" PRIuSIZET " rule(s) are loaded.", ruleset.GetRuleCount()) << std::endl
 	          << u8"Check may take few minutes. Please do not close this console..." << std::endl;
 
 	// Check rules one by one
-	for (auto* rule : rule_collection.GetRules()) {
-		rule->Check(reporter, ctx);
+	for (auto* rule : ruleset.GetRules()) {
+		rule->Check(reporter, level);
 	}
 
 	// Show report conclusion
@@ -91,6 +120,9 @@ static void CheckRules(BMapInspector::Ruleset::RuleContext& ctx) {
 	// Print report in detail
 	using BMapInspector::Utils::ReportLevel;
 	for (const auto& report : reporter.GetReports()) {
+		// Filter report first
+		if (!BMapInspector::Utils::FilterReportLevel(report.level, args.level)) continue;
+		// Okey, output this report.
 		switch (report.level) {
 			case ReportLevel::Error:
 				termcolor::cprintln(strop::printf(u8"[ERROR] [RULE: %s] %s", report.rule.c_str(), report.content.c_str()), Color::Red);
@@ -111,9 +143,9 @@ int main(int argc, char* argv[]) {
 		PrintSplash();
 		std::cout << std::endl;
 
-		auto ctx = LoadVirtools(args.value());
-		if (ctx.has_value()) {
-			CheckRules(ctx.value());
+		auto level = LoadLevel(args.value());
+		if (level.has_value()) {
+			CheckRules(args.value(), level.value());
 		}
 	}
 	return 0;
