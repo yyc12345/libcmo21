@@ -13,7 +13,7 @@ namespace BMapInspector::Map {
 	Level::Level(const Cli::Args& args) : m_Context(nullptr), m_LoadStatus() {
 		// Create contexy
 		this->m_Context = new C::CKContext();
-		// Callback for eat all output.
+		// Callback for eating all output.
 		this->m_Context->SetOutputCallback([](LibCmo::CKSTRING strl) -> void {});
 		// Set temp folder
 		auto pm = m_Context->GetPathManager();
