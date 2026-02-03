@@ -45,7 +45,7 @@ include(CMakePackageConfigHelpers)
 # we should enable PIC (position independent code), otherwise build process will fail.
 # Also we should let all symbols in final dll be hidden (not exported) in default.
 # Because we only want export functions we ordered.
-if ((NOT WIN32) AND NEMO_BUILD_BMAP)
+if ((NOT WIN32) AND (NEMO_BUILD_BALLANCE AND NEMO_BUILD_BMAP))
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     set(CMAKE_C_VISIBILITY_PRESET hidden)
     set(CMAKE_POSITION_INDEPENDENT_CODE True)

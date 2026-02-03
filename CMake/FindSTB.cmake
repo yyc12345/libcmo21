@@ -12,9 +12,9 @@
 if (NOT DEFINED STB_ROOT)
     set(STB_FOUND FALSE)
 else ()
-    # Look for STB_image.h in the specified STB_ROOT directory
+    # Look for stb_image.h in the specified STB_ROOT directory
     find_path(STB_INCLUDE_DIR
-        NAMES STB_image.h
+        NAMES stb_image.h
         HINTS ${STB_ROOT}
         NO_DEFAULT_PATH
     )
@@ -46,7 +46,7 @@ if (STB_FOUND)
     )
 else ()
     # If it is required, show infomations.
-    if (std_FIND_REQUIRED)
+    if (STB_FIND_REQUIRED)
         message(FATAL_ERROR "Fail to find STB library.")
     endif ()
 endif ()
