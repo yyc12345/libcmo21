@@ -15,6 +15,3 @@ cmake -A x64 -DCMAKE_CXX_STANDARD=23 -DZLIB_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_P
 cmake --build . --config Release
 cmake --install . --config Release
 CD ..
-
-:: Back to root directory
-CD ..

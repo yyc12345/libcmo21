@@ -1,6 +1,7 @@
 #include "Utils.hpp"
 #include <yycc/num/op.hpp>
 #include <stdexcept>
+#include <algorithm>
 
 namespace Unvirt::Utils {
 

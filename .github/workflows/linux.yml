@@ -63,7 +63,7 @@ jobs:
         name: LibCmo-linux-build
         path: bin/install/*
         retention-days: 30
-    - name: Upload Built ependencies
+    - name: Upload Built Dependencies
       uses: actions/upload-artifact@v4
       with:
         name: LibCmo-linux-dep

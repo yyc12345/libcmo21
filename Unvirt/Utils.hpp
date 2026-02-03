@@ -1,5 +1,7 @@
 #pragma once
+#include <yycc.hpp>
 #include <yycc/macro/class_copy_move.hpp>
+#include <cstddef>
 
 namespace Unvirt::Utils {
 

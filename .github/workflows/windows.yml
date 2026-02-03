@@ -38,8 +38,8 @@ jobs:
     - name: Build ZLIB
       shell: cmd
       run: |
-        CD extern/zlib
-        ..\..\.github\scripts\zlib\windows.bat
+        CD extern\zlib
+        CALL ..\..\.github\scripts\zlib\windows.bat
         ECHO SET ZLIB_ROOT=%ZLIB_ROOT% >> ..\envs.bat
         CD ..\..
     - name: Fetch STB
@@ -51,8 +51,8 @@ jobs:
     - name: Build STB
       shell: cmd
       run: |
-        CD extern/stb
-        ..\..\.github\scripts\stb\windows.bat
+        CD extern\stb
+        CALL ..\..\.github\scripts\stb\windows.bat
         ECHO SET STB_ROOT=%STB_ROOT% >> ..\envs.bat
         CD ..\..
     - name: Build LibCmo

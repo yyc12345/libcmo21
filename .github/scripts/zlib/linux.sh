@@ -16,6 +16,3 @@ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=23 -DZLIB_BUILD_EXAMPLES=O
 cmake --build .
 cmake --install .
 cd ..
-
-# Back to root directory
-cd ..

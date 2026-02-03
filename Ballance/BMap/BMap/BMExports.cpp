@@ -1,5 +1,6 @@
 #include "BMExports.hpp"
 #include <yycc.hpp>
+#include <yycc/carton/ironpad.hpp>
 #include <set>
 #include <type_traits>
 #include <memory>
@@ -59,8 +60,8 @@ bool BMInit() {
 	if (CheckInited()) return false;
 
 	// register exception handler if we are in Windows.
-#if defined(LIBCMO_BUILD_RELEASE) && (YYCC_OS == YYCC_OS_WINDOWS)
-	YYCC::ExceptionHelper::Register();
+#if defined(LIBCMO_BUILD_RELEASE) && defined(YYCC_OS_WINDOWS)
+	yycc::carton::ironpad::startup();
 #endif
 
 	// and startup CK environment
@@ -93,8 +94,8 @@ bool BMDispose() {
 	LibCmo::CK2::CKShutdown();
 
 	// unregister exception handler if we are in Windows
-#if defined(LIBCMO_BUILD_RELEASE) && (YYCC_OS == YYCC_OS_WINDOWS)
-	YYCC::ExceptionHelper::Unregister();
+#if defined(LIBCMO_BUILD_RELEASE) && defined(YYCC_OS_WINDOWS)
+	yycc::carton::ironpad::shutdown();
 #endif
 
 	return true;

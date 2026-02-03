@@ -11,6 +11,9 @@
 #include <yycc/string/reinterpret.hpp>
 #include <algorithm>
 #include <initializer_list>
+#include <limits>
+#include <cctype>
+#include <cstring>
 
 // Import implementations.
 #include "ObjImpls/CKObject.hpp"
