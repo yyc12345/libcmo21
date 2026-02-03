@@ -1,10 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-YYCCommonplace_ROOT="${YYCCommonplace_ROOT:?YYCCommonplace_ROOT must be set}"
-STB_ROOT="${STB_ROOT:?STB_ROOT must be set}"
-ZLIB_ROOT="${ZLIB_ROOT:?ZLIB_ROOT must be set}"
-
 # Create build directory and enter it
 mkdir bin
 cd bin

@@ -7,7 +7,7 @@ mkdir install
 
 # Record install directory first because build step require it
 cd install
-set ZLIB_ROOT=$(pwd)
+export ZLIB_ROOT=$(pwd)
 cd ..
 
 # Build in Release mode

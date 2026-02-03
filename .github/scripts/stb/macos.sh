@@ -1,2 +1,2 @@
 # Just directly record self as root directory
-set STB_ROOT=$(pwd)
+export STB_ROOT=$(pwd)

@@ -19,8 +19,7 @@ jobs:
       shell: bash
       run: |
         cd extern/YYCCommonplace
-        chmod +x ../../.github/scripts/yycc-macos.sh
-        source ../../.github/scripts/yycc-macos.sh
+        source ../../.github/scripts/yycc/macos.sh
         echo "YYCCommonplace_ROOT=$YYCCommonplace_ROOT" >> "$GITHUB_ENV"
         cd ../..
     - name: Fetch ZLIB
@@ -33,8 +32,7 @@ jobs:
       shell: bash
       run: |
         cd extern/zlib
-        chmod +x ../../.github/scripts/zlib-macos.sh
-        source ../../.github/scripts/zlib-macos.sh
+        source ../../.github/scripts/zlib/macos.sh
         echo "ZLIB_ROOT=$ZLIB_ROOT" >> "$GITHUB_ENV"
         cd ../..
     - name: Fetch STB
@@ -47,18 +45,22 @@ jobs:
       shell: bash
       run: |
         cd extern/stb
-        chmod +x ../../.github/scripts/stb-macos.sh
-        source ../../.github/scripts/stb-macos.sh
+        source ../../.github/scripts/stb/macos.sh
         echo "STB_ROOT=$STB_ROOT" >> "$GITHUB_ENV"
         cd ../..
     - name: Build LibCmo
       shell: bash
       run: |
-        chmod +x ./.github/scripts/macos.sh
-        ./.github/scripts/macos.sh
+        source ./.github/scripts/macos.sh
     - name: Upload Built Artifact
       uses: actions/upload-artifact@v4
       with:
         name: LibCmo-macos-build
         path: bin/install/*
-        retention-days: 30        
+        retention-days: 30
+    - name: Upload Built ependencies
+      uses: actions/upload-artifact@v4
+      with:
+        name: LibCmo-linux-dep
+        path: extern/zlib/install/*
+        retention-days: 30   

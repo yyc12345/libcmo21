@@ -25,10 +25,10 @@ jobs:
     - name: Build YYCCommonplace
       shell: cmd
       run: |
-        cd extern/YYCCommonplace
-        call ..\..\.github\scripts\yycc-windows.bat
-        echo set YYCCommonplace_ROOT=%YYCCommonplace_ROOT% > ../envs.bat
-        cd ../..
+        CD extern\YYCCommonplace
+        CALL ..\..\.github\scripts\yycc\windows.bat
+        ECHO SET YYCCommonplace_ROOT=%YYCCommonplace_ROOT% > ..\envs.bat
+        CD ..\..
     - name: Fetch ZLIB
       uses: actions/checkout@v4
       with:
@@ -38,10 +38,10 @@ jobs:
     - name: Build ZLIB
       shell: cmd
       run: |
-        cd extern/zlib
-        ..\..\.github\scripts\zlib-windows.bat
-        echo set ZLIB_ROOT=%ZLIB_ROOT% >> ../envs.bat
-        cd ../..
+        CD extern/zlib
+        ..\..\.github\scripts\zlib\windows.bat
+        ECHO SET ZLIB_ROOT=%ZLIB_ROOT% >> ..\envs.bat
+        CD ..\..
     - name: Fetch STB
       uses: actions/checkout@v4
       with:
@@ -51,10 +51,10 @@ jobs:
     - name: Build STB
       shell: cmd
       run: |
-        cd extern/stb
-        ..\..\.github\scripts\stb-windows.bat
-        echo set STB_ROOT=%STB_ROOT% >> ../envs.bat
-        cd ../..
+        CD extern/stb
+        ..\..\.github\scripts\stb\windows.bat
+        ECHO SET STB_ROOT=%STB_ROOT% >> ..\envs.bat
+        CD ..\..
     - name: Build LibCmo
       shell: cmd
       run: |
@@ -64,13 +64,19 @@ jobs:
         if not exist %VCVARS% set VCVARS="C:\Program Files\Microsoft Visual Studio\%VS%\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"
         call %VCVARS% ${{ matrix.msvc_arch }}
         :: Extract saved environment variables
-        call .\extern\envs.bat
+        CALL .\extern\envs.bat
         :: Build Project
-        .\.github\scripts\windows.bat
+        CALL .\.github\scripts\windows.bat
     - name: Upload Built Artifact
       uses: actions/upload-artifact@v4
       with:
         name: LibCmo-windows-build
         path: bin/install/*
+        retention-days: 30
+    - name: Upload Built Dependencies
+      uses: actions/upload-artifact@v4
+      with:
+        name: LibCmo-windows-dep
+        path: extern/zlib/install/*
         retention-days: 30
         

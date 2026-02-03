@@ -17,7 +17,7 @@ cd ..
 
 # Record install directory
 cd install
-set YYCCommonplace_ROOT=$(pwd)
+export YYCCommonplace_ROOT=$(pwd)
 cd ..
 
 # Back to root directory
