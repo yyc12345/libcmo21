@@ -12,7 +12,7 @@ cd ..
 
 # Build in Release mode
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=23 -DZLIB_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=$ZLIB_ROOT ../..
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=23 -DZLIB_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=$ZLIB_ROOT ..
 cmake --build .
 cmake --install .
 cd ..

@@ -10,7 +10,7 @@ mkdir install
 
 # Build in Release mode
 cd build
-cmake -DCMAKE_CXX_STANDARD=23 -DCMAKE_BUILD_TYPE=Release ../..
+cmake -DCMAKE_CXX_STANDARD=23 -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=True ../..
 cmake --build .
 cmake --install . --prefix=../install
 cd ..
