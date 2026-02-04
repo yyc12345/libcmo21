@@ -19,6 +19,28 @@ namespace BMapInspector::Rule::Shared {
 		return static_cast<O::CKGroup*>(ctx->GetObjectByNameAndClass(name, C::CK_CLASSID::CKCID_GROUP, nullptr));
 	}
 
+	static void Iter3dObjectsEx(std::vector<O::CK3dObject*>& container, O::CKGroup* group) {
+		for (L::CKDWORD obj_idx = 0; obj_idx < group->GetObjectCount(); ++obj_idx) {
+			auto* group_beobject = group->GetObject(obj_idx);
+			if (!C::CKIsChildClassOf(group_beobject->GetClassID(), C::CK_CLASSID::CKCID_3DOBJECT)) continue;
+			auto* group_3dobject = static_cast<O::CK3dObject*>(group_beobject);
+			container.emplace_back(group_3dobject);
+		}
+	}
+
+	std::vector<O::CK3dObject*> FetchPhysicalized3dObjects(C::CKContext* ctx) {
+		std::vector<O::CK3dObject*> rv;
+
+		auto* phys_floors = FetchGroup(ctx, GroupNames::PHYS_FLOORS);
+		if (phys_floors != nullptr) Iter3dObjectsEx(rv, phys_floors);
+		auto* phys_floorrails = FetchGroup(ctx, GroupNames::PHYS_FLOORRAILS);
+		if (phys_floorrails != nullptr) Iter3dObjectsEx(rv, phys_floorrails);
+		auto* phys_floorstopper = FetchGroup(ctx, GroupNames::PHYS_FLOORSTOPPER);
+		if (phys_floorstopper != nullptr) Iter3dObjectsEx(rv, phys_floorstopper);
+
+		return rv;
+	}
+
 	bool CheckTextureFileName(O::CKTexture* tex, L::CKSTRING name) {
 		// Get file name
 		auto filename = tex->GetUnderlyingData().GetSlotFileName(0);
@@ -30,14 +52,9 @@ namespace BMapInspector::Rule::Shared {
 		return C::CKStrEqualI(filename_part.c_str(), name);
 	}
 
-	std::vector<O::CK3dEntity*> Iter3dEntities(O::CKGroup* group) {
-		std::vector<O::CK3dEntity*> rv;
-		for (L::CKDWORD obj_idx = 0; obj_idx < group->GetObjectCount(); ++obj_idx) {
-			auto* group_object = group->GetObject(obj_idx);
-			if (!C::CKIsChildClassOf(group_object->GetClassID(), C::CK_CLASSID::CKCID_3DENTITY)) continue;
-			auto* group_3dentity = static_cast<O::CK3dEntity*>(group_object);
-			rv.emplace_back(group_3dentity);
-		}
+	std::vector<O::CK3dObject*> Iter3dObjects(O::CKGroup* group) {
+		std::vector<O::CK3dObject*> rv;
+		Iter3dObjectsEx(rv, group);
 		return rv;
 	}
 

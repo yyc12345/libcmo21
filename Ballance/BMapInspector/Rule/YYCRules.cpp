@@ -1,6 +1,8 @@
 #include "YYCRules.hpp"
 #include "Shared.hpp"
+#include <vector>
 #include <set>
+#include <algorithm>
 
 namespace L = LibCmo;
 namespace C = LibCmo::CK2;
@@ -12,7 +14,7 @@ namespace BMapInspector::Rule {
 
 	constexpr char8_t YYC1[] = u8"YYC1";
 
-	YYCRule1::YYCRule1() {}
+	YYCRule1::YYCRule1() : IRule() {}
 
 	YYCRule1::~YYCRule1() {}
 
@@ -30,10 +32,10 @@ namespace BMapInspector::Rule {
 		// Create container holding smooth meshes
 		std::set<O::CKMesh*> smooth_meshes;
 		// We iterate all object grouped into it.
-		auto group_3dentities = Shared::Iter3dEntities(phys_floorrails);
-		for (auto* group_3dentity : group_3dentities) {
+		auto group_3dobjects = Shared::Iter3dObjects(phys_floorrails);
+		for (auto* group_3dobject : group_3dobjects) {
 			// Then we iterate their current meshes
-			auto* mesh = group_3dentity->GetCurrentMesh();
+			auto* mesh = group_3dobject->GetCurrentMesh();
 			if (mesh == nullptr) continue;
 
 			// Iterate all meshes
@@ -47,7 +49,7 @@ namespace BMapInspector::Rule {
 					reporter.FormatError(
 					    YYC1,
 					    u8R"(Object "%s" is grouped into Phys_FloorRails, but its texture "%s" (referred by mesh %s and material %s) seems not the rail texture. This will cause this object be smooth unexpectly.)",
-					    Shared::RenderObjectName(group_3dentity),
+					    Shared::RenderObjectName(group_3dobject),
 					    Shared::RenderObjectName(texture),
 					    Shared::RenderObjectName(mesh),
 					    Shared::RenderObjectName(mtl));
@@ -74,6 +76,52 @@ namespace BMapInspector::Rule {
 				    YYC1,
 				    u8R"(Object "%s" is not grouped into Phys_FloorRails, but some objects grouped into Phys_FloorRails refer its mesh "%s". This will cause this object be smooth unexpectly.)",
 				    Shared::RenderObjectName(obj),
+				    Shared::RenderObjectName(mesh));
+			}
+		}
+	}
+
+#pragma endregion
+
+#pragma region YYC Rule 2
+
+	constexpr char8_t YYC2[] = u8"YYC2";
+
+	YYCRule2::YYCRule2() : IRule() {}
+
+	YYCRule2::~YYCRule2() {}
+
+	std::u8string_view YYCRule2::GetRuleName() const {
+		return YYC2;
+	}
+
+	void YYCRule2::Check(Reporter::Reporter& reporter, Map::Level& level) const {
+		auto* ctx = level.GetCKContext();
+		auto physicalized_3dobjects = Shared::FetchPhysicalized3dObjects(ctx);
+
+		// Iterate all physicalized 3dobject
+		for (auto* physicalized_3dobject : physicalized_3dobjects) {
+			// Get its mesh
+			auto* mesh = physicalized_3dobject->GetCurrentMesh();
+			if (mesh == nullptr) continue;
+
+			// Create a bool vector with vertex count and false init value.
+			std::vector<bool> used_vertex(mesh->GetVertexCount(), false);
+			// Iterate all face and set their vertex as used.
+			auto* face_indices = mesh->GetFaceIndices();
+			for (L::CKDWORD face_idx = 0; face_idx < mesh->GetFaceCount(); ++face_idx) {
+				used_vertex[face_indices[face_idx * 3]] = true;
+				used_vertex[face_indices[face_idx * 3 + 1]] = true;
+				used_vertex[face_indices[face_idx * 3 + 2]] = true;
+			}
+			// Check whether there is unused vertex
+			auto has_unused_vertex = std::any_of(used_vertex.begin(), used_vertex.end(), [](bool v) { return v == false; });
+			// If there is unused vertex, report error
+			if (has_unused_vertex) {
+				reporter.FormatError(
+				    YYC2,
+				    u8R"(Object "%s" is grouped into physicalization groups, and its referred mesh "%s" has isolated vertex. This will cause it can not be physicalized.)",
+				    Shared::RenderObjectName(physicalized_3dobject),
 				    Shared::RenderObjectName(mesh));
 			}
 		}

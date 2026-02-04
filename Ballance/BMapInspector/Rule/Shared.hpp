@@ -1,6 +1,7 @@
 #pragma once
 #include <VTAll.hpp>
 #include <vector>
+#include <array>
 
 namespace BMapInspector::Rule::Shared {
 
@@ -11,12 +12,19 @@ namespace BMapInspector::Rule::Shared {
 #pragma region Constant Values
 
 	namespace GroupNames {
+		// clang-format off
+		constexpr char8_t PHYS_FLOORS[] = u8"Phys_Floors";
 		constexpr char8_t PHYS_FLOORRAILS[] = u8"Phys_FloorRails";
-	}
+		constexpr char8_t PHYS_FLOORSTOPPER[] = u8"Phys_FloorStopper";
+		// clang-format on
+	} // namespace GroupNames
 
 	namespace TextureNames {
+		// clang-format off
 		constexpr char8_t RAIL_ENVIRONMENT[] = u8"Rail_Environment.bmp";
-	}
+		// clang-format on
+
+	} // namespace TextureNames
 
 #pragma endregion
 
@@ -29,6 +37,7 @@ namespace BMapInspector::Rule::Shared {
 	 * @return 
 	 */
 	O::CKGroup* FetchGroup(C::CKContext* ctx, L::CKSTRING name);
+	std::vector<O::CK3dObject*> FetchPhysicalized3dObjects(C::CKContext* ctx);
 	/**
 	 * @brief Check whether given CKTexture has the given file name (case-insensitive).
 	 * @param[in] tex Can not be nullptr.
@@ -42,7 +51,7 @@ namespace BMapInspector::Rule::Shared {
 	 * @param[in] group Can not be nullptr.
 	 * @return All objects is the child class of CK3dEntity.
 	 */
-	std::vector<O::CK3dEntity*> Iter3dEntities(O::CKGroup* group);
+	std::vector<O::CK3dObject*> Iter3dObjects(O::CKGroup* group);
 	/**
 	 * @brief 
 	 * @param[in] mesh Can not be nullptr.

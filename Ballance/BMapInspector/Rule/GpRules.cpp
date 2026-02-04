@@ -4,46 +4,50 @@ namespace BMapInspector::Rule {
 
 #pragma region GP1 Rule
 
-	Gp1Rule::Gp1Rule() : IRule() {}
+	GpRule1::GpRule1() : IRule() {}
 
-	Gp1Rule::~Gp1Rule() {}
+	GpRule1::~GpRule1() {}
 
-	std::u8string_view Gp1Rule::GetRuleName() const {
+	std::u8string_view GpRule1::GetRuleName() const {
 		return u8"GP1";
 	}
 
-	void Gp1Rule::Check(Reporter::Reporter& reporter, Map::Level& level) const {}
+	void GpRule1::Check(Reporter::Reporter& reporter, Map::Level& level) const {}
 
 #pragma endregion
 
 #pragma region GP2 Rule
 
-	Gp2Rule::Gp2Rule() : IRule() {}
+	constexpr char8_t GP2[] = u8"GP2";
 
-	Gp2Rule::~Gp2Rule() {}
+	GpRule2::GpRule2() : IRule() {}
 
-	std::u8string_view Gp2Rule::GetRuleName() const {
-		return u8"GP2";
+	GpRule2::~GpRule2() {}
+
+	std::u8string_view GpRule2::GetRuleName() const {
+		return GP2;
 	}
 
-	void Gp2Rule::Check(Reporter::Reporter& reporter, Map::Level& level) const {}
+	void GpRule2::Check(Reporter::Reporter& reporter, Map::Level& level) const {
+		
+	}
 
 #pragma endregion
 
 #pragma region GP3 Rule
-
-	Gp3Rule::Gp3Rule() : IRule() {}
-
-	Gp3Rule::~Gp3Rule() {}
-
-	std::u8string_view Gp3Rule::GetRuleName() const {
-		return u8"GP3";
-	}
-
-	void Gp3Rule::Check(Reporter::Reporter& reporter, Map::Level& level) const {
-		// TODO: Mesh hash is not implemented.
-	}
-
-#pragma endregion
+//
+//	Gp3Rule::Gp3Rule() : IRule() {}
+//
+//	Gp3Rule::~Gp3Rule() {}
+//
+//	std::u8string_view Gp3Rule::GetRuleName() const {
+//		return u8"GP3";
+//	}
+//
+//	void Gp3Rule::Check(Reporter::Reporter& reporter, Map::Level& level) const {
+//		// TODO: Mesh hash is not implemented.
+//	}
+//
+//#pragma endregion
 
 } // namespace BMapInspector::Rule

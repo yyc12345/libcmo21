@@ -5,6 +5,7 @@
 #include "Rule/YYCRules.hpp"
 #include "Rule/BBugRules.hpp"
 #include "Rule/ZZQRules.hpp"
+#include "Rule/SOneRules.hpp"
 
 namespace BMapInspector::Rule {
 
@@ -20,11 +21,13 @@ namespace BMapInspector::Rule {
 
 	Ruleset::Ruleset() : rules() {
 		// Add rule into list.
-		//rules.emplace_back(new Gp1Rule());
-		//rules.emplace_back(new Gp2Rule());
+		//rules.emplace_back(new GpRule1());
+		//rules.emplace_back(new GpRule2());
 		//rules.emplace_back(new Gp3Rule());
 		//rules.emplace_back(new Chirs1Rule());
 		rules.emplace_back(new YYCRule1());
+		rules.emplace_back(new YYCRule2());
+		rules.emplace_back(new SOneRule1());
 		// Add more rules...
 	}
 
