@@ -8,6 +8,7 @@
 #include <yycc/carton/termcolor.hpp>
 #include <yycc/string/op.hpp>
 #include <yycc/patch/stream.hpp>
+#include <yycc/windows/console.hpp>
 #include <iostream>
 #include <optional>
 
@@ -139,6 +140,16 @@ static void CheckRules(BMapInspector::Cli::Args& args, BMapInspector::Map::Level
 
 int main(int argc, char* argv[]) {
 
+	// register exception handler if we are in Windows.
+#if defined(LIBCMO_BUILD_RELEASE) && defined(YYCC_OS_WINDOWS)
+	yycc::carton::ironpad::startup();
+#endif
+
+	// Enable terminal color feature
+#if defined(YYCC_OS_WINDOWS)
+	auto suc = yycc::windows::console::colorful_console();
+#endif
+
 	// Startup CK2 engine.
 	LibCmo::CK2::CKERROR err = LibCmo::CK2::CKStartUp();
 	if (err != LibCmo::CK2::CKERROR::CKERR_OK) throw std::runtime_error("fail to initialize CK2 engine.");
@@ -156,6 +167,11 @@ int main(int argc, char* argv[]) {
 
 	// Shutdown CK2 engine.
 	LibCmo::CK2::CKShutdown();
+
+	// unregister exception handler if we are in Windows
+#if defined(LIBCMO_BUILD_RELEASE) && defined(YYCC_OS_WINDOWS)
+	yycc::carton::ironpad::shutdown();
+#endif
 
 	return 0;
 }
