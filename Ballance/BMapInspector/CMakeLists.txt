@@ -18,6 +18,7 @@ PRIVATE
 	Rule/ZZQRules.cpp
 	Rule/BBugRules.cpp
 	Rule/SOneRules.cpp
+	Rule/SSBRules.cpp
 )
 # Setup headers
 target_sources(BMapInspector
@@ -38,6 +39,7 @@ FILES
 	Rule/ZZQRules.hpp
 	Rule/BBugRules.hpp
 	Rule/SOneRules.hpp
+	Rule/SSBRules.hpp
 )
 # Setup header infomation
 target_include_directories(BMapInspector

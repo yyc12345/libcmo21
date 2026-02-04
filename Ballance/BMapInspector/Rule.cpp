@@ -6,6 +6,7 @@
 #include "Rule/BBugRules.hpp"
 #include "Rule/ZZQRules.hpp"
 #include "Rule/SOneRules.hpp"
+#include "Rule/SSBRules.hpp"
 
 namespace BMapInspector::Rule {
 
@@ -28,6 +29,7 @@ namespace BMapInspector::Rule {
 		rules.emplace_back(new YYCRule1());
 		rules.emplace_back(new YYCRule2());
 		rules.emplace_back(new SOneRule1());
+		rules.emplace_back(new SSBRule1());
 		// Add more rules...
 	}
 

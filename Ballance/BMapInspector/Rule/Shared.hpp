@@ -31,10 +31,18 @@ namespace BMapInspector::Rule::Shared {
 #pragma region Check Functions
 
 	/**
+	 * @brief Check whether given 2 float point values are equal with given tolerance.
+	 * @param lhs 
+	 * @param rhs 
+	 * @param tolerance 
+	 * @return 
+	 */
+	bool FPEqual(L::CKFLOAT lhs, L::CKFLOAT rhs, L::CKFLOAT tolerance);
+	/**
 	 * @brief 
 	 * @param[in] ctx Can not be nullptr.
 	 * @param[in] name Can not be nullptr.
-	 * @return 
+	 * @return Found pointer to CKGroup, otherwise nullptr.
 	 */
 	O::CKGroup* FetchGroup(C::CKContext* ctx, L::CKSTRING name);
 	std::vector<O::CK3dObject*> FetchPhysicalized3dObjects(C::CKContext* ctx);
