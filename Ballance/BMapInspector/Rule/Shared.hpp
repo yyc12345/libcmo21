@@ -16,6 +16,37 @@ namespace BMapInspector::Rule::Shared {
 		constexpr char8_t PHYS_FLOORS[] = u8"Phys_Floors";
 		constexpr char8_t PHYS_FLOORRAILS[] = u8"Phys_FloorRails";
 		constexpr char8_t PHYS_FLOORSTOPPER[] = u8"Phys_FloorStopper";
+
+		constexpr std::array ALL_PH{
+			u8"P_Extra_Life",
+			u8"P_Extra_Point",
+			u8"P_Trafo_Paper",
+			u8"P_Trafo_Stone",
+			u8"P_Trafo_Wood",
+			u8"P_Ball_Paper",
+			u8"P_Ball_Stone",
+			u8"P_Ball_Wood",
+			u8"P_Box",
+			u8"P_Dome",
+			u8"P_Modul_01",
+			u8"P_Modul_03",
+			u8"P_Modul_08",
+			u8"P_Modul_17",
+			u8"P_Modul_18",
+			u8"P_Modul_19",
+			u8"P_Modul_25",
+			u8"P_Modul_26",
+			u8"P_Modul_29",
+			u8"P_Modul_30",
+			u8"P_Modul_34",
+			u8"P_Modul_37",
+			u8"P_Modul_41",
+			u8"PS_Levelstart",
+			u8"PE_Levelende",
+			u8"PC_Checkpoints",
+			u8"PR_Resetpoints",
+		};
+
 		// clang-format on
 	} // namespace GroupNames
 

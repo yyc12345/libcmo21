@@ -29,6 +29,13 @@ namespace BMapInspector::Rule {
 		for (auto* physicalized_3dobject : physicalized_3dobjects) {
 			// Get its world matrix
 			const auto& matrix = physicalized_3dobject->GetWorldMatrix();
+
+			// YYC MARK:
+			// Following method is the bad way to check scale factor,
+			// because it rely on some premise.
+			// But it is simple, especially we do not have fully implement VxMatrix,
+			// or have any linear algebra library.
+			
 			// Extract 3 columns
 			V::VxVector3 col1(matrix[0][0], matrix[1][0], matrix[2][0]);
 			V::VxVector3 col2(matrix[0][1], matrix[1][1], matrix[2][1]);
