@@ -18,7 +18,7 @@ namespace BMapInspector::Rule {
 
 	public:
 		std::u8string_view GetRuleName() const override;
-		void Check(Reporter::Reporter& reporter, Map::Level& ctx) const override;
+		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
 	};
 
 	/**
@@ -35,7 +35,7 @@ namespace BMapInspector::Rule {
 
 	public:
 		std::u8string_view GetRuleName() const override;
-		void Check(Reporter::Reporter& reporter, Map::Level& ctx) const override;
+		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
 	};
 
 	/**
@@ -52,7 +52,7 @@ namespace BMapInspector::Rule {
 
 	public:
 		std::u8string_view GetRuleName() const override;
-		void Check(Reporter::Reporter& reporter, Map::Level& ctx) const override;
+		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
 	};
 
 }

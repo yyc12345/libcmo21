@@ -92,13 +92,26 @@ namespace BMapInspector::Map {
 		}
 	}
 
-	YYCC_IMPL_MOVE_CTOR(Level, rhs) : m_Context(rhs.m_Context) {
+	YYCC_IMPL_MOVE_CTOR(Level, rhs) :
+	    m_Context(rhs.m_Context), m_ObjGroups(std::move(rhs.m_ObjGroups)), m_Obj3dObjects(std::move(rhs.m_Obj3dObjects)),
+	    m_ObjMeshes(std::move(rhs.m_ObjMeshes)), m_ObjMaterials(std::move(rhs.m_ObjMaterials)), m_ObjTextures(std::move(rhs.m_ObjTextures)),
+	    m_ObjTargetLights(std::move(rhs.m_ObjTargetLights))
+
+	{
 		rhs.m_Context = nullptr;
 	}
 
 	YYCC_IMPL_MOVE_OPER(Level, rhs) {
 		this->m_Context = rhs.m_Context;
+		this->m_ObjGroups = std::move(rhs.m_ObjGroups);
+		this->m_Obj3dObjects = std::move(rhs.m_Obj3dObjects);
+		this->m_ObjMeshes = std::move(rhs.m_ObjMeshes);
+		this->m_ObjMaterials = std::move(rhs.m_ObjMaterials);
+		this->m_ObjTextures = std::move(rhs.m_ObjTextures);
+		this->m_ObjTargetLights = std::move(rhs.m_ObjTargetLights);
+
 		rhs.m_Context = nullptr;
+
 		return *this;
 	}
 

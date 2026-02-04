@@ -12,7 +12,7 @@ namespace BMapInspector::Rule {
 		return u8"GP1";
 	}
 
-	void Gp1Rule::Check(Reporter::Reporter& reporter, Map::Level& ctx) const {}
+	void Gp1Rule::Check(Reporter::Reporter& reporter, Map::Level& level) const {}
 
 #pragma endregion
 
@@ -26,7 +26,7 @@ namespace BMapInspector::Rule {
 		return u8"GP2";
 	}
 
-	void Gp2Rule::Check(Reporter::Reporter& reporter, Map::Level& ctx) const {}
+	void Gp2Rule::Check(Reporter::Reporter& reporter, Map::Level& level) const {}
 
 #pragma endregion
 
@@ -40,7 +40,7 @@ namespace BMapInspector::Rule {
 		return u8"GP3";
 	}
 
-	void Gp3Rule::Check(Reporter::Reporter& reporter, Map::Level& ctx) const {
+	void Gp3Rule::Check(Reporter::Reporter& reporter, Map::Level& level) const {
 		// TODO: Mesh hash is not implemented.
 	}
 

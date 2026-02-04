@@ -20,10 +20,11 @@ namespace BMapInspector::Rule {
 
 	Ruleset::Ruleset() : rules() {
 		// Add rule into list.
-		rules.emplace_back(new Gp1Rule());
-		rules.emplace_back(new Gp2Rule());
-		rules.emplace_back(new Gp3Rule());
-		rules.emplace_back(new Chirs1Rule());
+		//rules.emplace_back(new Gp1Rule());
+		//rules.emplace_back(new Gp2Rule());
+		//rules.emplace_back(new Gp3Rule());
+		//rules.emplace_back(new Chirs1Rule());
+		rules.emplace_back(new YYCRule1());
 		// Add more rules...
 	}
 

@@ -11,6 +11,7 @@ PRIVATE
 	Map.cpp
 	Rule.cpp
 	# Rules
+	Rule/Shared.cpp
 	Rule/GpRules.cpp
 	Rule/ChirsRules.cpp
 	Rule/YYCRules.cpp
@@ -29,6 +30,7 @@ FILES
 	Map.hpp
 	Rule.hpp
 	# Rules
+	Rule/Shared.hpp
 	Rule/GpRules.hpp
 	Rule/ChirsRules.hpp
 	Rule/YYCRules.hpp

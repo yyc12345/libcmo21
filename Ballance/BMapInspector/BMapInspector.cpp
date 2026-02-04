@@ -138,6 +138,11 @@ static void CheckRules(BMapInspector::Cli::Args& args, BMapInspector::Map::Level
 }
 
 int main(int argc, char* argv[]) {
+
+	// Startup CK2 engine.
+	LibCmo::CK2::CKERROR err = LibCmo::CK2::CKStartUp();
+	if (err != LibCmo::CK2::CKERROR::CKERR_OK) throw std::runtime_error("fail to initialize CK2 engine.");
+
 	auto args = AcceptArgs();
 	if (args.has_value()) {
 		PrintSplash();
@@ -148,5 +153,9 @@ int main(int argc, char* argv[]) {
 			CheckRules(args.value(), level.value());
 		}
 	}
+
+	// Shutdown CK2 engine.
+	LibCmo::CK2::CKShutdown();
+
 	return 0;
 }

@@ -19,7 +19,7 @@ namespace BMapInspector::Rule {
 
 	public:
 		virtual std::u8string_view GetRuleName() const = 0;
-		virtual void Check(Reporter::Reporter& reporter, Map::Level& ctx) const = 0;
+		virtual void Check(Reporter::Reporter& reporter, Map::Level& level) const = 0;
 	};
 
 	class Ruleset {

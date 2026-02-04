@@ -185,8 +185,8 @@ namespace LibCmo::CK2::MgrImpls {
 			}
 
 			// iterate all sub object and check name
-			for (const auto& objoff : m_ObjectsListByClass[i]) {
-				ObjImpls::CKObject* obj = m_ObjectsList[objoff];
+			for (const auto& objid : m_ObjectsListByClass[i]) {
+				ObjImpls::CKObject* obj = m_ObjectsList[Id2Offset(objid)];
 
 				if (name == nullptr) {
 					// directly add
