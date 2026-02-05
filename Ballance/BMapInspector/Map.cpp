@@ -59,24 +59,28 @@ namespace BMapInspector::Map {
 			auto ptr = fileobj.ObjPtr;
 			if (ptr == nullptr) continue;
 
+			using LibCmo::CK2::CK_CLASSID;
 			switch (fileobj.ObjectCid) {
-				case LibCmo::CK2::CK_CLASSID::CKCID_GROUP:
+				case CK_CLASSID::CKCID_GROUP:
 					m_ObjGroups.emplace_back(static_cast<O::CKGroup*>(ptr));
 					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT:
+				case CK_CLASSID::CKCID_3DOBJECT:
 					m_Obj3dObjects.emplace_back(static_cast<O::CK3dObject*>(ptr));
 					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_MESH:
+				case CK_CLASSID::CKCID_MESH:
 					m_ObjMeshes.emplace_back(static_cast<O::CKMesh*>(ptr));
 					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL:
+				case CK_CLASSID::CKCID_MATERIAL:
 					m_ObjMaterials.emplace_back(static_cast<O::CKMaterial*>(ptr));
 					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE:
+				case CK_CLASSID::CKCID_TEXTURE:
 					m_ObjTextures.emplace_back(static_cast<O::CKTexture*>(ptr));
 					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT:
+				case CK_CLASSID::CKCID_TARGETLIGHT:
 					m_ObjTargetLights.emplace_back(static_cast<O::CKTargetLight*>(ptr));
+					break;
+				case CK_CLASSID::CKCID_TARGETCAMERA:
+					m_ObjTargetCameras.emplace_back(static_cast<O::CKTargetCamera*>(ptr));
 					break;
 				default:
 					break; // skip unknow objects
@@ -95,7 +99,7 @@ namespace BMapInspector::Map {
 	YYCC_IMPL_MOVE_CTOR(Level, rhs) :
 	    m_Context(rhs.m_Context), m_ObjGroups(std::move(rhs.m_ObjGroups)), m_Obj3dObjects(std::move(rhs.m_Obj3dObjects)),
 	    m_ObjMeshes(std::move(rhs.m_ObjMeshes)), m_ObjMaterials(std::move(rhs.m_ObjMaterials)), m_ObjTextures(std::move(rhs.m_ObjTextures)),
-	    m_ObjTargetLights(std::move(rhs.m_ObjTargetLights))
+	    m_ObjTargetLights(std::move(rhs.m_ObjTargetLights)), m_ObjTargetCameras(std::move(rhs.m_ObjTargetCameras))
 
 	{
 		rhs.m_Context = nullptr;
@@ -109,6 +113,7 @@ namespace BMapInspector::Map {
 		this->m_ObjMaterials = std::move(rhs.m_ObjMaterials);
 		this->m_ObjTextures = std::move(rhs.m_ObjTextures);
 		this->m_ObjTargetLights = std::move(rhs.m_ObjTargetLights);
+		this->m_ObjTargetCameras = std::move(rhs.m_ObjTargetCameras);
 
 		rhs.m_Context = nullptr;
 
@@ -155,6 +160,11 @@ namespace BMapInspector::Map {
 	const std::vector<O::CKTargetLight*>& Level::GetTargetLights() const {
 		CHECK_STATUS(this)
 		return this->m_ObjTargetLights;
+	}
+
+	const std::vector<O::CKTargetCamera*>& Level::GetTargetCameras() const {
+		CHECK_STATUS(this)
+		return this->m_ObjTargetCameras;
 	}
 
 #undef CHECK_STATUS

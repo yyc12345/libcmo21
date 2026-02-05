@@ -1,23 +1,12 @@
 #pragma once
 #include "Cli.hpp"
+#include <VTAll.hpp>
 #include <yycc.hpp>
 #include <yycc/macro/class_copy_move.hpp>
 #include <string>
 #include <vector>
 #include <optional>
 #include <expected>
-
-namespace LibCmo::CK2 {
-	class CKContext;
-	namespace ObjImpls {
-		class CKGroup;
-		class CK3dObject;
-		class CKMesh;
-		class CKMaterial;
-		class CKTexture;
-		class CKTargetLight;
-	} // namespace ObjImpls
-} // namespace LibCmo::CK2
 
 namespace BMapInspector::Map {
 
@@ -53,6 +42,7 @@ namespace BMapInspector::Map {
 		const std::vector<LibCmo::CK2::ObjImpls::CKMaterial*>& GetMaterials() const;
 		const std::vector<LibCmo::CK2::ObjImpls::CKTexture*>& GetTextures() const;
 		const std::vector<LibCmo::CK2::ObjImpls::CKTargetLight*>& GetTargetLights() const;
+		const std::vector<LibCmo::CK2::ObjImpls::CKTargetCamera*>& GetTargetCameras() const;
 
 	private:
 		std::vector<LibCmo::CK2::ObjImpls::CKGroup*> m_ObjGroups;
@@ -61,6 +51,7 @@ namespace BMapInspector::Map {
 		std::vector<LibCmo::CK2::ObjImpls::CKMaterial*> m_ObjMaterials;
 		std::vector<LibCmo::CK2::ObjImpls::CKTexture*> m_ObjTextures;
 		std::vector<LibCmo::CK2::ObjImpls::CKTargetLight*> m_ObjTargetLights;
+		std::vector<LibCmo::CK2::ObjImpls::CKTargetCamera*> m_ObjTargetCameras;
 	};
 
 	Result<Level> load(const Cli::Args& args);

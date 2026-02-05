@@ -437,13 +437,13 @@ namespace LibCmo::CK2 {
 
 		constexpr CKGUID(CKDWORD gd1 = 0, CKDWORD gd2 = 0) : d1(gd1), d2(gd2) {}
 		CKGUID(const CKGUID& rhs) : d1(rhs.d1), d2(rhs.d2) {}
-		CKGUID(CKGUID&& rhs) : d1(rhs.d1), d2(rhs.d2) {}
+		CKGUID(CKGUID&& rhs) noexcept : d1(rhs.d1), d2(rhs.d2) {}
 		CKGUID& operator=(const CKGUID& rhs) {
 			this->d1 = rhs.d1;
 			this->d2 = rhs.d2;
 			return *this;
 		}
-		CKGUID& operator=(CKGUID&& rhs) {
+		CKGUID& operator=(CKGUID&& rhs) noexcept {
 			this->d1 = rhs.d1;
 			this->d2 = rhs.d2;
 			return *this;

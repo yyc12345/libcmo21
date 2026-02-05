@@ -2,7 +2,6 @@
 #include "Utils.hpp"
 #include "Reporter.hpp"
 #include "Map.hpp"
-#include <VTAll.hpp>
 #include <yycc.hpp>
 #include <yycc/macro/class_copy_move.hpp>
 #include <string>
