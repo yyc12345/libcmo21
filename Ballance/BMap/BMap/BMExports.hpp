@@ -104,6 +104,8 @@ bool some_interface_func(BMPARAM_OUT(Type_t, param_name)) {
 
 #pragma endregion
 
+// clang-format off
+
 #pragma region Init / Dispose
 
 BMAP_EXPORT bool BMInit();
@@ -159,6 +161,9 @@ BMAP_EXPORT bool BMFile_CreateTexture(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(Lib
 BMAP_EXPORT bool BMFile_GetTargetLightCount(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CKDWORD, out_count));
 BMAP_EXPORT bool BMFile_GetTargetLight(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, idx), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id));
 BMAP_EXPORT bool BMFile_CreateTargetLight(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id));
+BMAP_EXPORT bool BMFile_GetTargetCameraCount(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CKDWORD, out_count));
+BMAP_EXPORT bool BMFile_GetTargetCamera(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, idx), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id));
+BMAP_EXPORT bool BMFile_CreateTargetCamera(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id));
 
 #pragma endregion
 
@@ -339,3 +344,31 @@ BMAP_EXPORT bool BMLight_SetFalloffShape(BMPARAM_OBJECT_DECL(bmfile, objid), BMP
 // nothing
 
 #pragma endregion
+
+#pragma region CKCamera
+
+BMAP_EXPORT bool BMCamera_GetProjectionType(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_CAMERA_PROJECTION, out_val));
+BMAP_EXPORT bool BMCamera_SetProjectionType(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_CAMERA_PROJECTION, val));
+
+BMAP_EXPORT bool BMCamera_GetOrthographicZoom(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+BMAP_EXPORT bool BMCamera_SetOrthographicZoom(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+
+BMAP_EXPORT bool BMCamera_GetFrontPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+BMAP_EXPORT bool BMCamera_SetFrontPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+BMAP_EXPORT bool BMCamera_GetBackPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+BMAP_EXPORT bool BMCamera_SetBackPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+BMAP_EXPORT bool BMCamera_GetFov(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val));
+BMAP_EXPORT bool BMCamera_SetFov(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val));
+
+BMAP_EXPORT bool BMCamera_GetAspectRatio(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_width), BMPARAM_OUT(LibCmo::CKDWORD, out_height));
+BMAP_EXPORT bool BMCamera_SetAspectRatio(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, width), BMPARAM_IN(LibCmo::CKDWORD, height));
+
+#pragma endregion
+
+#pragma region CKTargetCamera
+
+// nothing
+
+#pragma endregion
+
+// clang-format on

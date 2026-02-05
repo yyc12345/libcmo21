@@ -48,7 +48,7 @@ namespace BMapInspector::Rule {
 					// No, this is not rail texture, throw error.
 					reporter.FormatError(
 					    YYC1,
-					    u8R"(Object "%s" is grouped into Phys_FloorRails, but its texture "%s" (referred by mesh %s and material %s) seems not the rail texture. This will cause some parts of this object be smooth unexpectly.)",
+					    u8R"(Object "%s" is grouped into Phys_FloorRails, but its texture "%s" (referred by mesh "%s" and material "%s") seems not the rail texture. This will cause some parts of this object be smooth unexpectly.)",
 					    Shared::RenderObjectName(group_3dobject),
 					    Shared::RenderObjectName(texture),
 					    Shared::RenderObjectName(mesh),

@@ -126,6 +126,9 @@ namespace BMap {
 		LibCmo::CKDWORD GetTargetLightCount();
 		LibCmo::CK2::CK_ID GetTargetLight(LibCmo::CKDWORD idx);
 		LibCmo::CK2::CK_ID CreateTargetLight();
+		LibCmo::CKDWORD GetTargetCameraCount();
+		LibCmo::CK2::CK_ID GetTargetCamera(LibCmo::CKDWORD idx);
+		LibCmo::CK2::CK_ID CreateTargetCamera();
 
 	private:
 		LibCmo::CK2::CKContext* m_Context;
@@ -136,6 +139,7 @@ namespace BMap {
 		std::vector<LibCmo::CK2::CK_ID> m_ObjMaterials;
 		std::vector<LibCmo::CK2::CK_ID> m_ObjTextures;
 		std::vector<LibCmo::CK2::CK_ID> m_ObjTargetLights;
+		std::vector<LibCmo::CK2::CK_ID> m_ObjTargetCameras;
 
 	};
 	

@@ -11,9 +11,7 @@ namespace BMap {
 		// check whether callback is nullptr.
 		m_IsInitError = m_IsInitError || (raw_callback == nullptr);
 		if (raw_callback != nullptr) {
-			m_Context->SetOutputCallback([raw_callback](LibCmo::CKSTRING strl) -> void {
-				raw_callback(strl);
-				});
+			m_Context->SetOutputCallback([raw_callback](LibCmo::CKSTRING strl) -> void { raw_callback(strl); });
 		}
 
 		// set temp folder and texture folder
@@ -89,27 +87,32 @@ namespace BMap {
 		m_ObjMaterials.clear();
 		m_ObjTextures.clear();
 		m_ObjTargetLights.clear();
+		m_ObjTargetCameras.clear();
 		for (const auto& fileobj : reader.GetFileObjects()) {
 			if (fileobj.ObjPtr == nullptr) continue;
 
+			using LibCmo::CK2::CK_CLASSID;
 			switch (fileobj.ObjectCid) {
-				case LibCmo::CK2::CK_CLASSID::CKCID_GROUP:
+				case CK_CLASSID::CKCID_GROUP:
 					m_ObjGroups.emplace_back(fileobj.CreatedObjectId);
 					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT:
+				case CK_CLASSID::CKCID_3DOBJECT:
 					m_Obj3dObjects.emplace_back(fileobj.CreatedObjectId);
 					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_MESH:
+				case CK_CLASSID::CKCID_MESH:
 					m_ObjMeshes.emplace_back(fileobj.CreatedObjectId);
 					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL:
+				case CK_CLASSID::CKCID_MATERIAL:
 					m_ObjMaterials.emplace_back(fileobj.CreatedObjectId);
 					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE:
+				case CK_CLASSID::CKCID_TEXTURE:
 					m_ObjTextures.emplace_back(fileobj.CreatedObjectId);
 					break;
-				case LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT:
+				case CK_CLASSID::CKCID_TARGETLIGHT:
 					m_ObjTargetLights.emplace_back(fileobj.CreatedObjectId);
+					break;
+				case CK_CLASSID::CKCID_TARGETCAMERA:
+					m_ObjTargetCameras.emplace_back(fileobj.CreatedObjectId);
 					break;
 				default:
 					break; // skip unknow objects
@@ -142,7 +145,10 @@ namespace BMap {
 		for (const auto& id : m_ObjTextures) {
 			writer.AddSavedObject(m_Context->GetObject(id));
 		}
-		for (const auto& id :m_ObjTargetLights) {
+		for (const auto& id : m_ObjTargetLights) {
+			writer.AddSavedObject(m_Context->GetObject(id));
+		}
+		for (const auto& id : m_ObjTargetCameras) {
 			writer.AddSavedObject(m_Context->GetObject(id));
 		}
 
@@ -238,6 +244,9 @@ namespace BMap {
 	LibCmo::CKDWORD BMFile::GetTargetLightCount() { return CommonGetObjectCount(m_ObjTargetLights); }
 	LibCmo::CK2::CK_ID BMFile::GetTargetLight(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjTargetLights, idx); }
 	LibCmo::CK2::CK_ID BMFile::CreateTargetLight() { return CommonCreateObject(m_ObjTargetLights, LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT); }
+	LibCmo::CKDWORD BMFile::GetTargetCameraCount() { return CommonGetObjectCount(m_ObjTargetCameras); }
+	LibCmo::CK2::CK_ID BMFile::GetTargetCamera(LibCmo::CKDWORD idx) { return CommonGetObject(m_ObjTargetCameras, idx); }
+	LibCmo::CK2::CK_ID BMFile::CreateTargetCamera() { return CommonCreateObject(m_ObjTargetCameras, LibCmo::CK2::CK_CLASSID::CKCID_TARGETCAMERA); }
 
 #pragma endregion
 

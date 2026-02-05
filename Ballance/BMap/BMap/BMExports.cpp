@@ -51,8 +51,12 @@ T CheckGenericObject(BMap::BMFile* possible_bmfile, LibCmo::CK2::CK_ID possible_
 #define CheckCKTexture(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKTexture*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE)
 #define CheckCKLight(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKLight*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_LIGHT)
 #define CheckCKTargetLight(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKTargetLight*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT)
+#define CheckCKCamera(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKCamera*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_CAMERA)
+#define CheckCKTargetCamera(bmfile, objid) CheckGenericObject<LibCmo::CK2::ObjImpls::CKTargetCamera*>(bmfile, objid, LibCmo::CK2::CK_CLASSID::CKCID_TARGETCAMERA)
 
 #pragma endregion
+
+// clang-format off
 
 #pragma region Module Init & Dispose
 
@@ -252,6 +256,21 @@ bool BMFile_GetTargetLight(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD
 bool BMFile_CreateTargetLight(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
 	if (!CheckBMFile(bmfile)) return false;
 	BMPARAM_OUT_ASSIGN(out_id, bmfile->CreateTargetLight());
+	return true;
+}
+bool BMFile_GetTargetCameraCount(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CKDWORD, out_count)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_count, bmfile->GetTargetCameraCount());
+	return true;
+}
+bool BMFile_GetTargetCamera(BMPARAM_FILE_DECL(bmfile), BMPARAM_IN(LibCmo::CKDWORD, idx), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->GetTargetCamera(idx));
+	return true;
+}
+bool BMFile_CreateTargetCamera(BMPARAM_FILE_DECL(bmfile), BMPARAM_OUT(LibCmo::CK2::CK_ID, out_id)) {
+	if (!CheckBMFile(bmfile)) return false;
+	BMPARAM_OUT_ASSIGN(out_id, bmfile->CreateTargetCamera());
 	return true;
 }
 
@@ -1042,3 +1061,98 @@ bool BMLight_SetFalloffShape(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibC
 // nothing
 
 #pragma endregion
+
+#pragma region CKCamera
+
+bool BMCamera_GetProjectionType(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CK2::CK_CAMERA_PROJECTION, out_val)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetProjectionType());
+	return true;
+}
+bool BMCamera_SetProjectionType(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CK2::CK_CAMERA_PROJECTION, val)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+
+	obj->SetProjectionType(val);
+	return true;
+}
+
+bool BMCamera_GetOrthographicZoom(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetOrthographicZoom());
+	return true;
+}
+bool BMCamera_SetOrthographicZoom(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetOrthographicZoom(val);
+	return true;
+}
+
+bool BMCamera_GetFrontPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetFrontPlane());
+	return true;
+}
+bool BMCamera_SetFrontPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetFrontPlane(val);
+	return true;
+}
+bool BMCamera_GetBackPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetFrontPlane());
+	return true;
+}
+bool BMCamera_SetBackPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetBackPlane(val);
+	return true;
+}
+bool BMCamera_GetFov(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetFrontPlane());
+	return true;
+}
+bool BMCamera_SetFov(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetFov(val);
+	return true;
+}
+
+bool BMCamera_GetAspectRatio(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKDWORD, out_width), BMPARAM_OUT(LibCmo::CKDWORD, out_height)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+	
+	LibCmo::CKDWORD cache_width, cache_height;
+	obj->GetAspectRatio(cache_width, cache_height);
+	BMPARAM_OUT_ASSIGN(out_width, cache_width);
+	BMPARAM_OUT_ASSIGN(out_height, cache_height);
+	
+	return true;
+}
+bool BMCamera_SetAspectRatio(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKDWORD, width), BMPARAM_IN(LibCmo::CKDWORD, height)) {
+	auto obj = CheckCKCamera(bmfile, objid);
+	if (obj == nullptr) return false;
+	obj->SetAspectRatio(width, height);
+	return true;
+}
+
+#pragma endregion
+
+#pragma region CKTargetCamera
+
+// nothing
+
+#pragma endregion
+
+// clang-format on
