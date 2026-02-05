@@ -39,6 +39,11 @@ Some Java code use Google Gson as its dependency.
 The Gson versio I used is Gson 2.10.1.
 It would be okey for you to use any Antlr you like.
 
+### Passing Dependencies
+
+When executing Java code relying on these dependencies, 
+you can use `-cp` option of Java runtime to pass the directory where you can find those dependency's JAR files.
+
 ## Python
 
 For most Python code written in this project, we use Astral UV to manage them.
