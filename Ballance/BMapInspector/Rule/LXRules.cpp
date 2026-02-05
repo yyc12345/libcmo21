@@ -1,6 +1,5 @@
-#include "YYCRules.hpp"
-#include "Shared.hpp"
 #include "LXRules.hpp"
+#include "Shared.hpp"
 #include <set>
 
 namespace L = LibCmo;
@@ -8,6 +7,7 @@ namespace C = LibCmo::CK2;
 namespace O = LibCmo::CK2::ObjImpls;
 
 namespace BMapInspector::Rule {
+
 #pragma region LX Rule 1
 
 	constexpr char8_t LX1[] = u8"LX1";

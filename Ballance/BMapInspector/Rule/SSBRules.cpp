@@ -1,6 +1,5 @@
-#include "YYCRules.hpp"
-#include "Shared.hpp"
 #include "SSBRules.hpp"
+#include "Shared.hpp"
 
 namespace L = LibCmo;
 namespace C = LibCmo::CK2;
