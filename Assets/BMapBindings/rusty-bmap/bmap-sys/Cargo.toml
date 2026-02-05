@@ -1,0 +1,9 @@
+[package]
+name = "bmap-sys"
+version = "0.4.0"
+authors = ["yyc12345"]
+edition = "2024"
+description = "The Rust binding to BMap."
+license = "SPDX:MIT"
+
+[dependencies]
