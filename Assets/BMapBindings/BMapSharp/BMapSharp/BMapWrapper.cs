@@ -6,6 +6,20 @@ using BMapSharp.VirtoolsTypes;
 namespace BMapSharp.BMapWrapper {
 
     /// <summary>
+    /// BMapSharp module specific exception.
+    /// </summary>
+    public class BMapException : Exception {
+        public BMapException() { }
+        public BMapException(string message)
+            : base(message) { }
+        public BMapException(string message, Exception inner)
+            : base(message, inner) { }
+        public static void ThrowIfFailed(bool condition) {
+            if (!condition) throw new BMapException("BMap operation failed.");
+        }
+    }
+
+    /// <summary>
     /// The guard of native BMap environment.
     /// This class initialize native BMap environment when constructing and free it when destructing.
     /// </summary>
