@@ -1,19 +1,19 @@
 using System;
+using System.IO;
 using System.Text;
-using System.Collections.Generic;
-using System.Diagnostics;
 using BMapSharp;
 
 namespace BMapSharpTest {
     internal class Program {
 
-        static void Main(string[] args) {
+        static int Main(string[] args) {
             // Parse arguments
+            Cli cli;
             try {
-
+                cli = new Cli();
             } catch (CliException e) {
                 Console.WriteLine($"Can not launch test. Reason: {e.Message}");
-                Environment.Exit(0);
+                return 2;
             }
 
             // Check console encoding.
@@ -21,7 +21,7 @@ namespace BMapSharpTest {
             // Check BMap status.
             if (!BMapSharp.BMapWrapper.Utils.IsBMapAvailable()) {
                 Console.WriteLine("Fail to initialize native BMap.");
-                Environment.Exit(0);
+                return 1;
             }
 
             // Waiting debugger
@@ -30,19 +30,20 @@ namespace BMapSharpTest {
             Console.ReadKey(true);
 
             // Start testbench
-            string file_name = resolved_args.mFileName; // "LightCameraTest.nmo";
-            string temp_folder = resolved_args.mTempFolder; // "Temp";
-            string texture_folder = resolved_args.mTextureFolder; // "F:\\Ballance\\Ballance\\Textures";
-            string[] encodings = resolved_args.mEncodings; // ["cp1252", "gb2312"];
+            string file_name = cli.FileName;
+            var temp_dir_info = Directory.CreateTempSubdirectory();
+            string temp_dir = temp_dir_info.FullName;
+            string texture_dir = Path.Combine(cli.BallanceDirectory, "Textures");
+            string[] encodings = cli.Encodings;
 
-            using (var reader = new BMapSharp.BMapWrapper.BMFileReader(file_name, temp_folder, texture_folder, encodings)) {
+            using (var reader = new BMapSharp.BMapWrapper.BMFileReader(file_name, temp_dir, texture_dir, encodings)) {
                 TestSuits.TestCommon.Test(reader);
                 TestSuits.TestIEquatable.Test(reader);
             }
 
             Console.WriteLine("Press any key to quit...");
             Console.ReadKey(true);
-
+            return 0;
         }
 
     }

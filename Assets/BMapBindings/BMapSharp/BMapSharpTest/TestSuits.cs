@@ -1,7 +1,7 @@
-using BMapSharp.BMapWrapper;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using BMapSharp.BMapWrapper;
 
 namespace BMapSharpTest.TestSuits {
 
