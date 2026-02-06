@@ -1,4 +1,4 @@
 <Solution>
   <Project Path="BMapSharp/BMapSharp.csproj" />
-  <Project Path="BMapSharpTestbench/BMapSharpTestbench.csproj" />
+  <Project Path="BMapSharpTest/BMapSharpTest.csproj" />
 </Solution>

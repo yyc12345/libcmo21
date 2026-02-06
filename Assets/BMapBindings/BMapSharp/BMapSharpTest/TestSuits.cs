@@ -1,0 +1,177 @@
+using BMapSharp.BMapWrapper;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+
+namespace BMapSharpTest.TestSuits {
+
+    public static class TestCommon {
+
+        public static void Test(BMFileReader reader) {
+            Console.WriteLine("===== Groups =====");
+            TestGroup(reader);
+            //Console.WriteLine("===== 3dObjects =====");
+            //Test3dObject(reader);
+            //Console.WriteLine("===== Meshes =====");
+            //TestMesh(reader);
+            //Console.WriteLine("===== Materials =====");
+            //TestMaterial(reader);
+            //Console.WriteLine("===== Textures =====");
+            //TestTexture(reader);
+            //Console.WriteLine("===== Target Lights =====");
+            //TestTargetLight(reader);
+            Console.WriteLine("===== Target Cameras =====");
+            TestTargetCamera(reader);
+            Console.WriteLine("===== END =====");
+        }
+
+        private static void TestGroup(BMFileReader reader) {
+            foreach (var gp in reader.GetGroups()) {
+                Console.WriteLine(gp.GetName());
+                foreach (var gp_item in gp.GetObjects()) {
+                    Console.WriteLine($"\t{gp_item.GetName()}");
+                }
+            }
+        }
+
+        private static void Test3dObject(BMFileReader reader) {
+            foreach (var obj in reader.Get3dObjects()) {
+                Console.WriteLine(obj.GetName());
+
+                var current_mesh = obj.GetCurrentMesh();
+                var mesh_name = current_mesh is null ? "<null>" : current_mesh.GetName();
+                Console.WriteLine($"\tMesh: {mesh_name}");
+                Console.WriteLine($"\tVisibility: {obj.GetVisibility()}");
+                Console.WriteLine($"\tMatrix: {obj.GetWorldMatrix().ToManaged()}");
+            }
+        }
+
+        private static void TestMesh(BMFileReader reader) {
+            foreach (var mesh in reader.GetMeshes()) {
+                Console.WriteLine(mesh.GetName());
+
+                Console.WriteLine($"\tLit Mode: {mesh.GetLitMode()}");
+                Console.WriteLine($"\tVertex Count: {mesh.GetVertexCount()}");
+                Console.WriteLine($"\tFace Count: {mesh.GetFaceCount()}");
+                Console.WriteLine($"\tMaterial Slot Count: {mesh.GetMaterialSlotCount()}");
+            }
+        }
+
+        private static void TestMaterial(BMFileReader reader) {
+            foreach (var mtl in reader.GetMaterials()) {
+                Console.WriteLine(mtl.GetName());
+
+                Console.WriteLine($"\tDiffuse: {mtl.GetDiffuse().ToManagedRGBA()}");
+                Console.WriteLine($"\tAmbient: {mtl.GetAmbient().ToManagedRGBA()}");
+                Console.WriteLine($"\tSpecular: {mtl.GetSpecular().ToManagedRGBA()}");
+                Console.WriteLine($"\tEmissive: {mtl.GetEmissive().ToManagedRGBA()}");
+
+                Console.WriteLine($"\tSpecular Power: {mtl.GetSpecularPower()}");
+
+                Console.WriteLine($"\tTexture Border Color: {mtl.GetTextureBorderColor().ToManagedRGBA()}");
+
+                Console.WriteLine($"\tTexture Blend Mode: {mtl.GetTextureBlendMode()}");
+                Console.WriteLine($"\tTexture Min Mode: {mtl.GetTextureMinMode()}");
+                Console.WriteLine($"\tTexture Mag Mode: {mtl.GetTextureMagMode()}");
+                Console.WriteLine($"\tSource Blend: {mtl.GetSourceBlend()}");
+                Console.WriteLine($"\tDest Blend: {mtl.GetDestBlend()}");
+                Console.WriteLine($"\tFill Mode: {mtl.GetFillMode()}");
+                Console.WriteLine($"\tShade Mode: {mtl.GetShadeMode()}");
+
+                Console.WriteLine($"\tAlpha Test Enabled: {mtl.GetAlphaTestEnabled()}");
+                Console.WriteLine($"\tAlpha Blend Enabled: {mtl.GetAlphaBlendEnabled()}");
+                Console.WriteLine($"\tPerspective Correction Enabled: {mtl.GetPerspectiveCorrectionEnabled()}");
+                Console.WriteLine($"\tZ Write Enabled: {mtl.GetZWriteEnabled()}");
+                Console.WriteLine($"\tTwo Sided Enabled: {mtl.GetTwoSidedEnabled()}");
+
+                Console.WriteLine($"\tAlpha Ref: {mtl.GetAlphaRef()}");
+
+                Console.WriteLine($"\tAlpha Func: {mtl.GetAlphaFunc()}");
+                Console.WriteLine($"\tZ Func: {mtl.GetZFunc()}");
+            }
+        }
+
+        private static void TestTexture(BMFileReader reader) {
+            foreach (var tex in reader.GetTextures()) {
+                Console.WriteLine(tex.GetName());
+
+                Console.WriteLine($"\tFile Name: {tex.GetFileName()}");
+                Console.WriteLine($"\tSave Options: {tex.GetSaveOptions()}");
+                Console.WriteLine($"\tVideo Format: {tex.GetVideoFormat()}");
+            }
+        }
+
+        private static void TestTargetLight(BMFileReader reader) {
+            foreach (var lit in reader.GetTargetLights()) {
+                Console.WriteLine(lit.GetName());
+
+                Console.WriteLine($"\tVisibility: {lit.GetVisibility()}");
+                Console.WriteLine($"\tMatrix: {lit.GetWorldMatrix().ToManaged()}");
+
+                Console.WriteLine($"Type: {lit.GetLightType()}");
+                Console.WriteLine($"Color: {lit.GetColor().ToManagedRGBA()}");
+                Console.WriteLine($"Constant Attenuation: {lit.GetConstantAttenuation()}");
+                Console.WriteLine($"Linear Attenuation: {lit.GetLinearAttenuation()}");
+                Console.WriteLine($"Quadratic Attenuation: {lit.GetQuadraticAttenuation()}");
+                Console.WriteLine($"Range: {lit.GetRange()}");
+                Console.WriteLine($"Hot Spot: {lit.GetHotSpot()}");
+                Console.WriteLine($"Falloff: {lit.GetFalloff()}");
+                Console.WriteLine($"Falloff Shape: {lit.GetFalloffShape()}");
+            }
+        }
+
+        private static void TestTargetCamera(BMFileReader reader) {
+            foreach (var cam in reader.GetTargetCameras()) {
+                Console.WriteLine(cam.GetName());
+
+                Console.WriteLine($"\tVisibility: {cam.GetVisibility()}");
+                Console.WriteLine($"\tMatrix: {cam.GetWorldMatrix().ToManaged()}");
+
+                Console.WriteLine($"Type: {cam.GetProjectionType()}");
+                Console.WriteLine($"Orthographic Zoom: {cam.GetOrthographicZoom()}");
+                Console.WriteLine($"Front Plane: {cam.GetFrontPlane()}");
+                Console.WriteLine($"Back Plane: {cam.GetBackPlane()}");
+                Console.WriteLine($"Fov: {cam.GetFov()}");
+
+                cam.GetAspectRatio(out var width, out var height);
+                Console.WriteLine($"Aspect Ratio: {width} x {height}");
+            }
+        }
+    }
+
+    public static class TestIEquatable {
+
+        public static void Test(BMFileReader reader) {
+            if (reader.Get3dObjectCount() < 2u) {
+                Debug.Fail(
+                    "Invalid file for test IEquatable.",
+                    "We can not perform IEquatable test because the length of 3dObject is too short (must greater than 2). Please choose another file to perform."
+                );
+                return;
+            }
+
+            // Prepare test variables
+            var all_3dobjects = new List<BM3dObject>(reader.Get3dObjects());
+            var first_3dobj = all_3dobjects[0];
+            var second_3dobj = all_3dobjects[1];
+            all_3dobjects = new List<BM3dObject>(reader.Get3dObjects());
+            var first_3dobj_again = all_3dobjects[0];
+            Debug.Assert(!Object.ReferenceEquals(first_3dobj, first_3dobj_again));
+
+            // Hashtable test
+            var test_hashset = new HashSet<BM3dObject>();
+            Debug.Assert(test_hashset.Add(first_3dobj));
+            Debug.Assert(!test_hashset.Add(first_3dobj_again));
+            Debug.Assert(test_hashset.Add(second_3dobj));
+
+            // Dictionary test
+            var test_dictionary = new Dictionary<BM3dObject, string>();
+            Debug.Assert(test_dictionary.TryAdd(first_3dobj, first_3dobj.GetName()));
+            Debug.Assert(!test_dictionary.TryAdd(first_3dobj_again, first_3dobj_again.GetName()));
+            Debug.Assert(test_dictionary.TryAdd(second_3dobj, second_3dobj.GetName()));
+
+        }
+
+    }
+
+}
