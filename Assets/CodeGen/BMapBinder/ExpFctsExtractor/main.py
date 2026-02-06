@@ -14,7 +14,7 @@ def _get_libcmo21_repo_directory() -> Path:
 
 
 def get_input_file_path() -> Path:
-    return _get_libcmo21_repo_directory() / "BMap" / "BMap" / "BMExports.hpp"
+    return _get_libcmo21_repo_directory() / "Ballance" / "BMap" / "BMap" / "BMExports.hpp"
 
 
 def _get_bmap_binder_directory() -> Path:

@@ -32,6 +32,7 @@ CPP_PY_TYPE_MAP: dict[str, str] = {
     "VXSHADE_MODE": "enum",
     "VXCMPFUNC": "enum",
     "VXMESH_LITMODE": "enum",
+    "CK_CAMERA_PROJECTION": "enum",
 }
 
 CS_ENUM_LIKE: set[str] = set((
@@ -46,6 +47,7 @@ CS_ENUM_LIKE: set[str] = set((
     "VXSHADE_MODE",
     "VXCMPFUNC",
     "VXMESH_LITMODE",
+    "CK_CAMERA_PROJECTION",
 ))
 
 @dataclass(frozen=True)
@@ -108,10 +110,12 @@ class RenderUtils:
                 # only allow 0 and 1 pointer level for string.
                 match vt_pointer_level:
                     case 0:
-                        marshal_as = f'UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringMarshaler), MarshalCookie = "{direction_cookie}"'
+                        marshaler = 'BMOwnedStringMarshaler' if param.is_input else 'BMStringMarshaler'
+                        marshal_as = f'UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof({marshaler})'
                         cs_type = "string"
                     case 1:
-                        marshal_as = f'UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(BMStringArrayMarshaler), MarshalCookie = "{direction_cookie}"'
+                        marshaler = 'BMOwnedStringArrayMarshaler' if param.is_input else 'BMStringArrayMarshaler'
+                        marshal_as = f'UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof({marshaler})'
                         cs_type = "string[]"
             case "CKDWORD":
                 if vt_pointer_level == 0:
