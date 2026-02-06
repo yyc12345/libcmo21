@@ -4,6 +4,8 @@ using System.Numerics;
 
 namespace BMapSharp.VirtoolsTypes {
 
+    #region Structures
+
     // NOTE: Structures defined in there is only served for marshaling.
     // You should not use them in hash set or anything else,
     // because they do not have proper hash function and compare function.
@@ -183,129 +185,454 @@ namespace BMapSharp.VirtoolsTypes {
         }
     }
 
+    #endregion
+
+    #region Enums
+
+    /// <summary>
+    /// Specify the way textures or sprites will be saved
+    /// </summary>
     public enum CK_TEXTURE_SAVEOPTIONS : uint {
-        CKTEXTURE_RAWDATA = 0,	/**< Save raw data inside file. The bitmap is saved in a raw 32 bit per pixel format.  */
-        CKTEXTURE_EXTERNAL = 1,	/**< Store only the file name for the texture. The bitmap file must be present in the bitmap paths when loading the composition.  */
-        CKTEXTURE_IMAGEFORMAT = 2,	/**< Save using format specified. The bitmap data will be converted to the specified format by the correspondant bitmap plugin and saved inside file.  */
-        CKTEXTURE_USEGLOBAL = 3,	/**< Use Global settings, that is the settings given with CKContext::SetGlobalImagesSaveOptions. (Not valid when using CKContext::SetImagesSaveOptions).  */
-        CKTEXTURE_INCLUDEORIGINALFILE = 4,	/**< Insert original image file inside CMO file. The bitmap file that was used originally for the texture or sprite will be append to the composition file and extracted when the file is loaded.  */
-    }
+        /// <summary>
+        /// Save raw data inside file. The bitmap is saved in a raw 32 bit per pixel format.
+        /// </summary>
+        CKTEXTURE_RAWDATA = 0,
+        /// <summary>
+        /// Store only the file name for the texture. The bitmap file must be present in the bitmap pathswhen loading the composition.
+        /// </summary>
+        CKTEXTURE_EXTERNAL = 1,
+        /// <summary>
+        /// Save using format specified. The bitmap data will be converted to thespecified format by the correspondant bitmap plugin and saved inside file.
+        /// </summary>
+        CKTEXTURE_IMAGEFORMAT = 2,
+        /// <summary>
+        /// Use Global settings, that is the settings given with CKContext::SetGlobalImagesSaveOptions. (Not valid when using CKContext::SetImagesSaveOptions).
+        /// </summary>
+        CKTEXTURE_USEGLOBAL = 3,
+        /// <summary>
+        /// Insert original image file inside CMO file. The bitmap file thatwas used originally for the texture or sprite will be append tothe composition file and extracted when the file is loaded.
+        /// </summary>
+        CKTEXTURE_INCLUDEORIGINALFILE = 4,
+    };
 
+    /// <summary>
+    /// Pixel format types.
+    /// </summary>
     public enum VX_PIXELFORMAT : uint {
-        UNKNOWN_PF = 0, /**< Unknown pixel format  */
-        _32_ARGB8888 = 1,   /**< 32-bit ARGB pixel format with alpha  */
-        _32_RGB888 = 2, /**< 32-bit RGB pixel format without alpha  */
-        _24_RGB888 = 3, /**< 24-bit RGB pixel format  */
-        _16_RGB565 = 4, /**< 16-bit RGB pixel format  */
-        _16_RGB555 = 5, /**< 16-bit RGB pixel format (5 bits per color)  */
-        _16_ARGB1555 = 6,   /**< 16-bit ARGB pixel format (5 bits per color + 1 bit for alpha)  */
-        _16_ARGB4444 = 7,   /**< 16-bit ARGB pixel format (4 bits per color)  */
-        _8_RGB332 = 8,  /**< 8-bit  RGB pixel format  */
-        _8_ARGB2222 = 9,    /**< 8-bit  ARGB pixel format  */
-        _32_ABGR8888 = 10,  /**< 32-bit ABGR pixel format  */
-        _32_RGBA8888 = 11,  /**< 32-bit RGBA pixel format  */
-        _32_BGRA8888 = 12,  /**< 32-bit BGRA pixel format  */
-        _32_BGR888 = 13,    /**< 32-bit BGR pixel format  */
-        _24_BGR888 = 14,    /**< 24-bit BGR pixel format  */
-        _16_BGR565 = 15,    /**< 16-bit BGR pixel format  */
-        _16_BGR555 = 16,    /**< 16-bit BGR pixel format (5 bits per color)  */
-        _16_ABGR1555 = 17,  /**< 16-bit ABGR pixel format (5 bits per color + 1 bit for alpha)  */
-        _16_ABGR4444 = 18,  /**< 16-bit ABGR pixel format (4 bits per color)  */
-        _DXT1 = 19, /**< S3/DirectX Texture Compression 1  */
-        _DXT2 = 20, /**< S3/DirectX Texture Compression 2  */
-        _DXT3 = 21, /**< S3/DirectX Texture Compression 3  */
-        _DXT4 = 22, /**< S3/DirectX Texture Compression 4  */
-        _DXT5 = 23, /**< S3/DirectX Texture Compression 5  */
-        _16_V8U8 = 24,  /**< 16-bit Bump Map format format (8 bits per color)  */
-        _32_V16U16 = 25,    /**< 32-bit Bump Map format format (16 bits per color)  */
-        _16_L6V5U5 = 26,    /**< 16-bit Bump Map format format with luminance  */
-        _32_X8L8V8U8 = 27,  /**< 32-bit Bump Map format format with luminance  */
-        _8_ABGR8888_CLUT = 28,  /**< 8 bits indexed CLUT (ABGR)  */
-        _8_ARGB8888_CLUT = 29,  /**< 8 bits indexed CLUT (ARGB)  */
-        _4_ABGR8888_CLUT = 30,  /**< 4 bits indexed CLUT (ABGR)  */
-        _4_ARGB8888_CLUT = 31,  /**< 4 bits indexed CLUT (ARGB)  */
-    }
+        /// <summary>
+        /// Unknown pixel format
+        /// </summary>
+        UNKNOWN_PF = 0,
+        /// <summary>
+        /// 32-bit ARGB pixel format with alpha
+        /// </summary>
+        _32_ARGB8888 = 1,
+        /// <summary>
+        /// 32-bit RGB pixel format without alpha
+        /// </summary>
+        _32_RGB888 = 2,
+        /// <summary>
+        /// 24-bit RGB pixel format
+        /// </summary>
+        _24_RGB888 = 3,
+        /// <summary>
+        /// 16-bit RGB pixel format
+        /// </summary>
+        _16_RGB565 = 4,
+        /// <summary>
+        /// 16-bit RGB pixel format (5 bits per color)
+        /// </summary>
+        _16_RGB555 = 5,
+        /// <summary>
+        /// 16-bit ARGB pixel format (5 bits per color + 1 bit for alpha)
+        /// </summary>
+        _16_ARGB1555 = 6,
+        /// <summary>
+        /// 16-bit ARGB pixel format (4 bits per color)
+        /// </summary>
+        _16_ARGB4444 = 7,
+        /// <summary>
+        /// 8-bit  RGB pixel format
+        /// </summary>
+        _8_RGB332 = 8,
+        /// <summary>
+        /// 8-bit  ARGB pixel format
+        /// </summary>
+        _8_ARGB2222 = 9,
+        /// <summary>
+        /// 32-bit ABGR pixel format
+        /// </summary>
+        _32_ABGR8888 = 10,
+        /// <summary>
+        /// 32-bit RGBA pixel format
+        /// </summary>
+        _32_RGBA8888 = 11,
+        /// <summary>
+        /// 32-bit BGRA pixel format
+        /// </summary>
+        _32_BGRA8888 = 12,
+        /// <summary>
+        /// 32-bit BGR pixel format
+        /// </summary>
+        _32_BGR888 = 13,
+        /// <summary>
+        /// 24-bit BGR pixel format
+        /// </summary>
+        _24_BGR888 = 14,
+        /// <summary>
+        /// 16-bit BGR pixel format
+        /// </summary>
+        _16_BGR565 = 15,
+        /// <summary>
+        /// 16-bit BGR pixel format (5 bits per color)
+        /// </summary>
+        _16_BGR555 = 16,
+        /// <summary>
+        /// 16-bit ABGR pixel format (5 bits per color + 1 bit for alpha)
+        /// </summary>
+        _16_ABGR1555 = 17,
+        /// <summary>
+        /// 16-bit ABGR pixel format (4 bits per color)
+        /// </summary>
+        _16_ABGR4444 = 18,
+        /// <summary>
+        /// S3/DirectX Texture Compression 1
+        /// </summary>
+        _DXT1 = 19,
+        /// <summary>
+        /// S3/DirectX Texture Compression 2
+        /// </summary>
+        _DXT2 = 20,
+        /// <summary>
+        /// S3/DirectX Texture Compression 3
+        /// </summary>
+        _DXT3 = 21,
+        /// <summary>
+        /// S3/DirectX Texture Compression 4
+        /// </summary>
+        _DXT4 = 22,
+        /// <summary>
+        /// S3/DirectX Texture Compression 5
+        /// </summary>
+        _DXT5 = 23,
+        /// <summary>
+        /// 16-bit Bump Map format format (8 bits per color)
+        /// </summary>
+        _16_V8U8 = 24,
+        /// <summary>
+        /// 32-bit Bump Map format format (16 bits per color)
+        /// </summary>
+        _32_V16U16 = 25,
+        /// <summary>
+        /// 16-bit Bump Map format format with luminance
+        /// </summary>
+        _16_L6V5U5 = 26,
+        /// <summary>
+        /// 32-bit Bump Map format format with luminance
+        /// </summary>
+        _32_X8L8V8U8 = 27,
+        /// <summary>
+        /// 8 bits indexed CLUT (ABGR)
+        /// </summary>
+        _8_ABGR8888_CLUT = 28,
+        /// <summary>
+        /// 8 bits indexed CLUT (ARGB)
+        /// </summary>
+        _8_ARGB8888_CLUT = 29,
+        /// <summary>
+        /// 4 bits indexed CLUT (ABGR)
+        /// </summary>
+        _4_ABGR8888_CLUT = 30,
+        /// <summary>
+        /// 4 bits indexed CLUT (ARGB)
+        /// </summary>
+        _4_ARGB8888_CLUT = 31,
+    };
 
+    /// <summary>
+    /// Light type.
+    /// </summary>
     public enum VXLIGHT_TYPE : uint {
-        VX_LIGHTPOINT = 1,	/**< The Light is a point of light  */
-        VX_LIGHTSPOT = 2,	/**< The light is a spotlight  */
-        VX_LIGHTDIREC = 3,	/**< The light is directional light : Lights comes from an infinite point so only direction of light can be given  */
-        // VX_LIGHTPARA = 4UL,	/**< Obsolete, do not use  */
-    }
+        /// <summary>
+        /// The Light is a point of light
+        /// </summary>
+        VX_LIGHTPOINT = 1U,
+        /// <summary>
+        /// The light is a spotlight
+        /// </summary>
+        VX_LIGHTSPOT = 2U,
+        /// <summary>
+        /// The light is directional light : Lights comes from an infinite point so only direction of light can be given
+        /// </summary>
+        VX_LIGHTDIREC = 3U,
+        // /// <summary>
+        // /// Obsolete, do not use
+        // /// </summary>
+        // VX_LIGHTPARA = 4U,
+    };
 
+    /// <summary>
+    /// Blend Mode Flags
+    /// </summary>
     public enum VXTEXTURE_BLENDMODE : uint {
-        VXTEXTUREBLEND_DECAL = 1,   /**< Texture replace any material information  */
-        VXTEXTUREBLEND_MODULATE = 2,    /**< Texture and material are combine. Alpha information of the texture replace material alpha component.  */
-        VXTEXTUREBLEND_DECALALPHA = 3,  /**< Alpha information in the texture specify how material and texture are combined. Alpha information of the texture replace material alpha component.  */
-        VXTEXTUREBLEND_MODULATEALPHA = 4,   /**< Alpha information in the texture specify how material and texture are combined  */
-        VXTEXTUREBLEND_DECALMASK = 5,
-        VXTEXTUREBLEND_MODULATEMASK = 6,
-        VXTEXTUREBLEND_COPY = 7,    /**< Equivalent to DECAL  */
-        VXTEXTUREBLEND_ADD = 8,
-        VXTEXTUREBLEND_DOTPRODUCT3 = 9, /**< Perform a Dot Product 3 between texture (normal map) and a referential vector given in VXRENDERSTATE_TEXTUREFACTOR.  */
-        VXTEXTUREBLEND_MAX = 10,
-    }
+        /// <summary>
+        /// Texture replace any material information
+        /// </summary>
+        VXTEXTUREBLEND_DECAL = 1U,
+        /// <summary>
+        /// Texture and material are combine. Alpha information of the texture replace material alpha component.
+        /// </summary>
+        VXTEXTUREBLEND_MODULATE = 2U,
+        /// <summary>
+        /// Alpha information in the texture specify how material and texture are combined. Alpha information of the texture replace material alpha component.
+        /// </summary>
+        VXTEXTUREBLEND_DECALALPHA = 3U,
+        /// <summary>
+        /// Alpha information in the texture specify how material and texture are combined
+        /// </summary>
+        VXTEXTUREBLEND_MODULATEALPHA = 4U,
+        VXTEXTUREBLEND_DECALMASK = 5U,
+        VXTEXTUREBLEND_MODULATEMASK = 6U,
+        /// <summary>
+        /// Equivalent to DECAL
+        /// </summary>
+        VXTEXTUREBLEND_COPY = 7U,
+        VXTEXTUREBLEND_ADD = 8U,
+        /// <summary>
+        /// Perform a Dot Product 3 between texture (normal map)and a referential vector given in VXRENDERSTATE_TEXTUREFACTOR.
+        /// </summary>
+        VXTEXTUREBLEND_DOTPRODUCT3 = 9U,
+        VXTEXTUREBLEND_MAX = 10U,
+        // VXTEXTUREBLEND_MASK = 0xFU,
+    };
 
+    /// <summary>
+    /// Filter Mode Options
+    /// </summary>
+    [Flags]
     public enum VXTEXTURE_FILTERMODE : uint {
-        VXTEXTUREFILTER_NEAREST = 1,    /**< No Filter  */
-        VXTEXTUREFILTER_LINEAR = 2, /**< Bilinear Interpolation  */
-        VXTEXTUREFILTER_MIPNEAREST = 3, /**< Mip mapping  */
-        VXTEXTUREFILTER_MIPLINEAR = 4,  /**< Mip Mapping with Bilinear interpolation  */
-        VXTEXTUREFILTER_LINEARMIPNEAREST = 5,   /**< Mip Mapping with Bilinear interpolation between mipmap levels.  */
-        VXTEXTUREFILTER_LINEARMIPLINEAR = 6,    /**< Trilinear Filtering  */
-        VXTEXTUREFILTER_ANISOTROPIC = 7,    /**< Anisotropic filtering  */
-    }
+        /// <summary>
+        /// No Filter
+        /// </summary>
+        VXTEXTUREFILTER_NEAREST = 1U,
+        /// <summary>
+        /// Bilinear Interpolation
+        /// </summary>
+        VXTEXTUREFILTER_LINEAR = 2U,
+        /// <summary>
+        /// Mip mapping
+        /// </summary>
+        VXTEXTUREFILTER_MIPNEAREST = 3U,
+        /// <summary>
+        /// Mip Mapping with Bilinear interpolation
+        /// </summary>
+        VXTEXTUREFILTER_MIPLINEAR = 4U,
+        /// <summary>
+        /// Mip Mapping with Bilinear interpolation between mipmap levels.
+        /// </summary>
+        VXTEXTUREFILTER_LINEARMIPNEAREST = 5U,
+        /// <summary>
+        /// Trilinear Filtering
+        /// </summary>
+        VXTEXTUREFILTER_LINEARMIPLINEAR = 6U,
+        /// <summary>
+        /// Anisotropic filtering
+        /// </summary>
+        VXTEXTUREFILTER_ANISOTROPIC = 7U,
+        // VXTEXTUREFILTER_MASK = 0xFU,
+    };
 
+    /// <summary>
+    /// Texture addressing modes.
+    /// </summary>
     public enum VXTEXTURE_ADDRESSMODE : uint {
-        VXTEXTURE_ADDRESSWRAP = 1,  /**< Default mesh wrap mode is used (see CKMesh::SetWrapMode)  */
-        VXTEXTURE_ADDRESSMIRROR = 2,    /**< Texture coordinates outside the range [0..1] are flipped evenly.  */
-        VXTEXTURE_ADDRESSCLAMP = 3, /**< Texture coordinates greater than 1.0 are set to 1.0, and values less than 0.0 are set to 0.0.  */
-        VXTEXTURE_ADDRESSBORDER = 4,    /**< When texture coordinates are greater than 1.0 or less than 0.0  texture is set to a color defined in CKMaterial::SetTextureBorderColor.  */
-        VXTEXTURE_ADDRESSMIRRORONCE = 5,    /**<   */
+        /// <summary>
+        /// Default mesh wrap mode is used (see CKMesh::SetWrapMode)
+        /// </summary>
+        VXTEXTURE_ADDRESSWRAP = 1U,
+        /// <summary>
+        /// Texture coordinates outside the range [0..1] are flipped evenly.
+        /// </summary>
+        VXTEXTURE_ADDRESSMIRROR = 2U,
+        /// <summary>
+        /// Texture coordinates greater than 1.0 are set to 1.0, and values less than 0.0 are set to 0.0.
+        /// </summary>
+        VXTEXTURE_ADDRESSCLAMP = 3U,
+        /// <summary>
+        /// When texture coordinates are greater than 1.0 or less than 0.0  texture is set to a color defined in CKMaterial::SetTextureBorderColor.
+        /// </summary>
+        VXTEXTURE_ADDRESSBORDER = 4U,
+        /// <summary>
+        /// 
+        /// </summary>
+        VXTEXTURE_ADDRESSMIRRORONCE = 5U,
+        /// <summary>
+        /// mask for all values
+        /// </summary>
+        // VXTEXTURE_ADDRESSMASK = 0x7U,
     }
 
+    /// <summary>
+    /// Blending Mode options
+    /// </summary>
     public enum VXBLEND_MODE : uint {
-        VXBLEND_ZERO = 1,   /**< Blend factor is (0, 0, 0, 0).  */
-        VXBLEND_ONE = 2,    /**< Blend factor is (1, 1, 1, 1).  */
-        VXBLEND_SRCCOLOR = 3,   /**< Blend factor is (Rs, Gs, Bs, As).  */
-        VXBLEND_INVSRCCOLOR = 4,    /**< Blend factor is (1-Rs, 1-Gs, 1-Bs, 1-As).  */
-        VXBLEND_SRCALPHA = 5,   /**< Blend factor is (As, As, As, As).  */
-        VXBLEND_INVSRCALPHA = 6,    /**< Blend factor is (1-As, 1-As, 1-As, 1-As).  */
-        VXBLEND_DESTALPHA = 7,  /**< Blend factor is (Ad, Ad, Ad, Ad).  */
-        VXBLEND_INVDESTALPHA = 8,   /**< Blend factor is (1-Ad, 1-Ad, 1-Ad, 1-Ad).  */
-        VXBLEND_DESTCOLOR = 9,  /**< Blend factor is (Rd, Gd, Bd, Ad).  */
-        VXBLEND_INVDESTCOLOR = 10,  /**< Blend factor is (1-Rd, 1-Gd, 1-Bd, 1-Ad).  */
-        VXBLEND_SRCALPHASAT = 11,   /**< Blend factor is (f, f, f, 1); f = min(As, 1-Ad).  */
-        // VXBLEND_BOTHSRCALPHA = 12,  /**< Source blend factor is (As, As, As, As) and destination blend factor is (1-As, 1-As, 1-As, 1-As)  */
-        // VXBLEND_BOTHINVSRCALPHA = 13,   /**< Source blend factor is (1-As, 1-As, 1-As, 1-As) and destination blend factor is (As, As, As, As)  */
+        /// <summary>
+        /// Blend factor is (0, 0, 0, 0).
+        /// </summary>
+        VXBLEND_ZERO = 1U,
+        /// <summary>
+        /// Blend factor is (1, 1, 1, 1).
+        /// </summary>
+        VXBLEND_ONE = 2U,
+        /// <summary>
+        /// Blend factor is (Rs, Gs, Bs, As).
+        /// </summary>
+        VXBLEND_SRCCOLOR = 3U,
+        /// <summary>
+        /// Blend factor is (1-Rs, 1-Gs, 1-Bs, 1-As).
+        /// </summary>
+        VXBLEND_INVSRCCOLOR = 4U,
+        /// <summary>
+        /// Blend factor is (As, As, As, As).
+        /// </summary>
+        VXBLEND_SRCALPHA = 5U,
+        /// <summary>
+        /// Blend factor is (1-As, 1-As, 1-As, 1-As).
+        /// </summary>
+        VXBLEND_INVSRCALPHA = 6U,
+        /// <summary>
+        /// Blend factor is (Ad, Ad, Ad, Ad).
+        /// </summary>
+        VXBLEND_DESTALPHA = 7U,
+        /// <summary>
+        /// Blend factor is (1-Ad, 1-Ad, 1-Ad, 1-Ad).
+        /// </summary>
+        VXBLEND_INVDESTALPHA = 8U,
+        /// <summary>
+        /// Blend factor is (Rd, Gd, Bd, Ad).
+        /// </summary>
+        VXBLEND_DESTCOLOR = 9U,
+        /// <summary>
+        /// Blend factor is (1-Rd, 1-Gd, 1-Bd, 1-Ad).
+        /// </summary>
+        VXBLEND_INVDESTCOLOR = 10U,
+        /// <summary>
+        /// Blend factor is (f, f, f, 1); f = min(As, 1-Ad).
+        /// </summary>
+        VXBLEND_SRCALPHASAT = 11U,
+        // /// <summary>
+        // /// Source blend factor is (As, As, As, As) and destination blend factor is (1-As, 1-As, 1-As, 1-As)
+        // /// </summary>
+        // VXBLEND_BOTHSRCALPHA = 12U,
+        // /// <summary>
+        // /// Source blend factor is (1-As, 1-As, 1-As, 1-As) and destination blend factor is (As, As, As, As)
+        // /// </summary>
+        // VXBLEND_BOTHINVSRCALPHA = 13U,
+        // /// <summary>
+        // /// Source blend factor is (1-As, 1-As, 1-As, 1-As) and destination blend factor is (As, As, As, As)
+        // /// </summary>
+        // VXBLEND_MASK = 0xFU,
     }
 
+    /// <summary>
+    /// Fill Mode Options
+    /// </summary>
     public enum VXFILL_MODE : uint {
-        VXFILL_POINT = 1,   /**< Vertices rendering  */
-        VXFILL_WIREFRAME = 2,   /**< Edges rendering  */
-        VXFILL_SOLID = 3,   /**< Face rendering  */
+        /// <summary>
+        /// Vertices rendering
+        /// </summary>
+        VXFILL_POINT = 1U,
+        /// <summary>
+        /// Edges rendering
+        /// </summary>
+        VXFILL_WIREFRAME = 2U,
+        /// <summary>
+        /// Face rendering
+        /// </summary>
+        VXFILL_SOLID = 3U,
+        // VXFILL_MASK = 3U,
     }
 
+    /// <summary>
+    /// Shade Mode Options
+    /// </summary>
     public enum VXSHADE_MODE : uint {
-        VXSHADE_FLAT = 1,   /**< Flat Shading  */
-        VXSHADE_GOURAUD = 2,    /**< Gouraud Shading  */
-        VXSHADE_PHONG = 3,  /**< Phong Shading (Not yet supported by most implementation)  */
+        /// <summary>
+        /// Flat Shading
+        /// </summary>
+        VXSHADE_FLAT = 1U,
+        /// <summary>
+        /// Gouraud Shading
+        /// </summary>
+        VXSHADE_GOURAUD = 2U,
+        /// <summary>
+        /// Phong Shading (Not yet supported by most implementation)
+        /// </summary>
+        VXSHADE_PHONG = 3U,
+        // VXSHADE_MASK = 3U,
     }
 
+    /// <summary>
+    /// Comparison Function
+    /// </summary>
     public enum VXCMPFUNC : uint {
-        VXCMP_NEVER = 1,    /**< Always fail the test.  */
-        VXCMP_LESS = 2, /**< Accept if value if less than current value.  */
-        VXCMP_EQUAL = 3,    /**< Accept if value if equal than current value.  */
-        VXCMP_LESSEQUAL = 4,    /**< Accept if value if less or equal than current value.  */
-        VXCMP_GREATER = 5,  /**< Accept if value if greater than current value.  */
-        VXCMP_NOTEQUAL = 6, /**< Accept if value if different than current value.  */
-        VXCMP_GREATEREQUAL = 7, /**< Accept if value if greater or equal current value.  */
-        VXCMP_ALWAYS = 8,   /**< Always accept the test.  */
+        /// <summary>
+        /// Always fail the test.
+        /// </summary>
+        VXCMP_NEVER = 1U,
+        /// <summary>
+        /// Accept if value if less than current value.
+        /// </summary>
+        VXCMP_LESS = 2U,
+        /// <summary>
+        /// Accept if value if equal than current value.
+        /// </summary>
+        VXCMP_EQUAL = 3U,
+        /// <summary>
+        /// Accept if value if less or equal than current value.
+        /// </summary>
+        VXCMP_LESSEQUAL = 4U,
+        /// <summary>
+        /// Accept if value if greater than current value.
+        /// </summary>
+        VXCMP_GREATER = 5U,
+        /// <summary>
+        /// Accept if value if different than current value.
+        /// </summary>
+        VXCMP_NOTEQUAL = 6U,
+        /// <summary>
+        /// Accept if value if greater or equal current value.
+        /// </summary>
+        VXCMP_GREATEREQUAL = 7U,
+        /// <summary>
+        /// Always accept the test.
+        /// </summary>
+        VXCMP_ALWAYS = 8U,
+        // /// <summary>
+        // /// Mask for all possible values.
+        // /// </summary>
+        // VXCMP_MASK = 0xFU,
     }
 
+    /// <summary>
+    /// Mesh lighting options
+    /// </summary>
     public enum VXMESH_LITMODE : uint {
-        VX_PRELITMESH = 0,  /**< Lighting use color information store with vertices  */
-        VX_LITMESH = 1, /**< Lighting is done by renderer using normals and face material information.  */
+        /// <summary>
+        /// Lighting use color information store with vertices
+        /// </summary>
+        VX_PRELITMESH = 0,
+        /// <summary>
+        /// Lighting is done by renderer using normals and face material information.
+        /// </summary>
+        VX_LITMESH = 1,
     }
+
+    public enum CK_CAMERA_PROJECTION : uint {
+        CK_PERSPECTIVEPROJECTION = 1,
+        CK_ORTHOGRAPHICPROJECTION = 2,
+    };
+
+    #endregion
 
 }

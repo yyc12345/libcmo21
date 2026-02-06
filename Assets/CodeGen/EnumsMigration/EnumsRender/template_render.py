@@ -65,6 +65,24 @@ class RenderUtils:
         """
         return RenderUtils.REGEX_PY_TO_LITERAL_NUMBER.sub("", numstr, 1)
 
+    REGEX_CS_TO_LITERAL_NUMBER: typing.ClassVar[re.Pattern] = re.compile("[lL]+$")
+
+    @staticmethod
+    def to_cs_num_literal(numstr: str) -> str:
+        """
+        Convert given string into C# number literal style.
+
+        Number literal declaration in C# is slightly different with C#.
+        C# support U but do not support L.
+        So this function actually just remove "L" suffix.
+
+        This function is only served for C# code generation.
+
+        :param numstr: The captured number.
+        :return: The C# style number string.
+        """
+        return RenderUtils.REGEX_CS_TO_LITERAL_NUMBER.sub("", numstr, 1)
+
     REGEX_PY_EXT_HUMANRDABLE_ENTRY_NAME: typing.ClassVar[re.Pattern] = re.compile("^[a-zA-Z0-9]+_")
 
     @staticmethod
