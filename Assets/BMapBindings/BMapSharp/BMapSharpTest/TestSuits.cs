@@ -10,16 +10,16 @@ namespace BMapSharpTest.TestSuits {
         public static void Test(BMFileReader reader) {
             Console.WriteLine("===== Groups =====");
             TestGroup(reader);
-            //Console.WriteLine("===== 3dObjects =====");
-            //Test3dObject(reader);
-            //Console.WriteLine("===== Meshes =====");
-            //TestMesh(reader);
-            //Console.WriteLine("===== Materials =====");
-            //TestMaterial(reader);
-            //Console.WriteLine("===== Textures =====");
-            //TestTexture(reader);
-            //Console.WriteLine("===== Target Lights =====");
-            //TestTargetLight(reader);
+            Console.WriteLine("===== 3dObjects =====");
+            Test3dObject(reader);
+            Console.WriteLine("===== Meshes =====");
+            TestMesh(reader);
+            Console.WriteLine("===== Materials =====");
+            TestMaterial(reader);
+            Console.WriteLine("===== Textures =====");
+            TestTexture(reader);
+            Console.WriteLine("===== Target Lights =====");
+            TestTargetLight(reader);
             Console.WriteLine("===== Target Cameras =====");
             TestTargetCamera(reader);
             Console.WriteLine("===== END =====");
@@ -134,7 +134,7 @@ namespace BMapSharpTest.TestSuits {
                 Console.WriteLine($"Fov: {cam.GetFov()}");
 
                 cam.GetAspectRatio(out var width, out var height);
-                Console.WriteLine($"Aspect Ratio: {width} x {height}");
+                Console.WriteLine($"Aspect Ratio: {width}:{height}");
             }
         }
     }

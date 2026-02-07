@@ -1107,7 +1107,7 @@ bool BMCamera_SetFrontPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCm
 bool BMCamera_GetBackPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
 	auto obj = CheckCKCamera(bmfile, objid);
 	if (obj == nullptr) return false;
-	BMPARAM_OUT_ASSIGN(out_val, obj->GetFrontPlane());
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetBackPlane());
 	return true;
 }
 bool BMCamera_SetBackPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {
@@ -1119,7 +1119,7 @@ bool BMCamera_SetBackPlane(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo
 bool BMCamera_GetFov(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_OUT(LibCmo::CKFLOAT, out_val)) {
 	auto obj = CheckCKCamera(bmfile, objid);
 	if (obj == nullptr) return false;
-	BMPARAM_OUT_ASSIGN(out_val, obj->GetFrontPlane());
+	BMPARAM_OUT_ASSIGN(out_val, obj->GetFov());
 	return true;
 }
 bool BMCamera_SetFov(BMPARAM_OBJECT_DECL(bmfile, objid), BMPARAM_IN(LibCmo::CKFLOAT, val)) {

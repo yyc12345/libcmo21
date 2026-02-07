@@ -178,13 +178,15 @@ namespace BMap {
 		// BMFile only provide limited type visiting, we must make sure it provided ID also is existed in out stored list.
 		// so we check its type here. if type is not matched, we reset it to nullptr.
 		if (obj != nullptr) {
+			using LibCmo::CK2::CK_CLASSID;
 			switch (obj->GetClassID()) {
-				case LibCmo::CK2::CK_CLASSID::CKCID_GROUP:
-				case LibCmo::CK2::CK_CLASSID::CKCID_3DOBJECT:
-				case LibCmo::CK2::CK_CLASSID::CKCID_MESH:
-				case LibCmo::CK2::CK_CLASSID::CKCID_MATERIAL:
-				case LibCmo::CK2::CK_CLASSID::CKCID_TEXTURE:
-				case LibCmo::CK2::CK_CLASSID::CKCID_TARGETLIGHT:
+				case CK_CLASSID::CKCID_GROUP:
+				case CK_CLASSID::CKCID_3DOBJECT:
+				case CK_CLASSID::CKCID_MESH:
+				case CK_CLASSID::CKCID_MATERIAL:
+				case CK_CLASSID::CKCID_TEXTURE:
+				case CK_CLASSID::CKCID_TARGETLIGHT:
+				case CK_CLASSID::CKCID_TARGETCAMERA:
 					break; // okey. do nothing
 				default:
 					// this object should not be exposed to outside, reset it to nullptr
