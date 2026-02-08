@@ -26,7 +26,7 @@ namespace BMapSharpTest {
             if (ballance_dir is null) {
                 throw new CliException("You must specify BMAP_BALLANCE_DIR environment variable before running this test.");
             }
-            this.BallanceDirectory = ballance_dir;
+            this.BallanceDir = ballance_dir;
 
             var encodings = System.Environment.GetEnvironmentVariable("BMAP_ENCODINGS");
             if (encodings is null) {
@@ -42,7 +42,7 @@ namespace BMapSharpTest {
         /// <summary>
         /// The path to the Ballance directory for finding textures
         /// </summary>
-        public string BallanceDirectory { get; private set; }
+        public string BallanceDir { get; private set; }
         /// <summary>
         /// The name of encodings used by BMap for loading map.
         /// </summary>

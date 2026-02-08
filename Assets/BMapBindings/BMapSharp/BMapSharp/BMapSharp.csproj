@@ -5,9 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
 
     <PackageId>BMapSharp</PackageId>
-    <Version>1.0.0</Version>
+    <Title>BMapSharp</Title>
+    <Version>0.4.0</Version>
     <Authors>yyc12345</Authors>
+    <Description>The C# binding to BMap.</Description>
     <Company>BearKidsTeam</Company>
+    <PackageLicenseFile>SPDX:MIT</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([System.OperatingSystem]::IsWindows())">

@@ -33,7 +33,7 @@ namespace BMapSharpTest {
             string file_name = cli.FileName;
             var temp_dir_info = Directory.CreateTempSubdirectory();
             string temp_dir = temp_dir_info.FullName;
-            string texture_dir = Path.Combine(cli.BallanceDirectory, "Textures");
+            string texture_dir = Path.Combine(cli.BallanceDir, "Textures");
             string[] encodings = cli.Encodings;
 
             using (var reader = new BMapSharp.BMapWrapper.BMFileReader(file_name, temp_dir, texture_dir, encodings)) {

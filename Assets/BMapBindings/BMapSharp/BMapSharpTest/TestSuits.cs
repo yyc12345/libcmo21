@@ -108,15 +108,15 @@ namespace BMapSharpTest.TestSuits {
                 Console.WriteLine($"\tVisibility: {lit.GetVisibility()}");
                 Console.WriteLine($"\tMatrix: {lit.GetWorldMatrix().ToManaged()}");
 
-                Console.WriteLine($"Type: {lit.GetLightType()}");
-                Console.WriteLine($"Color: {lit.GetColor().ToManagedRGBA()}");
-                Console.WriteLine($"Constant Attenuation: {lit.GetConstantAttenuation()}");
-                Console.WriteLine($"Linear Attenuation: {lit.GetLinearAttenuation()}");
-                Console.WriteLine($"Quadratic Attenuation: {lit.GetQuadraticAttenuation()}");
-                Console.WriteLine($"Range: {lit.GetRange()}");
-                Console.WriteLine($"Hot Spot: {lit.GetHotSpot()}");
-                Console.WriteLine($"Falloff: {lit.GetFalloff()}");
-                Console.WriteLine($"Falloff Shape: {lit.GetFalloffShape()}");
+                Console.WriteLine($"\tType: {lit.GetLightType()}");
+                Console.WriteLine($"\tColor: {lit.GetColor().ToManagedRGBA()}");
+                Console.WriteLine($"\tConstant Attenuation: {lit.GetConstantAttenuation()}");
+                Console.WriteLine($"\tLinear Attenuation: {lit.GetLinearAttenuation()}");
+                Console.WriteLine($"\tQuadratic Attenuation: {lit.GetQuadraticAttenuation()}");
+                Console.WriteLine($"\tRange: {lit.GetRange()}");
+                Console.WriteLine($"\tHot Spot: {lit.GetHotSpot()}");
+                Console.WriteLine($"\tFalloff: {lit.GetFalloff()}");
+                Console.WriteLine($"\tFalloff Shape: {lit.GetFalloffShape()}");
             }
         }
 
@@ -127,14 +127,14 @@ namespace BMapSharpTest.TestSuits {
                 Console.WriteLine($"\tVisibility: {cam.GetVisibility()}");
                 Console.WriteLine($"\tMatrix: {cam.GetWorldMatrix().ToManaged()}");
 
-                Console.WriteLine($"Type: {cam.GetProjectionType()}");
-                Console.WriteLine($"Orthographic Zoom: {cam.GetOrthographicZoom()}");
-                Console.WriteLine($"Front Plane: {cam.GetFrontPlane()}");
-                Console.WriteLine($"Back Plane: {cam.GetBackPlane()}");
-                Console.WriteLine($"Fov: {cam.GetFov()}");
+                Console.WriteLine($"\tType: {cam.GetProjectionType()}");
+                Console.WriteLine($"\tOrthographic Zoom: {cam.GetOrthographicZoom()}");
+                Console.WriteLine($"\tFront Plane: {cam.GetFrontPlane()}");
+                Console.WriteLine($"\tBack Plane: {cam.GetBackPlane()}");
+                Console.WriteLine($"\tFov: {cam.GetFov()}");
 
                 cam.GetAspectRatio(out var width, out var height);
-                Console.WriteLine($"Aspect Ratio: {width}:{height}");
+                Console.WriteLine($"\tAspect Ratio: {width}:{height}");
             }
         }
     }
