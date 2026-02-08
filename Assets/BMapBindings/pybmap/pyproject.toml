@@ -1,0 +1,15 @@
+[project]
+name = "pybmap"
+version = "0.4.0"
+description = "The Python binding to BMap."
+readme = "README.md"
+authors = [
+    { name = "yyc12345" }
+]
+classifiers = ["Private :: Do Not Upload"]
+requires-python = ">=3.11"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.8.0,<0.9"]
+build-backend = "uv_build"
