@@ -11,30 +11,68 @@ class BMapException(Exception):
     """
     pass
 
+# YYC MARK:
+# Due to the shitty type hints support for Python ctypes module,
+# I have to use typing.TYPE_CHECKING to write these shit code for type hint.
+# And the more disgusting thing is that these code is still not perfect.
+
 bm_CKSTRING = ctypes.c_char_p
-bm_CKSTRING_p = ctypes.POINTER(bm_CKSTRING)
+if typing.TYPE_CHECKING:
+    bm_CKSTRING_p = ctypes._Pointer[bm_CKSTRING]
+else:
+    bm_CKSTRING_p = ctypes.POINTER(bm_CKSTRING)
 bm_CKDWORD = ctypes.c_uint32
-bm_CKDWORD_p = ctypes.POINTER(bm_CKDWORD)
-bm_CKDWORD_pp = ctypes.POINTER(bm_CKDWORD_p)
+if typing.TYPE_CHECKING:
+    bm_CKDWORD_p = ctypes._Pointer[bm_CKDWORD]
+    bm_CKDWORD_pp = ctypes._Pointer[bm_CKDWORD_p]
+else:
+    bm_CKDWORD_p = ctypes.POINTER(bm_CKDWORD)
+    bm_CKDWORD_pp = ctypes.POINTER(bm_CKDWORD_p)
 bm_CKWORD = ctypes.c_uint16
-bm_CKWORD_p = ctypes.POINTER(bm_CKWORD)
-bm_CKWORD_pp = ctypes.POINTER(bm_CKWORD_p)
+if typing.TYPE_CHECKING:
+    bm_CKWORD_p = ctypes._Pointer[bm_CKWORD]
+    bm_CKWORD_pp = ctypes._Pointer[bm_CKWORD_p]
+else:
+    bm_CKWORD_p = ctypes.POINTER(bm_CKWORD)
+    bm_CKWORD_pp = ctypes.POINTER(bm_CKWORD_p)
 bm_CKID = ctypes.c_uint32
-bm_CKID_p = ctypes.POINTER(bm_CKID)
-bm_CKID_pp = ctypes.POINTER(bm_CKID_p)
+if typing.TYPE_CHECKING:
+    bm_CKID_p = ctypes._Pointer[bm_CKID]
+    bm_CKID_pp = ctypes._Pointer[bm_CKID_p]
+else:
+    bm_CKID_p = ctypes.POINTER(bm_CKID)
+    bm_CKID_pp = ctypes.POINTER(bm_CKID_p)
 bm_CKFLOAT = ctypes.c_float
-bm_CKFLOAT_p = ctypes.POINTER(bm_CKFLOAT)
+if typing.TYPE_CHECKING:
+    bm_CKFLOAT_p = ctypes._Pointer[bm_CKFLOAT]
+else:
+    bm_CKFLOAT_p = ctypes.POINTER(bm_CKFLOAT)
 bm_CKINT = ctypes.c_int32
 bm_CKBYTE = ctypes.c_uint8
-bm_CKBYTE_p = ctypes.POINTER(bm_CKBYTE)
+if typing.TYPE_CHECKING:
+    bm_CKBYTE_p = ctypes._Pointer[bm_CKBYTE]
+else:
+    bm_CKBYTE_p = ctypes.POINTER(bm_CKBYTE)
 
 bm_enum = bm_CKDWORD
-bm_enum_p = ctypes.POINTER(bm_enum)
+if typing.TYPE_CHECKING:
+    bm_enum_p = ctypes._Pointer[bm_enum]
+else:
+    bm_enum_p = ctypes.POINTER(bm_enum)
 bm_bool = ctypes.c_bool
-bm_bool_p = ctypes.POINTER(bm_bool)
+if typing.TYPE_CHECKING:
+    bm_bool_p = ctypes._Pointer[bm_bool]
+else:
+    bm_bool_p = ctypes.POINTER(bm_bool)
 bm_void_p = ctypes.c_void_p
-bm_void_pp = ctypes.POINTER(ctypes.c_void_p)
+if typing.TYPE_CHECKING:
+    bm_void_pp = ctypes._Pointer[bm_void_p]
+else:
+    bm_void_pp = ctypes.POINTER(ctypes.c_void_p)
 
+# YYC MARK:
+# I can't find any viable solution for type hint of C callbakc function type.
+# So I give up. I leave original code here.
 bm_callback = ctypes.CFUNCTYPE(None, bm_CKSTRING)
 
 class bm_VxVector2(ctypes.Structure):
@@ -42,16 +80,24 @@ class bm_VxVector2(ctypes.Structure):
         ('x', bm_CKFLOAT),
         ('y', bm_CKFLOAT),
     ]
-bm_VxVector2_p = ctypes.POINTER(bm_VxVector2)
-bm_VxVector2_pp = ctypes.POINTER(bm_VxVector2_p)
+if typing.TYPE_CHECKING:
+    bm_VxVector2_p = ctypes._Pointer[bm_VxVector2]
+    bm_VxVector2_pp = ctypes._Pointer[bm_VxVector2_p]
+else:
+    bm_VxVector2_p = ctypes.POINTER(bm_VxVector2)
+    bm_VxVector2_pp = ctypes.POINTER(bm_VxVector2_p)
 class bm_VxVector3(ctypes.Structure):
     _fields_ = [
         ('x', bm_CKFLOAT),
         ('y', bm_CKFLOAT),
         ('z', bm_CKFLOAT),
     ]
-bm_VxVector3_p = ctypes.POINTER(bm_VxVector3)
-bm_VxVector3_pp = ctypes.POINTER(bm_VxVector3_p)
+if typing.TYPE_CHECKING:
+    bm_VxVector3_p = ctypes._Pointer[bm_VxVector3]
+    bm_VxVector3_pp = ctypes._Pointer[bm_VxVector3_p]
+else:
+    bm_VxVector3_p = ctypes.POINTER(bm_VxVector3)
+    bm_VxVector3_pp = ctypes.POINTER(bm_VxVector3_p)
 class bm_VxColor(ctypes.Structure):
     _fields_ = [
         ('r', bm_CKFLOAT),
@@ -59,12 +105,18 @@ class bm_VxColor(ctypes.Structure):
         ('b', bm_CKFLOAT),
         ('a', bm_CKFLOAT),
     ]
-bm_VxColor_p = ctypes.POINTER(bm_VxColor)
+if typing.TYPE_CHECKING:
+    bm_VxColor_p = ctypes._Pointer[bm_VxColor]
+else:
+    bm_VxColor_p = ctypes.POINTER(bm_VxColor)
 class bm_VxMatrix(ctypes.Structure):
     _fields_ = list(
         (f'i{idx}', bm_CKFLOAT) for idx in range(16)
     )
-bm_VxMatrix_p = ctypes.POINTER(bm_VxMatrix)
+if typing.TYPE_CHECKING:
+    bm_VxMatrix_p = ctypes._Pointer[bm_VxMatrix]
+else:
+    bm_VxMatrix_p = ctypes.POINTER(bm_VxMatrix)
 
 #endregion
 
@@ -98,6 +150,9 @@ def is_bmap_available() -> bool:
     return _BMAP_MODULE is not None
 
 def _bmap_error_checker(result: bool, func, args) -> bool:
+    # YYC MARK:
+    # It seems that Python do reveal the underlying type of bm_bool
+    # and pass Python bool as the first argument for this function at runtime.
     if not result:
         raise BMapException("BMap operation failed.")
     return result
@@ -109,11 +164,15 @@ def _create_bmap_func(fct_name: str, fct_params: tuple[*Ts]) -> typing.Callable[
         raise BMapException(f'Fail to load native BMap dynamic library file "{_BMAP_DLL_PATH}".')
     
     # Reference: https://docs.python.org/3.11/library/ctypes.html#foreign-functions
-    cache: typing.Any = getattr(_BMAP_MODULE, fct_name)
-    cache.argtypes = fct_params
-    cache.restype = bm_bool
-    cache.errcheck = _bmap_error_checker
-    return cache
+    fct = _BMAP_MODULE.__getattr__(fct_name)
+    # YYC MARK:
+    # Idk why these type hints for the members of non-public ctypes._NamedFuncPointer 
+    # are so weired that can not accept my correct parameters.
+    # I've had enough. I use typing.cast and typing.Any to bury my head in the sand.
+    fct.argtypes = typing.cast(typing.Any, fct_params)
+    fct.restype = bm_bool
+    fct.errcheck = typing.cast(typing.Any, _bmap_error_checker)
+    return fct
 
 #endregion
 

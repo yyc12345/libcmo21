@@ -24,7 +24,7 @@ def _python_callback(strl: bytes):
     if strl is not None:
         print(f'[pybmap] {strl.decode(BMAP_ENCODING)}')
 
-RAW_CALLBACK = bmap.bm_callback(_python_callback)
+RAW_CALLBACK: bmap.bm_callback = bmap.bm_callback(_python_callback)
 
 #endregion
 
