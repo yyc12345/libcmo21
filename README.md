@@ -1,12 +1,18 @@
 # libcmo21
 
-The Library for CMO (also accept NMO, VMO and NMS) File RW (Read and Write). Also the Minimalist Virtools Environment.  
-Write with one Library and Load/Save Virtools File Everywhere.
+The library for CMO (also accept NMO, VMO and NMS) file RW (read and write). It is also a Minimalist Virtools Environment.
+
+> Write with one library. Load and save Virtools file everywhere.
 
 ## Status
 
-This is a long time project.  
-This project welcome everyone's contribution, except the employee of Dassault, which created Virtools.  
+This project is now suspended and may be still suspended eternally due to following reasons:
+
+* All ultimate goals are achieved.
+* The complexity of this project and legacy bugs.
+* The lost interest and the lack of time of mine.
+
+In following life time of this project, only easy-to-be-resolved critical bugs will be fixed.
 
 ## Introduction
 
@@ -18,7 +24,7 @@ This project only involving specific Virtools version, 2.1. Other too higher Vir
 
 This project is barely based on the reverse work of doyaGu who decompile `CK2.dll`, `VxMath.dll` and `CK2_3D.dll`. The program [unvirt](https://aluigi.altervista.org/papers.htm#unvirt) created by Luigi Auriemma, which is licensed by GPL-v2, also help my work.
 
-**The difference between this project and other Virtools libraries (e.g. [doyaGu/CK2](https://github.com/doyaGu/CK2)), is that this project is not focusing on re-creating the whole Virtools engine. This project only focus on the Virtools files RW, and it only just implement a minimalist Virtools environment for achieving this.**
+**The difference between this project and other Virtools libraries (e.g. [doyaGu/Ballanced](https://github.com/doyaGu/Ballanced)), is that this project is not focusing on re-creating the whole Virtools engine. This project only focus on the Virtools files RW, and it only just implement a minimalist Virtools environment for achieving this.**
 
 ## Goals
 
@@ -29,17 +35,23 @@ The ultimate goals of this project are:
   - Create a Python binding for the loader. And allow user can export Ballance Map from Blender on Linux platform natively.
   - Create a C# binding for the loader to enable that I can load Ballance Map in Godot on Linux / Android platform natively.
 
-There is still a long way to go. But I will try my best.
+These goals are now all achieved.
 
 ## Project Layout
 
-* LibCmo: Core library. It is a static library. Link to your program freely because I don't want to process export table things.
-* Unvirt: Interactive Virtools file viewer. Can provide more detail than Luigi Auriemma's unvirt but only can accept version limited Virtools file (< 4.0 I guess).
-* BMap: A dynamic library which is specific for Ballance Map loading by using LibCmo.
+* LibCmo: Core library. It is a static library because I don't want to process export table things. Link to your program freely.
+* Unvirt: Interactive Virtools file viewer. Can provide more detail than Luigi Auriemma's unvirt.
+* Ballance: Ballance related stuffs which utilize LibCmo.
+  - BMap: A dynamic library which is specific for Ballance Map loading and saving.
+  - BMapInspector: A inspector for checking Ballance Map.
 
 ## Contributions
 
-However, not all contribution will be accepted. Just like I said, we create **Minimalist** Virtools Environment. The basic RW functions is enough. We do not accept complex function implementations. There are 3 lists which indicate our accept guideline.
+However, not all contribution will be accepted.
+
+For the limitation of contributor, please see [Contribution Guideline](./CONTRIBUTING.md).
+
+For the content of contribution, just like I said, we create **Minimalist** Virtools Environment. The basic RW functions is enough. We do not accept complex function implementations. There are 3 lists which indicate our accept guideline.
 
 ### Wanted Features
 
