@@ -3,7 +3,7 @@ name = "pybmap"
 version = "0.4.0"
 description = "The Python binding to BMap."
 readme = "README.md"
-license = "SPDX:MIT"
+license = "MIT"
 authors = [{ name = "yyc12345" }]
 classifiers = ["Private :: Do Not Upload"]
 requires-python = ">=3.11"

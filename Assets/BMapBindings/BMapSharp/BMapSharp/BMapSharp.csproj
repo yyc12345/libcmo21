@@ -10,7 +10,7 @@
     <Authors>yyc12345</Authors>
     <Description>The C# binding to BMap.</Description>
     <Company>BearKidsTeam</Company>
-    <PackageLicenseFile>SPDX:MIT</PackageLicenseFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([System.OperatingSystem]::IsWindows())">

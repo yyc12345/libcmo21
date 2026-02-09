@@ -14,9 +14,9 @@ def main() -> None:
         return
     
     # Check BMap status.
-    # if True:
-    #     print('Fail to initialize native BMap.')
-    #     return
+    if not bmap.is_bmap_available():
+        print('Fail to initialize native BMap.')
+        return
 
     # Waiting debugger
     input(f'Python PID is {os.getpid()}. Waiting for debugger, press any key to continue...')

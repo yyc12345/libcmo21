@@ -1,30 +1,36 @@
-import ctypes, typing, atexit, enum
-from . import bmap, virtools_types
+import ctypes
+import typing
+import atexit
+import enum
+from . import bmap
+from . import virtools_types
 
 #region Basic Class & Constant Defines
 
-g_InvalidPtr: bmap.bm_void_p = bmap.bm_void_p(0)
-g_InvalidCKID: int = 0
-g_BMapEncoding: str = "utf-8"
+INVALID_PTR: bmap.bm_void_p = bmap.bm_void_p(0)
+INVALID_CKID: int = 0
+BMAP_ENCODING: str = "utf-8"
 
 def _python_callback(strl: bytes):
     """
     The Python type callback for BMFile.
-    Simply add a prefix when output.
-    Need a convertion before passing to BMFile.
+
+    This function simply add a prefix when output.
+    Extra convertion is required before passing to BMFile FFI function.
     """
-    # YYC Remarks:
+    # YYC MARK:
     # The passing value to this function is bytes, not bmap.bm_CKSTRING.
     # I think Python do an auto convertion in there.
     if strl is not None:
-        print(f'[PyBMap] {strl.decode(g_BMapEncoding)}')
-_g_RawCallback: bmap.bm_callback = bmap.bm_callback(_python_callback)
+        print(f'[pybmap] {strl.decode(BMAP_ENCODING)}')
+
+RAW_CALLBACK = bmap.bm_callback(_python_callback)
 
 #endregion
 
 #region Help Functions
 
-class _Utils:
+class _utils:
     @staticmethod
     def raise_out_of_length_exception() -> None:
         raise bmap.BMapException("The length of given data is too short when assigning struct array.")
@@ -39,7 +45,7 @@ class _Utils:
                     pdata[idx] = user_vector[_j]
                     idx += 1
         except StopIteration:
-            _Utils.raise_out_of_length_exception()
+            _utils.raise_out_of_length_exception()
 
     @staticmethod
     def _vector_iterator(pdata: typing.Any, item_count: int, factor_count: int) -> typing.Iterator[tuple[typing.Any, ...]]:
@@ -53,39 +59,37 @@ class _Utils:
 
     @staticmethod
     def vxvector3_assigner(pvector: bmap.bm_VxVector3_p, count: int, itor: typing.Iterator[virtools_types.VxVector3]) -> None:
-        _Utils._vector_assigner(ctypes.cast(pvector, bmap.bm_CKFLOAT_p), count, 3, map(lambda v: (v.x, v.y, v.z), itor))
+        _utils._vector_assigner(ctypes.cast(pvector, bmap.bm_CKFLOAT_p), count, 3, map(lambda v: (v.x, v.y, v.z), itor))
     @staticmethod
     def vxvector3_iterator(pvector: bmap.bm_VxVector3_p, count: int) -> typing.Iterator[virtools_types.VxVector3]:
         return map(
             lambda v: virtools_types.VxVector3(*v),
-            _Utils._vector_iterator(ctypes.cast(pvector, bmap.bm_CKFLOAT_p), count, 3)
+            _utils._vector_iterator(ctypes.cast(pvector, bmap.bm_CKFLOAT_p), count, 3)
         )
 
     @staticmethod     
     def vxvector2_assigner(pvector: bmap.bm_VxVector2_p, count: int, itor: typing.Iterator[virtools_types.VxVector2]) -> None:
-        _Utils._vector_assigner(ctypes.cast(pvector, bmap.bm_CKFLOAT_p), count, 2, map(lambda v: (v.x, v.y), itor))
+        _utils._vector_assigner(ctypes.cast(pvector, bmap.bm_CKFLOAT_p), count, 2, map(lambda v: (v.x, v.y), itor))
     @staticmethod
     def vxvector2_iterator(pvector: bmap.bm_VxVector2_p, count: int) -> typing.Iterator[virtools_types.VxVector2]:
         return map(
             lambda v: virtools_types.VxVector2(*v),
-            _Utils._vector_iterator(ctypes.cast(pvector, bmap.bm_CKFLOAT_p), count, 2)
+            _utils._vector_iterator(ctypes.cast(pvector, bmap.bm_CKFLOAT_p), count, 2)
         )
     
-    """!
-    @remarks
-    bmap.bm_CKWORD_p | bmap.bm_CKDWORD_p is just a type hint.
-    We actually do not need distinguish them in code.
-    Because the stride when increasing them is decided by their runtime type.
-    """
+    # YYC MARK:
+    # bmap.bm_CKWORD_p | bmap.bm_CKDWORD_p is just a type hint.
+    # We actually do not need distinguish them in code.
+    # Because the stride when increasing them is decided by their runtime type.
     
     @staticmethod
     def ckfaceindices_assigner(pindices: bmap.bm_CKWORD_p | bmap.bm_CKDWORD_p, count: int, itor: typing.Iterator[virtools_types.CKFaceIndices]) -> None:
-        _Utils._vector_assigner(pindices, count, 3, map(lambda v: (v.i1, v.i2, v.i3), itor))
+        _utils._vector_assigner(pindices, count, 3, map(lambda v: (v.i1, v.i2, v.i3), itor))
     @staticmethod
     def ckfaceindices_iterator(pindices: bmap.bm_CKWORD_p | bmap.bm_CKDWORD_p, count: int) -> typing.Iterator[virtools_types.CKFaceIndices]:
         return map(
             lambda v: virtools_types.CKFaceIndices(*v),
-            _Utils._vector_iterator(pindices, count, 3)
+            _utils._vector_iterator(pindices, count, 3)
         )
 
 #endregion
@@ -122,7 +126,7 @@ class _AbstractPointer():
 TEnumType = typing.TypeVar('TEnumType', bound = enum.IntEnum)
 TIntegralType = bmap.bm_CKDWORD | bmap.bm_CKWORD | bmap.bm_CKINT | bmap.bm_CKBYTE | bmap.bm_CKID
 TFloatPointType = bmap.bm_CKFLOAT
-TPointerType = typing.TypeVar('TPointerType')
+TPointerType = typing.TypeVar('TPointerType', bound=ctypes._Pointer)
 
 class _AbstractCKObject(_AbstractPointer):
     __mCKID: int
@@ -148,6 +152,7 @@ class _AbstractCKObject(_AbstractPointer):
     def __hash__(self) -> int:
         return hash((_AbstractPointer.__hash__(self), self.__mCKID))
 
+    # YYC MARK:
     # Convenient Value Getter Setter
     # Focusing on those which widely called types.
 
@@ -183,11 +188,11 @@ class _AbstractCKObject(_AbstractPointer):
         data: bmap.bm_CKSTRING = bmap.bm_CKSTRING()
         getter_(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
         if data.value is None: return None
-        else: return data.value.decode(g_BMapEncoding)
+        else: return data.value.decode(BMAP_ENCODING)
     def _set_str_value(self, setter_: typing.Callable[[bmap.bm_void_p, bmap.bm_CKID, bmap.bm_CKSTRING], bmap.bm_bool], data_: str | None) -> None:
         data: bmap.bm_CKSTRING
         if data_ is None: data = bmap.bm_CKSTRING(0)
-        else: data = bmap.bm_CKSTRING(data_.encode(g_BMapEncoding))
+        else: data = bmap.bm_CKSTRING(data_.encode(BMAP_ENCODING))
         setter_(self._get_pointer(), self._get_ckid(), data)
 
     def _set_vxcolor_value(self,
@@ -209,7 +214,7 @@ class _AbstractCKObject(_AbstractPointer):
         return ret
     
     def _get_pointer_value(self, ptr_type_: type[TPointerType], getter_: typing.Callable[[bmap.bm_void_p, bmap.bm_CKID, typing.Any], bmap.bm_bool]) -> TPointerType:
-        data = ptr_type_()
+        data: TPointerType = ptr_type_()
         getter_(self._get_pointer(), self._get_ckid(), ctypes.byref(data))
         return data
 
@@ -234,18 +239,16 @@ if is_bmap_available():
 
 #region Real Type Defines
 
-"""!
-@remarks
-BMFileReader, BMFileWriter, and BMMeshTrans can be create by given constructor.
-But they must be destroyed by calling dispose(). Otherwise it may cause memory leak.
-You also can use python `with` statement to achieve this automatically.
-
-BMObject, BMTexture, BMMaterial, BMMesh, and BM3dObject should NOT be constructed from given constructor.
-They must be obtained from BMFileReader, BMFileWriter, and BMMeshTrans.
-Thus BMObject, BMTexture, BMMaterial, BMMesh, and BM3dObject also do not need to free 
-because these resources are sotred in BMFileReader, BMFileWriter, and BMMeshTrans.
-We just provide them as a visitor.
-"""
+# YYC MARK:
+# BMFileReader, BMFileWriter, and BMMeshTrans can be create by given constructor.
+# But they must be destroyed by calling dispose(). Otherwise it may cause memory leak.
+# You also can use python `with` statement to achieve this automatically.
+# 
+# BMObject, BMTexture, BMMaterial, BMMesh, and BM3dObject should NOT be constructed from given constructor.
+# They must be obtained from BMFileReader, BMFileWriter, and BMMeshTrans.
+# Thus BMObject, BMTexture, BMMaterial, BMMesh, and BM3dObject also do not need to free 
+# because these resources are sotred in BMFileReader, BMFileWriter, and BMMeshTrans.
+# We just provide them as a visitor.
 
 class BMObject(_AbstractCKObject):
     def get_name(self) -> str | None:
@@ -258,10 +261,10 @@ class BMTexture(BMObject):
         return self._get_str_value(bmap.BMTexture_GetFileName)
 
     def load_image(self, filepath: str) -> None:
-        filename: bmap.bm_CKSTRING = bmap.bm_CKSTRING(filepath.encode(g_BMapEncoding))
+        filename: bmap.bm_CKSTRING = bmap.bm_CKSTRING(filepath.encode(BMAP_ENCODING))
         bmap.BMTexture_LoadImage(self._get_pointer(), self._get_ckid(), filename)
     def save_image(self, filepath: str) -> None:
-        filename: bmap.bm_CKSTRING = bmap.bm_CKSTRING(filepath.encode(g_BMapEncoding))
+        filename: bmap.bm_CKSTRING = bmap.bm_CKSTRING(filepath.encode(BMAP_ENCODING))
         bmap.BMTexture_SaveImage(self._get_pointer(), self._get_ckid(), filename)
 
     def get_save_options(self) -> virtools_types.CK_TEXTURE_SAVEOPTIONS:
@@ -299,11 +302,11 @@ class BMMaterial(BMObject):
     def get_texture(self) -> BMTexture | None:
         objid: bmap.bm_CKID = bmap.bm_CKID()
         bmap.BMMaterial_GetTexture(self._get_pointer(), self._get_ckid(), ctypes.byref(objid))
-        if objid.value == g_InvalidCKID: return None
+        if objid.value == INVALID_CKID: return None
         else: return BMTexture(self._get_pointer(), objid)
         
     def set_texture(self, tex_: BMTexture | None) -> None:
-        objid: bmap.bm_CKID = bmap.bm_CKID(g_InvalidCKID)
+        objid: bmap.bm_CKID = bmap.bm_CKID(INVALID_CKID)
         if tex_ is not None: objid = tex_._get_ckid()
         bmap.BMMaterial_SetTexture(self._get_pointer(), self._get_ckid(), objid)
 
@@ -398,25 +401,25 @@ class BMMesh(BMObject):
     def get_vertex_positions(self) -> typing.Iterator[virtools_types.VxVector3]:
         # get raw pointer and return
         raw_vector = self._get_pointer_value(bmap.bm_VxVector3_p, bmap.BMMesh_GetVertexPositions)
-        return _Utils.vxvector3_iterator(raw_vector, self.get_vertex_count())          
+        return _utils.vxvector3_iterator(raw_vector, self.get_vertex_count())          
     def set_vertex_positions(self, itor: typing.Iterator[virtools_types.VxVector3]) -> None:
         # get raw float pointer and assign
         raw_vector = self._get_pointer_value(bmap.bm_VxVector3_p, bmap.BMMesh_GetVertexPositions)
-        _Utils.vxvector3_assigner(raw_vector, self.get_vertex_count(), itor)
+        _utils.vxvector3_assigner(raw_vector, self.get_vertex_count(), itor)
 
     def get_vertex_normals(self) -> typing.Iterator[virtools_types.VxVector3]:
         raw_vector = self._get_pointer_value(bmap.bm_VxVector3_p, bmap.BMMesh_GetVertexNormals)
-        return _Utils.vxvector3_iterator(raw_vector, self.get_vertex_count())
+        return _utils.vxvector3_iterator(raw_vector, self.get_vertex_count())
     def set_vertex_normals(self, itor: typing.Iterator[virtools_types.VxVector3]) -> None:
         raw_vector = self._get_pointer_value(bmap.bm_VxVector3_p, bmap.BMMesh_GetVertexNormals)
-        _Utils.vxvector3_assigner(raw_vector, self.get_vertex_count(), itor)
+        _utils.vxvector3_assigner(raw_vector, self.get_vertex_count(), itor)
 
     def get_vertex_uvs(self) -> typing.Iterator[virtools_types.VxVector2]:
         raw_vector = self._get_pointer_value(bmap.bm_VxVector2_p, bmap.BMMesh_GetVertexUVs)
-        return _Utils.vxvector2_iterator(raw_vector, self.get_vertex_count())
+        return _utils.vxvector2_iterator(raw_vector, self.get_vertex_count())
     def set_vertex_uvs(self, itor: typing.Iterator[virtools_types.VxVector2]) -> None:
         raw_vector = self._get_pointer_value(bmap.bm_VxVector2_p, bmap.BMMesh_GetVertexUVs)
-        _Utils.vxvector2_assigner(raw_vector, self.get_vertex_count(), itor)
+        _utils.vxvector2_assigner(raw_vector, self.get_vertex_count(), itor)
 
     def get_face_count(self) -> int:
         return self._get_integral_value(bmap.bm_CKDWORD, bmap.BMMesh_GetFaceCount)
@@ -425,10 +428,10 @@ class BMMesh(BMObject):
 
     def get_face_indices(self) -> typing.Iterator[virtools_types.CKFaceIndices]:
         raw_idx = self._get_pointer_value(bmap.bm_CKWORD_p, bmap.BMMesh_GetFaceIndices)
-        return _Utils.ckfaceindices_iterator(raw_idx, self.get_face_count())
+        return _utils.ckfaceindices_iterator(raw_idx, self.get_face_count())
     def set_face_indices(self, itor: typing.Iterator[virtools_types.CKFaceIndices]) -> None:
         raw_idx = self._get_pointer_value(bmap.bm_CKWORD_p, bmap.BMMesh_GetFaceIndices)
-        _Utils.ckfaceindices_assigner(raw_idx, self.get_face_count(), itor)
+        _utils.ckfaceindices_assigner(raw_idx, self.get_face_count(), itor)
 
     def get_face_material_slot_indexs(self) -> typing.Iterator[int]:
         raw_idx = self._get_pointer_value(bmap.bm_CKWORD_p, bmap.BMMesh_GetFaceMaterialSlotIndexs)
@@ -441,7 +444,7 @@ class BMMesh(BMObject):
             for i in range(self.get_face_count()):
                 raw_idx[i] = next(itor)
         except StopIteration:
-            _Utils.raise_out_of_length_exception()
+            _utils.raise_out_of_length_exception()
 
     def get_material_slot_count(self) -> int:
         return self._get_integral_value(bmap.bm_CKDWORD, bmap.BMMesh_GetMaterialSlotCount)
@@ -454,7 +457,7 @@ class BMMesh(BMObject):
         for i in range(self.get_material_slot_count()):
             idx.value = i
             bmap.BMMesh_GetMaterialSlot(self._get_pointer(), self._get_ckid(), idx, ctypes.byref(mtlid))
-            if mtlid.value == g_InvalidCKID:
+            if mtlid.value == INVALID_CKID:
                 yield None
             else:
                 yield BMMaterial(self._get_pointer(), mtlid)
@@ -468,13 +471,13 @@ class BMMesh(BMObject):
                 # analyze mtl item
                 mtlobj: BMMaterial | None = next(itor)
                 if mtlobj is None:
-                    mtlid.value = g_InvalidCKID
+                    mtlid.value = INVALID_CKID
                 else:
                     mtlid = mtlobj._get_ckid()
                 # set
                 bmap.BMMesh_SetMaterialSlot(self._get_pointer(), self._get_ckid(), idx, mtlid)
         except StopIteration:
-            _Utils.raise_out_of_length_exception()
+            _utils.raise_out_of_length_exception()
 
 class BM3dEntity(BMObject):
     def get_world_matrix(self) -> virtools_types.VxMatrix:
@@ -494,13 +497,13 @@ class BM3dEntity(BMObject):
     def get_current_mesh(self) -> BMMesh | None:
         ckid: bmap.bm_CKID = bmap.bm_CKID()
         bmap.BM3dEntity_GetCurrentMesh(self._get_pointer(), self._get_ckid(), ctypes.byref(ckid))
-        if ckid.value == g_InvalidCKID:
+        if ckid.value == INVALID_CKID:
             return None
         else:
             return BMMesh(self._get_pointer(), ckid)
 
     def set_current_mesh(self, mesh: BMMesh | None) -> None:
-        ckid: bmap.bm_CKID = bmap.bm_CKID(g_InvalidCKID)
+        ckid: bmap.bm_CKID = bmap.bm_CKID(INVALID_CKID)
         if mesh is not None:
             ckid = mesh._get_ckid()
         bmap.BM3dEntity_SetCurrentMesh(self._get_pointer(), self._get_ckid(), ckid)
@@ -558,6 +561,43 @@ class BMLight(BM3dEntity):
 class BMTargetLight(BMLight):
     pass
 
+class BMCamera(BM3dEntity):
+    def get_projection_type(self) -> virtools_types.CK_CAMERA_PROJECTION:
+        return self._get_enum_value(virtools_types.CK_CAMERA_PROJECTION, bmap.BMCamera_GetProjectionType)
+    def set_type(self, data_: virtools_types.CK_CAMERA_PROJECTION) -> None:
+        self._set_enum_value(bmap.BMCamera_SetProjectionType, data_)
+
+    def get_orthographic_zoom(self) -> float:
+        return self._get_float_point_value(bmap.bm_CKFLOAT, bmap.BMCamera_GetOrthographicZoom)
+    def set_orthographic_zoom(self, val_: float) -> None:
+        self._set_float_point_value(bmap.bm_CKFLOAT, bmap.BMCamera_SetOrthographicZoom, val_)
+    
+    def get_front_plane(self) -> float:
+        return self._get_float_point_value(bmap.bm_CKFLOAT, bmap.BMCamera_GetFrontPlane)
+    def set_front_plane(self, val_: float) -> None:
+        self._set_float_point_value(bmap.bm_CKFLOAT, bmap.BMCamera_SetFrontPlane, val_)
+    def get_back_plane(self) -> float:
+        return self._get_float_point_value(bmap.bm_CKFLOAT, bmap.BMCamera_GetBackPlane)
+    def set_back_plane(self, val_: float) -> None:
+        self._set_float_point_value(bmap.bm_CKFLOAT, bmap.BMCamera_SetBackPlane, val_)
+    def get_fov(self) -> float:
+        return self._get_float_point_value(bmap.bm_CKFLOAT, bmap.BMCamera_GetFov)
+    def set_fov(self, val_: float) -> None:
+        self._set_float_point_value(bmap.bm_CKFLOAT, bmap.BMCamera_SetFov, val_)
+    
+    def get_aspect_ratio(self) -> tuple[int, int]:
+        width = bmap.bm_CKDWORD()
+        height = bmap.bm_CKDWORD()
+        bmap.BMCamera_GetAspectRatio(self._get_pointer(), self._get_ckid(), ctypes.byref(width), ctypes.byref(height))
+        return (width.value, height.value)
+    def set_aspect_ratio(self, width_: int, height_: int) -> None:
+        width = bmap.bm_CKDWORD(width_)
+        height = bmap.bm_CKDWORD(height_)
+        bmap.BMCamera_SetAspectRatio(self._get_pointer(), self._get_ckid(), width, height)
+
+class BMTargetCamera(BMCamera):
+    pass
+
 class BMGroup(BMObject):
     def add_object(self, member: BM3dObject) -> None:
         bmap.BMGroup_AddObject(self._get_pointer(), self._get_ckid(), member._get_ckid())
@@ -578,19 +618,19 @@ class BMGroup(BMObject):
             yield BM3dObject(self._get_pointer(), retid)
             
 class BMFileReader(_AbstractPointer):
-    def __init__(self, file_name_: str, temp_folder_: str, texture_folder_: str, encodings_: tuple[str]):
+    def __init__(self, file_name_: str, temp_folder_: str, texture_folder_: str, encodings_: tuple[str, ...]):
         # create param
-        file_name: bmap.bm_CKSTRING = bmap.bm_CKSTRING(file_name_.encode(g_BMapEncoding))
-        temp_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(temp_folder_.encode(g_BMapEncoding))
-        texture_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(texture_folder_.encode(g_BMapEncoding))
+        file_name: bmap.bm_CKSTRING = bmap.bm_CKSTRING(file_name_.encode(BMAP_ENCODING))
+        temp_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(temp_folder_.encode(BMAP_ENCODING))
+        texture_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(texture_folder_.encode(BMAP_ENCODING))
         encoding_count: bmap.bm_CKDWORD = bmap.bm_CKDWORD(len(encodings_))
         encodings: ctypes.Array = (bmap.bm_CKSTRING * len(encodings_))(
-            *(strl.encode(g_BMapEncoding) for strl in encodings_)
+            *(strl.encode(BMAP_ENCODING) for strl in encodings_)
         )
         out_file: bmap.bm_void_p = bmap.bm_void_p()
         # exec
         bmap.BMFile_Load(
-            file_name, temp_folder, texture_folder, _g_RawCallback,
+            file_name, temp_folder, texture_folder, RAW_CALLBACK,
             encoding_count, encodings,
             ctypes.byref(out_file)
         )
@@ -606,7 +646,7 @@ class BMFileReader(_AbstractPointer):
     def dispose(self) -> None:
         if self._is_valid():
             bmap.BMFile_Free(self._get_pointer())
-            self._set_pointer(g_InvalidPtr)
+            self._set_pointer(INVALID_PTR)
 
     def __get_ckobject_count(self,
         count_getter: typing.Callable[[bmap.bm_void_p, bmap.bm_CKDWORD_p], bmap.bm_bool]) -> int:
@@ -655,20 +695,25 @@ class BMFileReader(_AbstractPointer):
         return self.__get_ckobject_count(bmap.BMFile_GetTargetLightCount)
     def get_target_lights(self) -> typing.Iterator[BMTargetLight]:
         return self.__get_ckobjects(BMTargetLight, bmap.BMFile_GetTargetLightCount, bmap.BMFile_GetTargetLight)
+    def get_target_camera_count(self) -> int:
+        return self.__get_ckobject_count(bmap.BMFile_GetTargetCameraCount)
+    def get_target_cameras(self) -> typing.Iterator[BMTargetCamera]:
+        return self.__get_ckobjects(BMTargetCamera, bmap.BMFile_GetTargetCameraCount, bmap.BMFile_GetTargetCamera)
+
     
 class BMFileWriter(_AbstractPointer):
-    def __init__(self, temp_folder_: str, texture_folder_: str, encodings_: tuple[str]):
+    def __init__(self, temp_folder_: str, texture_folder_: str, encodings_: tuple[str, ...]):
         # create param
-        temp_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(temp_folder_.encode(g_BMapEncoding))
-        texture_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(texture_folder_.encode(g_BMapEncoding))
+        temp_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(temp_folder_.encode(BMAP_ENCODING))
+        texture_folder: bmap.bm_CKSTRING = bmap.bm_CKSTRING(texture_folder_.encode(BMAP_ENCODING))
         encoding_count: bmap.bm_CKDWORD = bmap.bm_CKDWORD(len(encodings_))
         encodings: ctypes.Array = (bmap.bm_CKSTRING * len(encodings_))(
-            *(strl.encode(g_BMapEncoding) for strl in encodings_)
+            *(strl.encode(BMAP_ENCODING) for strl in encodings_)
         )
         out_file: bmap.bm_void_p = bmap.bm_void_p()
         # exec
         bmap.BMFile_Create(
-            temp_folder, texture_folder, _g_RawCallback,
+            temp_folder, texture_folder, RAW_CALLBACK,
             encoding_count, encodings,
             ctypes.byref(out_file)
         )
@@ -683,7 +728,7 @@ class BMFileWriter(_AbstractPointer):
     
     def save(self, file_name_: str, texture_save_opt_: virtools_types.CK_TEXTURE_SAVEOPTIONS, use_compress_: bool, compress_level_: int) -> None:
         # create param
-        file_name: bmap.bm_CKSTRING = bmap.bm_CKSTRING(file_name_.encode(g_BMapEncoding))
+        file_name: bmap.bm_CKSTRING = bmap.bm_CKSTRING(file_name_.encode(BMAP_ENCODING))
         texture_save_opt: bmap.bm_enum = bmap.bm_enum(texture_save_opt_.value)
         use_compress: bmap.bm_bool = bmap.bm_bool(use_compress_)
         compress_level: bmap.bm_CKINT = bmap.bm_CKINT(compress_level_)
@@ -693,7 +738,7 @@ class BMFileWriter(_AbstractPointer):
     def dispose(self) -> None:
         if self._is_valid():
             bmap.BMFile_Free(self._get_pointer())
-            self._set_pointer(g_InvalidPtr)
+            self._set_pointer(INVALID_PTR)
 
     def __create_ckobject(self, 
         class_type: type[TCKObject],
@@ -717,6 +762,8 @@ class BMFileWriter(_AbstractPointer):
         return self.__create_ckobject(BMGroup, bmap.BMFile_CreateGroup)
     def create_target_light(self) -> BMTargetLight:
         return self.__create_ckobject(BMTargetLight, bmap.BMFile_CreateTargetLight)
+    def create_target_camera(self) -> BMTargetCamera:
+        return self.__create_ckobject(BMTargetCamera, bmap.BMFile_CreateTargetCamera)
     
 class BMMeshTrans(_AbstractPointer):
     def __init__(self):
@@ -733,7 +780,7 @@ class BMMeshTrans(_AbstractPointer):
     def dispose(self) -> None:
         if self._is_valid():
             bmap.BMMeshTrans_Delete(self._get_pointer())
-            self._set_pointer(g_InvalidPtr)
+            self._set_pointer(INVALID_PTR)
 
     def parse(self, objmesh: BMMesh) -> None:
         bmap.BMMeshTrans_Parse(self._get_pointer(), objmesh._get_pointer(), objmesh._get_ckid())
@@ -746,7 +793,7 @@ class BMMeshTrans(_AbstractPointer):
         raw_vector: bmap.bm_VxVector3_p = bmap.bm_VxVector3_p()
         bmap.BMMeshTrans_PrepareVertex(self._get_pointer(), ctypes.byref(raw_vector))
         # set by pointer
-        _Utils.vxvector3_assigner(raw_vector, count, itor)
+        _utils.vxvector3_assigner(raw_vector, count, itor)
     
     def prepare_normal(self, count: int, itor: typing.Iterator[virtools_types.VxVector3]) -> None:
         csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD(count)
@@ -755,7 +802,7 @@ class BMMeshTrans(_AbstractPointer):
         raw_vector: bmap.bm_VxVector3_p = bmap.bm_VxVector3_p()
         bmap.BMMeshTrans_PrepareNormal(self._get_pointer(), ctypes.byref(raw_vector))
         
-        _Utils.vxvector3_assigner(raw_vector, count, itor)
+        _utils.vxvector3_assigner(raw_vector, count, itor)
     
     def prepare_uv(self, count: int, itor: typing.Iterator[virtools_types.VxVector2]) -> None:
         csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD(count)
@@ -764,7 +811,7 @@ class BMMeshTrans(_AbstractPointer):
         raw_vector: bmap.bm_VxVector2_p = bmap.bm_VxVector2_p()
         bmap.BMMeshTrans_PrepareUV(self._get_pointer(), ctypes.byref(raw_vector))
         
-        _Utils.vxvector2_assigner(raw_vector, count, itor)
+        _utils.vxvector2_assigner(raw_vector, count, itor)
     
     def prepare_mtl_slot(self, count: int, itor: typing.Iterator[BMMaterial | None]) -> None:
         csize: bmap.bm_CKDWORD = bmap.bm_CKDWORD(count)
@@ -777,12 +824,12 @@ class BMMeshTrans(_AbstractPointer):
             for _ in range(count):
                 usermtl: BMMaterial | None = next(itor)
                 if usermtl is None:
-                    raw_ckid[idx] = g_InvalidCKID
+                    raw_ckid[idx] = INVALID_CKID
                 else:
                     raw_ckid[idx] = usermtl._get_ckid().value
                 idx += 1
         except StopIteration:
-            _Utils.raise_out_of_length_exception()
+            _utils.raise_out_of_length_exception()
     
     def prepare_face(self,
         count: int,
@@ -806,9 +853,9 @@ class BMMeshTrans(_AbstractPointer):
 
         # iterate and assign
         # assigne triple indices
-        _Utils.ckfaceindices_assigner(raw_vec_idx, count, vec_idx)
-        _Utils.ckfaceindices_assigner(raw_nml_idx, count, nml_idx)
-        _Utils.ckfaceindices_assigner(raw_uv_idx, count, uv_idx)
+        _utils.ckfaceindices_assigner(raw_vec_idx, count, vec_idx)
+        _utils.ckfaceindices_assigner(raw_nml_idx, count, nml_idx)
+        _utils.ckfaceindices_assigner(raw_uv_idx, count, uv_idx)
         # assign mtl index
         try:
             idx: int = 0
@@ -816,6 +863,6 @@ class BMMeshTrans(_AbstractPointer):
                 raw_mtl_idx[idx] = next(mtl_idx)
                 idx += 1
         except StopIteration:
-            _Utils.raise_out_of_length_exception()
+            _utils.raise_out_of_length_exception()
 
 #endregion
