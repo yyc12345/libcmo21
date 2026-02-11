@@ -83,6 +83,25 @@ class RenderUtils:
         """
         return RenderUtils.REGEX_CS_TO_LITERAL_NUMBER.sub("", numstr, 1)
 
+    @staticmethod
+    def to_rs_num_literal(numstr: str) -> str:
+        """
+        Convert given string into Rust number literal style.
+
+        Number literal declaration in Rust is slightly different with C++.
+        C++ support U and L but Rust use another complete suffix mode to decide the type of numeric literal (u32, i32 and etc).
+        However, Rust can properly deduce the correct type of number literal,
+        so we just need simply remove any suffix.
+
+        This function is only served for C# code generation.
+
+        :param numstr: The captured number.
+        :return: The Rust style number string.
+        """
+        # We reuse existing function
+        return RenderUtils.to_py_num_literal(numstr)
+
+
     REGEX_PY_EXT_HUMANRDABLE_ENTRY_NAME: typing.ClassVar[re.Pattern] = re.compile("^[a-zA-Z0-9]+_")
 
     @staticmethod

@@ -1,0 +1,14 @@
+{%- for fct in payload.fcts %}
+/// {{ fct.fct_name }}
+/// 
+/// # Parameters
+/// 
+{%- for param in fct.fct_params %}
+/// - `{{ param.var_name }}`: Direction: {% if param.is_input -%} input {%- else -%} output {%- endif %}. C++ type: `{{ param.var_type.to_c_type() }}`. {{ param.var_desc }}
+{%- endfor %}
+/// 
+/// # Return
+/// 
+/// True if no error, otherwise False.
+pub unsafe fn {{ fct.fct_name }}() -> bool;
+{%- endfor %}
