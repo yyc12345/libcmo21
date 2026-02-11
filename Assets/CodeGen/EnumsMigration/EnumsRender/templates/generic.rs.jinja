@@ -2,9 +2,10 @@
 {%- if benum.get_enum_comment() is not none %}
 {{ benum.get_enum_comment() | block_comment('/// ') }}
 {%- endif %}
-{%- if not benum.get_use_flags() %}
+{%- if not benum.is_flag() %}
+#[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[repr({% if benum.get_can_unsigned() -%} u32 {%- else -%} i32 {%- endif %})]
+#[repr({% if benum.is_unsigned() -%} u32 {%- else -%} i32 {%- endif %})]
 pub enum {{ benum.get_enum_name() }} {
     {%- for entry in benum.iter_entries() %}
     {%- if entry.get_entry_comment() is not none %}
@@ -16,10 +17,10 @@ pub enum {{ benum.get_enum_name() }} {
 {%- else %}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
-pub struct {{ benum.get_enum_name() }}({% if benum.get_can_unsigned() -%} u32 {%- else -%} i32 {%- endif %});
+pub struct {{ benum.get_enum_name() }}({% if benum.is_unsigned() -%} u32 {%- else -%} i32 {%- endif %});
 
 bitflags! {
-    impl {{ benum.get_enum_name() }}: {% if benum.get_can_unsigned() -%} u32 {%- else -%} i32 {%- endif %} {
+    impl {{ benum.get_enum_name() }}: {% if benum.is_unsigned() -%} u32 {%- else -%} i32 {%- endif %} {
     {%- for entry in benum.iter_entries() %}
         {%- if entry.get_entry_comment() is not none %}
         /// {{ entry.get_entry_comment() | line_comment }}

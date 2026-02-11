@@ -11,6 +11,7 @@ def main():
     render.render_cpp_enum("CKERROR.hpp", ckerror)
     render.render_py_enum("CKERROR.py", ckerror)
     render.render_cs_enum("CKERROR.cs", ckerror)
+    render.render_rs_enum("CKERROR.rs", ckerror)
     render.render_cpp_ckerror_docstring("CKERROR.docstring.hpp", "CKERROR.docstring.cpp", ckerror)
     render.render_py_enum_docstring("CKERROR.docstring.py", ckerror)
     render.render_cs_enum_docstring("CKERROR.docstring.cs", ckerror)

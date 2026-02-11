@@ -6,10 +6,28 @@ import com.google.gson.GsonBuilder;
 
 public class JsonWriter {
 
+	private static String writeBEnumEntryFlagKind(EnumsHelper.BEnumEntryFlagKind kind) {
+		return switch (kind) {
+			case NotFlag -> "not-flag";
+			case MayFlag -> "may-flag";
+			case MustFlag -> "must-flag";
+		};
+	}
+
+	private static String writeBEnumEntrySignKind(EnumsHelper.BEnumEntrySignKind kind) {
+		return switch (kind) {
+			case Positive -> "positive";
+			case Negative -> "negative";
+			case Unknown -> "unknown";
+		};
+	}
+
 	private static JsonObject writeBEnumEntry(EnumsHelper.BEnumEntry enumEntry) {
 		JsonObject data = new JsonObject();
 		data.addProperty("name", enumEntry.mEntryName);
 		data.addProperty("value", enumEntry.mEntryValue);
+		data.addProperty("flag_kind", writeBEnumEntryFlagKind(enumEntry.mEntryFlagKind));
+		data.addProperty("sign_kind", writeBEnumEntrySignKind(enumEntry.mEntrySignKind));
 		data.addProperty("comment", enumEntry.mEntryComment);
 
 		// Export hierarchy if possible
@@ -30,9 +48,8 @@ public class JsonWriter {
 		JsonObject data = new JsonObject();
 		data.addProperty("name", benum.mEnumName);
 		data.addProperty("comment", benum.mEnumComment);
-		data.addProperty("can_unsigned", benum.mCanUnsigned);
-		data.addProperty("use_flags", benum.mUseFlags);
-		data.addProperty("use_flags", benum.mUseFlags);
+		data.addProperty("is_unsigned", benum.mIsUnsigned);
+		data.addProperty("is_flag", benum.mIsFlag);
 
 		JsonArray entries = new JsonArray();
 		for (EnumsHelper.BEnumEntry enumEntry : benum.mEntries) {

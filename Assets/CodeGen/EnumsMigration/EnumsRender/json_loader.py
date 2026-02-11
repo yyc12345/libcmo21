@@ -87,9 +87,9 @@ class BEnum:
     """The name of this enum."""
     __enum_comment: str | None
     """The comment of this enum. None if no comment."""
-    __can_unsigned: bool
+    __is_unsigned: bool
     """True if this enum can use unsigned integer as its underlying type."""
-    __use_flags: bool
+    __is_flag: bool
     """True if this enum will use flags feature (supporting OR, AND, operators)."""
     __entries: list[BEnumEntry]
     """The list to store entries of this enum."""
@@ -101,14 +101,14 @@ class BEnum:
         self,
         enum_name: str,
         enum_comment: str | None,
-        can_unsigned: bool,
-        use_flags: bool,
+        is_unsigned: bool,
+        is_flag: bool,
         entries: list[BEnumEntry],
     ):
         self.__enum_name = enum_name
         self.__enum_comment = enum_comment
-        self.__can_unsigned = can_unsigned
-        self.__use_flags = use_flags
+        self.__is_unsigned = is_unsigned
+        self.__is_flag = is_flag
         self.__entries = entries
         self.__entries_map = {e.get_entry_name(): e for e in entries}
 
@@ -120,13 +120,13 @@ class BEnum:
         """Get the comment of this enum. None if no comment."""
         return self.__enum_comment
 
-    def get_can_unsigned(self) -> bool:
+    def is_unsigned(self) -> bool:
         """True if this enum can use unsigned integer as its underlying type."""
-        return self.__can_unsigned
+        return self.__is_unsigned
 
-    def get_use_flags(self) -> bool:
+    def is_flag(self) -> bool:
         """True if this enum will use flags feature (supporting OR, AND, operators)."""
-        return self.__use_flags
+        return self.__is_flag
 
     def iter_entries(self) -> typing.Iterator[BEnumEntry]:
         """Get the iterator of entries of this enum."""
@@ -140,8 +140,8 @@ class BEnum:
         return BEnum(
             data["name"],
             data.get("comment", None),
-            data["can_unsigned"],
-            data["use_flags"],
+            data["is_unsigned"],
+            data["is_flag"],
             list(map(lambda i: BEnum.__create_entry_by_content(i), data["entries"])),
         )
 

@@ -30,6 +30,9 @@ public class DefinesWalker extends CKDefinesParserBaseListener {
 
 	@Override
 	public void exitProg(CKDefinesParser.ProgContext ctx) {
+		// update enum
+		mCurrentEnum.updateByEntries();
+		// and return
 		mResult = mCurrentEnum;
 		mCurrentEnum = null;
 	}
@@ -48,19 +51,26 @@ public class DefinesWalker extends CKDefinesParserBaseListener {
 		if (ctx.CKGENERIC_NUM() == null) {
 			// define with id
 			mCurrentEntry.mEntryValue = ctx.CKGENERIC_ID(1).getText();
-			
+			// it refers other memeber, so its sign is unknown
+			mCurrentEntry.mEntrySignKind = EnumsHelper.BEnumEntrySignKind.Unknown;
+			// it refers other memeber, so it may flag.
+			mCurrentEntry.mEntryFlagKind = EnumsHelper.BEnumEntryFlagKind.MayFlag;
 		} else {
 			// define with number
 			String num = ctx.CKGENERIC_NUM().getText();
 			mCurrentEntry.mEntryValue = num;
 
-			// check whether this enum can be unsigned
+			// check the sign of this number
 			if (CommonHelper.isNegativeNumber(num)) {
-				mCurrentEnum.mCanUnsigned = false;
+				mCurrentEntry.mEntrySignKind = EnumsHelper.BEnumEntrySignKind.Negative;
+			} else {
+				mCurrentEntry.mEntrySignKind = EnumsHelper.BEnumEntrySignKind.Positive;
 			}
-			// if the number is in hex form, this enum MIGHT have flags feature
+			// if the number is in hex form, it may belong to flag enum
 			if (CommonHelper.isHexNumber(num)) {
-				mCurrentEnum.mUseFlags = true;
+				mCurrentEntry.mEntryFlagKind = EnumsHelper.BEnumEntryFlagKind.MayFlag;
+			} else {
+				mCurrentEntry.mEntryFlagKind = EnumsHelper.BEnumEntryFlagKind.NotFlag;
 			}
 
 		}

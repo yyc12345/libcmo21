@@ -72,9 +72,13 @@ public class ClassidWalker extends CKDefinesParserBaseListener {
 		mLevel = 0;
 		mLevelStack = null;
 
-		// classid is signed int and do not have flags feature.
-		mCurrentEnum.mCanUnsigned = false;
-		mCurrentEnum.mUseFlags = false;
+		// update self
+		mCurrentEnum.updateByEntries();
+		// we forcely set classid is signed and do not have flags feature.
+		mCurrentEnum.mIsFlag = false;
+		mCurrentEnum.mIsUnsigned = false;
+
+		// and return
 		mResult = mCurrentEnum;
 		mCurrentEnum = null;
 	}
@@ -89,6 +93,11 @@ public class ClassidWalker extends CKDefinesParserBaseListener {
 		// fill entry info
 		mCurrentEntry.mEntryName = ctx.CKGENERIC_ID(0).getText();
 		mCurrentEntry.mEntryValue = ctx.CKGENERIC_NUM().getText();
+
+		// All classid number is positive.
+		mCurrentEntry.mEntrySignKind = EnumsHelper.BEnumEntrySignKind.Positive;
+		// And all in ordinary number style so it doesn't have flag feature.
+		mCurrentEntry.mEntryFlagKind = EnumsHelper.BEnumEntryFlagKind.NotFlag;
 
 		// fill entry level info
 		int this_level = getClassidLevel(ctx.getStart());

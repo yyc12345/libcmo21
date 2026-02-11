@@ -59,6 +59,8 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 		List<TerminalNode> allNames = ctx.CKGENERIC_ID();
 		mCurrentEnum.mEnumName = allNames.get(allNames.size() - 1).getText();
 
+		// update self and add into list
+		mCurrentEnum.updateByEntries();
 		mCurrentProg.mEnums.add(mCurrentEnum);
 		mCurrentEnum = null;
 	}
@@ -75,6 +77,14 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 		// get entry name
 		mCurrentEntry.mEntryName = ctx.CKGENERIC_ID().getText();
 
+		// if its value is null, we manually fill 2 kinds
+		if (mCurrentEntry.mEntryValue == null) {
+			// the sign kind is unknown because it relys on other value (+1)
+			mCurrentEntry.mEntrySignKind = EnumsHelper.BEnumEntrySignKind.Unknown;
+			// because it just adds one from previous member, it should not belong to a flag enum
+			mCurrentEntry.mEntryFlagKind = EnumsHelper.BEnumEntryFlagKind.NotFlag;
+		}
+
 		mCurrentEnum.mEntries.add(mCurrentEntry);
 		mCurrentEntry = null;
 	}
@@ -85,34 +95,42 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 		List<TerminalNode> nums = ctx.CKGENERIC_NUM();
 
 		switch (nums.size()) {
-		case 1: {
-			// set value
-			TerminalNode node = nums.get(0);
-			mCurrentEntry.mEntryValue = node.getText();
+			case 1: {
+				// value is immediate number
+				TerminalNode node = nums.get(0);
+				String num = node.getText();
+				mCurrentEntry.mEntryValue = num;
 
-			// check whether this enum can be unsigned
-			if (CommonHelper.isNegativeNumber(node.getText())) {
-				mCurrentEnum.mCanUnsigned = false;
+				// check whether this enum can be unsigned
+				if (CommonHelper.isNegativeNumber(num)) {
+					mCurrentEntry.mEntrySignKind = EnumsHelper.BEnumEntrySignKind.Negative;
+				} else {
+					mCurrentEntry.mEntrySignKind = EnumsHelper.BEnumEntrySignKind.Positive;
+				}
+				// if the number is in hex form, this entry may belong to flag enum
+				if (CommonHelper.isHexNumber(num)) {
+					mCurrentEntry.mEntryFlagKind = EnumsHelper.BEnumEntryFlagKind.MayFlag;
+				} else {
+					mCurrentEntry.mEntryFlagKind = EnumsHelper.BEnumEntryFlagKind.NotFlag;
+				}
+
+				break;
 			}
-			// if the number is in hex form, this enum MIGHT have flags feature
-			if (CommonHelper.isHexNumber(node.getText())) {
-				mCurrentEnum.mUseFlags = true;
+			case 2: {
+				// value is bitwise operation
+				TerminalNode num = nums.get(0), offset = nums.get(1);
+				mCurrentEntry.mEntryValue = String.format("%s << %s", num.getText(), offset.getText());
+
+				// << operator appears.
+				// it shoud be unsigned.
+				mCurrentEntry.mEntrySignKind = EnumsHelper.BEnumEntrySignKind.Positive;
+				// and it must belong to flag enum
+				mCurrentEntry.mEntryFlagKind = EnumsHelper.BEnumEntryFlagKind.MustFlag;
+
+				break;
 			}
-
-			break;
-		}
-		case 2: {
-			// set value
-			TerminalNode num = nums.get(0), offset = nums.get(1);
-			mCurrentEntry.mEntryValue = String.format("%s << %s", num.getText(), offset.getText());
-
-			// << operator appears. this enum must have flags feature
-			mCurrentEnum.mUseFlags = true;
-
-			break;
-		}
-		default:
-			throw new IllegalArgumentException("Unexpected value: " + nums.size());
+			default:
+				throw new IllegalArgumentException("Unexpected value: " + nums.size());
 		}
 
 	}
@@ -123,9 +141,19 @@ public class EnumsWalker extends CKEnumsParserBaseListener {
 		mCurrentEntry.mEntryValue = ctx.CKGENERIC_ID().stream().map(value -> value.getText())
 				.collect(Collectors.joining(" | "));
 
-		// | operator appears. this enum must have flags feature
-		mCurrentEnum.mUseFlags = true;
-
+		if (ctx.CKGENERIC_ID().size() > 1) {
+			// If there is more than one ID, it means | operator appears.
+			// It should be unsigned.
+			mCurrentEntry.mEntrySignKind = EnumsHelper.BEnumEntrySignKind.Positive;
+			// And it must belong to flag enum.
+			mCurrentEntry.mEntryFlagKind = EnumsHelper.BEnumEntryFlagKind.MustFlag;
+		} else {
+			// Otherwise it just refer other member.
+			// The sign of its value is unclear.
+			mCurrentEntry.mEntrySignKind = EnumsHelper.BEnumEntrySignKind.Unknown;
+			// And it may belong to flag enum because it refers other memeber.
+			mCurrentEntry.mEntryFlagKind = EnumsHelper.BEnumEntryFlagKind.MayFlag;
+		}
 	}
 
 }
