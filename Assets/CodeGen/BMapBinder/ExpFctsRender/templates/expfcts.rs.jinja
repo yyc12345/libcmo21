@@ -10,5 +10,10 @@
 /// # Return
 /// 
 /// True if no error, otherwise False.
-pub unsafe fn {{ fct.fct_name }}() -> bool;
+pub unsafe fn {{ fct.fct_name }}(
+{%- for param in fct.fct_params -%}
+{{ param.var_name }}: {{ utils.get_rust_type(param) }}
+{%- if not loop.last %}, {% endif %}
+{%- endfor -%}
+) -> BMBOOL;
 {%- endfor %}

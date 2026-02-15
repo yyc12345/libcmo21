@@ -50,6 +50,36 @@ CS_ENUM_LIKE: set[str] = set((
     "CK_CAMERA_PROJECTION",
 ))
 
+CPP_RS_TYPE_MAP: dict[str, str] = {
+    "CKSTRING": "CKSTRING",
+    "CKDWORD": "CKDWORD",
+    "CKWORD": "CKWORD",
+    "CKINT": "CKINT",
+    "bool": "BMBOOL",
+    "CKFLOAT": "CKFLOAT",
+    "CKBYTE": "CKBYTE",
+    "CK_ID": "CKID",
+    "NakedOutputCallback": "BMCALLBACK",
+    "BMFile": "BMVOID",
+    "BMMeshTransition": "BMVOID",
+    "VxVector3": "VxVector3",
+    "VxVector2": "VxVector2",
+    "VxColor": "VxColor",
+    "VxMatrix": "VxMatrix",
+    "CK_TEXTURE_SAVEOPTIONS": "CK_TEXTURE_SAVEOPTIONS",
+    "VX_PIXELFORMAT": "VX_PIXELFORMAT",
+    "VXLIGHT_TYPE": "VXLIGHT_TYPE",
+    "VXTEXTURE_BLENDMODE": "VXTEXTURE_BLENDMODE",
+    "VXTEXTURE_FILTERMODE": "VXTEXTURE_FILTERMODE",
+    "VXTEXTURE_ADDRESSMODE": "VXTEXTURE_ADDRESSMODE",
+    "VXBLEND_MODE": "VXBLEND_MODE",
+    "VXFILL_MODE": "VXFILL_MODE",
+    "VXSHADE_MODE": "VXSHADE_MODE",
+    "VXCMPFUNC": "VXCMPFUNC",
+    "VXMESH_LITMODE": "VXMESH_LITMODE",
+    "CK_CAMERA_PROJECTION": "CK_CAMERA_PROJECTION",
+}
+
 @dataclass(frozen=True)
 class CsInteropType:
     """The class represent the C# type corresponding to extracted variable type."""
@@ -228,6 +258,25 @@ class RenderUtils:
         
         # return value
         return CsInteropType(marshal_as, cs_type)
+
+    @staticmethod
+    def get_rust_type(param: ExpFctParam) -> str:
+        vt = param.var_type
+
+        # setup pointer level
+        sb: str = 'P' * vt.get_pointer_level()
+        # try getting cpp type from base type and add it
+        cpp_type = CPP_RS_TYPE_MAP.get(vt.get_base_type(), None)
+        if cpp_type is None:
+            raise RuntimeError(f"unexpected type {vt.to_c_type()}")
+        else:
+            sb += cpp_type
+
+        # return built type string.
+        if param.is_input:
+            return f'param_in!({sb})'
+        else:
+            return f'param_out!({sb})'
 
 
 class TemplateRender:
