@@ -1,6 +1,47 @@
 import json
 import typing
 import utils
+import enum
+
+
+class BEnumEntryFlagKind(enum.StrEnum):
+    """
+    The kind of enum entry value.
+    This kind indicates whether this enum entry belong to a flag enum.
+    """
+
+    NotFlag = "not-flag"
+    """
+    This enum entry can not belong to a flag enum.
+    Because its value is ordinary.
+    """
+    MayFlag = "may-flag"
+    """
+    This enum entry may belong to a flag enum.
+     Because its value is in HEX format, and refering other members.
+    """
+    MustFlag = "must-flag"
+    """
+    This enum entry must belong to a flag enum.
+    Because its value use bitwise operation.
+    """
+
+
+class BEnumEntrySignKind(enum.StrEnum):
+    """
+    The kind of enum entry value.
+    This kind indicates the sign of this enum entry value.
+    """
+
+    Positive = "positive"
+    """The value of this enum entry is positive number or zero."""
+    Negative = "negative"
+    """he value of this enum entry is negative number."""
+    Unknown = "unknown"
+    """
+    The value of this enum entry is unknown.
+    This is may be caused by that it refer other memeber.
+    """
 
 
 class BEnumEntry:
@@ -10,14 +51,25 @@ class BEnumEntry:
     """The name of this entry."""
     __entry_value: str | None
     """The value of this entry. None if this entry do not have explicit value."""
+    __entry_flag_kind: BEnumEntryFlagKind
+    """The flag kind of this entry value."""
+    __entry_sign_kind: BEnumEntrySignKind
+    """The sign kind of this entry value."""
     __entry_comment: str | None
     """The comment of this entry. None if no comment."""
 
     def __init__(
-        self, entry_name: str, entry_value: str | None, entry_comment: str | None
+        self,
+        entry_name: str,
+        entry_value: str | None,
+        entry_flag_kind: BEnumEntryFlagKind,
+        entry_sign_kind: BEnumEntrySignKind,
+        entry_comment: str | None,
     ):
         self.__entry_name = entry_name
         self.__entry_value = entry_value
+        self.__entry_flag_kind = entry_flag_kind
+        self.__entry_sign_kind = entry_sign_kind
         self.__entry_comment = entry_comment
 
     def get_entry_name(self) -> str:
@@ -37,6 +89,8 @@ class BEnumEntry:
         return BEnumEntry(
             data["name"],
             data.get("value", None),
+            BEnumEntryFlagKind(data.get("flag_kind")),
+            BEnumEntrySignKind(data.get("sign_kind")),
             data.get("comment", None),
         )
 
@@ -58,10 +112,12 @@ class BHierarchyEnumEntry(BEnumEntry):
         self,
         entry_name: str,
         entry_value: str | None,
+        entry_flag_kind: BEnumEntryFlagKind,
+        entry_sign_kind: BEnumEntrySignKind,
         entry_comment: str | None,
         hierarchy: list[str],
     ):
-        super().__init__(entry_name, entry_value, entry_comment)
+        super().__init__(entry_name, entry_value, entry_flag_kind, entry_sign_kind, entry_comment)
         self.__hierarchy = hierarchy
 
     def iter_hierarchy(self, benum: "BEnum") -> typing.Iterator["BHierarchyEnumEntry"]:
@@ -75,6 +131,8 @@ class BHierarchyEnumEntry(BEnumEntry):
         return BHierarchyEnumEntry(
             data["name"],
             data.get("value", None),
+            BEnumEntryFlagKind(data.get("flag_kind")),
+            BEnumEntrySignKind(data.get("sign_kind")),
             data.get("comment", None),
             data["hierarchy"],
         )

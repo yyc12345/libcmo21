@@ -31,7 +31,7 @@ public class EnumsHelper {
 	public enum BEnumEntrySignKind {
 		/** The value of this enum entry is positive number or zero. */
 		Positive,
-		/** The value of this enum entry is negative. */
+		/** The value of this enum entry is negative number. */
 		Negative,
 		/**
 		 * The value of this enum entry is unknown.

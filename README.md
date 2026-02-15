@@ -12,7 +12,7 @@ This project is now suspended and may be still suspended eternally due to follow
 * The complexity of this project and legacy bugs.
 * The lost interest and the lack of time of mine.
 
-In following life time of this project, only easy-to-be-resolved critical bugs will be fixed.
+In the rest of life time of this project, only easy-to-be-resolved critical bugs will be fixed.
 
 ## Introduction
 
