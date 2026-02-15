@@ -3,9 +3,11 @@
 {{ benum.get_enum_comment() | block_comment('/// ') }}
 {%- endif %}
 {%- if not benum.is_flag() %}
-#[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr({% if benum.is_unsigned() -%} u32 {%- else -%} i32 {%- endif %})]
+#[non_exhaustive]
+#[rustfmt::skip]
+#[allow(non_camel_case_types)]
 pub enum {{ benum.get_enum_name() }} {
     {%- for entry in benum.iter_entries() %}
     {%- if entry.get_entry_comment() is not none %}
@@ -17,6 +19,8 @@ pub enum {{ benum.get_enum_name() }} {
 {%- else %}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
+#[rustfmt::skip]
+#[allow(non_camel_case_types)]
 pub struct {{ benum.get_enum_name() }}({% if benum.is_unsigned() -%} u32 {%- else -%} i32 {%- endif %});
 
 bitflags! {
