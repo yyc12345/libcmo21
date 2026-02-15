@@ -2,7 +2,7 @@
 
 ## Layout
 
-This project follow `src` and `test` layout and is managed by Astral UV.
+This project follows `src` and `test` layout and is managed by Astral UV.
 The source code of pybmap is located inside `src`.
 And the files located in `test` is used for testing.
 

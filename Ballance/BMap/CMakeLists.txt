@@ -31,6 +31,8 @@ target_compile_definitions(BMap
 PRIVATE
 	BMAP_EXPORTING
 )
+# Remove any possible prefix (such as `lib` on Linux)
+set_target_properties(BMap PROPERTIES PREFIX "")
 
 # Install binary and headers
 install(TARGETS BMap

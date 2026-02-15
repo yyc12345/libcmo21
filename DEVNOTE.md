@@ -9,7 +9,7 @@ When bumping a new version, you should update the version number in following fi
 * `CMakeLists.txt`: It control the version of `LibCmo`, `Unvirt`, `BMap` and `BMapInspector`. All of these projects share the same version.
 * `Assets/BMapBindings/pybmap/pyproject.toml`: The version of `BMap` Python binding. It should have the same version with `BMap` but not compelled.
 * `Assets/BMapBindings/BMapSharp/BMapSharp/BMapSharp.csproj`: The version of `BMap` C# binding. Same as above.
-* TODO
+* `Assets/BMapBindings/bmap-rs/Cargo.toml`: The version of `BMap` Rust binding. Same as above.
 
 ## Java
 

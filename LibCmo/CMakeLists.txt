@@ -118,6 +118,8 @@ PUBLIC
 	"$<$<CONFIG:Debug>:LIBCMO_BUILD_DEBUG>"
 	"$<$<CONFIG:Release,RelWithDebInfo,MinSize>:LIBCMO_BUILD_RELEASE>"
 )
+# Remove any possible prefix (such as `lib` on Linux)
+set_target_properties(LibCmo PROPERTIES PREFIX "")
 
 # Install binary and headers
 install(TARGETS LibCmo
