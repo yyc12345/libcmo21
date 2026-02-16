@@ -5,6 +5,7 @@
 use crate::bmap::{self, BMBOOL, CKID, CKSTRING, PBMVOID};
 use crate::marshaler;
 use std::marker::PhantomData;
+use std::mem::MaybeUninit;
 use thiserror::Error as TeError;
 
 // region: Error and Result Types
@@ -69,15 +70,27 @@ macro_rules! bmap_exec {
     };
 }
 
+macro_rules! param_in {
+    ($t:ty) => {
+        $t
+    };
+}
+
+macro_rules! param_out {
+    ($t:ty) => {
+        *mut $t
+    };
+}
+
 macro_rules! arg_in {
-    ($v:ident) => {
+    ($v:expr) => {
         $v
     };
 }
 
 macro_rules! arg_out {
-    ($v:ident, $t:ty) => {
-        &mut $v as *mut $t
+    ($v:expr, $t:ty) => {
+        $v as param_out!($t)
     };
 }
 
@@ -121,16 +134,46 @@ impl Drop for BMap {
 
 // region: Helper
 
-fn get_string_value<T>(
-    o: &T,
-    f: unsafe extern "C" fn(PBMVOID, CKID, *mut CKSTRING) -> BMBOOL,
+fn get_primitive_value<O, T>(
+    o: &O,
+    f: unsafe extern "C" fn(PBMVOID, CKID, param_out!(T)) -> BMBOOL,
+) -> Result<T>
+where
+    O: AbstractObject,
+    T: Sized + Copy,
+{
+    let mut data = MaybeUninit::<T>::uninit();
+    bmap_exec!(f(
+        o.get_pointer(),
+        o.get_ckid(),
+        arg_out!(data.as_mut_ptr(), T)
+    ));
+    Ok(unsafe { data.assume_init() })
+}
+
+fn set_primitive_value<O, T>(
+    o: &O,
+    f: unsafe extern "C" fn(PBMVOID, CKID, param_in!(T)) -> BMBOOL,
+    data: T
+) -> Result<()>
+where
+    O: AbstractObject,
+    T: Sized + Copy,
+{
+    bmap_exec!(f(o.get_pointer(), o.get_ckid(), arg_in!(data)));
+    Ok(())
+}
+
+fn get_string_value<O>(
+    o: &O,
+    f: unsafe extern "C" fn(PBMVOID, CKID, param_out!(CKSTRING)) -> BMBOOL,
 ) -> Result<Option<String>>
 where
-    T: AbstractObject,
+    O: AbstractObject,
 {
-    let mut data = CKSTRING::default();
-    bmap_exec!(f(o.get_pointer(), o.get_ckid(), arg_out!(data, CKSTRING)));
-
+    // Get raw string pointer
+    let data = get_primitive_value(o, f)?;
+    // Check raw string pointer.
     if data.is_null() {
         Ok(None)
     } else {
@@ -138,25 +181,25 @@ where
     }
 }
 
-fn set_string_value<T>(
-    o: &T,
-    f: unsafe extern "C" fn(PBMVOID, CKID, CKSTRING) -> BMBOOL,
+fn set_string_value<O>(
+    o: &O,
+    f: unsafe extern "C" fn(PBMVOID, CKID, param_in!(CKSTRING)) -> BMBOOL,
     s: Option<&str>,
 ) -> Result<()>
 where
-    T: AbstractObject,
+    O: AbstractObject,
 {
+    // Buold raw string pointer.
     let native = match s {
         Some(s) => Some(unsafe { marshaler::to_native_string(s)? }),
         None => None,
     };
-    let data = match &native {
+    let data: CKSTRING = match &native {
         Some(native) => unsafe { native.as_raw() },
         None => std::ptr::null_mut() as CKSTRING,
     };
-    bmap_exec!(f(o.get_pointer(), o.get_ckid(), arg_in!(data)));
-
-    Ok(())
+    // Set it
+    set_primitive_value(o, f, data)
 }
 
 // endregion
