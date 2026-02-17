@@ -1,22 +1,25 @@
 //! The module includes all senior wrappers for BMap FFI calling in Rust style.
 //!
 //! This module is what user of this library should use.
-
 use crate::bmap::{self, BMBOOL, CKID, CKSTRING, PBMVOID};
 use crate::marshaler;
+use std::iter::{Iterator, FusedIterator, ExactSizeIterator};
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
+use std::sync::LazyLock;
 use thiserror::Error as TeError;
 
 // region: Error and Result Types
 
 /// Any possible error occurs in this module.
-#[derive(Debug, TeError)]
+#[derive(Debug, TeError, Clone)]
 pub enum Error {
     #[error("native BMap operation failed")]
     BadCall,
     #[error("{0}")]
     Marshaler(#[from] marshaler::Error),
+    #[error("the length of given data iterator is too short when assigning struct array.")]
+    OutOfLength,
 }
 
 /// The result type used in this module.
@@ -25,6 +28,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 // endregion
 
 // region: Utilities
+
+// region: Traits
 
 /// Internal used trait representing all instance created by BMap.
 ///
@@ -50,6 +55,110 @@ pub trait AbstractObject: AbstractPointer {
     unsafe fn get_ckid(&self) -> CKID;
 }
 
+// endregion
+
+// region: Struct Iterator and Assigner
+
+fn struct_assigner<O, T, I>(_: &O, ptr: *mut T, cnt: usize, it: &mut I) -> Result<()>
+where
+    O: AbstractObject,
+    T: Sized + Copy,
+    I: Iterator<Item = T>,
+{
+    for i in 0..cnt {
+        // Fetch item
+        let item = match it.next() {
+            Some(v) => v,
+            None => return Err(Error::OutOfLength)
+        };
+        // Write item
+        unsafe { *ptr.add(i) = item };
+    }
+    Ok(())
+}
+
+pub struct StructIterator<'a, O, T>
+where
+    T: Sized + Copy,
+    O: AbstractObject,
+{
+    ptr: *mut T,
+    cnt: usize,
+    i: usize,
+    phantom: PhantomData<&'a O>,
+}
+
+impl<'a, O, T> StructIterator<'a, O, T>
+where
+    T: Sized + Copy,
+    O: AbstractObject,
+{
+    fn new(_: &'a O, ptr: *mut T, cnt: usize) -> Self {
+        Self {
+            ptr,
+            cnt,
+            i: 0,
+            phantom: PhantomData::<&'a O>,
+        }
+    }
+}
+
+impl<'a, O, T> Iterator for StructIterator<'a, O, T>
+where
+    T: Sized + Copy,
+    O: AbstractObject,
+{
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.i >= self.cnt {
+            None
+        } else {
+            let rv = unsafe { *self.ptr.add(self.i) };
+            self.i += 1;
+            Some(rv)
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let remaining = self.len();
+        (remaining, Some(remaining))
+    }
+}
+
+impl<'a, O, T> FusedIterator for StructIterator<'a, O, T>
+where
+    T: Sized + Copy,
+    O: AbstractObject,
+{
+}
+
+impl<'a, O, T> ExactSizeIterator for StructIterator<'a, O, T>
+where
+    T: Sized + Copy,
+    O: AbstractObject,
+{
+    fn len(&self) -> usize {
+        if self.i >= self.cnt {
+            0
+        } else {
+            self.i - self.cnt
+        }
+    }
+}
+
+fn struct_iterator<'a, O, T>(o: &'a O, ptr: *mut T, cnt: usize) -> Result<StructIterator<'a, O, T>>
+where
+    O: AbstractObject,
+    T: Sized + Copy,
+{
+    Ok(StructIterator::new(o, ptr, cnt))
+}
+
+// endregion
+
+// region: Constants
+
 /// The representation of invalid raw pointer.
 const INVALID_PTR: PBMVOID = std::ptr::null_mut();
 /// The representation of invalid CK_ID.
@@ -58,8 +167,14 @@ const INVALID_CKID: CKID = 0;
 /// The function used as callback for BMap.
 /// It just writes the data in console.
 unsafe extern "C" fn bmap_rs_callback(msg: CKSTRING) {
-    println!("[bmap-rs] {}", "");
+    if let Ok(msg) = unsafe { marshaler::from_native_string(msg) } {
+        println!("[bmap-rs] {}", msg);
+    }
 }
+
+// endregion
+
+// region: Macros
 
 /// The convenient macro for wrapping all BMap calling in Rust error procession pattern.
 macro_rules! bmap_exec {
@@ -96,22 +211,24 @@ macro_rules! arg_out {
 
 // endregion
 
-// region: BMap
+// endregion
+
+// region: BMap Guard
 
 /// The BMap environment guard.
 ///
 /// This struct make sure that all BMap calling is executed under initialized BMap environment,
 /// and shutdown BMap environment automatically when there is no more calling.
-pub struct BMap {}
+struct BMapGuard {}
 
-impl BMap {
-    pub fn new() -> Result<Self> {
+impl BMapGuard {
+    fn new() -> Result<Self> {
         bmap_exec!(bmap::BMInit());
         Ok(Self {})
     }
 }
 
-impl Drop for BMap {
+impl Drop for BMapGuard {
     fn drop(&mut self) {
         // Ignore return of this function by design.
         // Because using Result in Drop is inviable,
@@ -120,21 +237,55 @@ impl Drop for BMap {
     }
 }
 
+static BMAP_SINGLETON: LazyLock<Result<BMapGuard>> = LazyLock::new(|| {
+    BMapGuard::new()
+});
+
+fn get_bmap_guard_singleton() -> Result<&'static BMapGuard> {
+    BMAP_SINGLETON.as_ref().map_err(|e| e.clone())
+}
+
+pub fn is_bmap_available() -> bool {
+    BMAP_SINGLETON.is_ok()
+}
+
 // endregion
 
 // region: BMFileReader
+
+pub struct BMFileReader<'a> {
+    handle: PBMVOID,
+    phantom: PhantomData<&'a BMapGuard>
+}
+
+impl<'a> AbstractPointer for BMFileReader<'a> {
+    unsafe fn get_pointer(&self) -> PBMVOID {
+        self.handle
+    }
+}
 
 // endregion
 
 // region: BMFileWriter
 
+pub struct BMFileWriter<'a> {
+    handle: PBMVOID,
+    phantom: PhantomData<&'a BMapGuard>
+}
+
+impl<'a> AbstractPointer for BMFileWriter<'a> {
+    unsafe fn get_pointer(&self) -> PBMVOID {
+        self.handle
+    }
+}
+
 // endregion
 
 // region: CKObjects
 
-// region: Helper
+// region: Utilities Functions
 
-fn get_primitive_value<O, T>(
+fn get_copyable_value<O, T>(
     o: &O,
     f: unsafe extern "C" fn(PBMVOID, CKID, param_out!(T)) -> BMBOOL,
 ) -> Result<T>
@@ -151,10 +302,10 @@ where
     Ok(unsafe { data.assume_init() })
 }
 
-fn set_primitive_value<O, T>(
+fn set_copyable_value<O, T>(
     o: &O,
     f: unsafe extern "C" fn(PBMVOID, CKID, param_in!(T)) -> BMBOOL,
-    data: T
+    data: T,
 ) -> Result<()>
 where
     O: AbstractObject,
@@ -172,7 +323,7 @@ where
     O: AbstractObject,
 {
     // Get raw string pointer
-    let data = get_primitive_value(o, f)?;
+    let data: CKSTRING = get_copyable_value(o, f)?;
     // Check raw string pointer.
     if data.is_null() {
         Ok(None)
@@ -199,7 +350,7 @@ where
         None => std::ptr::null_mut() as CKSTRING,
     };
     // Set it
-    set_primitive_value(o, f, data)
+    set_copyable_value(o, f, data)
 }
 
 // endregion
@@ -254,5 +405,16 @@ pub struct BMTargetCamera {}
 // endregion
 
 // region: BMMeshTrans
+
+pub struct BMMeshTrans<'a> {
+    handle: PBMVOID,
+    phantom: PhantomData<&'a BMapGuard>
+}
+
+impl<'a> AbstractPointer for BMMeshTrans<'a> {
+    unsafe fn get_pointer(&self) -> PBMVOID {
+        self.handle
+    }
+}
 
 // endregion

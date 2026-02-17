@@ -7,7 +7,7 @@ use thiserror::Error as TeError;
 // region: Error and Result Types
 
 /// Any possible error occurs in this module.
-#[derive(Debug, TeError)]
+#[derive(Debug, TeError, Clone)]
 pub enum Error {
     #[error("can not parse from native string")]
     FromNative(#[from] std::str::Utf8Error),
