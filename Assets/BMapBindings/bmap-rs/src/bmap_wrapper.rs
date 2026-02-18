@@ -1,14 +1,17 @@
 //! The module includes all senior wrappers for BMap FFI calling in Rust style.
 //!
 //! This module is what user of this library should use.
-use crate::bmap::{self, BMBOOL, CKDWORD, CKID, CKSTRING, PBMVOID};
-use crate::marshaler;
+
+mod marshaler;
+mod utilities;
+
+use crate::bmap::{self, BMBOOL, CKDWORD, CKID, CKINT, CKSTRING, PBMVOID};
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::iter::{ExactSizeIterator, FusedIterator, Iterator};
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
-use std::sync::LazyLock;
+use std::sync::{Mutex, OnceLock};
 use thiserror::Error as TeError;
 
 // region: Error and Result Types
@@ -22,6 +25,8 @@ pub enum Error {
     Marshaler(#[from] marshaler::Error),
     #[error("the length of given data iterator is too short when assigning struct array.")]
     OutOfLength,
+    #[error("bad cast to integral value")]
+    BadIntCast(#[from] std::num::TryFromIntError),
 }
 
 /// The result type used in this module.
@@ -227,32 +232,76 @@ macro_rules! arg_out {
 ///
 /// This struct make sure that all BMap calling is executed under initialized BMap environment,
 /// and shutdown BMap environment automatically when there is no more calling.
-struct BMapGuard {}
+pub struct BMap {}
 
-impl BMapGuard {
+impl BMap {
+    pub fn instance() -> &'static Result<Mutex<BMap>> {
+        static INSTANCE: OnceLock<Result<Mutex<BMap>>> = OnceLock::new();
+        INSTANCE.get_or_init(|| BMap::new().map(|v| Mutex::new(v)))
+    }
+
+    pub fn is_available() -> bool {
+        Self::instance().is_ok()
+    }
+
+    pub fn with_bmap<F, R>(f: F) -> R
+    where
+        F: FnOnce(&mut Self) -> R,
+    {
+        let mut instance = Self::instance()
+            .as_ref()
+            .expect("bad BMap environment (not initialized)")
+            .lock()
+            .expect("failed mutex lock");
+        f(&mut instance)
+    }
+}
+
+impl BMap {
+    pub fn create_file_reader<'a, T>(
+        &'a mut self,
+        file_name: &str,
+        temp_folder: &str,
+        texture_folder: &str,
+        encodings: &[T],
+    ) -> Result<BMFileReader<'a>>
+    where
+        T: Into<Vec<u8>> + Copy,
+    {
+        BMFileReader::new(self, file_name, temp_folder, texture_folder, encodings)
+    }
+
+    pub fn create_file_writer<'a, T>(
+        &'a mut self,
+        temp_folder: &str,
+        texture_folder: &str,
+        encodings: &[T],
+    ) -> Result<BMFileWriter<'a>>
+    where
+        T: Into<Vec<u8>> + Copy,
+    {
+        BMFileWriter::new(self, temp_folder, texture_folder, encodings)
+    }
+
+    pub fn create_mesh_trans<'a>(&'a mut self) -> Result<BMMeshTrans<'a>> {
+        BMMeshTrans::new(self)
+    }
+}
+
+impl BMap {
     fn new() -> Result<Self> {
         bmap_exec!(bmap::BMInit());
         Ok(Self {})
     }
 }
 
-impl Drop for BMapGuard {
+impl Drop for BMap {
     fn drop(&mut self) {
         // Ignore return of this function by design.
         // Because using Result in Drop is inviable,
         // and using `panic!` is also not suggested.
         let _ = unsafe { bmap::BMDispose() };
     }
-}
-
-static BMAP_SINGLETON: LazyLock<Result<BMapGuard>> = LazyLock::new(|| BMapGuard::new());
-
-fn get_bmap_guard_singleton() -> Result<&'static BMapGuard> {
-    BMAP_SINGLETON.as_ref().map_err(|e| e.clone())
-}
-
-pub fn is_bmap_available() -> bool {
-    BMAP_SINGLETON.is_ok()
 }
 
 // endregion
@@ -277,11 +326,12 @@ pub fn is_bmap_available() -> bool {
 
 pub struct BMFileReader<'a> {
     handle: PBMVOID,
-    phantom: PhantomData<&'a BMapGuard>,
+    phantom: PhantomData<&'a BMap>,
 }
 
 impl<'a> BMFileReader<'a> {
-    pub fn new<T>(
+    fn new<T>(
+        _: &'a BMap,
         file_name: &str,
         temp_folder: &str,
         texture_folder: &str,
@@ -292,10 +342,28 @@ impl<'a> BMFileReader<'a> {
     {
         let file_name = unsafe { marshaler::to_native_string(file_name)? };
         let temp_folder = unsafe { marshaler::to_native_string(temp_folder)? };
-        let texture_folder = unsafe { marshaler::to_native_string(texture_folder) }?;
+        let texture_folder = unsafe { marshaler::to_native_string(texture_folder)? };
         let encodings = unsafe { marshaler::to_native_string_array(encodings)? };
+
+        let mut file = MaybeUninit::<PBMVOID>::uninit();
+        bmap_exec!(bmap::BMFile_Load(
+            file_name.as_raw(),
+            temp_folder.as_raw(),
+            texture_folder.as_raw(),
+            bmap_rs_callback,
+            encodings.len().try_into()?,
+            encodings.as_raw(),
+            arg_out!(file.as_mut_ptr(), PBMVOID)
+        ));
+
+        Ok(Self {
+            handle: unsafe { file.assume_init() },
+            phantom: PhantomData::<&'a BMap>,
+        })
     }
 }
+
+impl<'a> BMFileReader<'a> {}
 
 // impl<'a> BMFileReader<'a> {
 
@@ -308,6 +376,12 @@ impl<'a> BMFileReader<'a> {
 //     }
 
 // }
+
+impl<'a> Drop for BMFileReader<'a> {
+    fn drop(&mut self) {
+        let _ = unsafe { bmap::BMFile_Free(self.handle) };
+    }
+}
 
 impl<'a> AbstractPointer for BMFileReader<'a> {
     unsafe fn get_pointer(&self) -> PBMVOID {
@@ -323,7 +397,64 @@ impl<'a> BMFileRW for BMFileReader<'a> {}
 
 pub struct BMFileWriter<'a> {
     handle: PBMVOID,
-    phantom: PhantomData<&'a BMapGuard>,
+    phantom: PhantomData<&'a BMap>,
+}
+
+impl<'a> BMFileWriter<'a> {
+    fn new<T>(_: &'a BMap, temp_folder: &str, texture_folder: &str, encodings: &[T]) -> Result<Self>
+    where
+        T: Into<Vec<u8>> + Copy,
+    {
+        let temp_folder = unsafe { marshaler::to_native_string(temp_folder)? };
+        let texture_folder = unsafe { marshaler::to_native_string(texture_folder)? };
+        let encodings = unsafe { marshaler::to_native_string_array(encodings)? };
+
+        let mut file = MaybeUninit::<PBMVOID>::uninit();
+        bmap_exec!(bmap::BMFile_Create(
+            temp_folder.as_raw(),
+            texture_folder.as_raw(),
+            bmap_rs_callback,
+            encodings.len().try_into()?,
+            encodings.as_raw(),
+            arg_out!(file.as_mut_ptr(), PBMVOID)
+        ));
+
+        Ok(Self {
+            handle: unsafe { file.assume_init() },
+            phantom: PhantomData::<&'a BMap>,
+        })
+    }
+}
+
+impl<'a> BMFileWriter<'a> {
+    pub fn save(
+        &self,
+        filename: &str,
+        texture_save_opt: bmap::CK_TEXTURE_SAVEOPTIONS,
+        compress_level: Option<CKINT>,
+    ) -> Result<()> {
+        let filename = unsafe { marshaler::to_native_string(filename)? };
+        let use_compress = compress_level.is_some();
+        let compress_level = compress_level.unwrap_or(5);
+
+        bmap_exec!(bmap::BMFile_Save(
+            self.get_pointer(),
+            filename.as_raw(),
+            texture_save_opt,
+            use_compress,
+            compress_level
+        ));
+
+        Ok(())
+    }
+}
+
+impl<'a> BMFileWriter<'a> {}
+
+impl<'a> Drop for BMFileWriter<'a> {
+    fn drop(&mut self) {
+        let _ = unsafe { bmap::BMFile_Free(self.handle) };
+    }
 }
 
 impl<'a> AbstractPointer for BMFileWriter<'a> {
@@ -483,12 +614,12 @@ pub trait BMMaterial: BMObject {
         set_copyable_value(self, bmap::BMMaterial_SetSpecularPower, power)
     }
 
-    fn get_texture(&self) -> Result<Option<Box<dyn BMTexture>>> {
-        todo!();
-    }
-    fn set_texture(&mut self, texture: Option<&dyn BMTexture>) -> Result<()> {
-        todo!();
-    }
+    // fn get_texture(&self) -> Result<Option<Box<dyn BMTexture>>> {
+    //     todo!();
+    // }
+    // fn set_texture(&mut self, texture: Option<&dyn BMTexture>) -> Result<()> {
+    //     todo!();
+    // }
 
     fn get_texture_border_color(&self) -> Result<bmap::VxColor> {
         let intermediary = get_copyable_value(self, bmap::BMMaterial_GetTextureBorderColor)?;
@@ -950,7 +1081,24 @@ libobj_impl_obj_trait!(BMGroupImpl, BMGroup);
 
 pub struct BMMeshTrans<'a> {
     handle: PBMVOID,
-    phantom: PhantomData<&'a BMapGuard>,
+    phantom: PhantomData<&'a BMap>,
+}
+
+impl<'a> BMMeshTrans<'a> {
+    fn new(_: &'a BMap) -> Result<Self> {
+        let mut trans = MaybeUninit::<PBMVOID>::uninit();
+        bmap_exec!(bmap::BMMeshTrans_New(arg_out!(trans.as_mut_ptr(), PBMVOID)));
+        Ok(Self {
+            handle: unsafe { trans.assume_init() },
+            phantom: PhantomData::<&'a BMap>,
+        })
+    }
+}
+
+impl<'a> Drop for BMMeshTrans<'a> {
+    fn drop(&mut self) {
+        let _ = unsafe { bmap::BMMeshTrans_Delete(self.handle) };
+    }
 }
 
 impl<'a> AbstractPointer for BMMeshTrans<'a> {

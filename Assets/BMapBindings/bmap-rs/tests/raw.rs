@@ -1,7 +1,7 @@
 use bmap_rs::bmap;
 
 #[test]
-fn test_init_and_dispose() {
+fn test_raw() {
     assert!(unsafe { bmap::BMInit() });
     assert!(unsafe { bmap::BMDispose() });
 }
