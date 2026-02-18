@@ -23,7 +23,7 @@ pub enum Error {
     BadCall,
     #[error("{0}")]
     Marshaler(#[from] marshaler::Error),
-    #[error("the length of given data iterator is too short when assigning struct array.")]
+    #[error("the length of given data iterator is too short when assigning data array.")]
     OutOfLength,
     #[error("bad cast to integral value")]
     BadIntCast(#[from] std::num::TryFromIntError),
@@ -42,7 +42,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 ///
 /// Do **NOT** use this trait.
 /// It can not be hidden due to the limitation of Rust trait.
-pub trait AbstractPointer: Sized {
+pub trait AbstractPointer {
     /// Internal used function for fetching instance underlying pointer.
     ///
     /// Do **NOT** use this function.
@@ -74,7 +74,7 @@ trait BMFileObject: AbstractObject {}
 
 fn struct_assigner<O, T, I>(_: &O, ptr: *mut T, cnt: usize, it: &mut I) -> Result<()>
 where
-    O: AbstractObject,
+    O: AbstractObject + ?Sized,
     T: Sized + Copy,
     I: Iterator<Item = T>,
 {
@@ -92,8 +92,8 @@ where
 
 pub struct StructIterator<'a, O, T>
 where
+    O: AbstractObject + ?Sized,
     T: Sized + Copy,
-    O: AbstractObject,
 {
     ptr: *mut T,
     cnt: usize,
@@ -103,8 +103,8 @@ where
 
 impl<'a, O, T> StructIterator<'a, O, T>
 where
+    O: AbstractObject + ?Sized,
     T: Sized + Copy,
-    O: AbstractObject,
 {
     fn new(_: &'a O, ptr: *mut T, cnt: usize) -> Self {
         Self {
@@ -118,8 +118,8 @@ where
 
 impl<'a, O, T> Iterator for StructIterator<'a, O, T>
 where
+    O: AbstractObject + ?Sized,
     T: Sized + Copy,
-    O: AbstractObject,
 {
     type Item = T;
 
@@ -141,15 +141,15 @@ where
 
 impl<'a, O, T> FusedIterator for StructIterator<'a, O, T>
 where
+    O: AbstractObject + ?Sized,
     T: Sized + Copy,
-    O: AbstractObject,
 {
 }
 
 impl<'a, O, T> ExactSizeIterator for StructIterator<'a, O, T>
 where
+    O: AbstractObject + ?Sized,
     T: Sized + Copy,
-    O: AbstractObject,
 {
     fn len(&self) -> usize {
         if self.i >= self.cnt {
@@ -162,7 +162,7 @@ where
 
 fn struct_iterator<'a, O, T>(o: &'a O, ptr: *mut T, cnt: usize) -> Result<StructIterator<'a, O, T>>
 where
-    O: AbstractObject,
+    O: AbstractObject + ?Sized,
     T: Sized + Copy,
 {
     Ok(StructIterator::new(o, ptr, cnt))
@@ -258,27 +258,29 @@ impl BMap {
 }
 
 impl BMap {
-    pub fn create_file_reader<'a, T>(
+    pub fn create_file_reader<'a, I, T>(
         &'a mut self,
         file_name: &str,
         temp_folder: &str,
         texture_folder: &str,
-        encodings: &[T],
+        encodings: I,
     ) -> Result<BMFileReader<'a>>
     where
-        T: Into<Vec<u8>> + Copy,
+        I: Iterator<Item = T>,
+        T: Into<Vec<u8>>,
     {
         BMFileReader::new(self, file_name, temp_folder, texture_folder, encodings)
     }
 
-    pub fn create_file_writer<'a, T>(
+    pub fn create_file_writer<'a, I, T>(
         &'a mut self,
         temp_folder: &str,
         texture_folder: &str,
-        encodings: &[T],
+        encodings: I,
     ) -> Result<BMFileWriter<'a>>
     where
-        T: Into<Vec<u8>> + Copy,
+        I: Iterator<Item = T>,
+        T: Into<Vec<u8>>,
     {
         BMFileWriter::new(self, temp_folder, texture_folder, encodings)
     }
@@ -330,15 +332,16 @@ pub struct BMFileReader<'a> {
 }
 
 impl<'a> BMFileReader<'a> {
-    fn new<T>(
+    fn new<I, T>(
         _: &'a BMap,
         file_name: &str,
         temp_folder: &str,
         texture_folder: &str,
-        encodings: &[T],
+        encodings: I,
     ) -> Result<Self>
     where
-        T: Into<Vec<u8>> + Copy,
+        I: Iterator<Item = T>,
+        T: Into<Vec<u8>>,
     {
         let file_name = unsafe { marshaler::to_native_string(file_name)? };
         let temp_folder = unsafe { marshaler::to_native_string(temp_folder)? };
@@ -401,9 +404,10 @@ pub struct BMFileWriter<'a> {
 }
 
 impl<'a> BMFileWriter<'a> {
-    fn new<T>(_: &'a BMap, temp_folder: &str, texture_folder: &str, encodings: &[T]) -> Result<Self>
+    fn new<I, T>(_: &'a BMap, temp_folder: &str, texture_folder: &str, encodings: I) -> Result<Self>
     where
-        T: Into<Vec<u8>> + Copy,
+        I: Iterator<Item = T>,
+        T: Into<Vec<u8>>,
     {
         let temp_folder = unsafe { marshaler::to_native_string(temp_folder)? };
         let texture_folder = unsafe { marshaler::to_native_string(texture_folder)? };
@@ -471,12 +475,12 @@ impl<'a> BMFileRW for BMFileWriter<'a> {}
 
 // region: Utility Functions
 
-fn get_copyable_value<O, T>(
-    o: &O,
-    f: unsafe extern "C" fn(PBMVOID, CKID, param_out!(T)) -> BMBOOL,
-) -> Result<T>
+type FnCopyableValueGetter<T> = unsafe extern "C" fn(PBMVOID, CKID, param_out!(T)) -> BMBOOL;
+type FnCopyableValueSetter<T> = unsafe extern "C" fn(PBMVOID, CKID, param_in!(T)) -> BMBOOL;
+
+fn get_copyable_value<O, T>(o: &O, f: FnCopyableValueGetter<T>) -> Result<T>
 where
-    O: AbstractObject,
+    O: AbstractObject + ?Sized,
     T: Sized + Copy,
 {
     let mut data = MaybeUninit::<T>::uninit();
@@ -488,25 +492,25 @@ where
     Ok(unsafe { data.assume_init() })
 }
 
-fn set_copyable_value<O, T>(
-    o: &O,
-    f: unsafe extern "C" fn(PBMVOID, CKID, param_in!(T)) -> BMBOOL,
-    data: T,
-) -> Result<()>
+fn set_copyable_value<O, T>(o: &O, f: FnCopyableValueSetter<T>, data: T) -> Result<()>
 where
-    O: AbstractObject,
+    O: AbstractObject + ?Sized,
     T: Sized + Copy,
 {
     bmap_exec!(f(o.get_pointer(), o.get_ckid(), arg_in!(data)));
     Ok(())
 }
 
-fn get_string_value<O>(
-    o: &O,
-    f: unsafe extern "C" fn(PBMVOID, CKID, param_out!(CKSTRING)) -> BMBOOL,
-) -> Result<Option<String>>
+// YYC MARK:
+// Due to the pointer to C-style stirng is also copyable,
+// so we can reuse these code.
+
+type FnStringValueGetter = FnCopyableValueGetter<CKSTRING>;
+type FnStringValueSetter = FnCopyableValueSetter<CKSTRING>;
+
+fn get_string_value<O>(o: &O, f: FnStringValueGetter) -> Result<Option<String>>
 where
-    O: AbstractObject,
+    O: AbstractObject + ?Sized,
 {
     // Get raw string pointer
     let data: CKSTRING = get_copyable_value(o, f)?;
@@ -518,15 +522,11 @@ where
     }
 }
 
-fn set_string_value<O>(
-    o: &O,
-    f: unsafe extern "C" fn(PBMVOID, CKID, param_in!(CKSTRING)) -> BMBOOL,
-    s: Option<&str>,
-) -> Result<()>
+fn set_string_value<O>(o: &O, f: FnStringValueSetter, s: Option<&str>) -> Result<()>
 where
-    O: AbstractObject,
+    O: AbstractObject + ?Sized,
 {
-    // Buold raw string pointer.
+    // Build raw string pointer.
     let native = match s {
         Some(s) => Some(unsafe { marshaler::to_native_string(s)? }),
         None => None,
@@ -558,7 +558,7 @@ pub trait BMTexture: BMObject {
     }
 
     // YYC MARK:
-    // Although load_image and save_image is not a "value setter",
+    // Although "load_image" and "save_image" is not a "value setter",
     // but they have same function signature so we can reuse those code.
     fn load_image(&mut self, filepath: &str) -> Result<()> {
         set_string_value(self, bmap::BMTexture_LoadImage, Some(filepath))
@@ -614,12 +614,24 @@ pub trait BMMaterial: BMObject {
         set_copyable_value(self, bmap::BMMaterial_SetSpecularPower, power)
     }
 
-    // fn get_texture(&self) -> Result<Option<Box<dyn BMTexture>>> {
-    //     todo!();
-    // }
-    // fn set_texture(&mut self, texture: Option<&dyn BMTexture>) -> Result<()> {
-    //     todo!();
-    // }
+    // YYC MARK:
+    // We use "value getter" to get CKID first then convert it to our instance.
+    // Same pattern for using "value setter".
+    fn get_texture(&self) -> Result<Option<Box<dyn BMTexture>>> {
+        let ckid: CKID = get_copyable_value(self, bmap::BMMaterial_GetTexture)?;
+        Ok(if ckid == INVALID_CKID {
+            None
+        } else {
+            Some(Box::new(BMTextureImpl::new(, self.get_pointer(), ckid)))
+        })
+    }
+    fn set_texture(&mut self, texture: Option<&dyn BMTexture>) -> Result<()> {
+        let ckid: CKID = match texture {
+            Some(texture) => unsafe { texture.get_ckid() },
+            None => INVALID_CKID,
+        };
+        set_copyable_value(self, bmap::BMMaterial_SetTexture, ckid)
+    }
 
     fn get_texture_border_color(&self) -> Result<bmap::VxColor> {
         let intermediary = get_copyable_value(self, bmap::BMMaterial_GetTextureBorderColor)?;
@@ -883,7 +895,7 @@ macro_rules! libobj_struct {
         #[derive(Debug)]
         struct $name<'a, RW>
         where
-            RW: BMFileRW,
+            RW: BMFileRW + ?Sized,
         {
             handle: PBMVOID,
             id: CKID,
@@ -896,7 +908,7 @@ macro_rules! libobj_impl_new {
     ($name:ident) => {
         impl<'a, RW> $name<'a, RW>
         where
-            RW: BMFileRW,
+            RW: BMFileRW + ?Sized,
         {
             fn new(_: &'a RW, handle: PBMVOID, id: CKID) -> Self {
                 Self {
@@ -913,18 +925,18 @@ macro_rules! libobj_impl_eq_ord_hash {
     ($name:ident) => {
         impl<'a, RW> PartialEq for $name<'a, RW>
         where
-            RW: BMFileRW,
+            RW: BMFileRW + ?Sized,
         {
             fn eq(&self, other: &Self) -> bool {
                 self.handle == other.handle && self.id == other.id
             }
         }
 
-        impl<'a, RW> Eq for $name<'a, RW> where RW: BMFileRW {}
+        impl<'a, RW> Eq for $name<'a, RW> where RW: BMFileRW + ?Sized {}
 
         impl<'a, RW> PartialOrd for $name<'a, RW>
         where
-            RW: BMFileRW,
+            RW: BMFileRW + ?Sized,
         {
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
                 match self.handle.partial_cmp(&other.handle) {
@@ -936,7 +948,7 @@ macro_rules! libobj_impl_eq_ord_hash {
 
         impl<'a, RW> Ord for $name<'a, RW>
         where
-            RW: BMFileRW,
+            RW: BMFileRW + ?Sized,
         {
             fn cmp(&self, other: &Self) -> Ordering {
                 match self.handle.cmp(&other.handle) {
@@ -948,7 +960,7 @@ macro_rules! libobj_impl_eq_ord_hash {
 
         impl<'a, RW> Hash for $name<'a, RW>
         where
-            RW: BMFileRW,
+            RW: BMFileRW + ?Sized,
         {
             fn hash<H: Hasher>(&self, state: &mut H) {
                 self.handle.hash(state);
@@ -962,7 +974,7 @@ macro_rules! libobj_impl_abstract_object {
     ($name:ident) => {
         impl<'a, RW> AbstractPointer for $name<'a, RW>
         where
-            RW: BMFileRW,
+            RW: BMFileRW + ?Sized,
         {
             unsafe fn get_pointer(&self) -> PBMVOID {
                 self.handle
@@ -971,7 +983,7 @@ macro_rules! libobj_impl_abstract_object {
 
         impl<'a, RW> AbstractObject for $name<'a, RW>
         where
-            RW: BMFileRW,
+            RW: BMFileRW + ?Sized,
         {
             unsafe fn get_ckid(&self) -> CKID {
                 self.id
@@ -982,7 +994,7 @@ macro_rules! libobj_impl_abstract_object {
 
 macro_rules! libobj_impl_obj_trait {
     ($name:ident, $trait:ident) => {
-        impl<'a, RW> $trait for $name<'a, RW> where RW: BMFileRW {}
+        impl<'a, RW> $trait for $name<'a, RW> where RW: BMFileRW + ?Sized {}
     };
 }
 
@@ -1094,6 +1106,8 @@ impl<'a> BMMeshTrans<'a> {
         })
     }
 }
+
+impl<'a> BMMeshTrans<'a> {}
 
 impl<'a> Drop for BMMeshTrans<'a> {
     fn drop(&mut self) {

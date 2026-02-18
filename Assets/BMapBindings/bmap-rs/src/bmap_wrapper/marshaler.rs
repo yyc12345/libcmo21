@@ -67,9 +67,10 @@ pub unsafe fn from_native_string_array(ptr: PCKSTRING) -> Result<Vec<String>> {
     Ok(rv)
 }
 
-pub unsafe fn to_native_string_array<T>(words: &[T]) -> Result<BMStringArray>
+pub unsafe fn to_native_string_array<I, T>(words: I) -> Result<BMStringArray>
 where
-    T: Into<Vec<u8>> + Copy,
+    I: Iterator<Item = T>,
+    T: Into<Vec<u8>>,
 {
     BMStringArray::new(words)
 }
@@ -80,14 +81,14 @@ pub struct BMStringArray {
 }
 
 impl BMStringArray {
-    fn new<T>(words: &[T]) -> Result<Self>
+    fn new<I, T>(words: I) -> Result<Self>
     where
-        T: Into<Vec<u8>> + Copy,
+        I: Iterator<Item = T>,
+        T: Into<Vec<u8>>,
     {
         // Build array items
         let array_items = words
-            .iter()
-            .map(|word| CString::new(*word))
+            .map(|word| CString::new(word))
             .collect::<std::result::Result<Vec<CString>, std::ffi::NulError>>()?;
         // Build array body.
         // In theory, move operation will not affect data allocated on heap.
