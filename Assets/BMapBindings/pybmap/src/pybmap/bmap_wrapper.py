@@ -564,7 +564,7 @@ class BMTargetLight(BMLight):
 class BMCamera(BM3dEntity):
     def get_projection_type(self) -> virtools_types.CK_CAMERA_PROJECTION:
         return self._get_enum_value(virtools_types.CK_CAMERA_PROJECTION, bmap.BMCamera_GetProjectionType)
-    def set_type(self, data_: virtools_types.CK_CAMERA_PROJECTION) -> None:
+    def set_projection_type(self, data_: virtools_types.CK_CAMERA_PROJECTION) -> None:
         self._set_enum_value(bmap.BMCamera_SetProjectionType, data_)
 
     def get_orthographic_zoom(self) -> float:

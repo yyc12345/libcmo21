@@ -2,7 +2,7 @@
 
 // region: Structures
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[repr(C)]
 #[repr(packed(4))]
 pub struct VxVector2 {
@@ -20,7 +20,7 @@ impl VxVector2 {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[repr(C)]
 #[repr(packed(4))]
 pub struct VxVector3 {
@@ -39,7 +39,7 @@ impl VxVector3 {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[repr(C)]
 #[repr(packed(4))]
 pub struct VxColor {
@@ -80,18 +80,19 @@ impl VxColor {
         self.a = (val & 0xFF) as f32 / 255.0;
     }
 
-    pub fn to_dword(&mut self) -> u32 {
-        // Regulate self first
-        self.regulate();
+    pub fn to_dword(&self) -> u32 {
+        // Make a copy and regulate self first
+        let mut copied = self.clone();
+        copied.regulate();
         // Build result
         let mut rv = 0;
-        rv |= (self.b * 255.0) as u32;
+        rv |= (copied.b * 255.0) as u32;
         rv <<= 8;
-        rv |= (self.g * 255.0) as u32;
+        rv |= (copied.g * 255.0) as u32;
         rv <<= 8;
-        rv |= (self.r * 255.0) as u32;
+        rv |= (copied.r * 255.0) as u32;
         rv <<= 8;
-        rv |= (self.a * 255.0) as u32;
+        rv |= (copied.a * 255.0) as u32;
         return rv;
     }
 
@@ -107,7 +108,7 @@ impl VxColor {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[repr(C)]
 #[repr(packed(4))]
 pub struct VxMatrix {
@@ -135,7 +136,7 @@ impl VxMatrix {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[repr(C)]
 #[repr(packed(4))]
 pub struct CKFaceIndices {
@@ -154,7 +155,7 @@ impl CKFaceIndices {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[repr(C)]
 #[repr(packed(4))]
 pub struct CKShortFaceIndices {

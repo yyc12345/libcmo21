@@ -23,7 +23,7 @@ pub type CKID = u32;
 pub type PCKID = *mut CKID;
 pub type CKFLOAT = c_float;
 pub type CKINT = i32;
-pub type CKBYTE = i8;
+pub type CKBYTE = u8;
 
 pub type BMBOOL = bool;
 pub type BMVOID = c_void;

@@ -515,7 +515,7 @@ namespace BMapSharp.BMapWrapper {
             BMapException.ThrowIfFailed(fct_cnt(this.GetPointer(), out uint out_count));
             return out_count;
         }
-        private IEnumerable<T> GetGenericObject<T>(FctProtoGetCount fct_cnt, FctProtoGetObject fct_obj, FctProtoCreateInstance<T> fct_crt) {
+        private IEnumerable<T> GetGenericObjects<T>(FctProtoGetCount fct_cnt, FctProtoGetObject fct_obj, FctProtoCreateInstance<T> fct_crt) {
             uint count = GetGenericObjectCount(fct_cnt);
             for (uint i = 0; i < count; ++i) {
                 BMapException.ThrowIfFailed(fct_obj(this.GetPointer(), i, out uint out_id));
@@ -526,31 +526,31 @@ namespace BMapSharp.BMapWrapper {
         public uint GetTextureCount() =>
             GetGenericObjectCount(BMap.BMFile_GetTextureCount);
         public IEnumerable<BMTexture> GetTextures() =>
-            GetGenericObject<BMTexture>(BMap.BMFile_GetTextureCount, BMap.BMFile_GetTexture, (bmf, id) => new BMTexture(bmf, id));
+            GetGenericObjects<BMTexture>(BMap.BMFile_GetTextureCount, BMap.BMFile_GetTexture, (bmf, id) => new BMTexture(bmf, id));
         public uint GetMaterialCount() =>
             GetGenericObjectCount(BMap.BMFile_GetMaterialCount);
         public IEnumerable<BMMaterial> GetMaterials() =>
-            GetGenericObject<BMMaterial>(BMap.BMFile_GetMaterialCount, BMap.BMFile_GetMaterial, (bmf, id) => new BMMaterial(bmf, id));
+            GetGenericObjects<BMMaterial>(BMap.BMFile_GetMaterialCount, BMap.BMFile_GetMaterial, (bmf, id) => new BMMaterial(bmf, id));
         public uint GetMeshCount() =>
             GetGenericObjectCount(BMap.BMFile_GetMeshCount);
         public IEnumerable<BMMesh> GetMeshes() =>
-            GetGenericObject<BMMesh>(BMap.BMFile_GetMeshCount, BMap.BMFile_GetMesh, (bmf, id) => new BMMesh(bmf, id));
+            GetGenericObjects<BMMesh>(BMap.BMFile_GetMeshCount, BMap.BMFile_GetMesh, (bmf, id) => new BMMesh(bmf, id));
         public uint Get3dObjectCount() =>
             GetGenericObjectCount(BMap.BMFile_Get3dObjectCount);
         public IEnumerable<BM3dObject> Get3dObjects() =>
-            GetGenericObject<BM3dObject>(BMap.BMFile_Get3dObjectCount, BMap.BMFile_Get3dObject, (bmf, id) => new BM3dObject(bmf, id));
+            GetGenericObjects<BM3dObject>(BMap.BMFile_Get3dObjectCount, BMap.BMFile_Get3dObject, (bmf, id) => new BM3dObject(bmf, id));
         public uint GetGroupCount() =>
             GetGenericObjectCount(BMap.BMFile_GetGroupCount);
         public IEnumerable<BMGroup> GetGroups() =>
-            GetGenericObject<BMGroup>(BMap.BMFile_GetGroupCount, BMap.BMFile_GetGroup, (bmf, id) => new BMGroup(bmf, id));
+            GetGenericObjects<BMGroup>(BMap.BMFile_GetGroupCount, BMap.BMFile_GetGroup, (bmf, id) => new BMGroup(bmf, id));
         public uint GetTargetLightCount() =>
             GetGenericObjectCount(BMap.BMFile_GetTargetLightCount);
         public IEnumerable<BMTargetLight> GetTargetLights() =>
-            GetGenericObject<BMTargetLight>(BMap.BMFile_GetTargetLightCount, BMap.BMFile_GetTargetLight, (bmf, id) => new BMTargetLight(bmf, id));
+            GetGenericObjects<BMTargetLight>(BMap.BMFile_GetTargetLightCount, BMap.BMFile_GetTargetLight, (bmf, id) => new BMTargetLight(bmf, id));
         public uint GetTargetCameraCount() =>
             GetGenericObjectCount(BMap.BMFile_GetTargetCameraCount);
         public IEnumerable<BMTargetCamera> GetTargetCameras() =>
-            GetGenericObject<BMTargetCamera>(BMap.BMFile_GetTargetCameraCount, BMap.BMFile_GetTargetCamera, (bmf, id) => new BMTargetCamera(bmf, id));
+            GetGenericObjects<BMTargetCamera>(BMap.BMFile_GetTargetCameraCount, BMap.BMFile_GetTargetCamera, (bmf, id) => new BMTargetCamera(bmf, id));
 
     }
 

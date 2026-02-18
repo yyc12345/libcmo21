@@ -75,7 +75,6 @@ where
 }
 
 pub struct BMStringArray {
-    #[allow(dead_code)]
     array_items: Vec<CString>,
     array_body: Vec<CKSTRING>,
 }
@@ -103,7 +102,11 @@ impl BMStringArray {
         Ok(Self { array_items, array_body })
     }
 
-    pub unsafe fn as_raw(&mut self) -> PCKSTRING {
+    pub fn len(&self) -> usize {
+        self.array_items.len()
+    }
+
+    pub unsafe fn as_raw(&self) -> PCKSTRING {
         self.array_body.as_ptr() as PCKSTRING
     }
 }
