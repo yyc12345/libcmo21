@@ -68,6 +68,10 @@ namespace BMapSharpTest.TestSuits {
 
                 Console.WriteLine($"\tSpecular Power: {mtl.GetSpecularPower()}");
 
+                var current_texture = mtl.GetTexture();
+                var texture_name = current_texture is null ? "<null>" : current_texture.GetName();
+                Console.WriteLine($"\tTexture: {texture_name}");
+
                 Console.WriteLine($"\tTexture Border Color: {mtl.GetTextureBorderColor().ToManagedRGBA()}");
 
                 Console.WriteLine($"\tTexture Blend Mode: {mtl.GetTextureBlendMode()}");

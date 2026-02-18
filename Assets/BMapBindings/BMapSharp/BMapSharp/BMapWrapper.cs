@@ -269,6 +269,16 @@ namespace BMapSharp.BMapWrapper {
         public float GetSpecularPower() => GetGenericValue<float>(BMap.BMMaterial_GetSpecularPower);
         public void SetSpecularPower(float val) => SetGenericValue<float>(BMap.BMMaterial_SetSpecularPower, val);
 
+        public BMTexture GetTexture() {
+            BMapException.ThrowIfFailed(BMap.BMMaterial_GetTexture(GetPointer(), GetCKID(), out uint out_texid));
+            if (out_texid == Utils.INVALID_CKID) return null;
+            else return new BMTexture(GetPointer(), out_texid);
+        }
+        public void SetTexture(BMTexture tex) {
+            uint texid = (tex is null) ? Utils.INVALID_CKID : tex.GetCKID();
+            BMapException.ThrowIfFailed(BMap.BMMaterial_SetTexture(GetPointer(), GetCKID(), texid));
+        }
+
         public VxColor GetTextureBorderColor() {
             BMapException.ThrowIfFailed(BMap.BMMaterial_GetTextureBorderColor(GetPointer(), GetCKID(), out uint out_val));
             return new VxColor(out_val);
