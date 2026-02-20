@@ -24,12 +24,13 @@ namespace BMapInspector::Rule {
 	Ruleset::Ruleset() : rules() {
 		// Add rule into list.
 		//rules.emplace_back(new GpRule1());
-		//rules.emplace_back(new GpRule2());
+		rules.emplace_back(new GpRule2());
 		//rules.emplace_back(new Gp3Rule());
 		//rules.emplace_back(new Chirs1Rule());
 		rules.emplace_back(new YYCRule1());
 		rules.emplace_back(new YYCRule2());
 		rules.emplace_back(new BBugRule1());
+		rules.emplace_back(new ZZQRule1());
 		rules.emplace_back(new SOneRule1());
 		rules.emplace_back(new SSBRule1());
 		rules.emplace_back(new LXRule1());

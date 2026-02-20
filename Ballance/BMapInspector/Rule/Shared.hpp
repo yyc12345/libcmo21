@@ -59,6 +59,43 @@ namespace BMapInspector::Rule::Shared {
 
 #pragma endregion
 
+	#pragma region Utility Classes
+
+	constexpr L::CKDWORD MIN_SECTOR = 1;
+	constexpr L::CKDWORD MAX_SECTOR = 999;
+
+	using SectorName = std::u8string;
+
+	struct Sector9Names {
+		/** The Sector 9 name with "Sector_9" pattern which is accepted by all 999 sector loader */
+		std::u8string legacy_name;
+		/** The Sector 9 name with "Sector_09" pattern which is only accepted by new 999 sector loader */
+		std::u8string intuitive_name;
+	};
+
+	/**
+	 * @brief The class for building Ballance sector group name.
+	 */
+	class SectorNameBuilder {
+	public:
+		SectorNameBuilder();
+		~SectorNameBuilder();
+		YYCC_DEFAULT_COPY_MOVE(SectorNameBuilder)
+
+	public:
+		/**
+		 * @brief 
+		 * @param[in] sector 
+		 * @return 
+		 * @remarks
+		 * If you deliver sector index with 9, its return name is "Sector_9" which is accepted by all 999 sector loader.
+		 */
+		SectorName get_name(L::CKDWORD sector) const;
+		Sector9Names get_sector9_names() const;
+	};
+
+#pragma endregion
+
 #pragma region Check Functions
 
 	/**
@@ -69,6 +106,7 @@ namespace BMapInspector::Rule::Shared {
 	 * @return 
 	 */
 	bool FPEqual(L::CKFLOAT lhs, L::CKFLOAT rhs, L::CKFLOAT tolerance);
+
 	/**
 	 * @brief 
 	 * @param[in] ctx Can not be nullptr.

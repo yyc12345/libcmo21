@@ -6,7 +6,7 @@ namespace BMapInspector::Rule {
 	/**
 	 * @brief speedystoneball Rule 1
 	 * @details
-	 * Pjysicalized object should not have scale factor, especially negative scale factor (mirror).
+	 * Physicalized object should not have scale factor, especially negative scale factor (mirror).
 	 */
 	class SSBRule1 : public IRule {
 	public:
