@@ -48,11 +48,11 @@ namespace BMapInspector::Rule {
 					// No, this is not rail texture, throw error.
 					reporter.FormatError(
 					    YYC1,
-					    u8R"(Object "%s" is grouped into Phys_FloorRails, but its texture "%s" (referred by mesh "%s" and material "%s") seems not the rail texture. This will cause some parts of this object be smooth unexpectly.)",
-					    Shared::RenderObjectName(group_3dobject),
-					    Shared::RenderObjectName(texture),
-					    Shared::RenderObjectName(mesh),
-					    Shared::RenderObjectName(mtl));
+					    u8R"(Object %s is grouped into Phys_FloorRails, but its texture %s (referred by mesh %s and material %s) seems not the rail texture. This will cause some parts of this object be smooth unexpectly.)",
+					    Shared::QuoteObjectName(group_3dobject).c_str(),
+					    Shared::QuoteObjectName(texture).c_str(),
+					    Shared::QuoteObjectName(mesh).c_str(),
+					    Shared::QuoteObjectName(mtl).c_str());
 				}
 			}
 
@@ -74,9 +74,9 @@ namespace BMapInspector::Rule {
 				// Report error.
 				reporter.FormatError(
 				    YYC1,
-				    u8R"(Object "%s" is not grouped into Phys_FloorRails, but some objects grouped into Phys_FloorRails refer its mesh "%s". This will cause this object be smooth unexpectly.)",
-				    Shared::RenderObjectName(obj),
-				    Shared::RenderObjectName(mesh));
+				    u8R"(Object %s is not grouped into Phys_FloorRails, but some objects grouped into Phys_FloorRails refer its mesh %s. This will cause this object be smooth unexpectly.)",
+				    Shared::QuoteObjectName(obj).c_str(),
+				    Shared::QuoteObjectName(mesh).c_str());
 			}
 		}
 	}
@@ -120,9 +120,9 @@ namespace BMapInspector::Rule {
 			if (has_unused_vertex) {
 				reporter.FormatError(
 				    YYC2,
-				    u8R"(Object "%s" is grouped into physicalization groups, and its referred mesh "%s" has isolated vertex. This will cause it can not be physicalized.)",
-				    Shared::RenderObjectName(physicalized_3dobject),
-				    Shared::RenderObjectName(mesh));
+				    u8R"(Object %s is grouped into physicalization groups, and its referred mesh %s has isolated vertex. This will cause it can not be physicalized.)",
+				    Shared::QuoteObjectName(physicalized_3dobject).c_str(),
+				    Shared::QuoteObjectName(mesh).c_str());
 			}
 		}
 	}

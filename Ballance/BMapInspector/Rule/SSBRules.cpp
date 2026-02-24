@@ -48,8 +48,8 @@ namespace BMapInspector::Rule {
 			if (has_scale) {
 				reporter.FormatError(
 				    SSB1,
-				    u8R"(Object "%s" grouped into physicalization groups has scale factor. This will cause its collision shape is different with its render shape.)",
-				    Shared::RenderObjectName(physicalized_3dobject));
+				    u8R"(Object %s grouped into physicalization groups has scale factor. This will cause its collision shape is different with its render shape.)",
+				    Shared::QuoteObjectName(physicalized_3dobject).c_str());
 			}
 		}
 	}

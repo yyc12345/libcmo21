@@ -99,7 +99,7 @@ where
     i: usize,
     _p: PhantomData<P>,
     /// Phantom reference to prevent object modification during iteration
-    _o: &'o O,
+    _o: PhantomData<&'o O>,
 }
 
 impl<'o, P, O, T> StructIterator<'o, P, O, T>
@@ -567,7 +567,7 @@ where
 
 pub trait BMTexture<'o, P>: BMObject<'o, P>
 where
-    P: AbstractPointer<'o> + ?Sized,
+    P: AbstractPointer<'o> + ?Sized + 'o,
 {
     fn get_file_name(&self) -> Result<Option<String>> {
         get_string_value(self, bmap::BMTexture_GetFileName)
@@ -767,7 +767,7 @@ where
 
 pub trait BMMesh<'o, P>: BMObject<'o, P>
 where
-    P: AbstractPointer<'o> + ?Sized,
+    P: AbstractPointer<'o> + ?Sized + 'o,
 {
     fn get_lit_mode(&self) -> Result<bmap::VXMESH_LITMODE> {
         get_copyable_value(self, bmap::BMMesh_GetLitMode)
@@ -775,12 +775,51 @@ where
     fn set_lit_mode(&mut self, data: bmap::VXMESH_LITMODE) -> Result<()> {
         set_copyable_value(self, bmap::BMMesh_SetLitMode, data)
     }
+
+    fn get_vertex_count(&self) -> Result<u32> {
+        get_copyable_value(self, bmap::BMMesh_GetVertexCount)
+    }
+    fn set_vertex_count(&mut self, count: u32) -> Result<()> {
+        set_copyable_value(self, bmap::BMMesh_SetVertexCount, count)
+    }
+    fn get_vertex_positions(&'o self) -> Result<StructIterator<'o, P, Self, bmap::VxVector3>> {
+        let ptr = get_copyable_value(self, bmap::BMMesh_GetVertexPositions)?;
+        struct_iterator(self, ptr, self.get_vertex_count()?.try_into()?)
+    }
 }
 
 pub trait BM3dEntity<'o, P>: BMObject<'o, P>
 where
-    P: AbstractPointer<'o> + ?Sized,
+    P: AbstractPointer<'o> + ?Sized + 'o,
 {
+    fn get_world_matrix(&self) -> Result<bmap::VxMatrix> {
+        get_copyable_value(self, bmap::BM3dEntity_GetWorldMatrix)
+    }
+    fn set_world_matrix(&mut self, mat: bmap::VxMatrix) -> Result<()> {
+        set_copyable_value(self, bmap::BM3dEntity_SetWorldMatrix, mat)
+    }
+
+    // YYC MARK:
+    // Same reason for the reuse of "value setter" and "value getter".
+    fn get_current_mesh(&self) -> Result<Option<Box<dyn BMMesh<'o, P> + 'o>>> {
+        let ckid: CKID = get_copyable_value(self, bmap::BM3dEntity_GetCurrentMesh)?;
+        Ok(if ckid == INVALID_CKID {
+            None
+        } else {
+            Some(Box::new(BMMeshImpl::<'o, P>::new(
+                unsafe { self.get_pointer() },
+                ckid,
+            )))
+        })
+    }
+    fn set_current_mesh(&mut self, mesh: Option<&dyn BMMesh<'o, P>>) -> Result<()> {
+        let ckid: CKID = match mesh {
+            Some(mesh) => unsafe { mesh.get_ckid() },
+            None => INVALID_CKID,
+        };
+        set_copyable_value(self, bmap::BM3dEntity_SetCurrentMesh, ckid)
+    }
+
     fn get_visibility(&self) -> Result<bool> {
         get_copyable_value(self, bmap::BM3dEntity_GetVisibility)
     }
@@ -791,13 +830,13 @@ where
 
 pub trait BM3dObject<'o, P>: BM3dEntity<'o, P>
 where
-    P: AbstractPointer<'o> + ?Sized,
+    P: AbstractPointer<'o> + ?Sized + 'o,
 {
 }
 
 pub trait BMLight<'o, P>: BM3dEntity<'o, P>
 where
-    P: AbstractPointer<'o> + ?Sized,
+    P: AbstractPointer<'o> + ?Sized + 'o,
 {
     fn get_type(&self) -> Result<bmap::VXLIGHT_TYPE> {
         get_copyable_value(self, bmap::BMLight_GetType)
@@ -861,13 +900,13 @@ where
 
 pub trait BMTargetLight<'o, P>: BMLight<'o, P>
 where
-    P: AbstractPointer<'o> + ?Sized,
+    P: AbstractPointer<'o> + ?Sized + 'o,
 {
 }
 
 pub trait BMCamera<'o, P>: BM3dEntity<'o, P>
 where
-    P: AbstractPointer<'o> + ?Sized,
+    P: AbstractPointer<'o> + ?Sized + 'o,
 {
     fn get_projection_type(&self) -> Result<bmap::CK_CAMERA_PROJECTION> {
         get_copyable_value(self, bmap::BMCamera_GetProjectionType)
@@ -926,13 +965,13 @@ where
 
 pub trait BMTargetCamera<'o, P>: BMCamera<'o, P>
 where
-    P: AbstractPointer<'o> + ?Sized,
+    P: AbstractPointer<'o> + ?Sized + 'o,
 {
 }
 
 pub trait BMGroup<'o, P>: BMObject<'o, P>
 where
-    P: AbstractPointer<'o> + ?Sized,
+    P: AbstractPointer<'o> + ?Sized + 'o,
 {
 }
 

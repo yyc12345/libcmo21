@@ -1,7 +1,10 @@
 #pragma once
 #include <VTAll.hpp>
+#include <yycc.hpp>
+#include <yycc/string/op.hpp>
 #include <vector>
 #include <array>
+#include <type_traits>
 
 namespace BMapInspector::Rule::Shared {
 
@@ -59,7 +62,7 @@ namespace BMapInspector::Rule::Shared {
 
 #pragma endregion
 
-	#pragma region Utility Classes
+#pragma region Utility Classes
 
 	constexpr L::CKDWORD MIN_SECTOR = 1;
 	constexpr L::CKDWORD MAX_SECTOR = 999;
@@ -141,7 +144,25 @@ namespace BMapInspector::Rule::Shared {
 	 * @param[in] obj Can not be nullptr.
 	 * @return 
 	 */
-	const char8_t* RenderObjectName(O::CKObject* obj);
+	std::u8string QuoteObjectName(O::CKObject* obj);
+	/**
+	 * @brief 
+	 * @tparam InputIt 
+	 * @param first 
+	 * @param last 
+	 * @return 
+	 */
+	template<std::input_iterator InputIt>
+	    requires std::is_pointer_v<std::iter_value_t<InputIt>>
+	             && std::is_base_of_v<O::CKObject, std::remove_pointer_t<std::iter_value_t<InputIt>>>
+	std::u8string QuoteObjectNames(InputIt first, InputIt last) {
+		return yycc::string::op::join(
+		    [&first, &last]() -> std::optional<std::u8string_view> {
+			    if (first == last) return std::nullopt;
+			    return QuoteObjectName(*(first++));
+		    },
+		    u8", ");
+	}
 
 #pragma endregion
 

@@ -24,4 +24,21 @@ namespace BMapInspector::Rule {
 		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
 	};
 
+	/**
+	 * @brief ZZQ Rule 2
+	 * @details
+	 * The Ballance should only be included only one group.
+	 * This rule will check whether there is intersection between different sector group.
+	 */
+	class ZZQRule2 : public IRule {
+	public:
+		ZZQRule2();
+		virtual ~ZZQRule2();
+		YYCC_DEFAULT_COPY_MOVE(ZZQRule2)
+
+	public:
+		std::u8string_view GetRuleName() const override;
+		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
+	};
+
 }

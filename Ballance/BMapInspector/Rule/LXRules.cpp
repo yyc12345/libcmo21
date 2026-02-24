@@ -78,9 +78,9 @@ namespace BMapInspector::Rule {
 			if (element_meshes.contains(mesh)) {
 				reporter.FormatError(
 				    LX1,
-				    u8R"(Object "%s" used mesh "%s" is already used by a Ballance element. This will cause this object can not be rendered correctly in level.)",
-				    Shared::RenderObjectName(other_object),
-				    Shared::RenderObjectName(mesh));
+				    u8R"(Object %s used mesh %s is already used by a Ballance element. This will cause this object can not be rendered correctly in level.)",
+				    Shared::QuoteObjectName(other_object).c_str(),
+				    Shared::QuoteObjectName(mesh).c_str());
 			} else {
 				// If not, check material.
 				// Iterate all meshes
@@ -89,10 +89,10 @@ namespace BMapInspector::Rule {
 					if (element_materials.contains(mtl)) {
 						reporter.FormatError(
 						    LX1,
-						    u8R"(Object "%s" used material "%s" (referred by mesh "%s") is already used by a Ballance element. This will cause this object can not be rendered correctly in level.)",
-						    Shared::RenderObjectName(other_object),
-						    Shared::RenderObjectName(mtl),
-						    Shared::RenderObjectName(mesh));
+						    u8R"(Object %s used material %s (referred by mesh %s) is already used by a Ballance element. This will cause this object can not be rendered correctly in level.)",
+						    Shared::QuoteObjectName(other_object).c_str(),
+						    Shared::QuoteObjectName(mtl).c_str(),
+						    Shared::QuoteObjectName(mesh).c_str());
 					} else {
 						// Still not, check texture.
 						// Fetch texture
@@ -102,11 +102,11 @@ namespace BMapInspector::Rule {
 						if (element_textures.contains(texture)) {
 							reporter.FormatError(
 							    LX1,
-							    u8R"(Object "%s" used texture "%s" (referred by mesh "%s" and material "%s") is already used by a Ballance element. This will cause this object can not be rendered correctly in level.)",
-							    Shared::RenderObjectName(other_object),
-							    Shared::RenderObjectName(texture),
-							    Shared::RenderObjectName(mesh),
-							    Shared::RenderObjectName(mtl));
+							    u8R"(Object %s used texture %s (referred by mesh "%s" and material "%s") is already used by a Ballance element. This will cause this object can not be rendered correctly in level.)",
+							    Shared::QuoteObjectName(other_object).c_str(),
+							    Shared::QuoteObjectName(texture).c_str(),
+							    Shared::QuoteObjectName(mesh).c_str(),
+							    Shared::QuoteObjectName(mtl).c_str());
 						}
 					}
 				}

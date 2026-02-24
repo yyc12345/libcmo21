@@ -28,8 +28,8 @@ namespace BMapInspector::Rule {
 			if (mesh == nullptr) {
 				reporter.FormatError(
 				    SONE1,
-				    u8R"(Object "%s" is grouped into physicalization group, but it doesn't have any associated mesh. This will cause itself and following objects can not be physicalized.)",
-				    Shared::RenderObjectName(physicalized_3dobject));
+				    u8R"(Object %s is grouped into physicalization group, but it doesn't have any associated mesh. This will cause itself and following objects can not be physicalized.)",
+				    Shared::QuoteObjectName(physicalized_3dobject).c_str());
 			}
 		}
 	}

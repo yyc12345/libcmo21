@@ -1,6 +1,4 @@
 #include "Shared.hpp"
-#include <yycc.hpp>
-#include <yycc/string/op.hpp>
 #include <yycc/carton/termcolor.hpp>
 #include <filesystem>
 #include <stdexcept>
@@ -101,7 +99,7 @@ namespace BMapInspector::Rule::Shared {
 		return rv;
 	}
 
-	const char8_t* RenderObjectName(O::CKObject* obj) {
+	static const char8_t* RenderObjectName(O::CKObject* obj) {
 		static std::u8string ANONYMOUS = termcolor::colored(u8"<anonymous>", termcolor::Color::LightMagenta);
 		auto name = obj->GetName();
 		if (name == nullptr) {
@@ -109,6 +107,14 @@ namespace BMapInspector::Rule::Shared {
 		} else {
 			return name;
 		}
+	}
+
+	std::u8string QuoteObjectName(O::CKObject* obj) {
+		std::u8string rv;
+		rv.push_back(u8'"');
+		rv.append(RenderObjectName(obj));
+		rv.push_back(u8'"');
+		return rv;
 	}
 
 #pragma endregion
