@@ -56,6 +56,7 @@ namespace BMapInspector::Rule::Shared {
 	namespace TextureNames {
 		// clang-format off
 		constexpr char8_t RAIL_ENVIRONMENT[] = u8"Rail_Environment.bmp";
+		constexpr char8_t LATERNE_VERLAUF[] = u8"Laterne_Verlauf.tga";
 		// clang-format on
 
 	} // namespace TextureNames
@@ -117,6 +118,13 @@ namespace BMapInspector::Rule::Shared {
 	 * @return Found pointer to CKGroup, otherwise nullptr.
 	 */
 	O::CKGroup* FetchGroup(C::CKContext* ctx, L::CKSTRING name);
+	/**
+	 * @brief 
+	 * @param[in] ctx Can not be nullptr.
+	 * @param[in] name Can not be nullptr.
+	 * @return Found pointer to CKMaterial, otherwise nullptr.
+	 */
+	O::CKMaterial* FetchMaterial(C::CKContext* ctx, L::CKSTRING name);
 	std::vector<O::CK3dObject*> FetchPhysicalized3dObjects(C::CKContext* ctx);
 	/**
 	 * @brief Check whether given CKTexture has the given file name (case-insensitive).

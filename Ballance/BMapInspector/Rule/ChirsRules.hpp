@@ -3,19 +3,17 @@
 
 namespace BMapInspector::Rule {
 
-	// Reference: https://tieba.baidu.com/p/5913556704
-
 	/**
-	 * @brief Chirs241097 Rule 1
+	 * @brief chirs241097 Rule 1
 	 * @details
 	 * This rule will make sure that there is only 1 texture named Laterne_Verlauf in map,
 	 * which represent the ray of latern.
 	 */
-	class Chirs1Rule : public IRule {
+	class ChirsRule1 : public IRule {
 	public:
-		Chirs1Rule();
-		virtual ~Chirs1Rule();
-		YYCC_DELETE_COPY_MOVE(Chirs1Rule)
+		ChirsRule1();
+		virtual ~ChirsRule1();
+		YYCC_DELETE_COPY_MOVE(ChirsRule1)
 
 	public:
 		std::u8string_view GetRuleName() const override;

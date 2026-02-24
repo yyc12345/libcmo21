@@ -8,17 +8,25 @@ namespace O = LibCmo::CK2::ObjImpls;
 
 namespace BMapInspector::Rule {
 
+	// Reference: https://tieba.baidu.com/p/3182981807
+
 #pragma region GP1 Rule
+
+	constexpr char8_t GP1[] = u8"GP1";
 
 	GpRule1::GpRule1() : IRule() {}
 
 	GpRule1::~GpRule1() {}
 
 	std::u8string_view GpRule1::GetRuleName() const {
-		return u8"GP1";
+		return GP1;
 	}
 
-	void GpRule1::Check(Reporter::Reporter& reporter, Map::Level& level) const {}
+	void GpRule1::Check(Reporter::Reporter& reporter, Map::Level& level) const {
+		// TODO:
+		// Finish this rule.
+		// It is so complex that I don't want to implement it now.
+	}
 
 #pragma endregion
 
@@ -98,7 +106,8 @@ namespace BMapInspector::Rule {
 			auto sector_names = builder.get_sector9_names();
 			if (group_names.contains(sector_names.intuitive_name)) {
 				reporter.WriteWarning(
-				    GP2, u8R"(You are using intuitive sector name, "Sector_09", for sector 9. This is only accepted by new 999 sector loader.)");
+				    GP2,
+				    u8R"(You are using intuitive sector name, "Sector_09", for sector 9. This is only accepted by new 999 sector loader.)");
 			}
 		}
 
@@ -127,21 +136,5 @@ namespace BMapInspector::Rule {
 	}
 
 #pragma endregion
-
-#pragma region GP3 Rule
-	//
-	//	Gp3Rule::Gp3Rule() : IRule() {}
-	//
-	//	Gp3Rule::~Gp3Rule() {}
-	//
-	//	std::u8string_view Gp3Rule::GetRuleName() const {
-	//		return u8"GP3";
-	//	}
-	//
-	//	void Gp3Rule::Check(Reporter::Reporter& reporter, Map::Level& level) const {
-	//		// TODO: Mesh hash is not implemented.
-	//	}
-	//
-	//#pragma endregion
 
 } // namespace BMapInspector::Rule

@@ -58,6 +58,10 @@ namespace BMapInspector::Rule::Shared {
 		}
 	}
 
+	O::CKMaterial* FetchMaterial(C::CKContext* ctx, L::CKSTRING name) {
+		return static_cast<O::CKMaterial*>(ctx->GetObjectByNameAndClass(name, C::CK_CLASSID::CKCID_MATERIAL, nullptr));
+	}
+
 	std::vector<O::CK3dObject*> FetchPhysicalized3dObjects(C::CKContext* ctx) {
 		std::vector<O::CK3dObject*> rv;
 
