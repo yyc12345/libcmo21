@@ -58,125 +58,16 @@ pub trait AbstractObject<'o, P>: AbstractPointer<'o>
 where
     P: AbstractPointer<'o> + ?Sized,
 {
+    /// Internal used function for creating object.
+    ///
+    /// Do **NOT** use this function.
+    /// It can not be hidden due to the limitation of Rust trait.
+    unsafe fn new(parent: &'o P, handle: PBMVOID, id: CKID) -> Self;
     /// Internal used function for fetching object underlying ID.
     ///
     /// Do **NOT** use this function.
     /// It can not be hidden due to the limitation of Rust trait.
     unsafe fn get_ckid(&self) -> CKID;
-}
-
-// endregion
-
-// region: Struct Iterator and Assigner
-
-fn struct_assigner<'o, P, O, T, I>(_: &'o O, ptr: *mut T, cnt: usize, it: &mut I) -> Result<()>
-where
-    P: AbstractPointer<'o> + ?Sized,
-    O: AbstractObject<'o, P> + ?Sized,
-    T: Sized + Copy,
-    I: Iterator<Item = T>,
-{
-    for i in 0..cnt {
-        // Fetch item
-        let item = match it.next() {
-            Some(v) => v,
-            None => return Err(Error::OutOfLength),
-        };
-        // Write item
-        unsafe { *ptr.add(i) = item };
-    }
-    Ok(())
-}
-
-pub struct StructIterator<'o, P, O, T>
-where
-    P: AbstractPointer<'o> + ?Sized,
-    O: AbstractObject<'o, P> + ?Sized,
-    T: Sized + Copy,
-{
-    ptr: *mut T,
-    cnt: usize,
-    i: usize,
-    _p: PhantomData<P>,
-    /// Phantom reference to prevent object modification during iteration
-    _o: PhantomData<&'o O>,
-}
-
-impl<'o, P, O, T> StructIterator<'o, P, O, T>
-where
-    P: AbstractPointer<'o> + ?Sized,
-    O: AbstractObject<'o, P> + ?Sized,
-    T: Sized + Copy,
-{
-    fn new(o: &'o O, ptr: *mut T, cnt: usize) -> Self {
-        Self {
-            ptr,
-            cnt,
-            i: 0,
-            _p: PhantomData,
-            _o: o,
-        }
-    }
-}
-
-impl<'o, P, O, T> Iterator for StructIterator<'o, P, O, T>
-where
-    P: AbstractPointer<'o> + ?Sized,
-    O: AbstractObject<'o, P> + ?Sized,
-    T: Sized + Copy,
-{
-    type Item = T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.i >= self.cnt {
-            None
-        } else {
-            let rv = unsafe { *self.ptr.add(self.i) };
-            self.i += 1;
-            Some(rv)
-        }
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        let remaining = self.len();
-        (remaining, Some(remaining))
-    }
-}
-
-impl<'o, P, O, T> FusedIterator for StructIterator<'o, P, O, T>
-where
-    P: AbstractPointer<'o> + ?Sized,
-    O: AbstractObject<'o, P> + ?Sized,
-    T: Sized + Copy,
-{
-}
-
-impl<'o, P, O, T> ExactSizeIterator for StructIterator<'o, P, O, T>
-where
-    P: AbstractPointer<'o> + ?Sized,
-    O: AbstractObject<'o, P> + ?Sized,
-    T: Sized + Copy,
-{
-    fn len(&self) -> usize {
-        if self.i >= self.cnt {
-            0
-        } else {
-            self.i - self.cnt
-        }
-    }
-}
-
-fn struct_iterator<'o, P, O, T>(
-    o: &'o O,
-    ptr: *mut T,
-    cnt: usize,
-) -> Result<StructIterator<'o, P, O, T>>
-where
-    P: AbstractPointer<'o> + ?Sized,
-    O: AbstractObject<'o, P> + ?Sized,
-    T: Sized + Copy,
-{
-    Ok(StructIterator::new(o, ptr, cnt))
 }
 
 // endregion
@@ -199,6 +90,8 @@ unsafe extern "C" fn bmap_rs_callback(msg: CKSTRING) {
 // endregion
 
 // region: Macros
+
+// region: Common Macros
 
 /// The convenient macro for wrapping all BMap calling in Rust error procession pattern.
 macro_rules! bmap_exec {
@@ -235,6 +128,321 @@ macro_rules! arg_out {
 
 // endregion
 
+// region: Library Pointer Macros
+
+macro_rules! libptr_struct {
+    ($name:ident) => {
+        #[derive(Debug)]
+        pub struct $name<'p> {
+            handle: PBMVOID,
+            phantom: PhantomData<&'p BMap>,
+        }
+    };
+}
+
+macro_rules! libptr_impl_eq_ord_hash {
+    ($name:ident) => {
+        impl<'p> PartialEq for $name<'p> {
+            fn eq(&self, other: &Self) -> bool {
+                self.handle == other.handle
+            }
+        }
+
+        impl<'p> Eq for $name<'p> {}
+
+        impl<'p> PartialOrd for $name<'p> {
+            fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                self.handle.partial_cmp(&other.handle)
+            }
+        }
+
+        impl<'p> Ord for $name<'p> {
+            fn cmp(&self, other: &Self) -> Ordering {
+                self.handle.cmp(&other.handle)
+            }
+        }
+
+        impl<'p> Hash for $name<'p> {
+            fn hash<H: Hasher>(&self, state: &mut H) {
+                self.handle.hash(state);
+            }
+        }
+    };
+}
+
+macro_rules! libptr_impl_abstract_pointer {
+    ($name:ident) => {
+        impl<'p> AbstractPointer<'p> for $name<'p> {
+            unsafe fn get_pointer(&self) -> PBMVOID {
+                self.handle
+            }
+        }
+    };
+}
+
+// endregion
+
+// region: Library Object Macros
+
+macro_rules! libobj_struct {
+    ($name:ident) => {
+        #[derive(Debug)]
+        pub struct $name<'o, P>
+        where
+            P: AbstractPointer<'o> + ?Sized,
+        {
+            handle: PBMVOID,
+            id: CKID,
+            parent: PhantomData<&'o P>,
+        }
+    };
+}
+
+macro_rules! libobj_impl_new {
+    ($name:ident) => {
+        impl<'o, P> $name<'o, P>
+        where
+            P: AbstractPointer<'o> + ?Sized,
+        {
+            fn with_parent(_: &'o P, handle: PBMVOID, id: CKID) -> Self {
+                Self {
+                    handle,
+                    id,
+                    parent: PhantomData::<&'o P>,
+                }
+            }
+            fn with_sibling<AO>(_: &'o AO, handle: PBMVOID, id: CKID) -> Self
+            where
+                AO: AbstractObject<'o, P>,
+            {
+                Self {
+                    handle,
+                    id,
+                    parent: PhantomData::<&'o P>,
+                }
+            }
+        }
+    };
+}
+
+macro_rules! libobj_impl_eq_ord_hash {
+    ($name:ident) => {
+        impl<'o, P> PartialEq for $name<'o, P>
+        where
+            P: AbstractPointer<'o> + ?Sized,
+        {
+            fn eq(&self, other: &Self) -> bool {
+                self.handle == other.handle && self.id == other.id
+            }
+        }
+
+        impl<'o, P> Eq for $name<'o, P> where P: AbstractPointer<'o> + ?Sized {}
+
+        impl<'o, P> PartialOrd for $name<'o, P>
+        where
+            P: AbstractPointer<'o> + ?Sized,
+        {
+            fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                match self.handle.partial_cmp(&other.handle) {
+                    Some(Ordering::Equal) => self.id.partial_cmp(&other.id),
+                    other => other,
+                }
+            }
+        }
+
+        impl<'o, P> Ord for $name<'o, P>
+        where
+            P: AbstractPointer<'o> + ?Sized,
+        {
+            fn cmp(&self, other: &Self) -> Ordering {
+                match self.handle.cmp(&other.handle) {
+                    Ordering::Equal => self.id.cmp(&other.id),
+                    other => other,
+                }
+            }
+        }
+
+        impl<'o, P> Hash for $name<'o, P>
+        where
+            P: AbstractPointer<'o> + ?Sized,
+        {
+            fn hash<H: Hasher>(&self, state: &mut H) {
+                self.handle.hash(state);
+                self.id.hash(state);
+            }
+        }
+    };
+}
+
+macro_rules! libobj_impl_abstract_object {
+    ($name:ident) => {
+        impl<'o, P> AbstractPointer<'o> for $name<'o, P>
+        where
+            P: AbstractPointer<'o> + ?Sized,
+        {
+            unsafe fn get_pointer(&self) -> PBMVOID {
+                self.handle
+            }
+        }
+
+        impl<'o, P> AbstractObject<'o, P> for $name<'o, P>
+        where
+            P: AbstractPointer<'o> + ?Sized,
+        {
+            unsafe fn new(parent: &'o P, handle: PBMVOID, id: CKID) -> Self {
+                Self::with_parent(parent, handle, id)
+            }
+            unsafe fn get_ckid(&self) -> CKID {
+                self.id
+            }
+        }
+    };
+}
+
+macro_rules! libobj_impl_obj_trait {
+    ($name:ident, $trait:ident) => {
+        impl<'o, P> $trait<'o, P> for $name<'o, P> where P: AbstractPointer<'o> + ?Sized {}
+    };
+}
+
+// endregion
+
+// region: Iterator Utility Macros
+
+macro_rules! libiter_len_body {
+    ($current_cnt:expr, $all_cnt:expr) => {
+        if $current_cnt >= $all_cnt {
+            0
+        } else {
+            $current_cnt - $all_cnt
+        }
+    };
+}
+
+macro_rules! libiter_size_hint_body {
+    ($current_cnt:expr, $all_cnt:expr) => {
+        if $current_cnt >= $all_cnt {
+            (0, Some(0))
+        } else {
+            let remaining = $current_cnt - $all_cnt;
+            (remaining, Some(remaining))
+        }
+    };
+}
+
+// endregion
+
+// endregion
+
+// region: Struct Iterator and Assigner
+
+fn struct_assigner<'o, P, O, T, I>(_: &'o O, ptr: *mut T, cnt: usize, it: &mut I) -> Result<()>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: Sized + Copy,
+    I: Iterator<Item = T>,
+{
+    for i in 0..cnt {
+        // Fetch item
+        let item = match it.next() {
+            Some(v) => v,
+            None => return Err(Error::OutOfLength),
+        };
+        // Write item
+        unsafe { *ptr.add(i) = item };
+    }
+    Ok(())
+}
+
+pub struct StructIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: Sized + Copy,
+{
+    ptr: *mut T,
+    cnt: usize,
+    i: usize,
+    _p: PhantomData<P>,
+    /// Phantom reference to prevent object modification during iteration
+    _o: PhantomData<&'o O>,
+}
+
+impl<'o, P, O, T> StructIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: Sized + Copy,
+{
+    fn new(o: &'o O, ptr: *mut T, cnt: usize) -> Self {
+        Self {
+            ptr,
+            cnt,
+            i: 0,
+            _p: PhantomData,
+            _o: PhantomData,
+        }
+    }
+}
+
+impl<'o, P, O, T> Iterator for StructIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: Sized + Copy,
+{
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.i >= self.cnt {
+            None
+        } else {
+            let rv = unsafe { *self.ptr.add(self.i) };
+            self.i += 1;
+            Some(rv)
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        libiter_size_hint_body!(self.i, self.cnt)
+    }
+}
+
+impl<'o, P, O, T> FusedIterator for StructIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: Sized + Copy,
+{
+}
+
+impl<'o, P, O, T> ExactSizeIterator for StructIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: Sized + Copy,
+{
+    fn len(&self) -> usize {
+        libiter_len_body!(self.i, self.cnt)
+    }
+}
+
+fn struct_iterator<'o, P, O, T>(
+    o: &'o O,
+    ptr: *mut T,
+    cnt: usize,
+) -> Result<StructIter<'o, P, O, T>>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: Sized + Copy,
+{
+    Ok(StructIter::new(o, ptr, cnt))
+}
+
+// endregion
+
 // endregion
 
 // region: BMap Guard
@@ -244,6 +452,56 @@ macro_rules! arg_out {
 /// This struct make sure that all BMap calling is executed under initialized BMap environment,
 /// and shutdown BMap environment automatically when there is no more calling.
 pub struct BMap {}
+
+impl BMap {
+    fn new() -> Result<Self> {
+        bmap_exec!(bmap::BMInit());
+        Ok(Self {})
+    }
+}
+
+impl Drop for BMap {
+    fn drop(&mut self) {
+        // YYC MARK:
+        // Ignore return of this function by design.
+        // Because using Result in Drop is inviable,
+        // and using `panic!` is also not suggested.
+        let _ = unsafe { bmap::BMDispose() };
+    }
+}
+
+impl BMap {
+    pub fn create_file_reader<'b, I, T>(
+        &'b mut self,
+        file_name: &str,
+        temp_folder: &str,
+        texture_folder: &str,
+        encodings: I,
+    ) -> Result<BMFileReader<'b>>
+    where
+        I: Iterator<Item = T>,
+        T: Into<Vec<u8>>,
+    {
+        BMFileReader::new(self, file_name, temp_folder, texture_folder, encodings)
+    }
+
+    pub fn create_file_writer<'b, I, T>(
+        &'b mut self,
+        temp_folder: &str,
+        texture_folder: &str,
+        encodings: I,
+    ) -> Result<BMFileWriter<'b>>
+    where
+        I: Iterator<Item = T>,
+        T: Into<Vec<u8>>,
+    {
+        BMFileWriter::new(self, temp_folder, texture_folder, encodings)
+    }
+
+    pub fn create_mesh_trans<'b>(&'b mut self) -> Result<BMMeshTrans<'b>> {
+        BMMeshTrans::new(self)
+    }
+}
 
 impl BMap {
     pub fn instance() -> &'static Result<Mutex<BMap>> {
@@ -265,213 +523,6 @@ impl BMap {
             .lock()
             .expect("failed mutex lock");
         f(&mut instance)
-    }
-}
-
-impl BMap {
-    pub fn create_file_reader<'b, I, T>(
-        &mut self,
-        file_name: &str,
-        temp_folder: &str,
-        texture_folder: &str,
-        encodings: I,
-    ) -> Result<BMFileReader<'b>>
-    where
-        I: Iterator<Item = T>,
-        T: Into<Vec<u8>>,
-    {
-        BMFileReader::new(file_name, temp_folder, texture_folder, encodings)
-    }
-
-    pub fn create_file_writer<'b, I, T>(
-        &mut self,
-        temp_folder: &str,
-        texture_folder: &str,
-        encodings: I,
-    ) -> Result<BMFileWriter<'b>>
-    where
-        I: Iterator<Item = T>,
-        T: Into<Vec<u8>>,
-    {
-        BMFileWriter::new(temp_folder, texture_folder, encodings)
-    }
-
-    pub fn create_mesh_trans<'b>(&mut self) -> Result<BMMeshTrans<'b>> {
-        BMMeshTrans::new()
-    }
-}
-
-impl BMap {
-    fn new() -> Result<Self> {
-        bmap_exec!(bmap::BMInit());
-        Ok(Self {})
-    }
-}
-
-impl Drop for BMap {
-    fn drop(&mut self) {
-        // Ignore return of this function by design.
-        // Because using Result in Drop is inviable,
-        // and using `panic!` is also not suggested.
-        let _ = unsafe { bmap::BMDispose() };
-    }
-}
-
-// endregion
-
-// region: BMFileReader
-
-// type FnProtoGetCount = unsafe extern "C" fn(PBMVOID, param_out!(CKDWORD));
-// type FnProtoGetObject = unsafe extern "C" fn(PBMVOID, param_in!(CKDWORD), param_out!(CKID));
-
-// pub struct FileObjectIterator<'a, P, FT, O>
-// where
-//     P: BMFileP,
-//     FT: Fn(PBMVOID, CKID) -> O,
-//     O: AbstractObject,
-// {
-//     fget: FnProtoGetObject,
-//     fcret: FT,
-//     cnt: usize,
-//     i: usize,
-//     P: &'a P,
-// }
-
-pub struct BMFileReader<'b> {
-    handle: PBMVOID,
-    phantom: PhantomData<&'b BMap>,
-}
-
-impl<'b> BMFileReader<'b> {
-    fn new<I, T>(
-        file_name: &str,
-        temp_folder: &str,
-        texture_folder: &str,
-        encodings: I,
-    ) -> Result<Self>
-    where
-        I: Iterator<Item = T>,
-        T: Into<Vec<u8>>,
-    {
-        let file_name = unsafe { marshaler::to_native_string(file_name)? };
-        let temp_folder = unsafe { marshaler::to_native_string(temp_folder)? };
-        let texture_folder = unsafe { marshaler::to_native_string(texture_folder)? };
-        let encodings = unsafe { marshaler::to_native_string_array(encodings)? };
-
-        let mut file = MaybeUninit::<PBMVOID>::uninit();
-        bmap_exec!(bmap::BMFile_Load(
-            file_name.as_raw(),
-            temp_folder.as_raw(),
-            texture_folder.as_raw(),
-            bmap_rs_callback,
-            encodings.len().try_into()?,
-            encodings.as_raw(),
-            arg_out!(file.as_mut_ptr(), PBMVOID)
-        ));
-
-        Ok(Self {
-            handle: unsafe { file.assume_init() },
-            phantom: PhantomData::<&'b BMap>,
-        })
-    }
-}
-
-impl<'b> BMFileReader<'b> {}
-
-// impl<'a> BMFileReader<'a> {
-
-//     fn get_generic_object_count<O, FC>(&self, fc: FnProtoGetCount) -> Result<usize> {
-
-//     }
-
-//     fn get_generic_objects<'a, O, FC, FO>(&'a self, fc: FnProtoGetCount, fo: FnProtoGetObject) -> Result<FileObjectIterator<'a, Self, _, O>> {
-//         todo!()
-//     }
-
-// }
-
-impl<'b> Drop for BMFileReader<'b> {
-    fn drop(&mut self) {
-        let _ = unsafe { bmap::BMFile_Free(self.handle) };
-    }
-}
-
-impl<'b> AbstractPointer<'b> for BMFileReader<'b> {
-    unsafe fn get_pointer(&self) -> PBMVOID {
-        self.handle
-    }
-}
-
-// endregion
-
-// region: BMFileWriter
-
-pub struct BMFileWriter<'b> {
-    handle: PBMVOID,
-    phantom: PhantomData<&'b BMap>,
-}
-
-impl<'b> BMFileWriter<'b> {
-    fn new<I, T>(temp_folder: &str, texture_folder: &str, encodings: I) -> Result<Self>
-    where
-        I: Iterator<Item = T>,
-        T: Into<Vec<u8>>,
-    {
-        let temp_folder = unsafe { marshaler::to_native_string(temp_folder)? };
-        let texture_folder = unsafe { marshaler::to_native_string(texture_folder)? };
-        let encodings = unsafe { marshaler::to_native_string_array(encodings)? };
-
-        let mut file = MaybeUninit::<PBMVOID>::uninit();
-        bmap_exec!(bmap::BMFile_Create(
-            temp_folder.as_raw(),
-            texture_folder.as_raw(),
-            bmap_rs_callback,
-            encodings.len().try_into()?,
-            encodings.as_raw(),
-            arg_out!(file.as_mut_ptr(), PBMVOID)
-        ));
-
-        Ok(Self {
-            handle: unsafe { file.assume_init() },
-            phantom: PhantomData::<&'b BMap>,
-        })
-    }
-}
-
-impl<'b> BMFileWriter<'b> {
-    pub fn save(
-        &self,
-        filename: &str,
-        texture_save_opt: bmap::CK_TEXTURE_SAVEOPTIONS,
-        compress_level: Option<CKINT>,
-    ) -> Result<()> {
-        let filename = unsafe { marshaler::to_native_string(filename)? };
-        let use_compress = compress_level.is_some();
-        let compress_level = compress_level.unwrap_or(5);
-
-        bmap_exec!(bmap::BMFile_Save(
-            self.get_pointer(),
-            filename.as_raw(),
-            texture_save_opt,
-            use_compress,
-            compress_level
-        ));
-
-        Ok(())
-    }
-}
-
-impl<'b> BMFileWriter<'b> {}
-
-impl<'b> Drop for BMFileWriter<'b> {
-    fn drop(&mut self) {
-        let _ = unsafe { bmap::BMFile_Free(self.handle) };
-    }
-}
-
-impl<'b> AbstractPointer<'b> for BMFileWriter<'b> {
-    unsafe fn get_pointer(&self) -> PBMVOID {
-        self.handle
     }
 }
 
@@ -553,7 +604,7 @@ where
 
 // region: Traits
 
-pub trait BMObject<'o, P>: AbstractObject<'o, P>
+pub trait BMObjectDecl<'o, P>: AbstractObject<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized,
 {
@@ -565,7 +616,7 @@ where
     }
 }
 
-pub trait BMTexture<'o, P>: BMObject<'o, P>
+pub trait BMTextureDecl<'o, P>: BMObjectDecl<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized + 'o,
 {
@@ -597,7 +648,7 @@ where
     }
 }
 
-pub trait BMMaterial<'o, P>: BMObject<'o, P>
+pub trait BMMaterialDecl<'o, P>: BMObjectDecl<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized + 'o,
 {
@@ -633,27 +684,27 @@ where
         set_copyable_value(self, bmap::BMMaterial_SetSpecularPower, power)
     }
 
-    // YYC MARK:
-    // We use "value getter" to get CKID first then convert it to our instance.
-    // Same pattern for using "value setter".
-    fn get_texture(&self) -> Result<Option<Box<dyn BMTexture<'o, P> + 'o>>> {
-        let ckid: CKID = get_copyable_value(self, bmap::BMMaterial_GetTexture)?;
-        Ok(if ckid == INVALID_CKID {
-            None
-        } else {
-            Some(Box::new(BMTextureImpl::<'o, P>::new(
-                unsafe { self.get_pointer() },
-                ckid,
-            )))
-        })
-    }
-    fn set_texture(&mut self, texture: Option<&dyn BMTexture<'o, P>>) -> Result<()> {
-        let ckid: CKID = match texture {
-            Some(texture) => unsafe { texture.get_ckid() },
-            None => INVALID_CKID,
-        };
-        set_copyable_value(self, bmap::BMMaterial_SetTexture, ckid)
-    }
+    // // YYC MARK:
+    // // We use "value getter" to get CKID first then convert it to our instance.
+    // // Same pattern for using "value setter".
+    // fn get_texture(&self) -> Result<Option<Box<dyn BMTextureDecl<'o, P> + 'o>>> {
+    //     let ckid: CKID = get_copyable_value(self, bmap::BMMaterial_GetTexture)?;
+    //     Ok(if ckid == INVALID_CKID {
+    //         None
+    //     } else {
+    //         Some(Box::new(BMTexture::<'o, P>::new(
+    //             unsafe { self.get_pointer() },
+    //             ckid,
+    //         )))
+    //     })
+    // }
+    // fn set_texture(&mut self, texture: Option<&dyn BMTextureDecl<'o, P>>) -> Result<()> {
+    //     let ckid: CKID = match texture {
+    //         Some(texture) => unsafe { texture.get_ckid() },
+    //         None => INVALID_CKID,
+    //     };
+    //     set_copyable_value(self, bmap::BMMaterial_SetTexture, ckid)
+    // }
 
     fn get_texture_border_color(&self) -> Result<bmap::VxColor> {
         let intermediary = get_copyable_value(self, bmap::BMMaterial_GetTextureBorderColor)?;
@@ -765,7 +816,7 @@ where
     }
 }
 
-pub trait BMMesh<'o, P>: BMObject<'o, P>
+pub trait BMMeshDecl<'o, P>: BMObjectDecl<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized + 'o,
 {
@@ -782,13 +833,13 @@ where
     fn set_vertex_count(&mut self, count: u32) -> Result<()> {
         set_copyable_value(self, bmap::BMMesh_SetVertexCount, count)
     }
-    fn get_vertex_positions(&'o self) -> Result<StructIterator<'o, P, Self, bmap::VxVector3>> {
+    fn get_vertex_positions(&'o self) -> Result<StructIter<'o, P, Self, bmap::VxVector3>> {
         let ptr = get_copyable_value(self, bmap::BMMesh_GetVertexPositions)?;
         struct_iterator(self, ptr, self.get_vertex_count()?.try_into()?)
     }
 }
 
-pub trait BM3dEntity<'o, P>: BMObject<'o, P>
+pub trait BM3dEntityDecl<'o, P>: BMObjectDecl<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized + 'o,
 {
@@ -799,26 +850,26 @@ where
         set_copyable_value(self, bmap::BM3dEntity_SetWorldMatrix, mat)
     }
 
-    // YYC MARK:
-    // Same reason for the reuse of "value setter" and "value getter".
-    fn get_current_mesh(&self) -> Result<Option<Box<dyn BMMesh<'o, P> + 'o>>> {
-        let ckid: CKID = get_copyable_value(self, bmap::BM3dEntity_GetCurrentMesh)?;
-        Ok(if ckid == INVALID_CKID {
-            None
-        } else {
-            Some(Box::new(BMMeshImpl::<'o, P>::new(
-                unsafe { self.get_pointer() },
-                ckid,
-            )))
-        })
-    }
-    fn set_current_mesh(&mut self, mesh: Option<&dyn BMMesh<'o, P>>) -> Result<()> {
-        let ckid: CKID = match mesh {
-            Some(mesh) => unsafe { mesh.get_ckid() },
-            None => INVALID_CKID,
-        };
-        set_copyable_value(self, bmap::BM3dEntity_SetCurrentMesh, ckid)
-    }
+    // // YYC MARK:
+    // // Same reason for the reuse of "value setter" and "value getter".
+    // fn get_current_mesh(&self) -> Result<Option<Box<dyn BMMeshDecl<'o, P> + 'o>>> {
+    //     let ckid: CKID = get_copyable_value(self, bmap::BM3dEntity_GetCurrentMesh)?;
+    //     Ok(if ckid == INVALID_CKID {
+    //         None
+    //     } else {
+    //         Some(Box::new(BMMesh::<'o, P>::new(
+    //             unsafe { self.get_pointer() },
+    //             ckid,
+    //         )))
+    //     })
+    // }
+    // fn set_current_mesh(&mut self, mesh: Option<&dyn BMMeshDecl<'o, P>>) -> Result<()> {
+    //     let ckid: CKID = match mesh {
+    //         Some(mesh) => unsafe { mesh.get_ckid() },
+    //         None => INVALID_CKID,
+    //     };
+    //     set_copyable_value(self, bmap::BM3dEntity_SetCurrentMesh, ckid)
+    // }
 
     fn get_visibility(&self) -> Result<bool> {
         get_copyable_value(self, bmap::BM3dEntity_GetVisibility)
@@ -828,13 +879,13 @@ where
     }
 }
 
-pub trait BM3dObject<'o, P>: BM3dEntity<'o, P>
+pub trait BM3dObjectDecl<'o, P>: BM3dEntityDecl<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized + 'o,
 {
 }
 
-pub trait BMLight<'o, P>: BM3dEntity<'o, P>
+pub trait BMLightDecl<'o, P>: BM3dEntityDecl<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized + 'o,
 {
@@ -898,13 +949,13 @@ where
     }
 }
 
-pub trait BMTargetLight<'o, P>: BMLight<'o, P>
+pub trait BMTargetLightDecl<'o, P>: BMLightDecl<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized + 'o,
 {
 }
 
-pub trait BMCamera<'o, P>: BM3dEntity<'o, P>
+pub trait BMCameraDecl<'o, P>: BM3dEntityDecl<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized + 'o,
 {
@@ -963,240 +1014,426 @@ where
     }
 }
 
-pub trait BMTargetCamera<'o, P>: BMCamera<'o, P>
+pub trait BMTargetCameraDecl<'o, P>: BMCameraDecl<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized + 'o,
 {
 }
 
-pub trait BMGroup<'o, P>: BMObject<'o, P>
+pub trait BMGroupDecl<'o, P>: BMObjectDecl<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized + 'o,
 {
-}
-
-// endregion
-
-// region: Utility Macros
-
-macro_rules! libobj_struct {
-    ($name:ident) => {
-        #[derive(Debug)]
-        struct $name<'o, P>
-        where
-            P: AbstractPointer<'o> + ?Sized,
-        {
-            handle: PBMVOID,
-            id: CKID,
-            parent: PhantomData<&'o P>,
-        }
-    };
-}
-
-macro_rules! libobj_impl_new {
-    ($name:ident) => {
-        impl<'o, P> $name<'o, P>
-        where
-            P: AbstractPointer<'o> + ?Sized,
-        {
-            fn new(handle: PBMVOID, id: CKID) -> Self {
-                Self {
-                    handle,
-                    id,
-                    parent: PhantomData::<&'o P>,
-                }
-            }
-        }
-    };
-}
-
-macro_rules! libobj_impl_eq_ord_hash {
-    ($name:ident) => {
-        impl<'o, P> PartialEq for $name<'o, P>
-        where
-            P: AbstractPointer<'o> + ?Sized,
-        {
-            fn eq(&self, other: &Self) -> bool {
-                self.handle == other.handle && self.id == other.id
-            }
-        }
-
-        impl<'o, P> Eq for $name<'o, P> where P: AbstractPointer<'o> + ?Sized {}
-
-        impl<'o, P> PartialOrd for $name<'o, P>
-        where
-            P: AbstractPointer<'o> + ?Sized,
-        {
-            fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-                match self.handle.partial_cmp(&other.handle) {
-                    Some(Ordering::Equal) => self.id.partial_cmp(&other.id),
-                    other => other,
-                }
-            }
-        }
-
-        impl<'o, P> Ord for $name<'o, P>
-        where
-            P: AbstractPointer<'o> + ?Sized,
-        {
-            fn cmp(&self, other: &Self) -> Ordering {
-                match self.handle.cmp(&other.handle) {
-                    Ordering::Equal => self.id.cmp(&other.id),
-                    other => other,
-                }
-            }
-        }
-
-        impl<'o, P> Hash for $name<'o, P>
-        where
-            P: AbstractPointer<'o> + ?Sized,
-        {
-            fn hash<H: Hasher>(&self, state: &mut H) {
-                self.handle.hash(state);
-                self.id.hash(state);
-            }
-        }
-    };
-}
-
-macro_rules! libobj_impl_abstract_object {
-    ($name:ident) => {
-        impl<'o, P> AbstractPointer<'o> for $name<'o, P>
-        where
-            P: AbstractPointer<'o> + ?Sized,
-        {
-            unsafe fn get_pointer(&self) -> PBMVOID {
-                self.handle
-            }
-        }
-
-        impl<'o, P> AbstractObject<'o, P> for $name<'o, P>
-        where
-            P: AbstractPointer<'o> + ?Sized,
-        {
-            unsafe fn get_ckid(&self) -> CKID {
-                self.id
-            }
-        }
-    };
-}
-
-macro_rules! libobj_impl_obj_trait {
-    ($name:ident, $trait:ident) => {
-        impl<'o, P> $trait<'o, P> for $name<'o, P> where P: AbstractPointer<'o> + ?Sized {}
-    };
 }
 
 // endregion
 
 // region: Structs
 
-libobj_struct!(BMObjectImpl);
-libobj_impl_new!(BMObjectImpl);
-libobj_impl_eq_ord_hash!(BMObjectImpl);
-libobj_impl_abstract_object!(BMObjectImpl);
-libobj_impl_obj_trait!(BMObjectImpl, BMObject);
+libobj_struct!(BMObject);
+libobj_impl_new!(BMObject);
+libobj_impl_eq_ord_hash!(BMObject);
+libobj_impl_abstract_object!(BMObject);
+libobj_impl_obj_trait!(BMObject, BMObjectDecl);
 
-libobj_struct!(BMTextureImpl);
-libobj_impl_new!(BMTextureImpl);
-libobj_impl_eq_ord_hash!(BMTextureImpl);
-libobj_impl_abstract_object!(BMTextureImpl);
-libobj_impl_obj_trait!(BMTextureImpl, BMObject);
-libobj_impl_obj_trait!(BMTextureImpl, BMTexture);
+libobj_struct!(BMTexture);
+libobj_impl_new!(BMTexture);
+libobj_impl_eq_ord_hash!(BMTexture);
+libobj_impl_abstract_object!(BMTexture);
+libobj_impl_obj_trait!(BMTexture, BMObjectDecl);
+libobj_impl_obj_trait!(BMTexture, BMTextureDecl);
 
-libobj_struct!(BMMaterialImpl);
-libobj_impl_new!(BMMaterialImpl);
-libobj_impl_eq_ord_hash!(BMMaterialImpl);
-libobj_impl_abstract_object!(BMMaterialImpl);
-libobj_impl_obj_trait!(BMMaterialImpl, BMObject);
-libobj_impl_obj_trait!(BMMaterialImpl, BMMaterial);
+libobj_struct!(BMMaterial);
+libobj_impl_new!(BMMaterial);
+libobj_impl_eq_ord_hash!(BMMaterial);
+libobj_impl_abstract_object!(BMMaterial);
+libobj_impl_obj_trait!(BMMaterial, BMObjectDecl);
+libobj_impl_obj_trait!(BMMaterial, BMMaterialDecl);
 
-libobj_struct!(BMMeshImpl);
-libobj_impl_new!(BMMeshImpl);
-libobj_impl_eq_ord_hash!(BMMeshImpl);
-libobj_impl_abstract_object!(BMMeshImpl);
-libobj_impl_obj_trait!(BMMeshImpl, BMObject);
-libobj_impl_obj_trait!(BMMeshImpl, BMMesh);
+libobj_struct!(BMMesh);
+libobj_impl_new!(BMMesh);
+libobj_impl_eq_ord_hash!(BMMesh);
+libobj_impl_abstract_object!(BMMesh);
+libobj_impl_obj_trait!(BMMesh, BMObjectDecl);
+libobj_impl_obj_trait!(BMMesh, BMMeshDecl);
 
-libobj_struct!(BM3dEntityImpl);
-libobj_impl_new!(BM3dEntityImpl);
-libobj_impl_eq_ord_hash!(BM3dEntityImpl);
-libobj_impl_abstract_object!(BM3dEntityImpl);
-libobj_impl_obj_trait!(BM3dEntityImpl, BMObject);
-libobj_impl_obj_trait!(BM3dEntityImpl, BM3dEntity);
+libobj_struct!(BM3dEntity);
+libobj_impl_new!(BM3dEntity);
+libobj_impl_eq_ord_hash!(BM3dEntity);
+libobj_impl_abstract_object!(BM3dEntity);
+libobj_impl_obj_trait!(BM3dEntity, BMObjectDecl);
+libobj_impl_obj_trait!(BM3dEntity, BM3dEntityDecl);
 
-libobj_struct!(BM3dObjectImpl);
-libobj_impl_new!(BM3dObjectImpl);
-libobj_impl_eq_ord_hash!(BM3dObjectImpl);
-libobj_impl_abstract_object!(BM3dObjectImpl);
-libobj_impl_obj_trait!(BM3dObjectImpl, BMObject);
-libobj_impl_obj_trait!(BM3dObjectImpl, BM3dEntity);
-libobj_impl_obj_trait!(BM3dObjectImpl, BM3dObject);
+libobj_struct!(BM3dObject);
+libobj_impl_new!(BM3dObject);
+libobj_impl_eq_ord_hash!(BM3dObject);
+libobj_impl_abstract_object!(BM3dObject);
+libobj_impl_obj_trait!(BM3dObject, BMObjectDecl);
+libobj_impl_obj_trait!(BM3dObject, BM3dEntityDecl);
+libobj_impl_obj_trait!(BM3dObject, BM3dObjectDecl);
 
-libobj_struct!(BMLightImpl);
-libobj_impl_new!(BMLightImpl);
-libobj_impl_eq_ord_hash!(BMLightImpl);
-libobj_impl_abstract_object!(BMLightImpl);
-libobj_impl_obj_trait!(BMLightImpl, BMObject);
-libobj_impl_obj_trait!(BMLightImpl, BM3dEntity);
-libobj_impl_obj_trait!(BMLightImpl, BMLight);
+libobj_struct!(BMLight);
+libobj_impl_new!(BMLight);
+libobj_impl_eq_ord_hash!(BMLight);
+libobj_impl_abstract_object!(BMLight);
+libobj_impl_obj_trait!(BMLight, BMObjectDecl);
+libobj_impl_obj_trait!(BMLight, BM3dEntityDecl);
+libobj_impl_obj_trait!(BMLight, BMLightDecl);
 
-libobj_struct!(BMTargetLightImpl);
-libobj_impl_new!(BMTargetLightImpl);
-libobj_impl_eq_ord_hash!(BMTargetLightImpl);
-libobj_impl_abstract_object!(BMTargetLightImpl);
-libobj_impl_obj_trait!(BMTargetLightImpl, BMObject);
-libobj_impl_obj_trait!(BMTargetLightImpl, BM3dEntity);
-libobj_impl_obj_trait!(BMTargetLightImpl, BMLight);
-libobj_impl_obj_trait!(BMTargetLightImpl, BMTargetLight);
+libobj_struct!(BMTargetLight);
+libobj_impl_new!(BMTargetLight);
+libobj_impl_eq_ord_hash!(BMTargetLight);
+libobj_impl_abstract_object!(BMTargetLight);
+libobj_impl_obj_trait!(BMTargetLight, BMObjectDecl);
+libobj_impl_obj_trait!(BMTargetLight, BM3dEntityDecl);
+libobj_impl_obj_trait!(BMTargetLight, BMLightDecl);
+libobj_impl_obj_trait!(BMTargetLight, BMTargetLightDecl);
 
-libobj_struct!(BMCameraImpl);
-libobj_impl_new!(BMCameraImpl);
-libobj_impl_eq_ord_hash!(BMCameraImpl);
-libobj_impl_abstract_object!(BMCameraImpl);
-libobj_impl_obj_trait!(BMCameraImpl, BMObject);
-libobj_impl_obj_trait!(BMCameraImpl, BM3dEntity);
-libobj_impl_obj_trait!(BMCameraImpl, BMCamera);
+libobj_struct!(BMCamera);
+libobj_impl_new!(BMCamera);
+libobj_impl_eq_ord_hash!(BMCamera);
+libobj_impl_abstract_object!(BMCamera);
+libobj_impl_obj_trait!(BMCamera, BMObjectDecl);
+libobj_impl_obj_trait!(BMCamera, BM3dEntityDecl);
+libobj_impl_obj_trait!(BMCamera, BMCameraDecl);
 
-libobj_struct!(BMTargetCameraImpl);
-libobj_impl_new!(BMTargetCameraImpl);
-libobj_impl_eq_ord_hash!(BMTargetCameraImpl);
-libobj_impl_abstract_object!(BMTargetCameraImpl);
-libobj_impl_obj_trait!(BMTargetCameraImpl, BMObject);
-libobj_impl_obj_trait!(BMTargetCameraImpl, BM3dEntity);
-libobj_impl_obj_trait!(BMTargetCameraImpl, BMCamera);
-libobj_impl_obj_trait!(BMTargetCameraImpl, BMTargetCamera);
+libobj_struct!(BMTargetCamera);
+libobj_impl_new!(BMTargetCamera);
+libobj_impl_eq_ord_hash!(BMTargetCamera);
+libobj_impl_abstract_object!(BMTargetCamera);
+libobj_impl_obj_trait!(BMTargetCamera, BMObjectDecl);
+libobj_impl_obj_trait!(BMTargetCamera, BM3dEntityDecl);
+libobj_impl_obj_trait!(BMTargetCamera, BMCameraDecl);
+libobj_impl_obj_trait!(BMTargetCamera, BMTargetCameraDecl);
 
-libobj_struct!(BMGroupImpl);
-libobj_impl_new!(BMGroupImpl);
-libobj_impl_eq_ord_hash!(BMGroupImpl);
-libobj_impl_abstract_object!(BMGroupImpl);
-libobj_impl_obj_trait!(BMGroupImpl, BMObject);
-libobj_impl_obj_trait!(BMGroupImpl, BMGroup);
+libobj_struct!(BMGroup);
+libobj_impl_new!(BMGroup);
+libobj_impl_eq_ord_hash!(BMGroup);
+libobj_impl_abstract_object!(BMGroup);
+libobj_impl_obj_trait!(BMGroup, BMObjectDecl);
+libobj_impl_obj_trait!(BMGroup, BMGroupDecl);
 
 // endregion
+
+// endregion
+
+// region: BMFileReader
+
+libptr_struct!(BMFileReader);
+libptr_impl_eq_ord_hash!(BMFileReader);
+libptr_impl_abstract_pointer!(BMFileReader);
+
+impl<'p> BMFileReader<'p> {
+    fn new<I, T>(
+        _: &'p BMap,
+        file_name: &str,
+        temp_folder: &str,
+        texture_folder: &str,
+        encodings: I,
+    ) -> Result<Self>
+    where
+        I: Iterator<Item = T>,
+        T: Into<Vec<u8>>,
+    {
+        let file_name = unsafe { marshaler::to_native_string(file_name)? };
+        let temp_folder = unsafe { marshaler::to_native_string(temp_folder)? };
+        let texture_folder = unsafe { marshaler::to_native_string(texture_folder)? };
+        let encodings = unsafe { marshaler::to_native_string_array(encodings)? };
+
+        let mut file = MaybeUninit::<PBMVOID>::uninit();
+        bmap_exec!(bmap::BMFile_Load(
+            file_name.as_raw(),
+            temp_folder.as_raw(),
+            texture_folder.as_raw(),
+            bmap_rs_callback,
+            encodings.len().try_into()?,
+            encodings.as_raw(),
+            arg_out!(file.as_mut_ptr(), PBMVOID)
+        ));
+
+        Ok(Self {
+            handle: unsafe { file.assume_init() },
+            phantom: PhantomData::<&'p BMap>,
+        })
+    }
+}
+
+impl<'p> Drop for BMFileReader<'p> {
+    fn drop(&mut self) {
+        let _ = unsafe { bmap::BMFile_Free(self.handle) };
+    }
+}
+
+type FnProtoGetCount = unsafe extern "C" fn(PBMVOID, param_out!(CKDWORD)) -> BMBOOL;
+type FnProtoGetObject =
+    unsafe extern "C" fn(PBMVOID, param_in!(CKDWORD), param_out!(CKID)) -> BMBOOL;
+
+pub struct FileObjectIter<'p, O>
+where
+    O: AbstractObject<'p, BMFileReader<'p>>,
+{
+    fget: FnProtoGetObject,
+    cnt: usize,
+    i: usize,
+    parent: &'p BMFileReader<'p>,
+    obj: PhantomData<O>,
+}
+
+impl<'p, O> FileObjectIter<'p, O>
+where
+    O: AbstractObject<'p, BMFileReader<'p>>,
+{
+    fn new(parent: &'p BMFileReader<'p>, fget: FnProtoGetObject, cnt: usize) -> Self {
+        Self {
+            fget: fget,
+            cnt: cnt,
+            i: 0,
+            parent: parent,
+            obj: PhantomData,
+        }
+    }
+}
+
+impl<'p, O> Iterator for FileObjectIter<'p, O>
+where
+    O: AbstractObject<'p, BMFileReader<'p>>,
+{
+    type Item = Result<O>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.i >= self.cnt {
+            None
+        } else {
+            let mut ckid = MaybeUninit::<CKID>::uninit();
+            let i = match self.i.try_into() {
+                Ok(v) => v,
+                Err(e) => return Some(Err(Error::from(e))),
+            };
+
+            let rv = unsafe {
+                (self.fget)(
+                    self.parent.get_pointer(),
+                    i,
+                    arg_out!(ckid.as_mut_ptr(), CKID),
+                )
+            };
+            if !rv {
+                return Some(Err(Error::BadCall));
+            }
+
+            let ckid = unsafe { ckid.assume_init() };
+            self.i += 1;
+
+            Some(Ok(unsafe {
+                O::new(self.parent, self.parent.get_pointer(), ckid)
+            }))
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        libiter_size_hint_body!(self.i, self.cnt)
+    }
+}
+
+impl<'p, O> FusedIterator for FileObjectIter<'p, O> where O: AbstractObject<'p, BMFileReader<'p>> {}
+
+impl<'p, O> ExactSizeIterator for FileObjectIter<'p, O>
+where
+    O: AbstractObject<'p, BMFileReader<'p>>,
+{
+    fn len(&self) -> usize {
+        libiter_len_body!(self.i, self.cnt)
+    }
+}
+
+impl<'p> BMFileReader<'p> {
+    fn get_generic_object_count(&self, fc: FnProtoGetCount) -> Result<usize>
+    {
+        let mut cnt = MaybeUninit::<CKDWORD>::uninit();
+        bmap_exec!(fc(self.get_pointer(), arg_out!(cnt.as_mut_ptr(), CKDWORD)));
+
+        let cnt = unsafe { cnt.assume_init() };
+        Ok(cnt.try_into()?)
+    }
+    fn get_generic_objects<O>(
+        &'p self,
+        fc: FnProtoGetCount,
+        fo: FnProtoGetObject,
+    ) -> Result<FileObjectIter<'p, O>>
+    where
+        O: AbstractObject<'p, BMFileReader<'p>>,
+    {
+        let cnt = self.get_generic_object_count(fc)?;
+        Ok(FileObjectIter::new(self, fo, cnt))
+    }
+
+    pub fn get_texture_count(&'p self) -> Result<usize> {
+        self.get_generic_object_count(bmap::BMFile_GetTextureCount)
+    }
+    pub fn get_textures(&'p self) -> Result<FileObjectIter<'p, BMTexture<'p, Self>>> {
+        self.get_generic_objects(bmap::BMFile_GetTextureCount, bmap::BMFile_GetTexture)
+    }
+    pub fn get_material_count(&'p self) -> Result<usize> {
+        self.get_generic_object_count(bmap::BMFile_GetMaterialCount)
+    }
+    pub fn get_materials(&'p self) -> Result<FileObjectIter<'p, BMMaterial<'p, Self>>> {
+        self.get_generic_objects(bmap::BMFile_GetMaterialCount, bmap::BMFile_GetMaterial)
+    }
+    pub fn get_mesh_count(&'p self) -> Result<usize> {
+        self.get_generic_object_count(bmap::BMFile_GetMeshCount)
+    }
+    pub fn get_meshes(&'p self) -> Result<FileObjectIter<'p, BMMesh<'p, Self>>> {
+        self.get_generic_objects(bmap::BMFile_GetMeshCount, bmap::BMFile_GetMesh)
+    }
+    pub fn get_3dobject_count(&'p self) -> Result<usize> {
+        self.get_generic_object_count(bmap::BMFile_Get3dObjectCount)
+    }
+    pub fn get_3dobjects(&'p self) -> Result<FileObjectIter<'p, BM3dObject<'p, Self>>> {
+        self.get_generic_objects(bmap::BMFile_Get3dObjectCount, bmap::BMFile_Get3dObject)
+    }
+    pub fn get_group_count(&'p self) -> Result<usize> {
+        self.get_generic_object_count(bmap::BMFile_GetGroupCount)
+    }
+    pub fn get_groups(&'p self) -> Result<FileObjectIter<'p, BMGroup<'p, Self>>> {
+        self.get_generic_objects(bmap::BMFile_GetGroupCount, bmap::BMFile_GetGroup)
+    }
+    pub fn get_target_light_count(&'p self) -> Result<usize> {
+        self.get_generic_object_count(bmap::BMFile_GetTargetLightCount)
+    }
+    pub fn get_target_lights(&'p self) -> Result<FileObjectIter<'p, BMTargetLight<'p, Self>>> {
+        self.get_generic_objects(bmap::BMFile_GetTargetLightCount, bmap::BMFile_GetTargetLight)
+    }
+    pub fn get_target_camera_count(&'p self) -> Result<usize> {
+        self.get_generic_object_count(bmap::BMFile_GetTargetCameraCount)
+    }
+    pub fn get_target_cameras(&'p self) -> Result<FileObjectIter<'p, BMTargetCamera<'p, Self>>> {
+        self.get_generic_objects(bmap::BMFile_GetTargetCameraCount, bmap::BMFile_GetTargetCamera)
+    }
+}
+
+// endregion
+
+// region: BMFileWriter
+
+libptr_struct!(BMFileWriter);
+libptr_impl_eq_ord_hash!(BMFileWriter);
+libptr_impl_abstract_pointer!(BMFileWriter);
+
+impl<'p> BMFileWriter<'p> {
+    fn new<I, T>(_: &'p BMap, temp_folder: &str, texture_folder: &str, encodings: I) -> Result<Self>
+    where
+        I: Iterator<Item = T>,
+        T: Into<Vec<u8>>,
+    {
+        let temp_folder = unsafe { marshaler::to_native_string(temp_folder)? };
+        let texture_folder = unsafe { marshaler::to_native_string(texture_folder)? };
+        let encodings = unsafe { marshaler::to_native_string_array(encodings)? };
+
+        let mut file = MaybeUninit::<PBMVOID>::uninit();
+        bmap_exec!(bmap::BMFile_Create(
+            temp_folder.as_raw(),
+            texture_folder.as_raw(),
+            bmap_rs_callback,
+            encodings.len().try_into()?,
+            encodings.as_raw(),
+            arg_out!(file.as_mut_ptr(), PBMVOID)
+        ));
+
+        Ok(Self {
+            handle: unsafe { file.assume_init() },
+            phantom: PhantomData::<&'p BMap>,
+        })
+    }
+}
+
+impl<'p> Drop for BMFileWriter<'p> {
+    fn drop(&mut self) {
+        let _ = unsafe { bmap::BMFile_Free(self.handle) };
+    }
+}
+
+impl<'p> BMFileWriter<'p> {
+    pub fn save(
+        &self,
+        filename: &str,
+        texture_save_opt: bmap::CK_TEXTURE_SAVEOPTIONS,
+        compress_level: Option<CKINT>,
+    ) -> Result<()> {
+        let filename = unsafe { marshaler::to_native_string(filename)? };
+        let use_compress = compress_level.is_some();
+        let compress_level = compress_level.unwrap_or(5);
+
+        bmap_exec!(bmap::BMFile_Save(
+            self.get_pointer(),
+            filename.as_raw(),
+            texture_save_opt,
+            use_compress,
+            compress_level
+        ));
+
+        Ok(())
+    }
+}
+
+type FnProtoCreateObject = unsafe extern "C" fn(PBMVOID, param_out!(CKID)) -> BMBOOL;
+
+impl<'p> BMFileWriter<'p> {
+    fn create_generic_objects<O>(
+        &'p mut self,
+        fc: FnProtoCreateObject,
+    ) -> Result<O>
+    where
+        O: AbstractObject<'p, BMFileWriter<'p>>,
+    {
+        let mut ckid = MaybeUninit::<CKID>::uninit();
+        bmap_exec!(fc(self.get_pointer(), arg_out!(ckid.as_mut_ptr(), CKID)));
+
+        let ckid = unsafe { ckid.assume_init() };
+        Ok(unsafe { O::new(self, self.get_pointer(), ckid) })
+    }
+
+    pub fn create_texture(&'p mut self) -> Result<BMTexture<'p, Self>> {
+        self.create_generic_objects(bmap::BMFile_CreateTexture)
+    }
+    pub fn create_material(&'p mut self) -> Result<BMMaterial<'p, Self>> {
+        self.create_generic_objects(bmap::BMFile_CreateMaterial)
+    }
+    pub fn create_mesh(&'p mut self) -> Result<BMMesh<'p, Self>> {
+        self.create_generic_objects(bmap::BMFile_CreateMesh)
+    }
+    pub fn create_3dobject(&'p mut self) -> Result<BM3dObject<'p, Self>> {
+        self.create_generic_objects(bmap::BMFile_Create3dObject)
+    }
+    pub fn create_group(&'p mut self) -> Result<BMGroup<'p, Self>> {
+        self.create_generic_objects(bmap::BMFile_CreateGroup)
+    }
+    pub fn create_target_light(&'p mut self) -> Result<BMTargetLight<'p, Self>> {
+        self.create_generic_objects(bmap::BMFile_CreateTargetLight)
+    }
+    pub fn create_target_camera(&'p mut self) -> Result<BMTargetCamera<'p, Self>> {
+        self.create_generic_objects(bmap::BMFile_CreateTargetCamera)
+    }
+}
 
 // endregion
 
 // region: BMMeshTrans
 
-pub struct BMMeshTrans<'b> {
-    handle: PBMVOID,
-    phantom: PhantomData<&'b BMap>,
-}
+libptr_struct!(BMMeshTrans);
+libptr_impl_eq_ord_hash!(BMMeshTrans);
+libptr_impl_abstract_pointer!(BMMeshTrans);
 
-impl<'b> BMMeshTrans<'b> {
-    fn new() -> Result<Self> {
+impl<'p> BMMeshTrans<'p> {
+    fn new(_: &'p BMap) -> Result<Self> {
         let mut trans = MaybeUninit::<PBMVOID>::uninit();
         bmap_exec!(bmap::BMMeshTrans_New(arg_out!(trans.as_mut_ptr(), PBMVOID)));
+
         Ok(Self {
             handle: unsafe { trans.assume_init() },
-            phantom: PhantomData::<&'b BMap>,
+            phantom: PhantomData::<&'p BMap>,
         })
     }
 }
-
-impl<'b> BMMeshTrans<'b> {}
 
 impl<'b> Drop for BMMeshTrans<'b> {
     fn drop(&mut self) {
@@ -1204,10 +1441,6 @@ impl<'b> Drop for BMMeshTrans<'b> {
     }
 }
 
-impl<'b> AbstractPointer<'b> for BMMeshTrans<'b> {
-    unsafe fn get_pointer(&self) -> PBMVOID {
-        self.handle
-    }
-}
+impl<'b> BMMeshTrans<'b> {}
 
 // endregion

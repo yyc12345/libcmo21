@@ -66,10 +66,8 @@ mod cli {
 
 mod testsuits {
     use super::bmap;
-    pub use common;
-    pub use eq;
 
-    mod common {
+    pub mod common {
         use super::bmap;
 
         pub fn test(reader: bmap::BMFileReader) {
@@ -217,23 +215,31 @@ mod testsuits {
         }
     }
 
-    mod eq {
+    pub mod eq {
         use super::bmap;
-        use std::collections::{HashSet, BTreeSet};
+        use std::collections::{BTreeSet, HashSet};
 
         pub fn test(reader: bmap::BMFileReader) {
             // Check requirements
             assert!(
-                reader.get_3dobject_count() >= 2,
+                reader.get_3dobject_count().unwrap() >= 2,
                 r#"Invalid file for test Eq.
 We can not perform Eq test because the length of 3dObject is too short (must greater than 2). Please choose another file to perform."#
             );
 
             // Prepare variables
-            let all_3dobjects = reader.get_3dobjects().collect();
+            let all_3dobjects = reader
+                .get_3dobjects()
+                .unwrap()
+                .map(|o| o.unwrap())
+                .collect::<Vec<_>>();
             let first_3dobj = &all_3dobjects[0];
             let second_3dobj = &all_3dobjects[1];
-            let all_3dobjects_again = reader.get_3dobjects().collect();
+            let all_3dobjects_again = reader
+                .get_3dobjects()
+                .unwrap()
+                .map(|o| o.unwrap())
+                .collect::<Vec<_>>();
             let first_3dobj_again = &all_3dobjects_again[0];
 
             // Test HashSet
