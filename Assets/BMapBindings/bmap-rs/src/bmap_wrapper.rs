@@ -213,7 +213,7 @@ macro_rules! libobj_impl_new {
             }
             fn with_sibling<AO>(_: &'o AO, handle: PBMVOID, id: CKID) -> Self
             where
-                AO: AbstractObject<'o, P>,
+                AO: AbstractObject<'o, P> + ?Sized,
             {
                 Self {
                     handle,
@@ -684,27 +684,28 @@ where
         set_copyable_value(self, bmap::BMMaterial_SetSpecularPower, power)
     }
 
-    // // YYC MARK:
-    // // We use "value getter" to get CKID first then convert it to our instance.
-    // // Same pattern for using "value setter".
-    // fn get_texture(&self) -> Result<Option<Box<dyn BMTextureDecl<'o, P> + 'o>>> {
-    //     let ckid: CKID = get_copyable_value(self, bmap::BMMaterial_GetTexture)?;
-    //     Ok(if ckid == INVALID_CKID {
-    //         None
-    //     } else {
-    //         Some(Box::new(BMTexture::<'o, P>::new(
-    //             unsafe { self.get_pointer() },
-    //             ckid,
-    //         )))
-    //     })
-    // }
-    // fn set_texture(&mut self, texture: Option<&dyn BMTextureDecl<'o, P>>) -> Result<()> {
-    //     let ckid: CKID = match texture {
-    //         Some(texture) => unsafe { texture.get_ckid() },
-    //         None => INVALID_CKID,
-    //     };
-    //     set_copyable_value(self, bmap::BMMaterial_SetTexture, ckid)
-    // }
+    // YYC MARK:
+    // We use "value getter" to get CKID first then convert it to our instance.
+    // Same pattern for using "value setter".
+    fn get_texture(&'o self) -> Result<Option<BMTexture<'o, P>>> {
+        let ckid: CKID = get_copyable_value(self, bmap::BMMaterial_GetTexture)?;
+        Ok(if ckid == INVALID_CKID {
+            None
+        } else {
+            Some(BMTexture::with_sibling(
+                self,
+                unsafe { self.get_pointer() },
+                ckid,
+            ))
+        })
+    }
+    fn set_texture(&mut self, texture: Option<&BMTexture<'o, P>>) -> Result<()> {
+        let ckid: CKID = match texture {
+            Some(texture) => unsafe { texture.get_ckid() },
+            None => INVALID_CKID,
+        };
+        set_copyable_value(self, bmap::BMMaterial_SetTexture, ckid)
+    }
 
     fn get_texture_border_color(&self) -> Result<bmap::VxColor> {
         let intermediary = get_copyable_value(self, bmap::BMMaterial_GetTextureBorderColor)?;
@@ -850,26 +851,27 @@ where
         set_copyable_value(self, bmap::BM3dEntity_SetWorldMatrix, mat)
     }
 
-    // // YYC MARK:
-    // // Same reason for the reuse of "value setter" and "value getter".
-    // fn get_current_mesh(&self) -> Result<Option<Box<dyn BMMeshDecl<'o, P> + 'o>>> {
-    //     let ckid: CKID = get_copyable_value(self, bmap::BM3dEntity_GetCurrentMesh)?;
-    //     Ok(if ckid == INVALID_CKID {
-    //         None
-    //     } else {
-    //         Some(Box::new(BMMesh::<'o, P>::new(
-    //             unsafe { self.get_pointer() },
-    //             ckid,
-    //         )))
-    //     })
-    // }
-    // fn set_current_mesh(&mut self, mesh: Option<&dyn BMMeshDecl<'o, P>>) -> Result<()> {
-    //     let ckid: CKID = match mesh {
-    //         Some(mesh) => unsafe { mesh.get_ckid() },
-    //         None => INVALID_CKID,
-    //     };
-    //     set_copyable_value(self, bmap::BM3dEntity_SetCurrentMesh, ckid)
-    // }
+    // YYC MARK:
+    // Same reason for the reuse of "value setter" and "value getter".
+    fn get_current_mesh(&'o self) -> Result<Option<BMMesh<'o, P>>> {
+        let ckid: CKID = get_copyable_value(self, bmap::BM3dEntity_GetCurrentMesh)?;
+        Ok(if ckid == INVALID_CKID {
+            None
+        } else {
+            Some(BMMesh::with_sibling(
+                self,
+                unsafe { self.get_pointer() },
+                ckid,
+            ))
+        })
+    }
+    fn set_current_mesh(&mut self, mesh: Option<BMMesh<'o, P>>) -> Result<()> {
+        let ckid: CKID = match mesh {
+            Some(mesh) => unsafe { mesh.get_ckid() },
+            None => INVALID_CKID,
+        };
+        set_copyable_value(self, bmap::BM3dEntity_SetCurrentMesh, ckid)
+    }
 
     fn get_visibility(&self) -> Result<bool> {
         get_copyable_value(self, bmap::BM3dEntity_GetVisibility)
@@ -1247,8 +1249,7 @@ where
 }
 
 impl<'p> BMFileReader<'p> {
-    fn get_generic_object_count(&self, fc: FnProtoGetCount) -> Result<usize>
-    {
+    fn get_generic_object_count(&self, fc: FnProtoGetCount) -> Result<usize> {
         let mut cnt = MaybeUninit::<CKDWORD>::uninit();
         bmap_exec!(fc(self.get_pointer(), arg_out!(cnt.as_mut_ptr(), CKDWORD)));
 
@@ -1301,13 +1302,19 @@ impl<'p> BMFileReader<'p> {
         self.get_generic_object_count(bmap::BMFile_GetTargetLightCount)
     }
     pub fn get_target_lights(&'p self) -> Result<FileObjectIter<'p, BMTargetLight<'p, Self>>> {
-        self.get_generic_objects(bmap::BMFile_GetTargetLightCount, bmap::BMFile_GetTargetLight)
+        self.get_generic_objects(
+            bmap::BMFile_GetTargetLightCount,
+            bmap::BMFile_GetTargetLight,
+        )
     }
     pub fn get_target_camera_count(&'p self) -> Result<usize> {
         self.get_generic_object_count(bmap::BMFile_GetTargetCameraCount)
     }
     pub fn get_target_cameras(&'p self) -> Result<FileObjectIter<'p, BMTargetCamera<'p, Self>>> {
-        self.get_generic_objects(bmap::BMFile_GetTargetCameraCount, bmap::BMFile_GetTargetCamera)
+        self.get_generic_objects(
+            bmap::BMFile_GetTargetCameraCount,
+            bmap::BMFile_GetTargetCamera,
+        )
     }
 }
 
@@ -1378,10 +1385,7 @@ impl<'p> BMFileWriter<'p> {
 type FnProtoCreateObject = unsafe extern "C" fn(PBMVOID, param_out!(CKID)) -> BMBOOL;
 
 impl<'p> BMFileWriter<'p> {
-    fn create_generic_objects<O>(
-        &'p mut self,
-        fc: FnProtoCreateObject,
-    ) -> Result<O>
+    fn create_generic_objects<O>(&'p mut self, fc: FnProtoCreateObject) -> Result<O>
     where
         O: AbstractObject<'p, BMFileWriter<'p>>,
     {

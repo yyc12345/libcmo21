@@ -1,4 +1,5 @@
 use bmap_rs::bmap_wrapper as bmap;
+use std::io::Read;
 use std::path::PathBuf;
 
 #[test]
@@ -22,11 +23,21 @@ fn test_complete() {
     // Start testbench
     let file_name = cliopts.file_name.clone();
     let temp_folder = tempfile::tempdir().unwrap();
-    let texture_folder = cliopts.ballance_dir.clone();
+    let mut texture_folder = cliopts.ballance_dir.clone();
     texture_folder.push("Textures");
     let encodings = cliopts.encodings.clone();
     bmap::BMap::with_bmap(|b| {
-        let r = b.create_file_reader("", "", "", std::iter::once(""));
+        let r = b
+            .create_file_reader(
+                file_name.to_str().unwrap(),
+                temp_folder.path().to_str().unwrap(),
+                texture_folder.to_str().unwrap(),
+                encodings.iter().map(|e| e.as_str()),
+            )
+            .unwrap();
+
+        testsuits::common::test(&r);
+        testsuits::eq::test(&r);
     });
     drop(temp_folder);
 }
@@ -58,7 +69,10 @@ mod cli {
             Self {
                 file_name: PathBuf::from(file_name),
                 ballance_dir: PathBuf::from(ballance_dir),
-                encodings: encodings.split(",").collect(),
+                encodings: encodings
+                    .split(",")
+                    .map(|e| e.to_string())
+                    .collect::<Vec<_>>(),
             }
         }
     }
@@ -69,8 +83,12 @@ mod testsuits {
 
     pub mod common {
         use super::bmap;
+        use bmap::{
+            BM3dEntityDecl, BMCameraDecl, BMLightDecl, BMMaterialDecl, BMMeshDecl, BMObjectDecl,
+            BMTextureDecl,
+        };
 
-        pub fn test(reader: bmap::BMFileReader) {
+        pub fn test(reader: &bmap::BMFileReader) {
             println!("===== Groups =====");
             test_group(reader);
             println!("===== 3dObjects =====");
@@ -88,128 +106,139 @@ mod testsuits {
             println!("===== END =====");
         }
 
-        fn test_group(reader: bmap::BMFileReader) {
-            for gp in reader.get_groups() {
-                println!("{}", gp.get_name());
+        #[rustfmt::skip]
+        fn test_group(reader: &bmap::BMFileReader) {
+            for gp in reader.get_groups().unwrap() {
+                let gp = gp.unwrap();
+
+                println!("{:?}", gp.get_name().unwrap());
                 for gp_item in gp.get_objects() {
                     println!("\t{}", gp_item.get_name());
                 }
             }
         }
 
-        fn test_3dobject(reader: bmap::BMFileReader) {
-            for obj in reader.get_3dobjects() {
-                println!("{}", obj.get_name());
+        #[rustfmt::skip]
+        fn test_3dobject(reader: &bmap::BMFileReader) {
+            for obj in reader.get_3dobjects().unwrap() {
+                let obj = obj.unwrap();
 
-                let current_mesh = obj.get_current_mesh();
-                let mesh_name = if let Some(mesh) = current_mesh {
-                    mesh.get_name()
-                } else {
-                    "<null>".to_string()
+                println!("{:?}", obj.get_name().unwrap());
+
+                let current_mesh = obj.get_current_mesh().unwrap();
+                let mesh_name = match current_mesh {
+                    Some(mesh) => format!("{:?}", mesh.get_name()),
+                    None => "<null>".to_string(),
                 };
                 println!("\tMesh: {}", mesh_name);
-                println!("\tVisibility: {}", obj.get_visibility());
-                println!("\tMatrix: {:?}", obj.get_world_matrix().to_const());
+                println!("\tVisibility: {}", obj.get_visibility().unwrap());
+                println!("\tMatrix: {:?}", obj.get_world_matrix().unwrap());
             }
         }
 
-        fn test_mesh(reader: bmap::BMFileReader) {
-            for mesh in reader.get_meshs() {
-                println!("{}", mesh.get_name());
+        #[rustfmt::skip]
+        fn test_mesh(reader: &bmap::BMFileReader) {
+            for mesh in reader.get_meshes().unwrap() {
+                let mesh = mesh.unwrap();
 
-                println!("\tLit Mode: {}", mesh.get_lit_mode());
-                println!("\tVertex Count: {}", mesh.get_vertex_count());
-                println!("\tFace Count: {}", mesh.get_face_count());
-                println!("\tMaterial Slot Count: {}", mesh.get_material_slot_count());
+                println!("{:?}", mesh.get_name().unwrap());
+
+                println!("\tLit Mode: {:?}", mesh.get_lit_mode().unwrap());
+                println!("\tVertex Count: {}", mesh.get_vertex_count().unwrap());
+                println!("\tFace Count: {}", mesh.get_face_count().unwrap());
+                println!("\tMaterial Slot Count: {}", mesh.get_material_slot_count().unwrap());
             }
         }
 
-        fn test_material(reader: bmap::BMFileReader) {
-            for mtl in reader.get_materials() {
-                println!("{}", mtl.get_name());
+        #[rustfmt::skip]
+        fn test_material(reader: &bmap::BMFileReader) {
+            for mtl in reader.get_materials().unwrap() {
+                let mtl = mtl.unwrap();
 
-                println!("\tDiffuse: {:?}", mtl.get_diffuse().to_const_rgba());
-                println!("\tAmbient: {:?}", mtl.get_ambient().to_const_rgba());
-                println!("\tSpecular: {:?}", mtl.get_specular().to_const_rgba());
-                println!("\tEmissive: {:?}", mtl.get_emissive().to_const_rgba());
+                println!("{:?}", mtl.get_name().unwrap());
 
-                println!("\tSpecular Power: {}", mtl.get_specular_power());
+                println!("\tDiffuse: {:?}", mtl.get_diffuse().unwrap());
+                println!("\tAmbient: {:?}", mtl.get_ambient().unwrap());
+                println!("\tSpecular: {:?}", mtl.get_specular().unwrap());
+                println!("\tEmissive: {:?}", mtl.get_emissive().unwrap());
 
-                println!(
-                    "\tTexture Border Color: {:?}",
-                    mtl.get_texture_border_color().to_const_rgba()
-                );
+                println!("\tSpecular Power: {}", mtl.get_specular_power().unwrap());
 
-                println!("\tTexture Blend Mode: {}", mtl.get_texture_blend_mode());
-                println!("\tTexture Min Mode: {}", mtl.get_texture_min_mode());
-                println!("\tTexture Mag Mode: {}", mtl.get_texture_mag_mode());
-                println!("\tSource Blend: {}", mtl.get_source_blend());
-                println!("\tDest Blend: {}", mtl.get_dest_blend());
-                println!("\tFill Mode: {}", mtl.get_fill_mode());
-                println!("\tShade Mode: {}", mtl.get_shade_mode());
+                println!("\tTexture Border Color: {:?}", mtl.get_texture_border_color().unwrap());
 
-                println!("\tAlpha Test Enabled: {}", mtl.get_alpha_test_enabled());
-                println!("\tAlpha Blend Enabled: {}", mtl.get_alpha_blend_enabled());
-                println!(
-                    "\tPerspective Correction Enabled: {}",
-                    mtl.get_perspective_correction_enabled()
-                );
-                println!("\tZ Write Enabled: {}", mtl.get_z_write_enabled());
-                println!("\tTwo Sided Enabled: {}", mtl.get_two_sided_enabled());
+                println!("\tTexture Blend Mode: {:?}", mtl.get_texture_blend_mode().unwrap());
+                println!("\tTexture Min Mode: {:?}", mtl.get_texture_min_mode().unwrap());
+                println!("\tTexture Mag Mode: {:?}", mtl.get_texture_mag_mode().unwrap());
+                println!("\tSource Blend: {:?}", mtl.get_source_blend().unwrap());
+                println!("\tDest Blend: {:?}", mtl.get_dest_blend().unwrap());
+                println!("\tFill Mode: {:?}", mtl.get_fill_mode().unwrap());
+                println!("\tShade Mode: {:?}", mtl.get_shade_mode().unwrap());
 
-                println!("\tAlpha Ref: {}", mtl.get_alpha_ref());
+                println!("\tAlpha Test Enabled: {}", mtl.get_alpha_test_enabled().unwrap());
+                println!("\tAlpha Blend Enabled: {}", mtl.get_alpha_blend_enabled().unwrap());
+                println!("\tPerspective Correction Enabled: {}", mtl.get_perspective_correction_enabled().unwrap());
+                println!("\tZ Write Enabled: {}", mtl.get_z_write_enabled().unwrap());
+                println!("\tTwo Sided Enabled: {}", mtl.get_two_sided_enabled().unwrap());
 
-                println!("\tAlpha Func: {}", mtl.get_alpha_func());
-                println!("\tZ Func: {}", mtl.get_z_func());
+                println!("\tAlpha Ref: {}", mtl.get_alpha_ref().unwrap());
+
+                println!("\tAlpha Func: {:?}", mtl.get_alpha_func().unwrap());
+                println!("\tZ Func: {:?}", mtl.get_z_func().unwrap());
             }
         }
 
-        fn test_texture(reader: bmap::BMFileReader) {
-            for tex in reader.get_textures() {
-                println!("{}", tex.get_name());
+        #[rustfmt::skip]
+        fn test_texture(reader: &bmap::BMFileReader) {
+            for tex in reader.get_textures().unwrap() {
+                let tex = tex.unwrap();
 
-                println!("\tFile Name: {}", tex.get_file_name());
-                println!("\tSave Options: {}", tex.get_save_options());
-                println!("\tVideo Format: {}", tex.get_video_format());
+                println!("{:?}", tex.get_name().unwrap());
+
+                println!("\tFile Name: {:?}", tex.get_file_name().unwrap());
+                println!("\tSave Options: {:?}", tex.get_save_options().unwrap());
+                println!("\tVideo Format: {:?}", tex.get_video_format().unwrap());
             }
         }
 
-        fn test_target_light(reader: bmap::BMFileReader) {
-            for lit in reader.get_target_lights() {
-                println!("{}", lit.get_name());
+        #[rustfmt::skip]
+        fn test_target_light(reader: &bmap::BMFileReader) {
+            for lit in reader.get_target_lights().unwrap() {
+                let lit = lit.unwrap();
 
-                println!("\tVisibility: {}", lit.get_visibility());
-                println!("\tMatrix: {:?}", lit.get_world_matrix().to_const());
+                println!("{:?}", lit.get_name().unwrap());
 
-                println!("\tType: {}", lit.get_type());
-                println!("\tColor: {:?}", lit.get_color().to_const_rgba());
-                println!("\tConstant Attenuation: {}", lit.get_constant_attenuation());
-                println!("\tLinear Attenuation: {}", lit.get_linear_attenuation());
-                println!(
-                    "\tQuadratic Attenuation: {}",
-                    lit.get_quadratic_attenuation()
-                );
-                println!("\tRange: {}", lit.get_range());
-                println!("\tHot Spot: {}", lit.get_hot_spot());
-                println!("\tFalloff: {}", lit.get_falloff());
-                println!("\tFalloff Shape: {}", lit.get_falloff_shape());
+                println!("\tVisibility: {:?}", lit.get_visibility().unwrap());
+                println!("\tMatrix: {:?}", lit.get_world_matrix().unwrap());
+
+                println!("\tType: {:?}", lit.get_type().unwrap());
+                println!("\tColor: {:?}", lit.get_color().unwrap());
+                println!("\tConstant Attenuation: {}", lit.get_constant_attenuation().unwrap());
+                println!("\tLinear Attenuation: {}", lit.get_linear_attenuation().unwrap());
+                println!("\tQuadratic Attenuation: {}", lit.get_quadratic_attenuation().unwrap());
+                println!("\tRange: {}", lit.get_range().unwrap());
+                println!("\tHot Spot: {}", lit.get_hot_spot().unwrap());
+                println!("\tFalloff: {}", lit.get_falloff().unwrap());
+                println!("\tFalloff Shape: {}", lit.get_falloff_shape().unwrap());
             }
         }
 
-        fn test_target_camera(reader: bmap::BMFileReader) {
-            for cam in reader.get_target_cameras() {
-                println!("{}", cam.get_name());
+        #[rustfmt::skip]
+        fn test_target_camera(reader: &bmap::BMFileReader) {
+            for cam in reader.get_target_cameras().unwrap() {
+                let cam = cam.unwrap();
 
-                println!("\tVisibility: {}", cam.get_visibility());
-                println!("\tMatrix: {:?}", cam.get_world_matrix().to_const());
+                println!("{:?}", cam.get_name().unwrap());
 
-                println!("\tType: {}", cam.get_projection_type());
-                println!("\tOrthographic Zoom: {}", cam.get_orthographic_zoom());
-                println!("\tFront Plane: {}", cam.get_front_plane());
-                println!("\tBack Plane: {}", cam.get_back_plane());
-                println!("\tFov: {}", cam.get_fov());
+                println!("\tVisibility: {:?}", cam.get_visibility().unwrap());
+                println!("\tMatrix: {:?}", cam.get_world_matrix().unwrap());
 
-                let (width, height) = cam.get_aspect_ratio();
+                println!("\tType: {:?}", cam.get_projection_type().unwrap());
+                println!("\tOrthographic Zoom: {}", cam.get_orthographic_zoom().unwrap());
+                println!("\tFront Plane: {}", cam.get_front_plane().unwrap());
+                println!("\tBack Plane: {}", cam.get_back_plane().unwrap());
+                println!("\tFov: {}", cam.get_fov().unwrap());
+
+                let (width, height) = cam.get_aspect_ratio().unwrap();
                 println!("\tAspect Ratio: {}:{}", width, height);
             }
         }
@@ -219,7 +248,7 @@ mod testsuits {
         use super::bmap;
         use std::collections::{BTreeSet, HashSet};
 
-        pub fn test(reader: bmap::BMFileReader) {
+        pub fn test(reader: &bmap::BMFileReader) {
             // Check requirements
             assert!(
                 reader.get_3dobject_count().unwrap() >= 2,
