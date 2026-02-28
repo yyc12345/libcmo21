@@ -336,10 +336,8 @@ macro_rules! libiter_size_hint_body {
 
 // region: Struct Iterator and Assigner
 
-fn struct_assigner<'o, P, O, T, I>(_: &'o O, ptr: *mut T, cnt: usize, it: &mut I) -> Result<()>
+fn struct_assigner<T, I>(ptr: *mut T, cnt: usize, mut it: I) -> Result<()>
 where
-    P: AbstractPointer<'o> + ?Sized,
-    O: AbstractObject<'o, P> + ?Sized,
     T: Sized + Copy,
     I: Iterator<Item = T>,
 {
@@ -364,7 +362,7 @@ where
     ptr: *mut T,
     cnt: usize,
     i: usize,
-    _p: PhantomData<P>,
+    phantom: PhantomData<P>,
     /// Phantom reference to prevent object modification during iteration
     _o: PhantomData<&'o O>,
 }
@@ -380,7 +378,7 @@ where
             ptr,
             cnt,
             i: 0,
-            _p: PhantomData,
+            phantom: PhantomData,
             _o: PhantomData,
         }
     }
@@ -1445,6 +1443,107 @@ impl<'b> Drop for BMMeshTrans<'b> {
     }
 }
 
-impl<'b> BMMeshTrans<'b> {}
+impl<'b> BMMeshTrans<'b> {
+    pub fn parse<P>(&self, objmesh: BMMesh<'b, P>) -> Result<()>
+    where
+        P: AbstractPointer<'b> + ?Sized,
+    {
+        bmap_exec!(bmap::BMMeshTrans_Parse(
+            self.get_pointer(),
+            objmesh.get_pointer(),
+            objmesh.get_ckid()
+        ));
+        Ok(())
+    }
+}
+
+type FnProtoMeshTransSetCount = unsafe extern "C" fn(PBMVOID, param_in!(CKDWORD)) -> BMBOOL;
+type FnProtoMeshTransGetMem<T> = unsafe extern "C" fn(PBMVOID, param_out!(T)) -> BMBOOL;
+
+impl<'b> BMMeshTrans<'b> {
+    fn prepare_step_count(&mut self, f: FnProtoMeshTransSetCount, count: u32) -> Result<()> {
+        bmap_exec!(f(self.get_pointer(), arg_in!(count)));
+        Ok(())
+    }
+    fn prepare_step_mem<T>(&mut self, f: FnProtoMeshTransGetMem<T>) -> Result<T>
+    where
+        T: Copy + Sized,
+    {
+        let mut mem = MaybeUninit::<T>::uninit();
+        bmap_exec!(f(self.get_pointer(), arg_out!(mem.as_mut_ptr(), T)));
+        Ok(unsafe { mem.assume_init() })
+    }
+
+    pub fn prepare_vertex<I>(&mut self, count: u32, iem: I) -> Result<()>
+    where
+        I: Iterator<Item = bmap::VxVector3>,
+    {
+        self.prepare_step_count(bmap::BMMeshTrans_PrepareVertexCount, count)?;
+        let mem = self.prepare_step_mem(bmap::BMMeshTrans_PrepareVertex)?;
+        struct_assigner(mem, count.try_into()?, iem)
+    }
+    pub fn prepare_normal<I>(&mut self, count: u32, iem: I) -> Result<()>
+    where
+        I: Iterator<Item = bmap::VxVector3>,
+    {
+        self.prepare_step_count(bmap::BMMeshTrans_PrepareNormalCount, count)?;
+        let mem = self.prepare_step_mem(bmap::BMMeshTrans_PrepareNormal)?;
+        struct_assigner(mem, count.try_into()?, iem)
+    }
+    pub fn prepare_uv<I>(&mut self, count: u32, iem: I) -> Result<()>
+    where
+        I: Iterator<Item = bmap::VxVector2>,
+    {
+        self.prepare_step_count(bmap::BMMeshTrans_PrepareUVCount, count)?;
+        let mem = self.prepare_step_mem(bmap::BMMeshTrans_PrepareUV)?;
+        struct_assigner(mem, count.try_into()?, iem)
+    }
+    pub fn prepare_mtl_slot<I, P>(&'b mut self, count: u32, iem: I) -> Result<()>
+    where
+        I: Iterator<Item = Option<BMMaterial<'b, P>>>,
+        P: AbstractPointer<'b> + ?Sized + 'b,
+    {
+        self.prepare_step_count(bmap::BMMeshTrans_PrepareMtlSlotCount, count)?;
+        let mem = self.prepare_step_mem(bmap::BMMeshTrans_PrepareMtlSlot)?;
+        struct_assigner(
+            mem,
+            count.try_into()?,
+            iem.map(|m| match m {
+                Some(m) => unsafe { m.get_ckid() },
+                None => INVALID_CKID,
+            }),
+        )
+    }
+    pub fn prepare_face<IVec, INml, IUv, IMtl>(
+        &mut self,
+        count: u32,
+        vec_idx: IVec,
+        nml_idx: INml,
+        uv_idx: IUv,
+        mtl_idx: IMtl,
+    ) -> Result<()>
+    where
+        IVec: Iterator<Item = bmap::CKFaceIndices>,
+        INml: Iterator<Item = bmap::CKFaceIndices>,
+        IUv: Iterator<Item = bmap::CKFaceIndices>,
+        IMtl: Iterator<Item = bmap::CKDWORD>,
+    {
+        self.prepare_step_count(bmap::BMMeshTrans_PrepareFaceCount, count)?;
+
+        let mem = self.prepare_step_mem(bmap::BMMeshTrans_PrepareFaceVertexIndices)?
+            as *mut bmap::CKFaceIndices;
+        struct_assigner(mem, count.try_into()?, vec_idx)?;
+        let mem = self.prepare_step_mem(bmap::BMMeshTrans_PrepareFaceNormalIndices)?
+            as *mut bmap::CKFaceIndices;
+        struct_assigner(mem, count.try_into()?, nml_idx)?;
+        let mem = self.prepare_step_mem(bmap::BMMeshTrans_PrepareFaceUVIndices)?
+            as *mut bmap::CKFaceIndices;
+        struct_assigner(mem, count.try_into()?, uv_idx)?;
+        let mem = self.prepare_step_mem(bmap::BMMeshTrans_PrepareFaceMtlSlot)?;
+        struct_assigner(mem, count.try_into()?, mtl_idx)?;
+
+        Ok(())
+    }
+}
 
 // endregion
