@@ -5,7 +5,7 @@
 mod marshaler;
 //mod utilities;
 
-use crate::bmap::{self, BMBOOL, CKDWORD, CKID, CKINT, CKSTRING, PBMVOID};
+use crate::bmap::{self, BMBOOL, CKDWORD, CKID, CKINT, CKSTRING, CKWORD, PBMVOID};
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::iter::{ExactSizeIterator, FusedIterator, Iterator};
@@ -62,7 +62,14 @@ where
     ///
     /// Do **NOT** use this function.
     /// It can not be hidden due to the limitation of Rust trait.
-    unsafe fn new(parent: &'o P, handle: PBMVOID, id: CKID) -> Self;
+    unsafe fn with_parent(parent: &'o P, handle: PBMVOID, id: CKID) -> Self;
+    /// Internal used function for creating object.
+    ///
+    /// Do **NOT** use this function.
+    /// It can not be hidden due to the limitation of Rust trait.
+    unsafe fn with_sibling<AO>(sibling: &'o AO, handle: PBMVOID, id: CKID) -> Self
+    where
+        AO: AbstractObject<'o, P> + ?Sized;
     /// Internal used function for fetching object underlying ID.
     ///
     /// Do **NOT** use this function.
@@ -135,7 +142,7 @@ macro_rules! libptr_struct {
         #[derive(Debug)]
         pub struct $name<'p> {
             handle: PBMVOID,
-            phantom: PhantomData<&'p BMap>,
+            parent: PhantomData<&'p BMap>,
         }
     };
 }
@@ -200,28 +207,7 @@ macro_rules! libobj_struct {
 
 macro_rules! libobj_impl_new {
     ($name:ident) => {
-        impl<'o, P> $name<'o, P>
-        where
-            P: AbstractPointer<'o> + ?Sized,
-        {
-            fn with_parent(_: &'o P, handle: PBMVOID, id: CKID) -> Self {
-                Self {
-                    handle,
-                    id,
-                    parent: PhantomData::<&'o P>,
-                }
-            }
-            fn with_sibling<AO>(_: &'o AO, handle: PBMVOID, id: CKID) -> Self
-            where
-                AO: AbstractObject<'o, P> + ?Sized,
-            {
-                Self {
-                    handle,
-                    id,
-                    parent: PhantomData::<&'o P>,
-                }
-            }
-        }
+        impl<'o, P> $name<'o, P> where P: AbstractPointer<'o> + ?Sized {}
     };
 }
 
@@ -289,8 +275,22 @@ macro_rules! libobj_impl_abstract_object {
         where
             P: AbstractPointer<'o> + ?Sized,
         {
-            unsafe fn new(parent: &'o P, handle: PBMVOID, id: CKID) -> Self {
-                Self::with_parent(parent, handle, id)
+            unsafe fn with_parent(_: &'o P, handle: PBMVOID, id: CKID) -> Self {
+                Self {
+                    handle,
+                    id,
+                    parent: PhantomData::<&'o P>,
+                }
+            }
+            unsafe fn with_sibling<AO>(_: &'o AO, handle: PBMVOID, id: CKID) -> Self
+            where
+                AO: AbstractObject<'o, P> + ?Sized,
+            {
+                Self {
+                    handle,
+                    id,
+                    parent: PhantomData::<&'o P>,
+                }
             }
             unsafe fn get_ckid(&self) -> CKID {
                 self.id
@@ -363,8 +363,7 @@ where
     cnt: usize,
     i: usize,
     phantom: PhantomData<P>,
-    /// Phantom reference to prevent object modification during iteration
-    _o: PhantomData<&'o O>,
+    parent: PhantomData<&'o O>,
 }
 
 impl<'o, P, O, T> StructIter<'o, P, O, T>
@@ -373,13 +372,13 @@ where
     O: AbstractObject<'o, P> + ?Sized,
     T: Sized + Copy,
 {
-    fn new(o: &'o O, ptr: *mut T, cnt: usize) -> Self {
+    fn new(_: &'o O, ptr: *mut T, cnt: usize) -> Self {
         Self {
             ptr,
             cnt,
             i: 0,
             phantom: PhantomData,
-            _o: PhantomData,
+            parent: PhantomData,
         }
     }
 }
@@ -527,6 +526,112 @@ impl BMap {
 // endregion
 
 // region: BMObjects
+
+// region: Utility Structs
+
+type FnMeshMtlSlotGetter =
+    unsafe extern "C" fn(PBMVOID, CKID, param_in!(CKDWORD), param_out!(CKID)) -> BMBOOL;
+
+pub struct MeshMtlSlotIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: AbstractObject<'o, P>,
+{
+    f: FnMeshMtlSlotGetter,
+    cnt: usize,
+    i: usize,
+    phantom_pointer: PhantomData<P>,
+    parent: &'o O,
+    phantom_target: PhantomData<T>,
+}
+
+impl<'o, P, O, T> MeshMtlSlotIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: AbstractObject<'o, P>,
+{
+    fn new(parent: &'o O, f: FnMeshMtlSlotGetter, cnt: usize) -> Self {
+        Self {
+            f: f,
+            cnt: cnt,
+            i: 0,
+            phantom_pointer: PhantomData,
+            parent: parent,
+            phantom_target: PhantomData,
+        }
+    }
+}
+
+impl<'o, P, O, T> Iterator for MeshMtlSlotIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: AbstractObject<'o, P>,
+{
+    type Item = Result<Option<T>>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.i >= self.cnt {
+            None
+        } else {
+            let mut ckid = MaybeUninit::<CKID>::uninit();
+            let i = match self.i.try_into() {
+                Ok(v) => v,
+                Err(e) => return Some(Err(Error::from(e))),
+            };
+
+            let rv = unsafe {
+                (self.f)(
+                    self.parent.get_pointer(),
+                    self.parent.get_ckid(),
+                    arg_in!(i),
+                    arg_out!(ckid.as_mut_ptr(), CKID),
+                )
+            };
+            if !rv {
+                return Some(Err(Error::BadCall));
+            }
+
+            let ckid = unsafe { ckid.assume_init() };
+            self.i += 1;
+
+            if ckid == INVALID_CKID {
+                Some(Ok(None))
+            } else {
+                Some(Ok(Some(unsafe {
+                    T::with_sibling(self.parent, self.parent.get_pointer(), ckid)
+                })))
+            }
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        libiter_size_hint_body!(self.i, self.cnt)
+    }
+}
+
+impl<'o, P, O, T> FusedIterator for MeshMtlSlotIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: AbstractObject<'o, P>,
+{
+}
+
+impl<'o, P, O, T> ExactSizeIterator for MeshMtlSlotIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: AbstractObject<'o, P>,
+{
+    fn len(&self) -> usize {
+        libiter_len_body!(self.i, self.cnt)
+    }
+}
+
+// endregion
 
 // region: Utility Functions
 
@@ -690,11 +795,7 @@ where
         Ok(if ckid == INVALID_CKID {
             None
         } else {
-            Some(BMTexture::with_sibling(
-                self,
-                unsafe { self.get_pointer() },
-                ckid,
-            ))
+            Some(unsafe { BMTexture::with_sibling(self, self.get_pointer(), ckid) })
         })
     }
     fn set_texture(&mut self, texture: Option<&BMTexture<'o, P>>) -> Result<()> {
@@ -836,6 +937,100 @@ where
         let ptr = get_copyable_value(self, bmap::BMMesh_GetVertexPositions)?;
         struct_iterator(self, ptr, self.get_vertex_count()?.try_into()?)
     }
+    fn set_vertex_positions<I>(&mut self, iem: I) -> Result<()>
+    where
+        I: Iterator<Item = bmap::VxVector3>,
+    {
+        let ptr = get_copyable_value(self, bmap::BMMesh_GetVertexPositions)?;
+        struct_assigner(ptr, self.get_vertex_count()?.try_into()?, iem)
+    }
+    fn get_vertex_normals(&'o self) -> Result<StructIter<'o, P, Self, bmap::VxVector3>> {
+        let ptr = get_copyable_value(self, bmap::BMMesh_GetVertexNormals)?;
+        struct_iterator(self, ptr, self.get_vertex_count()?.try_into()?)
+    }
+    fn set_vertex_normals<I>(&mut self, iem: I) -> Result<()>
+    where
+        I: Iterator<Item = bmap::VxVector3>,
+    {
+        let ptr = get_copyable_value(self, bmap::BMMesh_GetVertexNormals)?;
+        struct_assigner(ptr, self.get_vertex_count()?.try_into()?, iem)
+    }
+    fn get_vertex_uvs(&'o self) -> Result<StructIter<'o, P, Self, bmap::VxVector2>> {
+        let ptr = get_copyable_value(self, bmap::BMMesh_GetVertexUVs)?;
+        struct_iterator(self, ptr, self.get_vertex_count()?.try_into()?)
+    }
+    fn set_vertex_uvs<I>(&mut self, iem: I) -> Result<()>
+    where
+        I: Iterator<Item = bmap::VxVector2>,
+    {
+        let ptr = get_copyable_value(self, bmap::BMMesh_GetVertexUVs)?;
+        struct_assigner(ptr, self.get_vertex_count()?.try_into()?, iem)
+    }
+
+    fn get_face_count(&self) -> Result<u32> {
+        get_copyable_value(self, bmap::BMMesh_GetFaceCount)
+    }
+    fn set_face_count(&mut self, count: u32) -> Result<()> {
+        set_copyable_value(self, bmap::BMMesh_SetFaceCount, count)
+    }
+    fn get_face_indices(&'o self) -> Result<StructIter<'o, P, Self, bmap::CKShortFaceIndices>> {
+        let ptr =
+            get_copyable_value(self, bmap::BMMesh_GetFaceIndices)? as *mut bmap::CKShortFaceIndices;
+        struct_iterator(self, ptr, self.get_face_count()?.try_into()?)
+    }
+    fn set_face_indices<I>(&mut self, iem: I) -> Result<()>
+    where
+        I: Iterator<Item = bmap::CKShortFaceIndices>,
+    {
+        let ptr =
+            get_copyable_value(self, bmap::BMMesh_GetFaceIndices)? as *mut bmap::CKShortFaceIndices;
+        struct_assigner(ptr, self.get_face_count()?.try_into()?, iem)
+    }
+    fn get_face_material_slot_indexs(&'o self) -> Result<StructIter<'o, P, Self, CKWORD>> {
+        let ptr = get_copyable_value(self, bmap::BMMesh_GetFaceMaterialSlotIndexs)?;
+        struct_iterator(self, ptr, self.get_face_count()?.try_into()?)
+    }
+    fn set_face_material_slot_indexs<I>(&mut self, iem: I) -> Result<()>
+    where
+        I: Iterator<Item = CKWORD>,
+    {
+        let ptr = get_copyable_value(self, bmap::BMMesh_GetFaceMaterialSlotIndexs)?;
+        struct_assigner(ptr, self.get_face_count()?.try_into()?, iem)
+    }
+
+    fn get_material_slot_count(&self) -> Result<u32> {
+        get_copyable_value(self, bmap::BMMesh_GetMaterialSlotCount)
+    }
+    fn set_material_slot_count(&mut self, count: u32) -> Result<()> {
+        set_copyable_value(self, bmap::BMMesh_SetMaterialSlotCount, count)
+    }
+    fn get_material_slots(&'o self) -> Result<MeshMtlSlotIter<'o, P, Self, BMMaterial<'o, P>>> {
+        Ok(MeshMtlSlotIter::new(
+            self,
+            bmap::BMMesh_GetMaterialSlot,
+            self.get_material_slot_count()?.try_into()?,
+        ))
+    }
+    fn set_material_slots<I>(&mut self, mut iem: I) -> Result<()>
+    where
+        I: Iterator<Item = Option<BMMaterial<'o, P>>>,
+    {
+        let cnt = self.get_material_slot_count()?;
+        for i in 0..cnt {
+            // Fetch item
+            let item = match iem.next() {
+                Some(v) => v,
+                None => return Err(Error::OutOfLength),
+            };
+            let ckid = match item {
+                Some(v) => unsafe { v.get_ckid() },
+                None => INVALID_CKID
+            };
+            // Write item
+            bmap_exec!(bmap::BMMesh_SetMaterialSlot(self.get_pointer(), self.get_ckid(), i, ckid))
+        }
+        Ok(())
+    }
 }
 
 pub trait BM3dEntityDecl<'o, P>: BMObjectDecl<'o, P>
@@ -856,11 +1051,7 @@ where
         Ok(if ckid == INVALID_CKID {
             None
         } else {
-            Some(BMMesh::with_sibling(
-                self,
-                unsafe { self.get_pointer() },
-                ckid,
-            ))
+            Some(unsafe { BMMesh::with_sibling(self, self.get_pointer(), ckid) })
         })
     }
     fn set_current_mesh(&mut self, mesh: Option<BMMesh<'o, P>>) -> Result<()> {
@@ -1153,7 +1344,7 @@ impl<'p> BMFileReader<'p> {
 
         Ok(Self {
             handle: unsafe { file.assume_init() },
-            phantom: PhantomData::<&'p BMap>,
+            parent: PhantomData::<&'p BMap>,
         })
     }
 }
@@ -1164,15 +1355,15 @@ impl<'p> Drop for BMFileReader<'p> {
     }
 }
 
-type FnProtoGetCount = unsafe extern "C" fn(PBMVOID, param_out!(CKDWORD)) -> BMBOOL;
-type FnProtoGetObject =
+type FnFileGetCount = unsafe extern "C" fn(PBMVOID, param_out!(CKDWORD)) -> BMBOOL;
+type FnFileGetObject =
     unsafe extern "C" fn(PBMVOID, param_in!(CKDWORD), param_out!(CKID)) -> BMBOOL;
 
 pub struct FileObjectIter<'p, O>
 where
     O: AbstractObject<'p, BMFileReader<'p>>,
 {
-    fget: FnProtoGetObject,
+    fget: FnFileGetObject,
     cnt: usize,
     i: usize,
     parent: &'p BMFileReader<'p>,
@@ -1183,7 +1374,7 @@ impl<'p, O> FileObjectIter<'p, O>
 where
     O: AbstractObject<'p, BMFileReader<'p>>,
 {
-    fn new(parent: &'p BMFileReader<'p>, fget: FnProtoGetObject, cnt: usize) -> Self {
+    fn new(parent: &'p BMFileReader<'p>, fget: FnFileGetObject, cnt: usize) -> Self {
         Self {
             fget: fget,
             cnt: cnt,
@@ -1225,7 +1416,7 @@ where
             self.i += 1;
 
             Some(Ok(unsafe {
-                O::new(self.parent, self.parent.get_pointer(), ckid)
+                O::with_parent(self.parent, self.parent.get_pointer(), ckid)
             }))
         }
     }
@@ -1247,7 +1438,7 @@ where
 }
 
 impl<'p> BMFileReader<'p> {
-    fn get_generic_object_count(&self, fc: FnProtoGetCount) -> Result<usize> {
+    fn get_generic_object_count(&self, fc: FnFileGetCount) -> Result<usize> {
         let mut cnt = MaybeUninit::<CKDWORD>::uninit();
         bmap_exec!(fc(self.get_pointer(), arg_out!(cnt.as_mut_ptr(), CKDWORD)));
 
@@ -1256,8 +1447,8 @@ impl<'p> BMFileReader<'p> {
     }
     fn get_generic_objects<O>(
         &'p self,
-        fc: FnProtoGetCount,
-        fo: FnProtoGetObject,
+        fc: FnFileGetCount,
+        fo: FnFileGetObject,
     ) -> Result<FileObjectIter<'p, O>>
     where
         O: AbstractObject<'p, BMFileReader<'p>>,
@@ -1346,7 +1537,7 @@ impl<'p> BMFileWriter<'p> {
 
         Ok(Self {
             handle: unsafe { file.assume_init() },
-            phantom: PhantomData::<&'p BMap>,
+            parent: PhantomData::<&'p BMap>,
         })
     }
 }
@@ -1380,10 +1571,10 @@ impl<'p> BMFileWriter<'p> {
     }
 }
 
-type FnProtoCreateObject = unsafe extern "C" fn(PBMVOID, param_out!(CKID)) -> BMBOOL;
+type FnFileCreateObject = unsafe extern "C" fn(PBMVOID, param_out!(CKID)) -> BMBOOL;
 
 impl<'p> BMFileWriter<'p> {
-    fn create_generic_objects<O>(&'p mut self, fc: FnProtoCreateObject) -> Result<O>
+    fn create_generic_objects<O>(&'p mut self, fc: FnFileCreateObject) -> Result<O>
     where
         O: AbstractObject<'p, BMFileWriter<'p>>,
     {
@@ -1391,7 +1582,7 @@ impl<'p> BMFileWriter<'p> {
         bmap_exec!(fc(self.get_pointer(), arg_out!(ckid.as_mut_ptr(), CKID)));
 
         let ckid = unsafe { ckid.assume_init() };
-        Ok(unsafe { O::new(self, self.get_pointer(), ckid) })
+        Ok(unsafe { O::with_parent(self, self.get_pointer(), ckid) })
     }
 
     pub fn create_texture(&'p mut self) -> Result<BMTexture<'p, Self>> {
@@ -1432,7 +1623,7 @@ impl<'p> BMMeshTrans<'p> {
 
         Ok(Self {
             handle: unsafe { trans.assume_init() },
-            phantom: PhantomData::<&'p BMap>,
+            parent: PhantomData::<&'p BMap>,
         })
     }
 }
