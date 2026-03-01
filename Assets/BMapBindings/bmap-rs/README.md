@@ -34,3 +34,10 @@ This project will find it in `build.rs` script and tell Rust compiler how to lin
 > You also may need rename some contents of other files involving this rename change.
 
 Also due to this, when distributing your Rust project, please do not forget copy the built BMap library with your Rust artifacts.
+
+## Test
+
+The test code located in `tests` directory is NOT designed for plain "cargo test".
+It is more close to an independent test program, so executing it may require some extra work.
+First you need configure all environment variables for testing.
+Then you can execute `cargo test complete -- --nocapture` to run the complete test program.

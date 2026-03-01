@@ -3,7 +3,6 @@
 //! This module is what user of this library should use.
 
 mod marshaler;
-//mod utilities;
 
 use crate::bmap::{self, BMBOOL, CKDWORD, CKID, CKINT, CKSTRING, CKWORD, PBMVOID};
 use std::cmp::Ordering;
@@ -322,7 +321,7 @@ macro_rules! libiter_len_body {
         if $current_cnt >= $all_cnt {
             0
         } else {
-            $current_cnt - $all_cnt
+            $all_cnt - $current_cnt
         }
     };
 }
@@ -332,7 +331,7 @@ macro_rules! libiter_size_hint_body {
         if $current_cnt >= $all_cnt {
             (0, Some(0))
         } else {
-            let remaining = $current_cnt - $all_cnt;
+            let remaining = $all_cnt - $current_cnt;
             (remaining, Some(remaining))
         }
     };
