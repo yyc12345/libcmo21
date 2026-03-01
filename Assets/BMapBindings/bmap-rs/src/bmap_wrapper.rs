@@ -205,9 +205,17 @@ macro_rules! libobj_struct {
     };
 }
 
-macro_rules! libobj_impl_new {
+macro_rules! libobj_impl_clone {
     ($name:ident) => {
-        impl<'o, P> $name<'o, P> where P: AbstractPointer<'o> + ?Sized {}
+        impl<'o, P> Clone for $name<'o, P> where P: AbstractPointer<'o> + ?Sized {
+            fn clone(&self) -> Self {
+                Self {
+                    handle: self.handle,
+                    id: self.id,
+                    parent: PhantomData::<&'o P>,
+                }
+            }
+        }
     };
 }
 
@@ -277,8 +285,8 @@ macro_rules! libobj_impl_abstract_object {
         {
             unsafe fn with_parent(_: &'o P, handle: PBMVOID, id: CKID) -> Self {
                 Self {
-                    handle,
-                    id,
+                    handle: handle,
+                    id: id,
                     parent: PhantomData::<&'o P>,
                 }
             }
@@ -287,8 +295,8 @@ macro_rules! libobj_impl_abstract_object {
                 AO: AbstractObject<'o, P> + ?Sized,
             {
                 Self {
-                    handle,
-                    id,
+                    handle: handle,
+                    id: id,
                     parent: PhantomData::<&'o P>,
                 }
             }
@@ -621,6 +629,104 @@ where
 }
 
 impl<'o, P, O, T> ExactSizeIterator for MeshMtlSlotIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: AbstractObject<'o, P>,
+{
+    fn len(&self) -> usize {
+        libiter_len_body!(self.i, self.cnt)
+    }
+}
+
+type FnGroupObjectGetter =
+    unsafe extern "C" fn(PBMVOID, CKID, param_in!(CKDWORD), param_out!(CKID)) -> BMBOOL;
+
+pub struct GroupObjectIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: AbstractObject<'o, P>,
+{
+    f: FnGroupObjectGetter,
+    cnt: usize,
+    i: usize,
+    phantom_pointer: PhantomData<P>,
+    parent: &'o O,
+    phantom_target: PhantomData<T>,
+}
+
+impl<'o, P, O, T> GroupObjectIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: AbstractObject<'o, P>,
+{
+    fn new(parent: &'o O, f: FnGroupObjectGetter, cnt: usize) -> Self {
+        Self {
+            f: f,
+            cnt: cnt,
+            i: 0,
+            phantom_pointer: PhantomData,
+            parent: parent,
+            phantom_target: PhantomData,
+        }
+    }
+}
+
+impl<'o, P, O, T> Iterator for GroupObjectIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: AbstractObject<'o, P>,
+{
+    type Item = Result<T>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.i >= self.cnt {
+            None
+        } else {
+            let mut ckid = MaybeUninit::<CKID>::uninit();
+            let i = match self.i.try_into() {
+                Ok(v) => v,
+                Err(e) => return Some(Err(Error::from(e))),
+            };
+
+            let rv = unsafe {
+                (self.f)(
+                    self.parent.get_pointer(),
+                    self.parent.get_ckid(),
+                    arg_in!(i),
+                    arg_out!(ckid.as_mut_ptr(), CKID),
+                )
+            };
+            if !rv {
+                return Some(Err(Error::BadCall));
+            }
+
+            let ckid = unsafe { ckid.assume_init() };
+            self.i += 1;
+
+            Some(Ok(unsafe {
+                T::with_sibling(self.parent, self.parent.get_pointer(), ckid)
+            }))
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        libiter_size_hint_body!(self.i, self.cnt)
+    }
+}
+
+impl<'o, P, O, T> FusedIterator for GroupObjectIter<'o, P, O, T>
+where
+    P: AbstractPointer<'o> + ?Sized,
+    O: AbstractObject<'o, P> + ?Sized,
+    T: AbstractObject<'o, P>,
+{
+}
+
+impl<'o, P, O, T> ExactSizeIterator for GroupObjectIter<'o, P, O, T>
 where
     P: AbstractPointer<'o> + ?Sized,
     O: AbstractObject<'o, P> + ?Sized,
@@ -1215,6 +1321,25 @@ pub trait BMGroupDecl<'o, P>: BMObjectDecl<'o, P>
 where
     P: AbstractPointer<'o> + ?Sized + 'o,
 {
+    fn add_object(&mut self, member: Option<BM3dObject<'o, P>>) -> Result<()> {
+        let ckid: CKID = match member {
+            Some(member) => unsafe { member.get_ckid() },
+            None => INVALID_CKID,
+        };
+        set_copyable_value(self, bmap::BMGroup_AddObject, ckid)
+    }
+
+    fn get_object_count(&self) -> Result<u32> {
+        get_copyable_value(self, bmap::BMGroup_GetObjectCount)
+    }
+
+    fn get_objects(&'o self) -> Result<GroupObjectIter<'o, P, Self, BM3dObject<'o, P>>> {
+        Ok(GroupObjectIter::new(
+            self,
+            bmap::BMGroup_GetObject,
+            self.get_object_count()?.try_into()?,
+        ))
+    }
 }
 
 // endregion
@@ -1222,41 +1347,41 @@ where
 // region: Structs
 
 libobj_struct!(BMObject);
-libobj_impl_new!(BMObject);
+libobj_impl_clone!(BMObject);
 libobj_impl_eq_ord_hash!(BMObject);
 libobj_impl_abstract_object!(BMObject);
 libobj_impl_obj_trait!(BMObject, BMObjectDecl);
 
 libobj_struct!(BMTexture);
-libobj_impl_new!(BMTexture);
+libobj_impl_clone!(BMTexture);
 libobj_impl_eq_ord_hash!(BMTexture);
 libobj_impl_abstract_object!(BMTexture);
 libobj_impl_obj_trait!(BMTexture, BMObjectDecl);
 libobj_impl_obj_trait!(BMTexture, BMTextureDecl);
 
 libobj_struct!(BMMaterial);
-libobj_impl_new!(BMMaterial);
+libobj_impl_clone!(BMMaterial);
 libobj_impl_eq_ord_hash!(BMMaterial);
 libobj_impl_abstract_object!(BMMaterial);
 libobj_impl_obj_trait!(BMMaterial, BMObjectDecl);
 libobj_impl_obj_trait!(BMMaterial, BMMaterialDecl);
 
 libobj_struct!(BMMesh);
-libobj_impl_new!(BMMesh);
+libobj_impl_clone!(BMMesh);
 libobj_impl_eq_ord_hash!(BMMesh);
 libobj_impl_abstract_object!(BMMesh);
 libobj_impl_obj_trait!(BMMesh, BMObjectDecl);
 libobj_impl_obj_trait!(BMMesh, BMMeshDecl);
 
 libobj_struct!(BM3dEntity);
-libobj_impl_new!(BM3dEntity);
+libobj_impl_clone!(BM3dEntity);
 libobj_impl_eq_ord_hash!(BM3dEntity);
 libobj_impl_abstract_object!(BM3dEntity);
 libobj_impl_obj_trait!(BM3dEntity, BMObjectDecl);
 libobj_impl_obj_trait!(BM3dEntity, BM3dEntityDecl);
 
 libobj_struct!(BM3dObject);
-libobj_impl_new!(BM3dObject);
+libobj_impl_clone!(BM3dObject);
 libobj_impl_eq_ord_hash!(BM3dObject);
 libobj_impl_abstract_object!(BM3dObject);
 libobj_impl_obj_trait!(BM3dObject, BMObjectDecl);
@@ -1264,7 +1389,7 @@ libobj_impl_obj_trait!(BM3dObject, BM3dEntityDecl);
 libobj_impl_obj_trait!(BM3dObject, BM3dObjectDecl);
 
 libobj_struct!(BMLight);
-libobj_impl_new!(BMLight);
+libobj_impl_clone!(BMLight);
 libobj_impl_eq_ord_hash!(BMLight);
 libobj_impl_abstract_object!(BMLight);
 libobj_impl_obj_trait!(BMLight, BMObjectDecl);
@@ -1272,7 +1397,7 @@ libobj_impl_obj_trait!(BMLight, BM3dEntityDecl);
 libobj_impl_obj_trait!(BMLight, BMLightDecl);
 
 libobj_struct!(BMTargetLight);
-libobj_impl_new!(BMTargetLight);
+libobj_impl_clone!(BMTargetLight);
 libobj_impl_eq_ord_hash!(BMTargetLight);
 libobj_impl_abstract_object!(BMTargetLight);
 libobj_impl_obj_trait!(BMTargetLight, BMObjectDecl);
@@ -1281,7 +1406,7 @@ libobj_impl_obj_trait!(BMTargetLight, BMLightDecl);
 libobj_impl_obj_trait!(BMTargetLight, BMTargetLightDecl);
 
 libobj_struct!(BMCamera);
-libobj_impl_new!(BMCamera);
+libobj_impl_clone!(BMCamera);
 libobj_impl_eq_ord_hash!(BMCamera);
 libobj_impl_abstract_object!(BMCamera);
 libobj_impl_obj_trait!(BMCamera, BMObjectDecl);
@@ -1289,7 +1414,7 @@ libobj_impl_obj_trait!(BMCamera, BM3dEntityDecl);
 libobj_impl_obj_trait!(BMCamera, BMCameraDecl);
 
 libobj_struct!(BMTargetCamera);
-libobj_impl_new!(BMTargetCamera);
+libobj_impl_clone!(BMTargetCamera);
 libobj_impl_eq_ord_hash!(BMTargetCamera);
 libobj_impl_abstract_object!(BMTargetCamera);
 libobj_impl_obj_trait!(BMTargetCamera, BMObjectDecl);
@@ -1298,7 +1423,7 @@ libobj_impl_obj_trait!(BMTargetCamera, BMCameraDecl);
 libobj_impl_obj_trait!(BMTargetCamera, BMTargetCameraDecl);
 
 libobj_struct!(BMGroup);
-libobj_impl_new!(BMGroup);
+libobj_impl_clone!(BMGroup);
 libobj_impl_eq_ord_hash!(BMGroup);
 libobj_impl_abstract_object!(BMGroup);
 libobj_impl_obj_trait!(BMGroup, BMObjectDecl);

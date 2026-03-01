@@ -85,7 +85,7 @@ mod testsuits {
         use super::bmap;
         use bmap::{
             BM3dEntityDecl, BMCameraDecl, BMLightDecl, BMMaterialDecl, BMMeshDecl, BMObjectDecl,
-            BMTextureDecl,
+            BMTextureDecl, BMGroupDecl
         };
 
         pub fn test(reader: &bmap::BMFileReader) {
@@ -112,8 +112,9 @@ mod testsuits {
                 let gp = gp.unwrap();
 
                 println!("{:?}", gp.get_name().unwrap());
-                for gp_item in gp.get_objects() {
-                    println!("\t{}", gp_item.get_name());
+                for gp_item in gp.get_objects().unwrap() {
+                    let gp_item = gp_item.unwrap();
+                    println!("\t{:?}", gp_item.get_name().unwrap());
                 }
             }
         }
@@ -273,14 +274,14 @@ We can not perform Eq test because the length of 3dObject is too short (must gre
 
             // Test HashSet
             let mut test_hashset = HashSet::new();
-            assert!(test_hashset.insert(first_3dobj.clone()));
-            assert!(!test_hashset.insert(first_3dobj_again.clone()));
+            assert!(test_hashset.insert(first_3dobj));
+            assert!(!test_hashset.insert(first_3dobj_again));
             assert!(test_hashset.insert(second_3dobj));
 
             // Test BTreeSet
             let mut test_btreeset = BTreeSet::new();
-            assert!(test_btreeset.insert(first_3dobj.clone()));
-            assert!(!test_btreeset.insert(first_3dobj_again.clone()));
+            assert!(test_btreeset.insert(first_3dobj));
+            assert!(!test_btreeset.insert(first_3dobj_again));
             assert!(test_btreeset.insert(second_3dobj));
         }
     }
