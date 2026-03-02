@@ -343,6 +343,10 @@ namespace LibCmo::CK2::ObjImpls {
 		return m_ImageHost;
 	}
 
+	const CKBitmapData& CKTexture::GetUnderlyingData() const {
+		return m_ImageHost;
+	}
+
 	bool CKTexture::LoadImage(CKSTRING filename, CKDWORD slot) {
 		// check file name
 		if (filename == nullptr) return false;

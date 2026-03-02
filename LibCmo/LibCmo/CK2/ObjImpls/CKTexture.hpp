@@ -20,6 +20,7 @@ namespace LibCmo::CK2::ObjImpls {
 		virtual bool Load(CKStateChunk* chunk, CKFileVisitor* file) override;
 
 		CKBitmapData& GetUnderlyingData();
+		const CKBitmapData& GetUnderlyingData() const;
 
 		/**
 		 * @brief A wrapper of underlying CKBitmapData::LoadImage. Not only load image, but also set file name.
