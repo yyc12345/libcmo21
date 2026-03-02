@@ -32,6 +32,7 @@ namespace BMapInspector::Rule {
 		rules.emplace_back(new BBugRule1());
 		rules.emplace_back(new ZZQRule1());
 		rules.emplace_back(new ZZQRule2());
+		rules.emplace_back(new ZZQRule3());
 		rules.emplace_back(new SOneRule1());
 		rules.emplace_back(new SSBRule1());
 		rules.emplace_back(new LXRule1());

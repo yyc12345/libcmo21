@@ -16,6 +16,11 @@ namespace BMapInspector::Rule::Shared {
 
 	namespace GroupNames {
 		// clang-format off
+		constexpr char8_t PS_LEVELSTART[] = u8"PS_Levelstart";
+		constexpr char8_t PE_LEVELENDE[] = u8"PE_Levelende";
+		constexpr char8_t PC_CHECKPOINTS[] = u8"PC_Checkpoints";
+		constexpr char8_t PR_RESETPOINTS[] = u8"PR_Resetpoints";
+
 		constexpr char8_t PHYS_FLOORS[] = u8"Phys_Floors";
 		constexpr char8_t PHYS_FLOORRAILS[] = u8"Phys_FloorRails";
 		constexpr char8_t PHYS_FLOORSTOPPER[] = u8"Phys_FloorStopper";

@@ -143,4 +143,79 @@ namespace BMapInspector::Rule {
 
 #pragma endregion
 
+#pragma region ZZQ Rule 3
+
+	constexpr char8_t ZZQ3[] = u8"ZZQ3";
+
+	ZZQRule3::ZZQRule3() : IRule() {}
+
+	ZZQRule3::~ZZQRule3() {}
+
+	std::u8string_view ZZQRule3::GetRuleName() const {
+		return ZZQ3;
+	}
+
+	void ZZQRule3::Check(Reporter::Reporter& reporter, Map::Level& level) const {
+		auto* ctx = level.GetCKContext();
+		Shared::SectorNameBuilder builder;
+
+		auto* level_start = Shared::FetchGroup(ctx, Shared::GroupNames::PS_LEVELSTART);
+		if (level_start == nullptr) {
+			reporter.WriteError(ZZQ3, u8R"(Incomplete level: can not find "PS_Levelstart" group.)");
+		} else {
+			switch (level_start->GetObjectCount()) {
+				case 0:
+					reporter.WriteError(ZZQ3, u8R"(Incomplete level: there is no object grouped into "PS_Levelstart" group.)");
+					break;
+				case 1:
+					// OK. Do nothing.
+					break;
+				default:
+					reporter.WriteError(ZZQ3, u8R"(Bad level: there are more than one objects grouped into "PS_Levelstart" group.)");
+					break;
+			}
+		}
+
+		auto* level_end = Shared::FetchGroup(ctx, Shared::GroupNames::PE_LEVELENDE);
+		if (level_end == nullptr) {
+			reporter.WriteError(ZZQ3, u8R"(Incomplete level: can not find "PE_Levelende" group.)");
+		} else {
+			switch (level_end->GetObjectCount()) {
+				case 0:
+					reporter.WriteError(ZZQ3, u8R"(Incomplete level: there is no object grouped into "PE_Levelende" group.)");
+					break;
+				case 1:
+					// OK. Do nothing.
+					break;
+				default:
+					reporter.WriteError(ZZQ3, u8R"(Bad level: there are more than one objects grouped into "PE_Levelende" group.)");
+					break;
+			}
+		}
+
+		auto* check_points = Shared::FetchGroup(ctx, Shared::GroupNames::PC_CHECKPOINTS);
+		if (check_points == nullptr) {
+			reporter
+			    .WriteWarning(ZZQ3,
+			                  u8R"(Can not find "PC_Checkpoints" group. This will cause bad render of particle at the level start point.)");
+		}
+
+		auto* reset_points = Shared::FetchGroup(ctx, Shared::GroupNames::PR_RESETPOINTS);
+		if (reset_points == nullptr) {
+			reporter.WriteError(ZZQ3, u8R"(Incomplete level: can not find "PR_Resetpoints" group.)");
+		} else {
+			if (reset_points->GetObjectCount() == 0) {
+				reporter.WriteError(ZZQ3, u8R"(Incomplete level: there is no object grouped into "PC_Resetpoints" group.)");
+			}
+		}
+
+		auto sector1_name = builder.get_name(1);
+		auto* sector1 = Shared::FetchGroup(ctx, sector1_name.c_str());
+		if (sector1 == nullptr) {
+			reporter.WriteError(ZZQ3, u8R"(Incomplete level: can not find "Sector_01" group.)");
+		}
+	}
+
+#pragma endregion
+
 } // namespace BMapInspector::Rule

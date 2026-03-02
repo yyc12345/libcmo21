@@ -41,4 +41,24 @@ namespace BMapInspector::Rule {
 		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
 	};
 
+	/**
+	 * @brief ZZQ Rule 3
+	 * @details
+	 * A minimalist level must contains following items:
+	 * \li One start point.
+	 * \li One end point (spaceship).
+	 * \li One reset point.
+	 * \li "Sector_01" group.
+	 */
+	class ZZQRule3 : public IRule {
+	public:
+		ZZQRule3();
+		virtual ~ZZQRule3();
+		YYCC_DELETE_COPY_MOVE(ZZQRule3)
+
+	public:
+		std::u8string_view GetRuleName() const override;
+		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
+	};
+
 }
