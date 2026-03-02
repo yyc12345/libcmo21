@@ -566,7 +566,7 @@ namespace BMapInspector::Rule {
 
 				reporter.FormatInfo(
 				    YYC3,
-				    u8"Some textures are exactly same. Please consider merge them into one to reduce the final size of map. These textures are: %s",
+				    u8"Some textures are visually identical. Please consider merging them to reduce the final map size. These textures are: %s.",
 				    Shared::QuoteObjectNames(dup_texs.begin(), dup_texs.end()).c_str());
 			} else {
 				++it;
@@ -592,7 +592,7 @@ namespace BMapInspector::Rule {
 
 				reporter.FormatInfo(
 				    YYC3,
-				    u8"Some materials are exactly same. Please consider merge them into one to reduce the final size of map. These materials are: %s",
+				    u8"Some materials are visually identical. Please consider merging them to reduce the final map size. These materials are: %s.",
 				    Shared::QuoteObjectNames(dup_mtls.begin(), dup_mtls.end()).c_str());
 			} else {
 				++it;
@@ -618,7 +618,7 @@ namespace BMapInspector::Rule {
 
 				reporter.FormatInfo(
 				    YYC3,
-				    u8"Some meshes are exactly same. Please consider merge them into one to reduce the final size of map. These meshes are: %s",
+				    u8"Some meshes are visually identical. Please consider merging them to reduce the final map size. These meshes are: %s.",
 				    Shared::QuoteObjectNames(dup_meshes.begin(), dup_meshes.end()).c_str());
 			} else {
 				++it;

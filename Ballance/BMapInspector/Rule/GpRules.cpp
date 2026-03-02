@@ -99,7 +99,7 @@ namespace BMapInspector::Rule {
 		if (sector_count > 8) {
 			reporter.WriteWarning(
 			    GP2,
-			    u8"You are creating a map with more than 8 levels. This will cause vanilla Ballance freezed when loading it. Please make sure that all players of your map have properly set 999 sector loader up.");
+			    u8"You are creating a map with more than 8 sectors. This will cause vanilla Ballance freezed when loading it. Please make sure that all players of your map have properly set 999 sector loader up.");
 		}
 		// If there is sector 9, check its kind and report wanring if it is intuitive kind.
 		if (sector_count > 8) {

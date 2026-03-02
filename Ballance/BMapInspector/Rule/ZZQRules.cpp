@@ -132,7 +132,7 @@ namespace BMapInspector::Rule {
 					// Output result.
 					reporter.FormatWarning(ZZQ2,
 					                       u8"Some objects are grouped into sector %" PRIuCKDWORD " and sector %" PRIuCKDWORD
-					                       " represented group bothly. This is not allowed. These objects are: %s",
+					                       " represented group bothly. This is not allowed. These objects are: %s.",
 					                       left_sector_idx,
 					                       right_sector_idx,
 					                       Shared::QuoteObjectNames(intersection.begin(), intersection.end()).c_str());
