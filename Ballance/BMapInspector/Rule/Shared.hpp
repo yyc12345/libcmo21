@@ -164,10 +164,14 @@ namespace BMapInspector::Rule::Shared {
 	    requires std::is_pointer_v<std::iter_value_t<InputIt>>
 	             && std::is_base_of_v<O::CKObject, std::remove_pointer_t<std::iter_value_t<InputIt>>>
 	std::u8string QuoteObjectNames(InputIt first, InputIt last) {
+		std::u8string cache;
 		return yycc::string::op::join(
-		    [&first, &last]() -> std::optional<std::u8string_view> {
+		    [&cache, &first, &last]() -> std::optional<std::u8string_view> {
 			    if (first == last) return std::nullopt;
-			    return QuoteObjectName(*(first++));
+				// YYC MARK:
+				// We must use "cache", otherwise "use after free" will occur.
+			    cache = QuoteObjectName(*(first++));
+			    return cache;
 		    },
 		    u8", ");
 	}

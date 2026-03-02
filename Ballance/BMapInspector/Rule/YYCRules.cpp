@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <optional>
 #include <type_traits>
+#include <unordered_set>
 
 namespace L = LibCmo;
 namespace C = LibCmo::CK2;
@@ -182,7 +183,7 @@ namespace BMapInspector::Rule {
 		void update_array(const T* addr, size_t cnt) {
 			std::hash<T> hasher;
 			for (size_t i = 0; i < cnt; ++i) {
-				combine(hasher(addr[i]))
+				combine(hasher(addr[i]));
 			}
 		}
 
@@ -416,7 +417,10 @@ namespace BMapInspector::Rule {
 
 			// Compare face data arrays
 			if (!std::equal(lhs->GetFaceIndices(), lhs->GetFaceIndices() + face_count * 3, rhs->GetFaceIndices())) return false;
-			if (!std::equal(lhs->GetFaceMaterialSlotIndexs(), lhs->GetFaceMaterialSlotIndexs() + face_count, rhs->GetFaceMaterialSlotIndexs())) return false;
+			if (!std::equal(lhs->GetFaceMaterialSlotIndexs(),
+			                lhs->GetFaceMaterialSlotIndexs() + face_count,
+			                rhs->GetFaceMaterialSlotIndexs()))
+				return false;
 
 			// Compare material slot count
 			auto material_slot_count = lhs->GetMaterialSlotCount();
@@ -441,7 +445,7 @@ namespace BMapInspector::Rule {
 
 	public:
 		O::CKTexture* GetTexture() const { return texture; }
-		size_t GetHash() const { 
+		size_t GetHash() const {
 			if (!hash.has_value()) hash = hasher(texture);
 			return hash.value();
 		}
@@ -460,7 +464,7 @@ namespace BMapInspector::Rule {
 
 	public:
 		O::CKMaterial* GetMaterial() const { return material; }
-		size_t GetHash() const { 
+		size_t GetHash() const {
 			if (!hash.has_value()) hash = hasher(material);
 			return hash.value();
 		}
@@ -476,10 +480,10 @@ namespace BMapInspector::Rule {
 		CKMeshWrapper(O::CKMesh* mesh) : mesh(mesh), hasher(), hash(std::nullopt) {}
 		~CKMeshWrapper() {}
 		YYCC_DEFAULT_COPY_MOVE(CKMeshWrapper)
-	
+
 	public:
 		O::CKMesh* GetMesh() const { return mesh; }
-		size_t GetHash() const { 
+		size_t GetHash() const {
 			if (!hash.has_value()) hash = hasher(mesh);
 			return hash.value();
 		}
@@ -495,26 +499,21 @@ namespace BMapInspector::Rule {
 #pragma region CKObject Wrapper Hash and Equal
 
 	struct CKTextureWrapperHash {
-		[[nodiscard]] size_t operator()(const CKTextureWrapper& tex) const noexcept {
-			return tex.GetHash();
-		}
+		[[nodiscard]] size_t operator()(const CKTextureWrapper& tex) const noexcept { return tex.GetHash(); }
 	};
 
 	struct CKMaterialWrapperHash {
-		[[nodiscard]] size_t operator()(const CKMaterialWrapper& mtl) const noexcept {
-			return mtl.GetHash();
-		}
+		[[nodiscard]] size_t operator()(const CKMaterialWrapper& mtl) const noexcept { return mtl.GetHash(); }
 	};
 
 	struct CKMeshWrapperHash {
-		[[nodiscard]] size_t operator()(const CKMeshWrapper& mesh) const noexcept {
-			return mesh.GetHash();
-		}
+		[[nodiscard]] size_t operator()(const CKMeshWrapper& mesh) const noexcept { return mesh.GetHash(); }
 	};
 
 	struct CKTextureWrapperEqualTo {
 		CKTextureEqualTo equal_to;
 		[[nodiscard]] bool operator()(const CKTextureWrapper& lhs, const CKTextureWrapper& rhs) const {
+			if (lhs.GetHash() != rhs.GetHash()) return false;
 			return equal_to(lhs.GetTexture(), rhs.GetTexture());
 		}
 	};
@@ -522,6 +521,7 @@ namespace BMapInspector::Rule {
 	struct CKMaterialWrapperEqualTo {
 		CKMaterialEqualTo equal_to;
 		[[nodiscard]] bool operator()(const CKMaterialWrapper& lhs, const CKMaterialWrapper& rhs) const {
+			if (lhs.GetHash() != rhs.GetHash()) return false;
 			return equal_to(lhs.GetMaterial(), rhs.GetMaterial());
 		}
 	};
@@ -529,6 +529,7 @@ namespace BMapInspector::Rule {
 	struct CKMeshWrapperEqualTo {
 		CKMeshEqualTo equal_to;
 		[[nodiscard]] bool operator()(const CKMeshWrapper& lhs, const CKMeshWrapper& rhs) const {
+			if (lhs.GetHash() != rhs.GetHash()) return false;
 			return equal_to(lhs.GetMesh(), rhs.GetMesh());
 		}
 	};
@@ -545,7 +546,85 @@ namespace BMapInspector::Rule {
 		return YYC3;
 	}
 
-	void YYCRule3::Check(Reporter::Reporter& reporter, Map::Level& level) const {}
+	void YYCRule3::Check(Reporter::Reporter& reporter, Map::Level& level) const {
+		// Check textures
+		std::unordered_multiset<CKTextureWrapper, CKTextureWrapperHash, CKTextureWrapperEqualTo> textures;
+		for (auto* tex : level.GetTextures()) {
+			textures.emplace(CKTextureWrapper(tex));
+		}
+		// Show result
+		for (auto it = textures.begin(); it != textures.end();) {
+			size_t count = textures.count(*it);
+
+			// all count elements have equivalent keys
+			if (count > 1) {
+				std::vector<O::CKTexture*> dup_texs;
+				for (size_t i = 0; i < count; ++i) {
+					dup_texs.emplace_back(it->GetTexture());
+					++it;
+				}
+
+				reporter.FormatInfo(
+				    YYC3,
+				    u8"Some textures are exactly same. Please consider merge them into one to reduce the final size of map. These textures are: %s",
+				    Shared::QuoteObjectNames(dup_texs.begin(), dup_texs.end()).c_str());
+			} else {
+				++it;
+			}
+		}
+
+		// Check materials
+		std::unordered_multiset<CKMaterialWrapper, CKMaterialWrapperHash, CKMaterialWrapperEqualTo> materials;
+		for (auto* mat : level.GetMaterials()) {
+			materials.emplace(CKMaterialWrapper(mat));
+		}
+		// Show result
+		for (auto it = materials.begin(); it != materials.end();) {
+			size_t count = materials.count(*it);
+
+			// all count elements have equivalent keys
+			if (count > 1) {
+				std::vector<O::CKMaterial*> dup_mtls;
+				for (size_t i = 0; i < count; ++i) {
+					dup_mtls.emplace_back(it->GetMaterial());
+					++it;
+				}
+
+				reporter.FormatInfo(
+				    YYC3,
+				    u8"Some materials are exactly same. Please consider merge them into one to reduce the final size of map. These materials are: %s",
+				    Shared::QuoteObjectNames(dup_mtls.begin(), dup_mtls.end()).c_str());
+			} else {
+				++it;
+			}
+		}
+
+		// Check meshes
+		std::unordered_multiset<CKMeshWrapper, CKMeshWrapperHash, CKMeshWrapperEqualTo> meshes;
+		for (auto* mesh : level.GetMeshes()) {
+			meshes.emplace(CKMeshWrapper(mesh));
+		}
+		// Show result
+		for (auto it = meshes.begin(); it != meshes.end();) {
+			size_t count = meshes.count(*it);
+
+			// all count elements have equivalent keys
+			if (count > 1) {
+				std::vector<O::CKMesh*> dup_meshes;
+				for (size_t i = 0; i < count; ++i) {
+					dup_meshes.emplace_back(it->GetMesh());
+					++it;
+				}
+
+				reporter.FormatInfo(
+				    YYC3,
+				    u8"Some meshes are exactly same. Please consider merge them into one to reduce the final size of map. These meshes are: %s",
+				    Shared::QuoteObjectNames(dup_meshes.begin(), dup_meshes.end()).c_str());
+			} else {
+				++it;
+			}
+		}
+	}
 
 #pragma endregion
 

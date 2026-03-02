@@ -129,8 +129,6 @@ namespace BMapInspector::Rule {
 					auto left_sector_idx = static_cast<L::CKDWORD>(i + 1);
 					auto right_sector_idx = static_cast<L::CKDWORD>(j + 1);
 
-					// Join object together
-
 					// Output result.
 					reporter.FormatWarning(ZZQ2,
 					                       u8"Some objects are grouped into sector %" PRIuCKDWORD " and sector %" PRIuCKDWORD

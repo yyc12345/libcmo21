@@ -28,6 +28,7 @@ namespace BMapInspector::Rule {
 		rules.emplace_back(new ChirsRule1());
 		rules.emplace_back(new YYCRule1());
 		rules.emplace_back(new YYCRule2());
+		rules.emplace_back(new YYCRule3());
 		rules.emplace_back(new BBugRule1());
 		rules.emplace_back(new ZZQRule1());
 		rules.emplace_back(new ZZQRule2());
