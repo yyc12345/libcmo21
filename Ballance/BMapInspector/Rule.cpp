@@ -29,7 +29,10 @@ namespace BMapInspector::Rule {
 		rules.emplace_back(new YYCRule1());
 		rules.emplace_back(new YYCRule2());
 		rules.emplace_back(new YYCRule3());
+		rules.emplace_back(new YYCRule4());		
 		rules.emplace_back(new BBugRule1());
+		rules.emplace_back(new BBugRule2());
+		rules.emplace_back(new BBugRule3());
 		rules.emplace_back(new ZZQRule1());
 		rules.emplace_back(new ZZQRule2());
 		rules.emplace_back(new ZZQRule3());

@@ -53,4 +53,22 @@ namespace BMapInspector::Rule {
 		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
 	};
 
+	/**
+	 * @brief YYC12345 Rule 4
+	 * @details
+	 * \li Check the video format for opaque and transparent texture respectively.
+	 * \li Warning for video format which is not used by vanilla Ballance.
+	 * \li Warning for transparent used video format in non-Ballance textures to conserve resources.
+	 */
+	class YYCRule4 : public IRule {
+	public:
+		YYCRule4();
+		virtual ~YYCRule4();
+		YYCC_DELETE_COPY_MOVE(YYCRule4)
+
+	public:
+		std::u8string_view GetRuleName() const override;
+		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
+	};
+
 }

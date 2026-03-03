@@ -14,6 +14,7 @@ namespace L = LibCmo;
 namespace C = LibCmo::CK2;
 namespace V = LibCmo::VxMath;
 namespace O = LibCmo::CK2::ObjImpls;
+namespace strop = yycc::string::op;
 
 namespace BMapInspector::Rule {
 
@@ -246,7 +247,7 @@ namespace BMapInspector::Rule {
 			if (filename == nullptr) {
 				combiner.update(nullptr);
 			} else {
-				auto lower_filename = yycc::string::op::to_lower(filename);
+				auto lower_filename = strop::to_lower(filename);
 				combiner.update(lower_filename);
 			}
 			combiner.update(texdata.GetSaveOptions());
@@ -627,5 +628,73 @@ namespace BMapInspector::Rule {
 	}
 
 #pragma endregion
+
+#pragma region YYC Rule 4
+
+	constexpr char8_t YYC4[] = u8"YYC4";
+
+	YYCRule4::YYCRule4() : IRule() {}
+
+	YYCRule4::~YYCRule4() {}
+
+	std::u8string_view YYCRule4::GetRuleName() const {
+		return YYC4;
+	}
+
+	void YYCRule4::Check(Reporter::Reporter& reporter, Map::Level& level) const {
+		// Build lowercase texture name set first.
+		std::set<std::u8string> opaque_texs;
+		for (const auto* tex_name : Shared::TextureNames::OPAQUE_TEXS) {
+			opaque_texs.emplace(strop::to_lower(tex_name));
+		}
+		std::set<std::u8string> transparent_texs;
+		for (const auto* tex_name : Shared::TextureNames::TRANSPARENT_TEXS) {
+			transparent_texs.emplace(strop::to_lower(tex_name));
+		}
+
+		// Check texture one by one
+		for (auto& tex : level.GetTextures()) {
+			auto tex_filename = tex->GetUnderlyingData().GetSlotFileName(0);
+			if (tex_filename == nullptr) continue;
+
+			auto lower_tex_filename = strop::to_lower(tex_filename);
+			if (opaque_texs.contains(lower_tex_filename)) {
+				if (tex->GetVideoFormat() != V::VX_PIXELFORMAT::_16_ARGB1555) {
+					reporter.FormatWarning(
+					    YYC4,
+					    u8"Texture %s is Ballance opaque texture. But its video format is not ARGB1555. This is mismatched with vanilla Ballance.",
+					    Shared::QuoteObjectName(tex).c_str());
+				}
+			} else if (transparent_texs.contains(lower_tex_filename)) {
+				if (tex->GetVideoFormat() != V::VX_PIXELFORMAT::_32_ARGB8888) {
+					reporter.FormatWarning(
+					    YYC4,
+					    u8"Texture %s is Ballance transparent texture. But its video format is not ARGB8888. This is mismatched with vanilla Ballance.",
+					    Shared::QuoteObjectName(tex).c_str());
+				}
+			} else {
+				switch (tex->GetVideoFormat()) {
+					case V::VX_PIXELFORMAT::_16_ARGB1555:
+						// Do nothing.
+						break;
+					case V::VX_PIXELFORMAT::_32_ARGB8888:
+						reporter.FormatWarning(
+						    YYC4,
+						    u8"Texture %s is not Ballance texture. Its video format is ARGB8888. "
+						    "This may cause useless performance consumption if there is no transparent inside it. Please check whether this is essential.",
+						    Shared::QuoteObjectName(tex).c_str());
+						break;
+					default:
+						reporter.FormatWarning(
+						    YYC4,
+						    u8"Texture %s is not Ballance texture. Its video format is not ARGB1555 or ARGB8888. "
+						    "This is mismatched with vanilla Ballance. Please set it to ARGB1555 for opaque texture, or ARGB8888 for transaprent texture, "
+							"except special scenario.",
+						    Shared::QuoteObjectName(tex).c_str());
+						break;
+				}
+			}
+		}
+	}
 
 } // namespace BMapInspector::Rule
