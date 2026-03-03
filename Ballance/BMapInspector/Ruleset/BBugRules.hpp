@@ -1,14 +1,14 @@
 #pragma once
 #include "../Rule.hpp"
 
-namespace BMapInspector::Rule {
+namespace BMapInspector::Ruleset {
     
     /**
      * @brief BBug Rule 1
 	 * @details
 	 * Using light in map is not suggested.
      */
-    class BBugRule1 : public IRule {
+    class BBugRule1 : public Rule::IRule {
 	public:
 		BBugRule1();
 		virtual ~BBugRule1();
@@ -24,7 +24,7 @@ namespace BMapInspector::Rule {
 	 * @details
 	 * Using camera in map is not suggested.
 	 */
-	class BBugRule2 : public IRule {
+	class BBugRule2 : public Rule::IRule {
 	public:
 		BBugRule2();
 		virtual ~BBugRule2();
@@ -40,7 +40,7 @@ namespace BMapInspector::Rule {
 	 * @details
 	 * Check whether the parameters of all materials is same with Ballance vanilla settings.
 	 */
-	class BBugRule3 : public IRule {
+	class BBugRule3 : public Rule::IRule {
 	public:
 		BBugRule3();
 		virtual ~BBugRule3();

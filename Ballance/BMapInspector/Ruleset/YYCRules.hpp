@@ -1,7 +1,7 @@
 #pragma once
 #include "../Rule.hpp"
 
-namespace BMapInspector::Rule {
+namespace BMapInspector::Ruleset {
 
 	/**
 	 * @brief YYC12345 Rule 1
@@ -9,7 +9,7 @@ namespace BMapInspector::Rule {
 	 * The object grouped into "Phys_FloorRails" should only be rails, otherwise their meshes' UV will be smooth.
 	 * Additionally, these smooth UV meshes will also affect those objects refering them.
 	 */
-	class YYCRule1 : public IRule {
+	class YYCRule1 : public Rule::IRule {
 	public:
 		YYCRule1();
 		virtual ~YYCRule1();
@@ -26,7 +26,7 @@ namespace BMapInspector::Rule {
 	 * The object grouped into physicalization group should not have isolated vertex,
 	 * otherwise it will fail to be physicalized.
 	 */
-	class YYCRule2 : public IRule {
+	class YYCRule2 : public Rule::IRule {
 	public:
 		YYCRule2();
 		virtual ~YYCRule2();
@@ -42,7 +42,7 @@ namespace BMapInspector::Rule {
 	 * @details
 	 * Exactly same mesh, material and texture can be merged.
 	 */
-	class YYCRule3 : public IRule {
+	class YYCRule3 : public Rule::IRule {
 	public:
 		YYCRule3();
 		virtual ~YYCRule3();
@@ -60,7 +60,7 @@ namespace BMapInspector::Rule {
 	 * \li Warning for video format which is not used by vanilla Ballance.
 	 * \li Warning for transparent used video format in non-Ballance textures to conserve resources.
 	 */
-	class YYCRule4 : public IRule {
+	class YYCRule4 : public Rule::IRule {
 	public:
 		YYCRule4();
 		virtual ~YYCRule4();

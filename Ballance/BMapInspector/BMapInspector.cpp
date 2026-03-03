@@ -101,14 +101,16 @@ static void CheckRules(BMapInspector::Cli::Args& args, BMapInspector::Map::Level
 	BMapInspector::Reporter::Reporter reporter;
 
 	// Get rule collection
-	BMapInspector::Rule::Ruleset ruleset;
+	BMapInspector::Rule::RuleCollection rule_collection;
 	// Show rule infos
-	std::cout << strop::printf(u8"Total %" PRIuSIZET " rule(s) are loaded.", ruleset.GetRuleCount()) << std::endl
+	std::cout << strop::printf(u8"Total %" PRIuSIZET " rule(s) are loaded.", rule_collection.GetRuleCount()) << std::endl
 	          << u8"Check may take few minutes. Please do not close this console..." << std::endl;
 
 	// Check rules one by one
-	for (auto* rule : ruleset.GetRules()) {
+	for (auto* rule : rule_collection.GetRules()) {
+		reporter.EnterRule(rule->GetRuleName());
 		rule->Check(reporter, level);
+		reporter.LeaveRule();
 	}
 
 	// Show report conclusion

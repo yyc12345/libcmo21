@@ -11,15 +11,18 @@ PRIVATE
 	Map.cpp
 	Rule.cpp
 	# Rules
-	Rule/Shared.cpp
-	Rule/GpRules.cpp
-	Rule/ChirsRules.cpp
-	Rule/YYCRules.cpp
-	Rule/ZZQRules.cpp
-	Rule/BBugRules.cpp
-	Rule/SOneRules.cpp
-	Rule/SSBRules.cpp
-	Rule/LXRules.cpp
+	Ruleset/Shared/Utility.cpp
+	Ruleset/Shared/Name.cpp
+	Ruleset/Shared/Sector.cpp
+	Ruleset/Shared/DupCmp.cpp
+	Ruleset/GpRules.cpp
+	Ruleset/ChirsRules.cpp
+	Ruleset/YYCRules.cpp
+	Ruleset/ZZQRules.cpp
+	Ruleset/BBugRules.cpp
+	Ruleset/SOneRules.cpp
+	Ruleset/SSBRules.cpp
+	Ruleset/LXRules.cpp
 )
 # Setup headers
 target_sources(BMapInspector
@@ -33,15 +36,18 @@ FILES
 	Map.hpp
 	Rule.hpp
 	# Rules
-	Rule/Shared.hpp
-	Rule/GpRules.hpp
-	Rule/ChirsRules.hpp
-	Rule/YYCRules.hpp
-	Rule/ZZQRules.hpp
-	Rule/BBugRules.hpp
-	Rule/SOneRules.hpp
-	Rule/SSBRules.hpp
-	Rule/LXRules.hpp
+	Ruleset/Shared/Utility.hpp
+	Ruleset/Shared/Name.hpp
+	Ruleset/Shared/Sector.hpp
+	Ruleset/Shared/DupCmp.hpp
+	Ruleset/GpRules.hpp
+	Ruleset/ChirsRules.hpp
+	Ruleset/YYCRules.hpp
+	Ruleset/ZZQRules.hpp
+	Ruleset/BBugRules.hpp
+	Ruleset/SOneRules.hpp
+	Ruleset/SSBRules.hpp
+	Ruleset/LXRules.hpp
 )
 # Setup header infomation
 target_include_directories(BMapInspector

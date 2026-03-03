@@ -1,54 +1,70 @@
 #include "Reporter.hpp"
 #include <yycc/string/op.hpp>
 #include <cstdarg>
+#include <stdexcept>
 
+using BMapInspector::Utils::ReportLevel;
 namespace strop = yycc::string::op;
 
 namespace BMapInspector::Reporter {
 
 #pragma region Reporter
 
-	Reporter::Reporter() {}
+	Reporter::Reporter() : current_rule(std::nullopt), reports() {}
 
 	Reporter::~Reporter() {}
 
-	void Reporter::AddReport(Utils::ReportLevel level, const std::u8string_view &rule, const std::u8string_view &content) {
-		this->reports.emplace_back(Report{
-		    .level = level,
-		    .rule = std::u8string(rule),
-		    .content = std::u8string(content),
-		});
+	void Reporter::EnterRule(const std::u8string_view &rule) {
+		if (this->current_rule.has_value()) throw std::logic_error("can not enter rule multiple times");
+		else this->current_rule = std::u8string(rule);
 	}
 
-	void Reporter::WriteInfo(const std::u8string_view &rule, const std::u8string_view &content) {
-		this->AddReport(Utils::ReportLevel::Info, rule, content);
+	void Reporter::LeaveRule() {
+		if (this->current_rule.has_value()) this->current_rule = std::nullopt;
+		else throw std::logic_error("can not leave rule without any existing rule");
 	}
 
-	void Reporter::FormatInfo(const std::u8string_view &rule, const char8_t *fmt, ...) {
+	void Reporter::AddReport(ReportLevel level, const std::u8string_view &content) {
+		if (this->current_rule.has_value()) {
+			this->reports.emplace_back(Report{
+			    .level = level,
+			    .rule = std::u8string(this->current_rule.value()),
+			    .content = std::u8string(content),
+			});
+		} else {
+			throw std::logic_error("can not add report without any rule scope");
+		}
+	}
+
+	void Reporter::WriteInfo(const std::u8string_view &content) {
+		this->AddReport(ReportLevel::Info, content);
+	}
+
+	void Reporter::FormatInfo(const char8_t *fmt, ...) {
 		va_list argptr;
 		va_start(argptr, fmt);
-		this->WriteInfo(rule, strop::vprintf(fmt, argptr));
+		this->WriteInfo(strop::vprintf(fmt, argptr));
 		va_end(argptr);
 	}
 
-	void Reporter::WriteWarning(const std::u8string_view &rule, const std::u8string_view &content) {
-		this->AddReport(Utils::ReportLevel::Warning, rule, content);
+	void Reporter::WriteWarning(const std::u8string_view &content) {
+		this->AddReport(ReportLevel::Warning, content);
 	}
-	void Reporter::FormatWarning(const std::u8string_view &rule, const char8_t *fmt, ...) {
+	void Reporter::FormatWarning(const char8_t *fmt, ...) {
 		va_list argptr;
 		va_start(argptr, fmt);
-		this->WriteWarning(rule, strop::vprintf(fmt, argptr));
+		this->WriteWarning(strop::vprintf(fmt, argptr));
 		va_end(argptr);
 	}
 
-	void Reporter::WriteError(const std::u8string_view &rule, const std::u8string_view &content) {
-		this->AddReport(Utils::ReportLevel::Error, rule, content);
+	void Reporter::WriteError(const std::u8string_view &content) {
+		this->AddReport(ReportLevel::Error, content);
 	}
 
-	void Reporter::FormatError(const std::u8string_view &rule, const char8_t *fmt, ...) {
+	void Reporter::FormatError(const char8_t *fmt, ...) {
 		va_list argptr;
 		va_start(argptr, fmt);
-		this->WriteError(rule, strop::vprintf(fmt, argptr));
+		this->WriteError(strop::vprintf(fmt, argptr));
 		va_end(argptr);
 	}
 
@@ -56,13 +72,13 @@ namespace BMapInspector::Reporter {
 		ReporterDigest digest{.cnt_err = 0, .cnt_warn = 0, .cnt_info = 0};
 		for (const auto &report : this->reports) {
 			switch (report.level) {
-				case Utils::ReportLevel::Error:
+				case ReportLevel::Error:
 					++digest.cnt_err;
 					break;
-				case Utils::ReportLevel::Warning:
+				case ReportLevel::Warning:
 					++digest.cnt_warn;
 					break;
-				case Utils::ReportLevel::Info:
+				case ReportLevel::Info:
 					++digest.cnt_info;
 					break;
 			}

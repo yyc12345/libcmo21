@@ -1,7 +1,7 @@
 #pragma once
 #include "../Rule.hpp"
 
-namespace BMapInspector::Rule {
+namespace BMapInspector::Ruleset {
 
 	/**
 	 * @brief SomeOne_001 Rule 1
@@ -9,7 +9,7 @@ namespace BMapInspector::Rule {
 	 * If there is a physicalized object without any mesh,
 	 * itself and following objects will not be physicalized.
 	 */
-	class SOneRule1 : public IRule {
+	class SOneRule1 : public Rule::IRule {
 	public:
 		SOneRule1();
 		virtual ~SOneRule1();
@@ -20,4 +20,4 @@ namespace BMapInspector::Rule {
 		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
 	};
 
-} // namespace BMapInspector::Rule
+} // namespace BMapInspector::Ruleset

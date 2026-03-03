@@ -1,4 +1,6 @@
-#include "Shared.hpp"
+#include "Utility.hpp"
+#include "Name.hpp"
+#include <yycc.hpp>
 #include <yycc/carton/termcolor.hpp>
 #include <filesystem>
 #include <stdexcept>
@@ -6,44 +8,24 @@
 
 namespace strop = yycc::string::op;
 namespace termcolor = yycc::carton::termcolor;
+namespace L = LibCmo;
+namespace C = LibCmo::CK2;
+namespace O = LibCmo::CK2::ObjImpls;
 
-namespace BMapInspector::Rule::Shared {
+namespace BMapInspector::Ruleset::Shared::Utility {
 
-#pragma region Utility Classes
+	#pragma region Utilities
 
-#pragma region Sector Name Builder
-
-	SectorNameBuilder::SectorNameBuilder() {}
-
-	SectorNameBuilder::~SectorNameBuilder() {}
-
-	SectorName SectorNameBuilder::get_name(L::CKDWORD sector) const {
-		if (sector < MIN_SECTOR || sector > MAX_SECTOR) {
-			throw std::logic_error("invalid sector number");
-		} else {
-			if (sector < 9) {
-				return strop::printf(u8"Sector_%02" PRIuCKDWORD, sector);
-			} else {
-				return strop::printf(u8"Sector_%" PRIuCKDWORD, sector);
-			}
-		}
-	}
-
-	Sector9Names SectorNameBuilder::get_sector9_names() const {
-		return Sector9Names{.legacy_name = u8"Sector_9", .intuitive_name = u8"Sector_09"};
-	}
-
-#pragma endregion
-
-#pragma endregion
-
-#pragma region Check Functions
 
 	bool FPEqual(L::CKFLOAT lhs, L::CKFLOAT rhs, L::CKFLOAT tolerance) {
 		auto diff = lhs - rhs;
 		auto absolute_diff = std::fabs(diff);
 		return absolute_diff <= tolerance;
 	}
+
+#pragma endregion
+
+	#pragma region Virtools Stuff
 
 	O::CKGroup* FetchGroup(C::CKContext* ctx, L::CKSTRING name) {
 		return static_cast<O::CKGroup*>(ctx->GetObjectByNameAndClass(name, C::CK_CLASSID::CKCID_GROUP, nullptr));
@@ -65,25 +47,32 @@ namespace BMapInspector::Rule::Shared {
 	std::vector<O::CK3dObject*> FetchPhysicalized3dObjects(C::CKContext* ctx) {
 		std::vector<O::CK3dObject*> rv;
 
-		auto* phys_floors = FetchGroup(ctx, GroupNames::PHYS_FLOORS);
+		auto* phys_floors = FetchGroup(ctx, Name::Group::PHYS_FLOORS);
 		if (phys_floors != nullptr) Iter3dObjectsEx(rv, phys_floors);
-		auto* phys_floorrails = FetchGroup(ctx, GroupNames::PHYS_FLOORRAILS);
+		auto* phys_floorrails = FetchGroup(ctx, Name::Group::PHYS_FLOORRAILS);
 		if (phys_floorrails != nullptr) Iter3dObjectsEx(rv, phys_floorrails);
-		auto* phys_floorstopper = FetchGroup(ctx, GroupNames::PHYS_FLOORSTOPPER);
+		auto* phys_floorstopper = FetchGroup(ctx, Name::Group::PHYS_FLOORSTOPPER);
 		if (phys_floorstopper != nullptr) Iter3dObjectsEx(rv, phys_floorstopper);
 
 		return rv;
 	}
 
-	bool CheckTextureFileName(O::CKTexture* tex, L::CKSTRING name) {
+	std::optional<std::u8string> ExtractTextureFileName(O::CKTexture* tex) {
 		// Get file name
 		auto filename = tex->GetUnderlyingData().GetSlotFileName(0);
-		if (filename == nullptr) return false;
+		if (filename == nullptr) return std::nullopt;
 		// Extract file name part
 		std::filesystem::path filepath(filename);
 		auto filename_part = filepath.filename().u8string();
+		return filename_part;
+	}
+
+	bool CheckTextureFileName(O::CKTexture* tex, L::CKSTRING name) {
+		// Get file name part
+		auto filename_part = ExtractTextureFileName(tex);
+		if (!filename_part.has_value()) return false;
 		// Return result.
-		return C::CKStrEqualI(filename_part.c_str(), name);
+		return C::CKStrEqualI(filename_part.value().c_str(), name);
 	}
 
 	std::vector<O::CK3dObject*> Iter3dObjects(O::CKGroup* group) {
@@ -103,24 +92,31 @@ namespace BMapInspector::Rule::Shared {
 		return rv;
 	}
 
-	static const char8_t* RenderObjectName(O::CKObject* obj) {
-		static std::u8string ANONYMOUS = termcolor::colored(u8"<anonymous>", termcolor::Color::LightMagenta);
-		auto name = obj->GetName();
-		if (name == nullptr) {
-			return ANONYMOUS.c_str();
-		} else {
-			return name;
-		}
+#pragma endregion
+
+	#pragma region Presentation
+
+	std::u8string QuoteText(const std::u8string_view& words) {
+		std::u8string rv;
+		rv.reserve(words.size() + 2);
+
+		rv.push_back('"');
+		rv.append(words);
+		rv.push_back('"');
+
+		return rv;
 	}
 
 	std::u8string QuoteObjectName(O::CKObject* obj) {
-		std::u8string rv;
-		rv.push_back(u8'"');
-		rv.append(RenderObjectName(obj));
-		rv.push_back(u8'"');
-		return rv;
+		static std::u8string ANONYMOUS = termcolor::colored(u8"<anonymous>", termcolor::Color::LightMagenta);
+		auto name = obj->GetName();
+		if (name == nullptr) {
+			return QuoteText(ANONYMOUS);
+		} else {
+			return QuoteText(name);
+		}
 	}
 
 #pragma endregion
 
-} // namespace BMapInspector::Rule::Shared
+} // namespace BMapInspector::Ruleset::Shared::Utility

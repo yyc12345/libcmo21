@@ -10,6 +10,9 @@
 
 namespace BMapInspector::Rule {
 
+	/**
+	 * @brief The interface of a rule.
+	 */
 	class IRule {
 	public:
 		IRule();
@@ -21,18 +24,21 @@ namespace BMapInspector::Rule {
 		virtual void Check(Reporter::Reporter& reporter, Map::Level& level) const = 0;
 	};
 
-	class Ruleset {
+	/**
+	 * @brief A collection of rules.
+	 */
+	class RuleCollection {
 	public:
-		Ruleset();
-		~Ruleset();
-		YYCC_DELETE_COPY_MOVE(Ruleset)
+		RuleCollection();
+		~RuleCollection();
+		YYCC_DELETE_COPY_MOVE(RuleCollection)
 
 	public:
 		size_t GetRuleCount() const;
-		const std::vector<IRule *> &GetRules() const;
+		const std::vector<IRule*>& GetRules() const;
 
 	private:
-		std::vector<IRule *> rules;
+		std::vector<IRule*> rules;
 	};
 
-} // namespace BMapInspector::Ruleset
+} // namespace BMapInspector::Rule

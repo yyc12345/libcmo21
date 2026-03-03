@@ -1,7 +1,7 @@
 #pragma once
 #include "../Rule.hpp"
 
-namespace BMapInspector::Rule {
+namespace BMapInspector::Ruleset {
 
 	/**
 	 * @brief chirs241097 Rule 1
@@ -9,7 +9,7 @@ namespace BMapInspector::Rule {
 	 * This rule will make sure that there is only 1 texture named Laterne_Verlauf in map,
 	 * which represent the ray of latern.
 	 */
-	class ChirsRule1 : public IRule {
+	class ChirsRule1 : public Rule::IRule {
 	public:
 		ChirsRule1();
 		virtual ~ChirsRule1();

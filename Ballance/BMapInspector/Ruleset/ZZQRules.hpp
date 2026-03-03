@@ -1,7 +1,7 @@
 #pragma once
 #include "../Rule.hpp"
 
-namespace BMapInspector::Rule {
+namespace BMapInspector::Ruleset {
     
     /**
      * @brief ZZQ Rule 1
@@ -13,7 +13,7 @@ namespace BMapInspector::Rule {
 	 * to know which object can make sound in game, 
 	 * if mapper require the stopper which can not make sound them by design.
      */
-    class ZZQRule1 : public IRule {
+    class ZZQRule1 : public Rule::IRule {
 	public:
 		ZZQRule1();
 		virtual ~ZZQRule1();
@@ -30,7 +30,7 @@ namespace BMapInspector::Rule {
 	 * The Ballance should only be included only one group.
 	 * This rule will check whether there is intersection between different sector group.
 	 */
-	class ZZQRule2 : public IRule {
+	class ZZQRule2 : public Rule::IRule {
 	public:
 		ZZQRule2();
 		virtual ~ZZQRule2();
@@ -50,7 +50,7 @@ namespace BMapInspector::Rule {
 	 * \li One reset point.
 	 * \li "Sector_01" group.
 	 */
-	class ZZQRule3 : public IRule {
+	class ZZQRule3 : public Rule::IRule {
 	public:
 		ZZQRule3();
 		virtual ~ZZQRule3();

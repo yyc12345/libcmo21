@@ -16,6 +16,11 @@ namespace BMapInspector::Utils {
 		Info = 2,
 	};
 
+	/**
+	 * @brief Parse given string as report level.
+	 * @param[in] value The string for parsing.
+	 * @return Parsed level or nothing (error occurs).
+	 */
 	std::optional<ReportLevel> ParseReportLevel(const std::u8string_view& value);
 
 	/**

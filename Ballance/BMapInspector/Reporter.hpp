@@ -5,6 +5,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <optional>
 
 namespace BMapInspector::Reporter {
 
@@ -26,22 +27,27 @@ namespace BMapInspector::Reporter {
 		~Reporter();
 		YYCC_DEFAULT_COPY_MOVE(Reporter)
 
+	public:
+		void EnterRule(const std::u8string_view& rule);
+		void LeaveRule();
+
 	private:
-		void AddReport(Utils::ReportLevel level, const std::u8string_view& rule, const std::u8string_view& content);
+		void AddReport(Utils::ReportLevel level, const std::u8string_view& content);
 
 	public:
-		void WriteInfo(const std::u8string_view& rule, const std::u8string_view& content);
-		void FormatInfo(const std::u8string_view& rule, const char8_t* fmt, ...);
-		void WriteWarning(const std::u8string_view& rule, const std::u8string_view& content);
-		void FormatWarning(const std::u8string_view& rule, const char8_t* fmt, ...);
-		void WriteError(const std::u8string_view& rule, const std::u8string_view& content);
-		void FormatError(const std::u8string_view& rule, const char8_t* fmt, ...);
+		void WriteInfo(const std::u8string_view& content);
+		void FormatInfo(const char8_t* fmt, ...);
+		void WriteWarning(const std::u8string_view& content);
+		void FormatWarning(const char8_t* fmt, ...);
+		void WriteError(const std::u8string_view& content);
+		void FormatError(const char8_t* fmt, ...);
 
 	public:
 		ReporterDigest GetDigest() const;
 		const std::vector<Report>& GetReports() const;
 
 	private:
+		std::optional<std::u8string> current_rule;
 		std::vector<Report> reports;
 	};
 

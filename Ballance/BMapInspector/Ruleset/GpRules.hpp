@@ -1,14 +1,14 @@
 #pragma once
 #include "../Rule.hpp"
 
-namespace BMapInspector::Rule {
+namespace BMapInspector::Ruleset {
     
     /**
      * @brief Gamepiaynmo Rule 1
 	 * @details
 	 * The most comprehensive group checker inspired from Ballance Blender Plugin.
      */
-    class GpRule1 : public IRule {
+    class GpRule1 : public Rule::IRule {
 	public:
 		GpRule1();
 		virtual ~GpRule1();
@@ -30,7 +30,7 @@ namespace BMapInspector::Rule {
 	 * \li Warn for sector count greater than 8. It will cause vanilla game freezed without 999 sector loader.
 	 * \li Check whether sector group is successive.
 	 */
-	class GpRule2 : public IRule {
+	class GpRule2 : public Rule::IRule {
 	public:
 		GpRule2();
 		virtual ~GpRule2();

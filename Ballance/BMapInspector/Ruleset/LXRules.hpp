@@ -1,14 +1,14 @@
 #pragma once
 #include "../Rule.hpp"
 
-namespace BMapInspector::Rule {
+namespace BMapInspector::Ruleset {
 
 	/**
 	 * @brief LengXi Rule 1
 	 * @details
 	 * All meshes, materials and textures used by Ballance elements should not be used by any other objects.
 	 */
-	class LXRule1 : public IRule {
+	class LXRule1 : public Rule::IRule {
 	public:
 		LXRule1();
 		virtual ~LXRule1();
