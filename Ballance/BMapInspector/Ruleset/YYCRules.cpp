@@ -7,6 +7,7 @@
 #include <vector>
 #include <set>
 #include <optional>
+#include <algorithm>
 #include <unordered_set>
 
 namespace L = LibCmo;
