@@ -341,53 +341,20 @@ namespace LibCmo::VxMath {
 	public:
 		static constexpr CKDWORD FACTOR_SIZE = 1u;              /**< Single color factor (one of ARGB) occpied size in byte. */
 		static constexpr CKDWORD PIXEL_SIZE = FACTOR_SIZE * 4u; /**< Single pixel occpied size in byte. */
+
 	public:
 		/**
 		 * @brief Create a blank (invalid) image.
 		*/
-		VxImageDescEx() : m_Width(0), m_Height(0), m_Image(nullptr) {}
+		VxImageDescEx();
 		/**
 		 * @brief Create a image with given width and height.
 		 * @param[in] width The width of image.
 		 * @param[in] height The height of image.
 		*/
-		VxImageDescEx(CKDWORD width, CKDWORD height) : m_Width(width), m_Height(height), m_Image(nullptr) { CreateImage(width, height); }
-		VxImageDescEx(const VxImageDescEx& rhs) : m_Width(rhs.m_Width), m_Height(rhs.m_Height), m_Image(nullptr) {
-			// copy image
-			if (rhs.m_Image != nullptr) {
-				CreateImage(rhs.m_Width, rhs.m_Height, rhs.m_Image);
-			}
-		}
-		VxImageDescEx(VxImageDescEx&& rhs) noexcept : m_Width(rhs.m_Width), m_Height(rhs.m_Height), m_Image(rhs.m_Image) {
-			// move image
-			rhs.m_Height = 0;
-			rhs.m_Width = 0;
-			rhs.m_Image = nullptr;
-		}
-		VxImageDescEx& operator=(const VxImageDescEx& rhs) {
-			FreeImage();
-
-			m_Width = rhs.m_Width;
-			m_Height = rhs.m_Height;
-			if (rhs.m_Image != nullptr) {
-				CreateImage(rhs.m_Width, rhs.m_Height, rhs.m_Image);
-			}
-
-			return *this;
-		}
-		VxImageDescEx& operator=(VxImageDescEx&& rhs) noexcept {
-			FreeImage();
-
-			m_Height = rhs.m_Height;
-			m_Width = rhs.m_Width;
-			m_Image = rhs.m_Image;
-			rhs.m_Height = 0;
-			rhs.m_Width = 0;
-			rhs.m_Image = nullptr;
-
-			return *this;
-		}
-		~VxImageDescEx() { FreeImage(); }
+		VxImageDescEx(CKDWORD width, CKDWORD height);
+		~VxImageDescEx();
+		YYCC_DECL_COPY_MOVE(VxImageDescEx)
 
 		/**
 		 * @brief Create image with given width and height
@@ -397,12 +364,7 @@ namespace LibCmo::VxMath {
 		 * \li There is no initialization (fill with zero) for this new created image.
 		 * \li Old image will be free first before creating.
 		*/
-		void CreateImage(CKDWORD Width, CKDWORD Height) {
-			FreeImage();
-			m_Width = Width;
-			m_Height = Height;
-			m_Image = new CKBYTE[GetImageSize()];
-		}
+		void CreateImage(CKDWORD Width, CKDWORD Height);
 		/**
 		 * @brief Create image with given width, height and data.
 		 * @param[in] Width The width of image.
@@ -413,86 +375,69 @@ namespace LibCmo::VxMath {
 		 * an undefined behavior is raised.
 		 * @remarks Old image will be free first before creating.
 		*/
-		void CreateImage(CKDWORD Width, CKDWORD Height, const void* dataptr) {
-			CreateImage(Width, Height);
-			std::memcpy(m_Image, dataptr, GetImageSize());
-		}
+		void CreateImage(CKDWORD Width, CKDWORD Height, const void* dataptr);
 		/**
 		 * @brief Free current image. Reset this to invalid status.
 		*/
-		void FreeImage() {
-			m_Width = 0;
-			m_Height = 0;
-			if (m_Image != nullptr) {
-				delete[] m_Image;
-				m_Image = nullptr;
-			}
-		}
+		void FreeImage();
 
 		/**
 		 * @brief Get the allocated memory size of image.
 		 * @return The allocated memory size of image.
 		 * Basically it is image width * height * (single pixel size).
 		*/
-		CKDWORD GetImageSize() const { return static_cast<CKDWORD>(PIXEL_SIZE * m_Width * m_Height); }
+		CKDWORD GetImageSize() const;
 		/**
 		 * @brief Get a constant pointer to image in memory unit for viewing.
 		 * @return A constant pointer to image in memory unit.
 		*/
-		const CKBYTE* GetImage() const { return m_Image; }
+		const CKBYTE* GetImage() const;
 		/**
 		 * @brief Get a mutable pointer to image in memory unit for modifying.
 		 * @return A mutable pointer to image in memory uint.
 		*/
-		CKBYTE* GetMutableImage() { return m_Image; }
+		CKBYTE* GetMutableImage();
 
 		/**
 		 * @brief Get the full count of pixel in image.
 		 * @return The count of image. Basically it is image width * height.
 		*/
-		CKDWORD GetPixelCount() const { return static_cast<CKDWORD>(m_Width * m_Height); }
+		CKDWORD GetPixelCount() const;
 		/**
 		 * @brief Get a constant pointer to image in pixel unit for viewing.
 		 * @return A constant pointer to image in pixel unit.
 		*/
-		const CKDWORD* GetPixels() const { return reinterpret_cast<CKDWORD*>(m_Image); }
+		const CKDWORD* GetPixels() const;
 		/**
 		 * @brief Get a mutable pointer to image in pixel uint for modifying.
 		 * @return A mutable pointer to image in pixel uint.
 		*/
-		CKDWORD* GetMutablePixels() { return reinterpret_cast<CKDWORD*>(m_Image); }
+		CKDWORD* GetMutablePixels();
 
 		/**
 		 * @brief Get the width of this image in pixel.
 		 * @return The width of this image in pixel.
 		*/
-		CKDWORD GetWidth() const { return m_Width; }
+		CKDWORD GetWidth() const;
 		/**
 		 * @brief Get the height of this image in pixel.
 		 * @return The height of this image in pixel.
 		*/
-		CKDWORD GetHeight() const { return m_Height; }
+		CKDWORD GetHeight() const;
 
 		/**
 		 * @brief Check whether this image is valid image for using.
 		 * @details If one of width and height is zero, or underlying image pointer, this image is invalid.
 		 * @return True if it is, otherwise false.
 		*/
-		bool IsValid() const { return (m_Width != 0u && m_Height != 0u && m_Image != nullptr); }
+		bool IsValid() const;
 		/**
 		 * @brief Check whether the width and height of this image are equal to another image.
 		 * @param[in] rhs Another image for comparing.
 		 * @return True if their width and height are equal, otherwise false.
 		*/
-		bool IsHWEqual(const VxImageDescEx& rhs) const { return (m_Width == rhs.m_Width && m_Height == rhs.m_Height); }
-		//	bool IsMaskEqual(const VxImageDescEx& rhs) const {
-		//		return (
-		//			m_RedMask == rhs.m_RedMask &&
-		//			m_GreenMask == rhs.m_GreenMask &&
-		//			m_BlueMask == rhs.m_BlueMask &&
-		//			m_AlphaMask == rhs.m_AlphaMask
-		//			);
-		//	}
+		bool IsHWEqual(const VxImageDescEx& rhs) const;
+		//	bool IsMaskEqual(const VxImageDescEx& rhs) const;
 
 		//public:
 		//	CKDWORD m_RedMask;

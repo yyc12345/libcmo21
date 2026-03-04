@@ -538,6 +538,121 @@ namespace LibCmo::VxMath {
 
 #pragma endregion
 
+#pragma region VxImageDescEx
+
+	VxImageDescEx::VxImageDescEx() : m_Width(0), m_Height(0), m_Image(nullptr) {}
+
+	VxImageDescEx::VxImageDescEx(CKDWORD width, CKDWORD height) : m_Width(width), m_Height(height), m_Image(nullptr) {
+		CreateImage(width, height);
+	}
+
+	YYCC_IMPL_COPY_CTOR(VxImageDescEx, rhs) : m_Width(rhs.m_Width), m_Height(rhs.m_Height), m_Image(nullptr) {
+		// copy image
+		if (rhs.m_Image != nullptr) {
+			CreateImage(rhs.m_Width, rhs.m_Height, rhs.m_Image);
+		}
+	}
+
+	YYCC_IMPL_COPY_OPER(VxImageDescEx, rhs) {
+		FreeImage();
+
+		m_Width = rhs.m_Width;
+		m_Height = rhs.m_Height;
+		if (rhs.m_Image != nullptr) {
+			CreateImage(rhs.m_Width, rhs.m_Height, rhs.m_Image);
+		}
+
+		return *this;
+	}
+
+	YYCC_IMPL_MOVE_CTOR(VxImageDescEx, rhs) : m_Width(rhs.m_Width), m_Height(rhs.m_Height), m_Image(rhs.m_Image) {
+		// move image
+		rhs.m_Height = 0;
+		rhs.m_Width = 0;
+		rhs.m_Image = nullptr;
+	}
+
+	YYCC_IMPL_MOVE_OPER(VxImageDescEx, rhs) {
+		FreeImage();
+
+		m_Height = rhs.m_Height;
+		m_Width = rhs.m_Width;
+		m_Image = rhs.m_Image;
+		rhs.m_Height = 0;
+		rhs.m_Width = 0;
+		rhs.m_Image = nullptr;
+
+		return *this;
+	}
+
+	VxImageDescEx::~VxImageDescEx() {
+		FreeImage();
+	}
+
+	void VxImageDescEx::CreateImage(CKDWORD Width, CKDWORD Height) {
+		FreeImage();
+		m_Width = Width;
+		m_Height = Height;
+		m_Image = new CKBYTE[GetImageSize()];
+	}
+
+	void VxImageDescEx::CreateImage(CKDWORD Width, CKDWORD Height, const void* dataptr) {
+		CreateImage(Width, Height);
+		std::memcpy(m_Image, dataptr, GetImageSize());
+	}
+
+	void VxImageDescEx::FreeImage() {
+		m_Width = 0;
+		m_Height = 0;
+		if (m_Image != nullptr) {
+			delete[] m_Image;
+			m_Image = nullptr;
+		}
+	}
+
+	CKDWORD VxImageDescEx::GetImageSize() const {
+		return static_cast<CKDWORD>(PIXEL_SIZE * m_Width * m_Height);
+	}
+
+	const CKBYTE* VxImageDescEx::GetImage() const { return m_Image; }
+
+	CKBYTE* VxImageDescEx::GetMutableImage() { return m_Image; }
+
+	CKDWORD VxImageDescEx::GetPixelCount() const {
+		return static_cast<CKDWORD>(m_Width * m_Height);
+	}
+
+	const CKDWORD* VxImageDescEx::GetPixels() const {
+		return reinterpret_cast<CKDWORD*>(m_Image);
+	}
+
+	CKDWORD* VxImageDescEx::GetMutablePixels() {
+		return reinterpret_cast<CKDWORD*>(m_Image);
+	}
+
+	CKDWORD VxImageDescEx::GetWidth() const { return m_Width; }
+
+	CKDWORD VxImageDescEx::GetHeight() const { return m_Height; }
+
+	bool VxImageDescEx::IsValid() const {
+		return (m_Width != 0u && m_Height != 0u && m_Image != nullptr);
+	}
+
+	bool VxImageDescEx::IsHWEqual(const VxImageDescEx& rhs) const {
+		return (m_Width == rhs.m_Width && m_Height == rhs.m_Height);
+	}
+
+	// bool VxImageDescEx::IsMaskEqual(const VxImageDescEx& rhs) const {
+	// 	return (
+	// 		m_RedMask == rhs.m_RedMask &&
+	// 		m_GreenMask == rhs.m_GreenMask &&
+	// 		m_BlueMask == rhs.m_BlueMask &&
+	// 		m_AlphaMask == rhs.m_AlphaMask
+	// 	);
+	// }
+
+#pragma endregion
+
 #pragma region Patched
 
 	namespace NSVxVector {
