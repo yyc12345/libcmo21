@@ -34,3 +34,8 @@ add_custom_target (LibCmoDocuments
 install (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
     DESTINATION ${NEMO_INSTALL_DOC_PATH}
 )
+
+# Install UNVIRT.md documentation
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/UNVIRT.md
+    DESTINATION ${NEMO_INSTALL_DOC_PATH}
+)
