@@ -29,7 +29,8 @@ namespace BMapInspector::Rule {
 		rules.emplace_back(new Ruleset::YYCRule1());
 		rules.emplace_back(new Ruleset::YYCRule2());
 		rules.emplace_back(new Ruleset::YYCRule3());
-		rules.emplace_back(new Ruleset::YYCRule4());		
+		rules.emplace_back(new Ruleset::YYCRule4());
+		rules.emplace_back(new Ruleset::YYCRule5());
 		rules.emplace_back(new Ruleset::BBugRule1());
 		rules.emplace_back(new Ruleset::BBugRule2());
 		rules.emplace_back(new Ruleset::BBugRule3());
@@ -59,4 +60,4 @@ namespace BMapInspector::Rule {
 
 #pragma endregion
 
-} // namespace BMapInspector::RuleCollection
+} // namespace BMapInspector::Rule

@@ -262,15 +262,15 @@ namespace BMapInspector::Ruleset {
 			auto lower_tex_filename = strop::to_lower(tex_filename.value());
 			if (opaque_texs.contains(lower_tex_filename)) {
 				if (tex->GetVideoFormat() != V::VX_PIXELFORMAT::_16_ARGB1555) {
-					reporter.FormatWarning(u8"Texture %s is Ballance opaque texture. But its video format is not ARGB1555. "
-					                       u8"This is mismatched with vanilla Ballance.",
-					                       Shared::Utility::QuoteObjectName(tex).c_str());
+					reporter.FormatInfo(u8"Texture %s is Ballance opaque texture. But its video format is not ARGB1555. "
+					                    u8"This is mismatched with vanilla Ballance.",
+					                    Shared::Utility::QuoteObjectName(tex).c_str());
 				}
 			} else if (transparent_texs.contains(lower_tex_filename)) {
 				if (tex->GetVideoFormat() != V::VX_PIXELFORMAT::_32_ARGB8888) {
-					reporter.FormatWarning(u8"Texture %s is Ballance transparent texture. But its video format is not ARGB8888. "
-					                       u8"This is mismatched with vanilla Ballance.",
-					                       Shared::Utility::QuoteObjectName(tex).c_str());
+					reporter.FormatInfo(u8"Texture %s is Ballance transparent texture. But its video format is not ARGB8888. "
+					                    u8"This is mismatched with vanilla Ballance.",
+					                    Shared::Utility::QuoteObjectName(tex).c_str());
 				}
 			} else {
 				switch (tex->GetVideoFormat()) {
@@ -278,13 +278,13 @@ namespace BMapInspector::Ruleset {
 						// Do nothing.
 						break;
 					case V::VX_PIXELFORMAT::_32_ARGB8888:
-						reporter.FormatWarning(u8"Texture %s is not Ballance texture. Its video format is ARGB8888. "
-						                       u8"This may cause useless performance consumption if there is no transparent inside it. "
-						                       u8"Please check whether this is essential.",
-						                       Shared::Utility::QuoteObjectName(tex).c_str());
+						reporter.FormatInfo(u8"Texture %s is not Ballance texture. Its video format is ARGB8888. "
+						                    u8"This may cause useless performance consumption if there is no transparent inside it. "
+						                    u8"Please check whether this is essential.",
+						                    Shared::Utility::QuoteObjectName(tex).c_str());
 						break;
 					default:
-						reporter.FormatWarning(
+						reporter.FormatInfo(
 						    u8"Texture %s is not Ballance texture. Its video format is not ARGB1555 or ARGB8888. "
 						    u8"This is mismatched with vanilla Ballance. "
 						    u8"Please set it to ARGB1555 for opaque texture, or ARGB8888 for transaprent texture, except special scenario.",
@@ -294,5 +294,61 @@ namespace BMapInspector::Ruleset {
 			}
 		}
 	}
+
+#pragma endregion
+
+#pragma region YYC Rule 5
+
+	YYCRule5::YYCRule5() : Rule::IRule() {}
+
+	YYCRule5::~YYCRule5() {}
+
+	std::u8string_view YYCRule5::GetRuleName() const {
+		return u8"YYC5";
+	}
+
+	void YYCRule5::Check(Reporter::Reporter& reporter, Map::Level& level) const {
+		// Build lowercase texture name set first.
+		std::set<std::u8string> texs;
+		for (const auto* tex_name : Shared::Name::Texture::ALL) {
+			texs.emplace(strop::to_lower(tex_name));
+		}
+
+		// Check texture one by one
+		for (auto& tex : level.GetTextures()) {
+			auto tex_filename = Shared::Utility::ExtractTextureFileName(tex);
+			if (!tex_filename.has_value()) continue;
+
+			auto lower_tex_filename = strop::to_lower(tex_filename.value());
+			bool is_ballance_tex = texs.contains(lower_tex_filename);
+
+			using C::CK_TEXTURE_SAVEOPTIONS;
+			switch (tex->GetUnderlyingData().GetSaveOptions()) {
+				case CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_USEGLOBAL:
+					reporter.FormatInfo(u8"The save option of texture %s rely on global Virtools settings. "
+					                    u8"This cause ambiguity and different behavior on different Virtools by different user settings. "
+					                    u8"Please consider change it to explicit option, such as External or Raw Data.",
+					                    Shared::Utility::QuoteObjectName(tex).c_str());
+					break;
+				case CK_TEXTURE_SAVEOPTIONS::CKTEXTURE_EXTERNAL:
+					if (!is_ballance_tex) {
+						reporter.FormatWarning(u8"Texture %s is not Ballance texture, but its save option is External. "
+						                       u8"This may cause texture loss when rendering in game. Please consider store it inside map.",
+						                       Shared::Utility::QuoteObjectName(tex).c_str());
+					}
+					break;
+				default:
+					if (is_ballance_tex) {
+						reporter.FormatInfo(u8"Texture %s is Ballance texture, but its save option is not External. "
+						                    u8"Please consider storing it as External to reduce the final size of map file, "
+						                    u8"and let user specified texture pack work.",
+						                    Shared::Utility::QuoteObjectName(tex).c_str());
+					}
+					break;
+			}
+		}
+	}
+
+#pragma endregion
 
 } // namespace BMapInspector::Ruleset

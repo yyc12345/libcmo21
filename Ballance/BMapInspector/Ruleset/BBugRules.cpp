@@ -54,9 +54,9 @@ namespace BMapInspector::Ruleset {
 
 	void BBugRule3::Check(Reporter::Reporter& reporter, Map::Level& level) const {
 		// TODO:
-		// This function is already presented in Ballance Blender Plugin,
-		// so I don't want write it in there now.
-		// Write this if I have spare time in future.
+		// This rule is complex and can be done by Ballance Blender Plugin.
+		// So we are not urgently to implement it in there.
+		// Just make a rule placeholder in there and may finish it in future.
 	}
 
 #pragma endregion

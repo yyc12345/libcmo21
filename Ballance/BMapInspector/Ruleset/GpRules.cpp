@@ -23,8 +23,9 @@ namespace BMapInspector::Ruleset {
 
 	void GpRule1::Check(Reporter::Reporter& reporter, Map::Level& level) const {
 		// TODO:
-		// Finish this rule.
-		// It is so complex that I don't want to implement it now.
+		// This rule is complex and can be done by Ballance Blender Plugin.
+		// So we are not urgently to implement it in there.
+		// Just make a rule placeholder in there and may finish it in future.
 	}
 
 #pragma endregion

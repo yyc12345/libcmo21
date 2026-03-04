@@ -56,15 +56,31 @@ namespace BMapInspector::Ruleset {
 	/**
 	 * @brief YYC12345 Rule 4
 	 * @details
-	 * \li Check the video format for opaque and transparent texture respectively.
-	 * \li Warning for video format which is not used by vanilla Ballance.
-	 * \li Warning for transparent used video format in non-Ballance textures to conserve resources.
+	 * Check the video format for Ballance and user-defined texture respectively.
+	 * Report if there is non-vanilla Ballance settings.
 	 */
 	class YYCRule4 : public Rule::IRule {
 	public:
 		YYCRule4();
 		virtual ~YYCRule4();
 		YYCC_DELETE_COPY_MOVE(YYCRule4)
+
+	public:
+		std::u8string_view GetRuleName() const override;
+		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
+	};
+
+	/**
+	 * @brief YYC12345 Rule 5
+	 * @details
+	 * Check the save options for Ballance and user-defined texture respectively
+	 * for reducing map size and avoid ambiguity.
+	 */
+	class YYCRule5 : public Rule::IRule {
+	public:
+		YYCRule5();
+		virtual ~YYCRule5();
+		YYCC_DELETE_COPY_MOVE(YYCRule5)
 
 	public:
 		std::u8string_view GetRuleName() const override;
