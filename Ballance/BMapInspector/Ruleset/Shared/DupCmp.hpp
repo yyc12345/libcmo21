@@ -4,6 +4,7 @@
 #include <yycc/macro/class_copy_move.hpp>
 #include <yycc/macro/ptr_size_detector.hpp>
 #include <utility>
+#include <optional>
 
 #define BMAPINSP_L LibCmo
 #define BMAPINSP_C LibCmo::CK2

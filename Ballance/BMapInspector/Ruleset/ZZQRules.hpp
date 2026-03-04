@@ -34,7 +34,7 @@ namespace BMapInspector::Ruleset {
 	public:
 		ZZQRule2();
 		virtual ~ZZQRule2();
-		YYCC_DEFAULT_COPY_MOVE(ZZQRule2)
+		YYCC_DELETE_COPY_MOVE(ZZQRule2)
 
 	public:
 		std::u8string_view GetRuleName() const override;
