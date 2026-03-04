@@ -351,4 +351,23 @@ namespace BMapInspector::Ruleset {
 
 #pragma endregion
 
+#pragma region YYC Rule 6
+
+	YYCRule6::YYCRule6() : Rule::IRule() {}
+
+	YYCRule6::~YYCRule6() {}
+
+	std::u8string_view YYCRule6::GetRuleName() const {
+		return u8"YYC6";
+	}
+
+	void YYCRule6::Check(Reporter::Reporter& reporter, Map::Level& level) const {
+		// TODO:
+		// This rule is not so essential.
+		// So we are not urgently to implement it in there.
+		// Just make a rule placeholder in there and may finish it in future.
+	}
+
+#pragma endregion
+
 } // namespace BMapInspector::Ruleset

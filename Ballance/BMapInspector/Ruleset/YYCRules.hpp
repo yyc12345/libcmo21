@@ -87,4 +87,20 @@ namespace BMapInspector::Ruleset {
 		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
 	};
 
+	/**
+	 * @brief YYC12345 Rule 6
+	 * @details
+	 * Show info hint for the skip of progressbar when loading map.
+	 */
+	class YYCRule6 : public Rule::IRule {
+	public:
+		YYCRule6();
+		virtual ~YYCRule6();
+		YYCC_DELETE_COPY_MOVE(YYCRule6)
+
+	public:
+		std::u8string_view GetRuleName() const override;
+		void Check(Reporter::Reporter& reporter, Map::Level& level) const override;
+	};
+
 }
