@@ -50,8 +50,12 @@ It would be okey for you to use any Antlr you like.
 
 ### Passing Dependencies
 
-When executing Java code relying on these dependencies, 
-you can use `-cp` option of Java runtime to pass the directory where you can find those dependency's JAR files.
+When compiling or executing Java code relying on these dependencies, 
+you can use `-cp` option to pass these dependency's JAR files.
+All dependencies should be specified in one `-cp` option with `;` as separator.
+
+For example, when compiling, you can pass `-cp "<path-to-antlr4-jar>;<path-to-gson-jar>"` as option.
+Or pass `-cp ".;<path-to-antlr4-jar>;<path-to-gson-jar>"` when executing.
 
 ## Python
 
