@@ -9,6 +9,7 @@ MKDIR install
 
 :: Build with x64 architecture in Release mode
 CD build
+set CXXFLAGS=/D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR=1
 cmake -A x64 -DCMAKE_CXX_STANDARD=23 ../..
 cmake --build . --config Release
 cmake --install . --prefix=../install --config Release
